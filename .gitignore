@@ -163,3 +163,4 @@ yarn-error.log*
 
 .vscode
 .cursor
+.codex
