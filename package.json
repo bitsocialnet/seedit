@@ -82,7 +82,10 @@
     "lint": "oxlint src electron",
     "type-check": "tsgo --noEmit",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",
-    "android:build": "yarn build && npx cap sync android && npx cap run android"
+    "android:build": "yarn build && npx cap sync android && npx cap run android",
+    "doctor": "react-doctor . -y",
+    "doctor:score": "react-doctor . --score -y",
+    "doctor:verbose": "react-doctor . --verbose -y"
   },
   "browserslist": {
     "production": [
@@ -137,7 +140,8 @@
     "wait-on": "7.0.1",
     "@reforged/maker-appimage": "5.1.1",
     "glob": "10.5.0",
-    "progress": "2.0.3"
+    "progress": "2.0.3",
+    "react-doctor": "0.0.17"
   },
   "resolutions": {
     "js-yaml": "4.1.1",

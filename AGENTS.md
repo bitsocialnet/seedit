@@ -348,6 +348,22 @@ yarn add lodash
 
 **Note:** This applies to both `dependencies` and `devDependencies`. There are no exceptions—the convenience of auto-updates doesn't justify the security risk.
 
+## React Doctor (Advisory)
+
+React Doctor is advisory quality tooling for React architecture/perf/correctness checks.
+
+**Standard commands:**
+- `yarn doctor`, `yarn doctor:score`, `yarn doctor:verbose`
+
+**Trigger rules:**
+- Run after touching React UI logic (`components`, `hooks`, route/page/view files, state/store code used by UI).
+- Run before opening PRs that include React behavior changes.
+
+**Interpretation:**
+- Treat diagnostics as actionable recommendations.
+- Prioritize `error` diagnostics first, then `warning`.
+- Score is informative only; no merge blocking based on score yet.
+
 ## Boundaries
 
 - Never commit secrets or API keys
