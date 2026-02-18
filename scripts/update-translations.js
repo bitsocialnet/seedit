@@ -5,7 +5,7 @@
 
   Usage examples:
   - Copy value of a key from en to all languages (dry run):
-    node scripts/update-translations.js --key 5chan_description --from en --dry
+    node scripts/update-translations.js --key seedit_description --from en --dry
 
   - Set a specific value for all languages (including en):
     node scripts/update-translations.js --key no_global_rules_info --value "Your value" --include-en --write
