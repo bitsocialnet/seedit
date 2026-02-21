@@ -13573,10 +13573,10 @@ react-ace@14.0.1:
     lodash.isequal "^4.5.0"
     prop-types "^15.8.1"
 
-react-doctor@0.0.17:
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/react-doctor/-/react-doctor-0.0.17.tgz#6247048179b37be5fef471d49a9a239e8c0a7300"
-  integrity sha512-W4MGb3rAM9PGz0Gn1FYcoSxW6LFjy56PyBAznsEP9Iwubz5zaOzD3COoF/i/0sjfZAufgSUqH5qMJoWaOdWJzQ==
+react-doctor@0.0.28:
+  version "0.0.28"
+  resolved "https://registry.yarnpkg.com/react-doctor/-/react-doctor-0.0.28.tgz#4c7d6f372e10c3e05508143eb68120ad70d2219f"
+  integrity sha512-YlouaJcxha25UG6lCZYg5ua2CT9ksYV8YEwwicXQiL238MFmgDHDyfRO6fRJxUntP7EuqT0kBpY1C/EXvknjMQ==
   dependencies:
     commander "^14.0.3"
     eslint-plugin-react-hooks "^7.0.1"
@@ -13585,6 +13585,7 @@ react-doctor@0.0.17:
     oxlint "^1.47.0"
     picocolors "^1.1.1"
     prompts "^2.4.2"
+    typescript ">=5.0.4 <7"
 
 react-dom@19.1.2:
   version "19.1.2"
@@ -15576,6 +15577,11 @@ typescript@5.1.6:
   version "5.1.6"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.1.6.tgz#02f8ac202b6dad2c0dd5e0913745b47a37998274"
   integrity sha512-zaWCozRZ6DLEWAWFrVDz1H6FVXzUSfTy5FUMWsQlU8Ym5JP9eO4xkTIROFCQvhQf61z6O/G6ugw3SgAnvvm+HA==
+
+"typescript@>=5.0.4 <7":
+  version "5.9.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.9.3.tgz#5b4f59e15310ab17a216f5d6cf53ee476ede670f"
+  integrity sha512-jl1vZzPDinLr9eUt3J/t7V6FgNEw9QjvBPdysz9KfQDD41fQrC2Y4vKQdiaUpFT4bXlb1RHhLpp8wtm6M5TgSw==
 
 typestub-ipfs-only-hash@4.0.0:
   version "4.0.0"

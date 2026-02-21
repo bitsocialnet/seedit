@@ -141,7 +141,7 @@
     "@reforged/maker-appimage": "5.1.1",
     "glob": "10.5.0",
     "progress": "2.0.3",
-    "react-doctor": "0.0.17"
+    "react-doctor": "0.0.28"
   },
   "resolutions": {
     "js-yaml": "4.1.1",
