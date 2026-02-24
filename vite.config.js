@@ -162,7 +162,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: true,
+    open: process.env.PORT ? 'http://seedit.localhost:1355/' : true,
     watch: {
       usePolling: true,
     },
