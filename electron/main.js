@@ -224,7 +224,7 @@ const createMainWindow = () => {
     callback({ responseHeaders: details.responseHeaders });
   });
 
-  const startURL = isDev ? 'http://localhost:3000' : `file://${path.join(dirname, '../build/index.html')}`;
+  const startURL = isDev ? 'http://seedit.localhost:1355' : `file://${path.join(dirname, '../build/index.html')}`;
 
   mainWindow.loadURL(startURL);
 

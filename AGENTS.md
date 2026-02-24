@@ -21,12 +21,18 @@ Seedit is a serverless, adminless, decentralized Reddit alternative built on the
 
 ```bash
 yarn install      # Install dependencies
-yarn start        # Start dev server (port 3000)
+yarn start        # Start dev server (http://seedit.localhost:1355)
 yarn build        # Production build
 yarn test         # Run tests
 yarn prettier     # Format code
 yarn electron     # Run Electron app
 ```
+
+## Local Development URLs
+
+This project uses [Portless](https://github.com/vercel-labs/portless) for local dev. The dev server is available at http://seedit.localhost:1355 instead of a random port. Other Bitsocial projects use the same proxy (5chan, mintpass, bitsocial at `.localhost:1355`), so they can all run simultaneously without port conflicts.
+
+To bypass Portless: `PORTLESS=0 yarn start`
 
 ## Code Style
 

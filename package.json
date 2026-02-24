@@ -55,7 +55,7 @@
     "kubo": "0.39.0"
   },
   "scripts": {
-    "start": "vite",
+    "start": "portless seedit vite",
     "build": "cross-env NODE_ENV=production PUBLIC_URL=./ GENERATE_SOURCEMAP=false vite build",
     "build:preload": "cross-env NODE_ENV=production vite build --config electron/vite.preload.config.js",
     "build-netlify": "cross-env NODE_OPTIONS=\"--max_old_space_size=4096\" NODE_ENV=production PUBLIC_URL=./ GENERATE_SOURCEMAP=true VITE_COMMIT_REF=$COMMIT_REF CI='' vite build",
@@ -64,8 +64,8 @@
     "analyze-bundle": "cross-env NODE_ENV=production PUBLIC_URL=./ GENERATE_SOURCEMAP=true vite build && npx source-map-explorer 'build/assets/*.js'",
     "electron": "yarn build:preload && yarn electron:before && electron .",
     "electron:no-delete-data": "yarn build:preload && electron .",
-    "electron:start": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && yarn electron\"",
-    "electron:start:no-delete-data": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://localhost:3000 && yarn electron:no-delete-data\"",
+    "electron:start": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://seedit.localhost:1355 && yarn electron\"",
+    "electron:start:no-delete-data": "concurrently \"cross-env BROWSER=none yarn start\" \"wait-on http://seedit.localhost:1355 && yarn electron:no-delete-data\"",
     "electron:package": "yarn build && yarn build:preload && electron-forge package",
     "electron:build": "yarn build && yarn build:preload && electron-forge make",
     "electron:build:linux": "yarn build && yarn build:preload && electron-forge make --platform=linux",

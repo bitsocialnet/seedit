@@ -36,12 +36,15 @@ The default list of communities, used on s/all on Seedit, is bitsocial's [defaul
 
 1. Install Node v22 (Download from https://nodejs.org)
 2. Install Yarn: `npm install -g yarn`
-3. `yarn install --frozen-lockfile` to install Seedit dependencies
-4. `yarn start` to run the web client
+3. Install [Portless](https://github.com/vercel-labs/portless): `npm install -g portless`
+4. `yarn install --frozen-lockfile` to install Seedit dependencies
+5. `yarn start` to run the web client
+
+The dev server runs at http://seedit.localhost:1355 via [Portless](https://port1355.dev/), which gives each Bitsocial project a stable, named URL instead of a random port. To bypass Portless and use a plain Vite dev server: `PORTLESS=0 yarn start`
 
 ### Scripts:
 
-- Web client: `yarn start`
+- Web client: `yarn start` (http://seedit.localhost:1355)
 - Electron client (must start web client first): `yarn electron`
 - Electron client and don't delete data: `yarn electron:no-delete-data`
 - Web client and electron client: `yarn electron:start`
