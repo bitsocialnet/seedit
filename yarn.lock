@@ -950,6 +950,21 @@
     ipaddr.js "^2.2.0"
     punycode "^2.3.1"
 
+"@bonfida/spl-name-service@3.0.16":
+  version "3.0.16"
+  resolved "https://registry.yarnpkg.com/@bonfida/spl-name-service/-/spl-name-service-3.0.16.tgz#5ebcadbb1908af9348ff15c20a4e4fdc8a1408da"
+  integrity sha512-Y47inKaoGYQ2gxykZsLepc0fNPMLWd5ycGQ6k2FiHvIzlY4trHijc7zr9TyDhB/eI9c3XTy5ItM01Izy5pIZ/A==
+  dependencies:
+    "@bonfida/sns-records" "0.0.1"
+    "@noble/curves" "^1.9.1"
+    "@scure/base" "^1.2.5"
+    "@solana/spl-token" "0.4.6"
+    borsh "2.0.0"
+    buffer "^6.0.3"
+    graphemesplit "^2.6.0"
+    ipaddr.js "^2.2.0"
+    punycode "^2.3.1"
+
 "@capacitor/android@7.4.5":
   version "7.4.5"
   resolved "https://registry.yarnpkg.com/@capacitor/android/-/android-7.4.5.tgz#3832b457e0a3a7079a645bf5be3cc23d406c2971"
@@ -3625,6 +3640,19 @@
     uint8arrays "^4.0.3"
     viem "2.45.0"
 
+"@mintpass/challenge@1.1.11":
+  version "1.1.11"
+  resolved "https://registry.yarnpkg.com/@mintpass/challenge/-/challenge-1.1.11.tgz#aa2d0d010d53f3d9bf36bf5427c8cb28b05a04bc"
+  integrity sha512-wr6oCXwrPer88xNNy7fksgBOI6lN+5zU9qkZ2+HSWBjJe1223XXbyJe/atvX/e3mi6ITVrbxOO3rO99iRDEwFg==
+  dependencies:
+    "@keyv/sqlite" "^4.0.5"
+    "@plebbit/plebbit-logger" "https://github.com/plebbit/plebbit-logger.git"
+    env-paths "^3.0.0"
+    keyv "5.5.0"
+    multiformats "^13.1.0"
+    uint8arrays "^4.0.3"
+    viem "2.45.0"
+
 "@multiformats/base-x@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@multiformats/base-x/-/base-x-4.0.1.tgz#95ff0fa58711789d53aefb2590a8b7a4e715d121"
@@ -3740,7 +3768,7 @@
   dependencies:
     "@noble/hashes" "1.8.0"
 
-"@noble/curves@^1.4.0", "@noble/curves@^1.4.2", "@noble/curves@~1.9.0":
+"@noble/curves@^1.4.0", "@noble/curves@^1.4.2", "@noble/curves@^1.9.1", "@noble/curves@~1.9.0":
   version "1.9.7"
   resolved "https://registry.yarnpkg.com/@noble/curves/-/curves-1.9.7.tgz#79d04b4758a43e4bca2cbdc62e7771352fa6b951"
   integrity sha512-gbKGcRUYIjA3/zCCNaWDciTMFI0dCkvou3TL8Zmy5Nc7sJ47a0jtOeZoTaMxkuqRo9cRhjOdZJXegxYE5FN/xw==
@@ -4424,6 +4452,78 @@
     viem "2.43.1"
     zod "4.1.12"
 
+"@plebbit/plebbit-js@https://github.com/plebbit/plebbit-js.git#fd7486d31ce71b29b6dc49c019278af8fb0b0d45":
+  version "0.0.11"
+  resolved "https://github.com/plebbit/plebbit-js.git#fd7486d31ce71b29b6dc49c019278af8fb0b0d45"
+  dependencies:
+    "@bonfida/spl-name-service" "3.0.16"
+    "@enhances/with-resolvers" "0.0.5"
+    "@helia/block-brokers" "5.0.13"
+    "@helia/delegated-routing-v1-http-api-client" "5.1.4"
+    "@helia/ipns" "9.1.5"
+    "@helia/unixfs" "6.0.4"
+    "@libp2p/crypto" "5.1.13"
+    "@libp2p/fetch" "4.0.9"
+    "@libp2p/gossipsub" "15.0.11"
+    "@libp2p/identify" "4.0.9"
+    "@libp2p/interfaces" "3.3.2"
+    "@libp2p/peer-id" "6.0.4"
+    "@libp2p/peer-id-factory" "4.2.4"
+    "@libp2p/websockets" "10.1.2"
+    "@mintpass/challenge" "1.1.11"
+    "@plebbit/plebbit-logger" "git+https://github.com/plebbit/plebbit-logger.git#355a96d7659ed820047980049dfa627d30d83a69"
+    "@plebbit/proper-lockfile" "git+https://github.com/plebbit/node-proper-lockfile.git#7fd6332117340c1d3d98dd0afee2d31cc06f72b8"
+    "@types/proper-lockfile" "4.1.2"
+    assert "2.1.0"
+    better-sqlite3 "12.4.1"
+    blockstore-core "6.1.1"
+    blockstore-fs "3.0.2"
+    blockstore-idb "3.0.1"
+    buffer "6.0.3"
+    captcha-canvas "3.3.4"
+    cbor "9.0.1"
+    debounce "1.2.1"
+    err-code "3.0.1"
+    ethers "6.16.0"
+    ext-name "5.0.0"
+    helia "6.0.14"
+    hpagent "1.2.0"
+    it-all "3.0.6"
+    jose "4.11.0"
+    js-sha256 "0.11.1"
+    js-sha512 "0.9.0"
+    kubo-rpc-client "6.0.2"
+    limiter-es6-compat "2.1.2"
+    localforage "1.10.0"
+    lodash.merge "4.6.2"
+    lru-cache "10.1.0"
+    open-graph-scraper "6.10.0"
+    p-limit "4.0.0"
+    p-timeout "6.1.2"
+    peer-id "0.16.0"
+    probe-image-size "7.2.3"
+    remeda "1.57.0"
+    retry "0.13.1"
+    rpc-websockets "9.3.1"
+    safe-stable-stringify "2.4.3"
+    sha1-uint8array "0.10.7"
+    skia-canvas "3.0.8"
+    tcp-port-used "1.0.2"
+    tiny-typed-emitter "2.1.0"
+    tinycache "1.1.2"
+    ts-custom-error "3.3.1"
+    typestub-ipfs-only-hash "4.0.0"
+    uuid "11.1.0"
+    viem "2.45.0"
+    zod "4.3.6"
+
+"@plebbit/plebbit-logger@git+https://github.com/plebbit/plebbit-logger.git", "@plebbit/plebbit-logger@git+https://github.com/plebbit/plebbit-logger.git#355a96d7659ed820047980049dfa627d30d83a69":
+  version "0.0.1"
+  uid "355a96d7659ed820047980049dfa627d30d83a69"
+  resolved "git+https://github.com/plebbit/plebbit-logger.git#355a96d7659ed820047980049dfa627d30d83a69"
+  dependencies:
+    debug "4.3.4"
+
 "@plebbit/plebbit-logger@github:plebbit/plebbit-logger#355a96d7659ed820047980049dfa627d30d83a69":
   version "0.0.1"
   uid "355a96d7659ed820047980049dfa627d30d83a69"
@@ -4436,6 +4536,22 @@
   resolved "https://github.com/plebbit/plebbit-logger.git#355a96d7659ed820047980049dfa627d30d83a69"
   dependencies:
     debug "4.3.4"
+
+"@plebbit/plebbit-react-hooks@https://github.com/plebbit/plebbit-react-hooks.git#a828bd598bcc392ed379136feaee0a7b1c8cd23f":
+  version "0.0.1"
+  resolved "https://github.com/plebbit/plebbit-react-hooks.git#a828bd598bcc392ed379136feaee0a7b1c8cd23f"
+  dependencies:
+    "@plebbit/plebbit-js" "https://github.com/plebbit/plebbit-js.git#fd7486d31ce71b29b6dc49c019278af8fb0b0d45"
+    "@plebbit/plebbit-logger" "https://github.com/plebbit/plebbit-logger.git"
+    assert "2.0.0"
+    ethers "5.6.9"
+    localforage "1.10.0"
+    lodash.isequal "4.5.0"
+    memoizee "0.4.15"
+    quick-lru "5.1.1"
+    uint8arrays "3.1.1"
+    uuid "11.1.0"
+    zustand "4.0.0"
 
 "@plebbit/plebbit-react-hooks@https://github.com/plebbit/plebbit-react-hooks.git#df3cb6901f63054870dc127cd7565c98617c2a4f":
   version "0.0.1"
@@ -4452,6 +4568,14 @@
     uint8arrays "3.1.1"
     uuid "11.1.0"
     zustand "4.0.0"
+
+"@plebbit/proper-lockfile@git+https://github.com/plebbit/node-proper-lockfile.git#7fd6332117340c1d3d98dd0afee2d31cc06f72b8":
+  version "4.1.2"
+  resolved "git+https://github.com/plebbit/node-proper-lockfile.git#7fd6332117340c1d3d98dd0afee2d31cc06f72b8"
+  dependencies:
+    graceful-fs "^4.2.4"
+    retry "^0.12.0"
+    signal-exit "^3.0.2"
 
 "@plebbit/proper-lockfile@github:plebbit/node-proper-lockfile#7fd6332117340c1d3d98dd0afee2d31cc06f72b8":
   version "4.1.2"
@@ -4692,7 +4816,7 @@
     estree-walker "^2.0.2"
     picomatch "^4.0.2"
 
-"@scure/base@^1.1.6", "@scure/base@~1.2.5":
+"@scure/base@^1.1.6", "@scure/base@^1.2.5", "@scure/base@~1.2.5":
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.2.6.tgz#ca917184b8231394dd8847509c67a0be522e59f6"
   integrity sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==
@@ -8801,7 +8925,7 @@ graceful-fs@^4.1.10, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.11.tgz#4183e4e8bf08bb6e05bbb2f7d2e0c8f712ca40e3"
   integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
 
-graphemesplit@^2.4.4:
+graphemesplit@^2.4.4, graphemesplit@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/graphemesplit/-/graphemesplit-2.6.0.tgz#548ec986e83dcdfec31adf5c98b282985077ce46"
   integrity sha512-rG9w2wAfkpg0DILa1pjnjNfucng3usON360shisqIMUBw/87pojcBSrHmeE4UwryAuBih7g8m1oilf5/u8EWdQ==
@@ -16607,7 +16731,7 @@ zod@4.1.12:
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.1.12.tgz#64f1ea53d00eab91853195653b5af9eee68970f0"
   integrity sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==
 
-"zod@^3.25.0 || ^4.0.0", zod@^4.1.11:
+zod@4.3.6, "zod@^3.25.0 || ^4.0.0", zod@^4.1.11:
   version "4.3.6"
   resolved "https://registry.yarnpkg.com/zod/-/zod-4.3.6.tgz#89c56e0aa7d2b05107d894412227087885ab112a"
   integrity sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==
