@@ -935,21 +935,6 @@
     bs58 "5.0.0"
     buffer "^6.0.3"
 
-"@bonfida/spl-name-service@3.0.10":
-  version "3.0.10"
-  resolved "https://registry.yarnpkg.com/@bonfida/spl-name-service/-/spl-name-service-3.0.10.tgz#883f2e077eef7d91147f44ae383990a82479d5f8"
-  integrity sha512-CrqlEDz43K9fPIVaUXn29OiMWZUOs3+sxU7zHrlPjjdXn9GrJSVao5gjmflfK6tcwLxSSGC4F4GOg5erSfyR/A==
-  dependencies:
-    "@bonfida/sns-records" "0.0.1"
-    "@noble/curves" "^1.4.0"
-    "@scure/base" "^1.1.6"
-    "@solana/spl-token" "0.4.6"
-    borsh "2.0.0"
-    buffer "^6.0.3"
-    graphemesplit "^2.4.4"
-    ipaddr.js "^2.2.0"
-    punycode "^2.3.1"
-
 "@bonfida/spl-name-service@3.0.16":
   version "3.0.16"
   resolved "https://registry.yarnpkg.com/@bonfida/spl-name-service/-/spl-name-service-3.0.16.tgz#5ebcadbb1908af9348ff15c20a4e4fdc8a1408da"
@@ -3628,18 +3613,6 @@
     semver "^7.3.5"
     tar "^6.1.11"
 
-"@mintpass/challenge@1.1.10":
-  version "1.1.10"
-  resolved "https://registry.yarnpkg.com/@mintpass/challenge/-/challenge-1.1.10.tgz#b32547c55462df4582861e1ae005888056178d74"
-  integrity sha512-ICi668eSf6nqdwERqXXHWevrO/5CIx4mMFxsS7Ob/IS1lmRr5h7jeAfp4HVofdCkyMw6K61nzjfnhd9rd9AMjQ==
-  dependencies:
-    "@keyv/sqlite" "^4.0.5"
-    env-paths "^3.0.0"
-    keyv "5.5.0"
-    multiformats "^13.1.0"
-    uint8arrays "^4.0.3"
-    viem "2.45.0"
-
 "@mintpass/challenge@1.1.11":
   version "1.1.11"
   resolved "https://registry.yarnpkg.com/@mintpass/challenge/-/challenge-1.1.11.tgz#aa2d0d010d53f3d9bf36bf5427c8cb28b05a04bc"
@@ -4387,71 +4360,6 @@
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"
   integrity sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==
 
-"@plebbit/plebbit-js@https://github.com/plebbit/plebbit-js.git#8e7d818688d0b4aab2ce6271b271167a4eb75225":
-  version "0.0.8"
-  resolved "https://github.com/plebbit/plebbit-js.git#8e7d818688d0b4aab2ce6271b271167a4eb75225"
-  dependencies:
-    "@bonfida/spl-name-service" "3.0.10"
-    "@enhances/with-resolvers" "0.0.5"
-    "@helia/block-brokers" "5.0.13"
-    "@helia/delegated-routing-v1-http-api-client" "5.1.4"
-    "@helia/ipns" "9.1.5"
-    "@helia/unixfs" "6.0.4"
-    "@libp2p/crypto" "5.1.13"
-    "@libp2p/fetch" "4.0.9"
-    "@libp2p/gossipsub" "15.0.11"
-    "@libp2p/identify" "4.0.9"
-    "@libp2p/interfaces" "3.3.2"
-    "@libp2p/peer-id" "6.0.4"
-    "@libp2p/peer-id-factory" "4.2.4"
-    "@libp2p/websockets" "10.1.2"
-    "@mintpass/challenge" "1.1.10"
-    "@plebbit/plebbit-logger" "github:plebbit/plebbit-logger#355a96d7659ed820047980049dfa627d30d83a69"
-    "@plebbit/proper-lockfile" "github:plebbit/node-proper-lockfile#7fd6332117340c1d3d98dd0afee2d31cc06f72b8"
-    "@types/proper-lockfile" "4.1.2"
-    assert "2.1.0"
-    better-sqlite3 "12.4.1"
-    blockstore-core "6.1.1"
-    blockstore-fs "3.0.2"
-    blockstore-idb "3.0.1"
-    buffer "6.0.3"
-    captcha-canvas "3.3.4"
-    cbor "9.0.1"
-    debounce "1.2.1"
-    err-code "3.0.1"
-    ethers "6.16.0"
-    ext-name "5.0.0"
-    helia "6.0.14"
-    hpagent "1.2.0"
-    it-all "3.0.6"
-    jose "4.11.0"
-    js-sha256 "0.11.1"
-    js-sha512 "0.9.0"
-    kubo-rpc-client "6.0.2"
-    limiter-es6-compat "2.1.2"
-    localforage "1.10.0"
-    lodash.merge "4.6.2"
-    lru-cache "10.1.0"
-    open-graph-scraper "6.10.0"
-    p-limit "4.0.0"
-    p-timeout "6.1.2"
-    peer-id "0.16.0"
-    probe-image-size "7.2.3"
-    remeda "1.57.0"
-    retry "0.13.1"
-    rpc-websockets "9.3.1"
-    safe-stable-stringify "2.4.3"
-    sha1-uint8array "0.10.7"
-    skia-canvas "3.0.8"
-    tcp-port-used "1.0.2"
-    tiny-typed-emitter "2.1.0"
-    tinycache "1.1.2"
-    ts-custom-error "3.3.1"
-    typestub-ipfs-only-hash "4.0.0"
-    uuid "11.1.0"
-    viem "2.43.1"
-    zod "4.1.12"
-
 "@plebbit/plebbit-js@https://github.com/plebbit/plebbit-js.git#fd7486d31ce71b29b6dc49c019278af8fb0b0d45":
   version "0.0.11"
   resolved "https://github.com/plebbit/plebbit-js.git#fd7486d31ce71b29b6dc49c019278af8fb0b0d45"
@@ -4517,17 +4425,10 @@
     viem "2.45.0"
     zod "4.3.6"
 
-"@plebbit/plebbit-logger@git+https://github.com/plebbit/plebbit-logger.git", "@plebbit/plebbit-logger@git+https://github.com/plebbit/plebbit-logger.git#355a96d7659ed820047980049dfa627d30d83a69":
+"@plebbit/plebbit-logger@git+https://github.com/plebbit/plebbit-logger.git#355a96d7659ed820047980049dfa627d30d83a69":
   version "0.0.1"
   uid "355a96d7659ed820047980049dfa627d30d83a69"
   resolved "git+https://github.com/plebbit/plebbit-logger.git#355a96d7659ed820047980049dfa627d30d83a69"
-  dependencies:
-    debug "4.3.4"
-
-"@plebbit/plebbit-logger@github:plebbit/plebbit-logger#355a96d7659ed820047980049dfa627d30d83a69":
-  version "0.0.1"
-  uid "355a96d7659ed820047980049dfa627d30d83a69"
-  resolved "https://codeload.github.com/plebbit/plebbit-logger/tar.gz/355a96d7659ed820047980049dfa627d30d83a69"
   dependencies:
     debug "4.3.4"
 
@@ -4553,33 +4454,9 @@
     uuid "11.1.0"
     zustand "4.0.0"
 
-"@plebbit/plebbit-react-hooks@https://github.com/plebbit/plebbit-react-hooks.git#df3cb6901f63054870dc127cd7565c98617c2a4f":
-  version "0.0.1"
-  resolved "https://github.com/plebbit/plebbit-react-hooks.git#df3cb6901f63054870dc127cd7565c98617c2a4f"
-  dependencies:
-    "@plebbit/plebbit-js" "https://github.com/plebbit/plebbit-js.git#8e7d818688d0b4aab2ce6271b271167a4eb75225"
-    "@plebbit/plebbit-logger" "https://github.com/plebbit/plebbit-logger.git"
-    assert "2.0.0"
-    ethers "5.6.9"
-    localforage "1.10.0"
-    lodash.isequal "4.5.0"
-    memoizee "0.4.15"
-    quick-lru "5.1.1"
-    uint8arrays "3.1.1"
-    uuid "11.1.0"
-    zustand "4.0.0"
-
 "@plebbit/proper-lockfile@git+https://github.com/plebbit/node-proper-lockfile.git#7fd6332117340c1d3d98dd0afee2d31cc06f72b8":
   version "4.1.2"
   resolved "git+https://github.com/plebbit/node-proper-lockfile.git#7fd6332117340c1d3d98dd0afee2d31cc06f72b8"
-  dependencies:
-    graceful-fs "^4.2.4"
-    retry "^0.12.0"
-    signal-exit "^3.0.2"
-
-"@plebbit/proper-lockfile@github:plebbit/node-proper-lockfile#7fd6332117340c1d3d98dd0afee2d31cc06f72b8":
-  version "4.1.2"
-  resolved "https://codeload.github.com/plebbit/node-proper-lockfile/tar.gz/7fd6332117340c1d3d98dd0afee2d31cc06f72b8"
   dependencies:
     graceful-fs "^4.2.4"
     retry "^0.12.0"
@@ -4816,7 +4693,7 @@
     estree-walker "^2.0.2"
     picomatch "^4.0.2"
 
-"@scure/base@^1.1.6", "@scure/base@^1.2.5", "@scure/base@~1.2.5":
+"@scure/base@^1.2.5", "@scure/base@~1.2.5":
   version "1.2.6"
   resolved "https://registry.yarnpkg.com/@scure/base/-/base-1.2.6.tgz#ca917184b8231394dd8847509c67a0be522e59f6"
   integrity sha512-g/nm5FgUa//MCj1gV09zTJTaM6KBAHqLN907YVQqf7zC49+DcO4B1so4ZX07Ef10Twr6nuqYEH9GEggFXA4Fmg==
@@ -8925,7 +8802,7 @@ graceful-fs@^4.1.10, graceful-fs@^4.1.15, graceful-fs@^4.1.2, graceful-fs@^4.1.6
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.11.tgz#4183e4e8bf08bb6e05bbb2f7d2e0c8f712ca40e3"
   integrity sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==
 
-graphemesplit@^2.4.4, graphemesplit@^2.6.0:
+graphemesplit@^2.6.0:
   version "2.6.0"
   resolved "https://registry.yarnpkg.com/graphemesplit/-/graphemesplit-2.6.0.tgz#548ec986e83dcdfec31adf5c98b282985077ce46"
   integrity sha512-rG9w2wAfkpg0DILa1pjnjNfucng3usON360shisqIMUBw/87pojcBSrHmeE4UwryAuBih7g8m1oilf5/u8EWdQ==
@@ -12754,20 +12631,6 @@ own-keys@^1.0.1:
     object-keys "^1.1.1"
     safe-push-apply "^1.0.0"
 
-ox@0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/ox/-/ox-0.10.5.tgz#dbef388065011b0109a25ed60359ca04cdd56434"
-  integrity sha512-mXJRiZswmX46abrzNkJpTN9sPJ/Rhevsp5Dfg0z80D55aoLNmEV4oN+/+feSNW593c2CnHavMqSVBanpJ0lUkQ==
-  dependencies:
-    "@adraffy/ens-normalize" "^1.11.0"
-    "@noble/ciphers" "^1.3.0"
-    "@noble/curves" "1.9.1"
-    "@noble/hashes" "^1.8.0"
-    "@scure/bip32" "^1.7.0"
-    "@scure/bip39" "^1.6.0"
-    abitype "^1.2.3"
-    eventemitter3 "5.0.1"
-
 ox@0.11.3:
   version "0.11.3"
   resolved "https://registry.yarnpkg.com/ox/-/ox-0.11.3.tgz#f50be1cae88822f5111b1e3f4a324c4c07eed422"
@@ -13364,6 +13227,13 @@ plist@^3.0.0, plist@^3.0.5, plist@^3.1.0:
     "@xmldom/xmldom" "^0.8.8"
     base64-js "^1.5.1"
     xmlbuilder "^15.1.1"
+
+portless@0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/portless/-/portless-0.5.2.tgz#ee405277721e54119c191f13fc6434a1dc06c42a"
+  integrity sha512-LnJvnFUduG4QSIDqc4og9WCLRA6L0+btA96nn6icY6cxyEAR44cnWaIxVzmw7y74KQ+R7zJM1HpenankphympA==
+  dependencies:
+    chalk "^5.3.0"
 
 possible-typed-array-names@^1.0.0:
   version "1.1.0"
@@ -16143,20 +16013,6 @@ vfile@^6.0.0:
     "@types/unist" "^3.0.0"
     vfile-message "^4.0.0"
 
-viem@2.43.1:
-  version "2.43.1"
-  resolved "https://registry.yarnpkg.com/viem/-/viem-2.43.1.tgz#ec6eb4841ed8eb4a11d54cb0b39afa8204fcd287"
-  integrity sha512-S33pBNlRvOlVv4+L94Z8ydCMDB1j0cuHFUvaC28i6OTxw3uY1P4M3h1YDFK8YC1H9/lIbeBTTvCRhi0FqU/2iw==
-  dependencies:
-    "@noble/curves" "1.9.1"
-    "@noble/hashes" "1.8.0"
-    "@scure/bip32" "1.7.0"
-    "@scure/bip39" "1.6.0"
-    abitype "1.2.3"
-    isows "1.0.7"
-    ox "0.10.5"
-    ws "8.18.3"
-
 viem@2.45.0:
   version "2.45.0"
   resolved "https://registry.yarnpkg.com/viem/-/viem-2.45.0.tgz#5f7f28b639193b783b7fbb6bef7575e9cc8d6f86"
@@ -16725,11 +16581,6 @@ yoctocolors@^2.1.1:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/zod-validation-error/-/zod-validation-error-4.0.2.tgz#bc605eba49ce0fcd598c127fee1c236be3f22918"
   integrity sha512-Q6/nZLe6jxuU80qb/4uJ4t5v2VEZ44lzQjPDhYJNztRQ4wyWc6VF3D3Kb/fAuPetZQnhS3hnajCf9CsWesghLQ==
-
-zod@4.1.12:
-  version "4.1.12"
-  resolved "https://registry.yarnpkg.com/zod/-/zod-4.1.12.tgz#64f1ea53d00eab91853195653b5af9eee68970f0"
-  integrity sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ==
 
 zod@4.3.6, "zod@^3.25.0 || ^4.0.0", zod@^4.1.11:
   version "4.3.6"
