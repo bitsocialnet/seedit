@@ -1,6 +1,6 @@
-[![Build Status](https://img.shields.io/github/actions/workflow/status/bitsocialhq/seedit/test.yml?branch=master)](https://github.com/bitsocialhq/seedit/actions/workflows/test.yml)
-[![Release](https://img.shields.io/github/v/release/bitsocialhq/seedit)](https://github.com/bitsocialhq/seedit/releases/latest)
-[![License](https://img.shields.io/badge/license-GPL--2.0--only-red.svg)](https://github.com/bitsocialhq/seedit/blob/master/LICENSE)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/bitsocialnet/seedit/test.yml?branch=master)](https://github.com/bitsocialnet/seedit/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/bitsocialnet/seedit)](https://github.com/bitsocialnet/seedit/releases/latest)
+[![License](https://img.shields.io/badge/license-GPL--2.0--only-red.svg)](https://github.com/bitsocialnet/seedit/blob/master/LICENSE)
 [![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-brightgreen.svg)](http://commitizen.github.io/cz-cli/)
 
 <img src="https://github.com/plebeius-eth/assets/blob/main/seedit-logo.png" width="302" height="111">
@@ -14,8 +14,8 @@ Seedit is a serverless, adminless, decentralized and open-source (old)reddit alt
 - Seedit web version: https://seedit.app — or, using Brave/IPFS Companion: https://seedit.eth
 
 ### Downloads
-- Seedit desktop version (full p2p bitsocial node, seeds automatically): available for Mac/Windows/Linux, [download link in the release page](https://github.com/bitsocialhq/seedit/releases/latest)
-- Seedit mobile version: available for Android, [download link in the release page](https://github.com/bitsocialhq/seedit/releases/latest)
+- Seedit desktop version (full p2p bitsocial node, seeds automatically): available for Mac/Windows/Linux, [download link in the release page](https://github.com/bitsocialnet/seedit/releases/latest)
+- Seedit mobile version: available for Android, [download link in the release page](https://github.com/bitsocialnet/seedit/releases/latest)
 
 <br />
 
@@ -24,13 +24,13 @@ Seedit is a serverless, adminless, decentralized and open-source (old)reddit alt
 ## How to create a community
 To run a community, you can choose between two options:
 
-1. If you prefer to use a **GUI**, download the desktop version of the Seedit client, available for Windows, MacOS and Linux: [latest release](https://github.com/bitsocialhq/seedit/releases/latest). Create a community using using the familiar old.reddit-like UI, and modify its settings to your liking. The app runs an IPFS node, meaning you have to keep it running to have your board online.
-2. If you prefer to use a **command line interface**, install bitsocial-cli, available for Windows, MacOS and Linux: [latest release](https://github.com/bitsocialhq/bitsocial-cli/releases/latest). Follow the instructions in the readme of the repo. When running the daemon for the first time, it will output WebUI links you can use to manage your community with the ease of the GUI.
+1. If you prefer to use a **GUI**, download the desktop version of the Seedit client, available for Windows, MacOS and Linux: [latest release](https://github.com/bitsocialnet/seedit/releases/latest). Create a community using using the familiar old.reddit-like UI, and modify its settings to your liking. The app runs an IPFS node, meaning you have to keep it running to have your board online.
+2. If you prefer to use a **command line interface**, install bitsocial-cli, available for Windows, MacOS and Linux: [latest release](https://github.com/bitsocialnet/bitsocial-cli/releases/latest). Follow the instructions in the readme of the repo. When running the daemon for the first time, it will output WebUI links you can use to manage your community with the ease of the GUI.
 
-Peers can connect to your bitsocial community using any bitsocial client, such as Seedit or [5chan](https://github.com/bitsocialhq/5chan). They only need the community address, which is not stored in any central database, as bitsocial is a pure peer-to-peer protocol.
+Peers can connect to your bitsocial community using any bitsocial client, such as Seedit or [5chan](https://github.com/bitsocialnet/5chan). They only need the community address, which is not stored in any central database, as bitsocial is a pure peer-to-peer protocol.
 
 ### How to add a community to the default list (s/all)
-The default list of communities, used on s/all on Seedit, is bitsocial's [default-multisub.json list](https://github.com/bitsocialhq/lists/blob/master/default-multisub.json). You can open a pull request in that repo to add your community to the list.
+The default list of communities, used on s/all on Seedit, is bitsocial's [default-multisub.json list](https://github.com/bitsocialnet/lists/blob/master/default-multisub.json). You can open a pull request in that repo to add your community to the list.
 
 ## To run locally
 
@@ -51,4 +51,4 @@ The dev server runs at http://seedit.localhost:1355 via [Portless](https://port1
 
 ### Build:
 
-The linux/windows/mac/android build scripts are in https://github.com/bitsocialhq/seedit/blob/master/.github/workflows/release.yml
+The linux/windows/mac/android build scripts are in https://github.com/bitsocialnet/seedit/blob/master/.github/workflows/release.yml

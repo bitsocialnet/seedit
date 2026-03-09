@@ -25,7 +25,7 @@ SCRIPT="
 cd ~
 rm $SEEDIT_HTML_NAME.zip
 rm -fr $SEEDIT_HTML_NAME
-wget https://github.com/bitsocialhq/seedit/releases/download/v$SEEDIT_VERSION/$SEEDIT_HTML_NAME.zip || exit
+wget https://github.com/bitsocialnet/seedit/releases/download/v$SEEDIT_VERSION/$SEEDIT_HTML_NAME.zip || exit
 
 # extract html
 unzip $SEEDIT_HTML_NAME.zip || exit
@@ -38,7 +38,7 @@ do
   # download previous version
   SEEDIT_PREVIOUS_VERSION_HTML_NAME="seedit-html-\$SEEDIT_PREVIOUS_VERSION"
   echo downloading \$SEEDIT_PREVIOUS_VERSION_HTML_NAME...
-  wget --quiet https://github.com/bitsocialhq/seedit/releases/download/v\$SEEDIT_PREVIOUS_VERSION/\$SEEDIT_PREVIOUS_VERSION_HTML_NAME.zip
+  wget --quiet https://github.com/bitsocialnet/seedit/releases/download/v\$SEEDIT_PREVIOUS_VERSION/\$SEEDIT_PREVIOUS_VERSION_HTML_NAME.zip
   # extract previous version html
   unzip -qq \$SEEDIT_PREVIOUS_VERSION_HTML_NAME.zip
   rm \$SEEDIT_PREVIOUS_VERSION_HTML_NAME.zip

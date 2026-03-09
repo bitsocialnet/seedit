@@ -6,7 +6,7 @@ const commitRef = import.meta.env.VITE_COMMIT_REF;
 const VersionWithCommit = () => {
   return (
     <a
-      href={commitRef ? `https://github.com/bitsocialhq/seedit/commit/${commitRef}` : `https://github.com/bitsocialhq/seedit/releases/tag/v${version}`}
+      href={commitRef ? `https://github.com/bitsocialnet/seedit/commit/${commitRef}` : `https://github.com/bitsocialnet/seedit/releases/tag/v${version}`}
       target='_blank'
       rel='noopener noreferrer'
     >
@@ -17,7 +17,7 @@ const VersionWithCommit = () => {
 
 const Version = () => {
   return (
-    <a href={`https://github.com/bitsocialhq/seedit/releases/tag/v${version}`} target='_blank' rel='noopener noreferrer'>
+    <a href={`https://github.com/bitsocialnet/seedit/releases/tag/v${version}`} target='_blank' rel='noopener noreferrer'>
       v{version}
     </a>
   );

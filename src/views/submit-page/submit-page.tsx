@@ -101,7 +101,7 @@ const UploadMediaForm = () => {
       if (!(isAndroid || isElectron)) {
         if (window.confirm(t('upload_button_warning'))) {
           const link = document.createElement('a');
-          link.href = 'https://github.com/bitsocialhq/seedit/releases/latest';
+          link.href = 'https://github.com/bitsocialnet/seedit/releases/latest';
           link.target = '_blank';
           link.rel = 'noopener noreferrer';
           link.click();
@@ -170,7 +170,7 @@ const UploadMediaForm = () => {
     if (!(isAndroid || isElectron)) {
       if (window.confirm(t('upload_button_warning'))) {
         const link = document.createElement('a');
-        link.href = 'https://github.com/bitsocialhq/seedit/releases/latest';
+        link.href = 'https://github.com/bitsocialnet/seedit/releases/latest';
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
         link.click();

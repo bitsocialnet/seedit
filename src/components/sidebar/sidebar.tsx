@@ -58,7 +58,7 @@ const ModeratorsList = ({ roles }: { roles: Record<string, Role> }) => {
             u/{Plebbit.getShortAddress({ address })}
           </li>
         ))}
-        {/* TODO: https://github.com/bitsocialhq/seedit/issues/274
+        {/* TODO: https://github.com/bitsocialnet/seedit/issues/274
          <li className={styles.listMore}>{t('about_moderation')} »</li> */}
       </ul>
     </div>
@@ -142,19 +142,19 @@ export const Footer = () => {
           </li>
           <span className={styles.footerSeparator}>|</span>
           <li>
-            <a href='https://github.com/bitsocialhq/seedit' target='_blank' rel='noopener noreferrer'>
+            <a href='https://github.com/bitsocialnet/seedit' target='_blank' rel='noopener noreferrer'>
               github
             </a>
             <span className={styles.footerSeparator}>|</span>
           </li>
           <li>
-            <a href='https://t.me/bitsocialhq' target='_blank' rel='noopener noreferrer'>
+            <a href='https://t.me/bitsocialnet' target='_blank' rel='noopener noreferrer'>
               telegram
             </a>
             <span className={styles.footerSeparator}>|</span>
           </li>
           <li>
-            <a href='https://x.com/bitsocialhq' target='_blank' rel='noopener noreferrer'>
+            <a href='https://x.com/bitsocialnet' target='_blank' rel='noopener noreferrer'>
               x
             </a>
             <span className={styles.footerSeparator}>|</span>
@@ -263,7 +263,7 @@ const Sidebar = ({ comment, isSubCreatedButNotYetPublished, settings, subplebbit
       navigate('/communities/create');
     } else if (window.confirm(t('create_community_warning'))) {
       const link = document.createElement('a');
-      link.href = 'https://github.com/bitsocialhq/seedit/releases/latest';
+      link.href = 'https://github.com/bitsocialnet/seedit/releases/latest';
       link.target = '_blank';
       link.rel = 'noopener noreferrer';
       link.click();
@@ -367,7 +367,7 @@ const Sidebar = ({ comment, isSubCreatedButNotYetPublished, settings, subplebbit
           )}
         {(moderatorRole || isOwner) && <ModerationTools address={address} />}
         {isInSubplebbitsView && (
-          <a href='https://github.com/bitsocialhq/lists' target='_blank' rel='noopener noreferrer'>
+          <a href='https://github.com/bitsocialnet/lists' target='_blank' rel='noopener noreferrer'>
             <div className={styles.largeButton}>
               <div className={styles.nub} />
               {t('submit_community')}

@@ -34,13 +34,13 @@ const CheckForUpdates = () => {
       if (packageJson.version !== packageData.version) {
         const newVersionText = t('new_stable_version', { newVersion: packageData.version, oldVersion: packageJson.version });
         const updateActionText = window.electronApi?.isElectron
-          ? t('download_latest_desktop', { link: 'https://github.com/bitsocialhq/seedit/releases/latest', interpolation: { escapeValue: false } })
+          ? t('download_latest_desktop', { link: 'https://github.com/bitsocialnet/seedit/releases/latest', interpolation: { escapeValue: false } })
           : isAndroid
             ? t('download_latest_android')
             : t('refresh_to_update');
         if (isAndroid) {
           if (window.confirm(newVersionText + ' ' + updateActionText)) {
-            window.open(`https://github.com/bitsocialhq/seedit/releases/download/v${packageData.version}/seedit-${packageData.version}.apk`, '_blank', 'noreferrer');
+            window.open(`https://github.com/bitsocialnet/seedit/releases/download/v${packageData.version}/seedit-${packageData.version}.apk`, '_blank', 'noreferrer');
           }
         } else {
           alert(newVersionText + ' ' + updateActionText);
@@ -107,7 +107,7 @@ const LanguageSettings = () => {
           </option>
         ))}
       </select>
-      <a href='https://github.com/bitsocialhq/seedit/tree/master/public/translations' target='_blank' rel='noopener noreferrer'>
+      <a href='https://github.com/bitsocialnet/seedit/tree/master/public/translations' target='_blank' rel='noopener noreferrer'>
         {t('contribute_on_github')}
       </a>
     </div>

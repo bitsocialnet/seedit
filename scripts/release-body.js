@@ -47,7 +47,7 @@ if (remoteFiles.length) {
   files = remoteFiles;
 }
 
-const linkTo = (file) => `https://github.com/bitsocialhq/seedit/releases/download/v${version}/${file}`;
+const linkTo = (file) => `https://github.com/bitsocialnet/seedit/releases/download/v${version}/${file}`;
 const has = (s, sub) => s.toLowerCase().includes(sub);
 const isArm = (s) => has(s, 'arm64') || has(s, 'aarch64');
 const isX64 = (s) => (has(s, 'x64') || has(s, 'x86_64')) || !isArm(s);
