@@ -1,4 +1,4 @@
-import { PublishSubplebbitEditOptions } from '@plebbit/plebbit-react-hooks';
+import { PublishSubplebbitEditOptions } from '@bitsocialnet/bitsocial-react-hooks';
 import { Roles } from '../lib/utils/user-utils';
 import { create } from 'zustand';
 

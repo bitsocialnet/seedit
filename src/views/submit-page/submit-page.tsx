@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useAccount, usePublishComment, useSubplebbit } from '@plebbit/plebbit-react-hooks';
+import { useAccount, usePublishComment, useSubplebbit } from '@bitsocialnet/bitsocial-react-hooks';
 import Plebbit from '@plebbit/plebbit-js';
 import { Capacitor } from '@capacitor/core';
 import FileUploader from '../../plugins/file-uploader';

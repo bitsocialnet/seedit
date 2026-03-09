@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState, useRef, lazy, Suspense, Component } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { usePublishSubplebbitEdit, useSubplebbit } from '@plebbit/plebbit-react-hooks';
+import { usePublishSubplebbitEdit, useSubplebbit } from '@bitsocialnet/bitsocial-react-hooks';
 import useTheme from '../../../stores/use-theme-store';
 import styles from '../../settings/account-data-editor/account-data-editor.module.css';
 import useIsMobile from '../../../hooks/use-is-mobile';

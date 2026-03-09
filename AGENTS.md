@@ -10,7 +10,7 @@ Seedit is a serverless, adminless, decentralized Reddit alternative built on the
 - **Zustand** for state management
 - **React Router v6** for routing
 - **Vite** for bundling
-- **plebbit-react-hooks** for Plebbit protocol integration
+- **bitsocial-react-hooks** for Plebbit protocol integration
 - **i18next** for translations
 - **yarn** as package manager
 - **oxlint** for linting
@@ -48,7 +48,7 @@ AI tends to overuse `useState` and `useEffect`. This project follows modern Reac
 ### Do NOT
 
 - Use `useState` for shared/global state → use **Zustand stores** in `src/stores/`
-- Use `useEffect` for data fetching → use **plebbit-react-hooks** (already handles caching, loading states)
+- Use `useEffect` for data fetching → use **bitsocial-react-hooks** (already handles caching, loading states)
 - Copy-paste logic across components → extract into **custom hooks** in `src/hooks/`
 - Use boolean flag soup (`isLoading`, `isError`, `isSuccess`) → use **state machines** with Zustand
 - Use `useEffect` to sync derived state → **calculate during render** instead
@@ -56,7 +56,7 @@ AI tends to overuse `useState` and `useEffect`. This project follows modern Reac
 ### Do
 
 - Use Zustand for any state shared between components
-- Use plebbit-react-hooks (`useComment`, `useFeed`, `useSubplebbit`, etc.) for all Plebbit data
+- Use bitsocial-react-hooks (`useComment`, `useFeed`, `useSubplebbit`, etc.) for all Plebbit data
 - Extract reusable logic into custom hooks
 - Calculate derived values during render, not in effects
 - Use `useMemo` only when profiling shows it's needed
@@ -67,7 +67,7 @@ AI tends to overuse `useState` and `useEffect`. This project follows modern Reac
 | Concern | ❌ Avoid | ✅ Use Instead |
 |---------|----------|----------------|
 | Shared state | `useState` + prop drilling | Zustand store |
-| Data fetching | `useEffect` + fetch | plebbit-react-hooks |
+| Data fetching | `useEffect` + fetch | bitsocial-react-hooks |
 | Derived state | `useEffect` to sync | Calculate during render |
 | Side effects | Effects without cleanup | AbortController or query libs |
 | Complex flows | Boolean flags | State machine in Zustand |
@@ -91,7 +91,7 @@ Skills are more efficient than docs—they inject targeted guidance without bloa
 
 ### Context7 (for library docs)
 
-When you need documentation for libraries like **plebbit-react-hooks** or **plebbit-js**, use the Context7 skill to fetch current docs instead of relying on potentially outdated training data.
+When you need documentation for libraries like **bitsocial-react-hooks** or **plebbit-js**, use the Context7 skill to fetch current docs instead of relying on potentially outdated training data.
 
 ```bash
 npx skills add https://github.com/intellectronica/agent-skills --skill context7

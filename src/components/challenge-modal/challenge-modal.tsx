@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FloatingFocusManager, useClick, useDismiss, useFloating, useId, useInteractions, useRole } from '@floating-ui/react';
-import { Challenge as ChallengeType, useComment, useAccount } from '@plebbit/plebbit-react-hooks';
+import { Challenge as ChallengeType, useComment, useAccount } from '@bitsocialnet/bitsocial-react-hooks';
 import { useTranslation } from 'react-i18next';
 import useChallengesStore from '../../stores/use-challenges-store';
 import useTheme from '../../hooks/use-theme';

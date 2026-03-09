@@ -1,4 +1,4 @@
-import { setAccount } from '@plebbit/plebbit-react-hooks';
+import { setAccount } from '@bitsocialnet/bitsocial-react-hooks';
 
 const NSFW_SUBSCRIPTION_PROMPT_KEY_PREFIX = 'seedit-nsfw-subscription-prompt-shown-';
 
@@ -51,8 +51,8 @@ export const handleNSFWSubscriptionPrompt = async ({ account, defaultSubplebbits
   const tagText = isShowingAll
     ? 'all NSFW communities'
     : tagsToShow.length === 1
-    ? `communities tagged as "${tagsToShow[0]}"`
-    : `communities tagged as: ${tagsToShow.join(', ')}`;
+      ? `communities tagged as "${tagsToShow[0]}"`
+      : `communities tagged as: ${tagsToShow.join(', ')}`;
 
   const confirmMessage = `You're now showing ${tagText}. Would you like to subscribe to these communities? This will add them to your subscriptions.`;
 

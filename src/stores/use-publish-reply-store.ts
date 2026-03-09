@@ -1,5 +1,5 @@
-import { PublishCommentOptions } from '@plebbit/plebbit-react-hooks';
-import { ChallengeVerification, Comment } from '@plebbit/plebbit-react-hooks';
+import { PublishCommentOptions } from '@bitsocialnet/bitsocial-react-hooks';
+import { ChallengeVerification, Comment } from '@bitsocialnet/bitsocial-react-hooks';
 import { create } from 'zustand';
 import useChallengesStore from './use-challenges-store';
 import { alertChallengeVerificationFailed } from '../lib/utils/challenge-utils';

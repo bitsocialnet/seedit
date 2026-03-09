@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { setAccount, useAccount, useAuthorAvatar } from '@plebbit/plebbit-react-hooks';
+import { setAccount, useAccount, useAuthorAvatar } from '@bitsocialnet/bitsocial-react-hooks';
 import styles from './avatar-settings.module.css';
 import { Trans, useTranslation } from 'react-i18next';
 
@@ -150,7 +150,7 @@ const AvatarSettings = () => {
                   1: (
                     <Link
                       key='tokenAddressWhitelistLink'
-                      to='https://github.com/plebbit/plebbit-react-hooks/blob/557cc3f40b5933a00553ed9c0bc310d2cd7a3b52/src/hooks/authors/author-avatars.ts#L133'
+                      to='https://github.com/bitsocialnet/bitsocial-react-hooks/blob/557cc3f40b5933a00553ed9c0bc310d2cd7a3b52/src/hooks/authors/author-avatars.ts#L133'
                       target='_blank'
                       rel='noopener noreferrer'
                     />

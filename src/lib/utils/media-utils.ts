@@ -1,5 +1,5 @@
-import localForageLru from '@plebbit/plebbit-react-hooks/dist/lib/localforage-lru/index.js';
-import { Comment } from '@plebbit/plebbit-react-hooks';
+import localForageLru from '@bitsocialnet/bitsocial-react-hooks/dist/lib/localforage-lru/index.js';
+import { Comment } from '@bitsocialnet/bitsocial-react-hooks';
 import extName from 'ext-name';
 import { canEmbed } from '../../components/post/embed';
 import memoize from 'memoizee';

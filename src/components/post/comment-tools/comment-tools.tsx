@@ -1,7 +1,7 @@
 import { useCallback, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Author, useAccount, useComment, useSubplebbit } from '@plebbit/plebbit-react-hooks';
+import { Author, useAccount, useComment, useSubplebbit } from '@bitsocialnet/bitsocial-react-hooks';
 import useScheduledReset from '../../../hooks/use-scheduled-reset';
 import styles from './comment-tools.module.css';
 import EditMenu from './edit-menu';

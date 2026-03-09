@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { usePublishComment } from '@plebbit/plebbit-react-hooks';
+import { usePublishComment } from '@bitsocialnet/bitsocial-react-hooks';
 import usePublishReplyStore from '../stores/use-publish-reply-store';
 
 const usePublishReply = ({ cid, subplebbitAddress, postCid }: { cid: string; subplebbitAddress: string; postCid: string | undefined }) => {

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { ChallengeVerification, Comment, usePublishVote, useAccountVote } from '@plebbit/plebbit-react-hooks';
+import { ChallengeVerification, Comment, usePublishVote, useAccountVote } from '@bitsocialnet/bitsocial-react-hooks';
 import useChallengesStore from '../stores/use-challenges-store';
 import { alertChallengeVerificationFailed } from '../lib/utils/challenge-utils';
 

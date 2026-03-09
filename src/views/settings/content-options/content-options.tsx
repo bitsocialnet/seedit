@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useAccount } from '@plebbit/plebbit-react-hooks';
+import { useAccount } from '@bitsocialnet/bitsocial-react-hooks';
 import styles from './content-options.module.css';
 import useContentOptionsStore from '../../../stores/use-content-options-store';
 import { useDefaultSubplebbits } from '../../../hooks/use-default-subplebbits';

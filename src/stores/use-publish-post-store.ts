@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import challengesStore from './use-challenges-store';
-import { Comment, PublishCommentOptions } from '@plebbit/plebbit-react-hooks';
+import { Comment, PublishCommentOptions } from '@bitsocialnet/bitsocial-react-hooks';
 import { alertChallengeVerificationFailed } from '../lib/utils/challenge-utils';
 
 const { addChallenge } = challengesStore.getState();

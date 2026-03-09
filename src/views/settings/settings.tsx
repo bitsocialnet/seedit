@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { Capacitor } from '@capacitor/core';
-import { setAccount, useAccount } from '@plebbit/plebbit-react-hooks';
+import { setAccount, useAccount } from '@bitsocialnet/bitsocial-react-hooks';
 import { isSettingsPlebbitOptionsView, isSettingsContentOptionsView } from '../../lib/utils/view-utils';
 import useTheme from '../../hooks/use-theme';
 import { VersionWithCommit } from '../../components/version';

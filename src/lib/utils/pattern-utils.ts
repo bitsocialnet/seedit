@@ -1,4 +1,4 @@
-import { Comment, useSubplebbit } from '@plebbit/plebbit-react-hooks';
+import { Comment, useSubplebbit } from '@bitsocialnet/bitsocial-react-hooks';
 import React, { ReactNode, Fragment } from 'react';
 
 /**

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useAccount, setAccount } from '@plebbit/plebbit-react-hooks';
+import { useAccount, setAccount } from '@bitsocialnet/bitsocial-react-hooks';
 import { getAutoSubscribeAddresses, useDefaultSubplebbits } from './use-default-subplebbits';
 import { useAutoSubscribeStore } from '../stores/use-auto-subscribe-store';
 

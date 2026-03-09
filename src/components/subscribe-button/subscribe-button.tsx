@@ -1,6 +1,6 @@
 import { useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useSubscribe } from '@plebbit/plebbit-react-hooks';
+import { useSubscribe } from '@bitsocialnet/bitsocial-react-hooks';
 import styles from './subscribe-button.module.css';
 import { isAuthorView, isProfileView, isPendingPostView } from '../../lib/utils/view-utils';
 

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { StateSnapshot, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { useAccount, useNotifications } from '@plebbit/plebbit-react-hooks';
+import { useAccount, useNotifications } from '@bitsocialnet/bitsocial-react-hooks';
 import styles from './inbox.module.css';
 import Reply from '../../components/reply/reply';
 import { isInboxCommentRepliesView, isInboxPostRepliesView, isInboxUnreadView } from '../../lib/utils/view-utils';

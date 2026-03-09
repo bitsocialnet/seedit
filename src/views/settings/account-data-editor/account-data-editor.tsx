@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, lazy, Suspense, Component } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { setAccount, useAccount } from '@plebbit/plebbit-react-hooks';
+import { setAccount, useAccount } from '@bitsocialnet/bitsocial-react-hooks';
 import useTheme from '../../../stores/use-theme-store';
 import stringify from 'json-stringify-pretty-compact';
 import styles from './account-data-editor.module.css';

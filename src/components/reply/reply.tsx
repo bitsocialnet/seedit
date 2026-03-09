@@ -2,11 +2,20 @@ import { Fragment, useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Plebbit from '@plebbit/plebbit-js';
-import { Comment, useAccountComment, useAuthorAddress, useAuthorAvatar, useBlock, useComment, useEditedComment, useSubplebbit } from '@plebbit/plebbit-react-hooks';
+import {
+  Comment,
+  useAccountComment,
+  useAuthorAddress,
+  useAuthorAvatar,
+  useBlock,
+  useComment,
+  useEditedComment,
+  useSubplebbit,
+} from '@bitsocialnet/bitsocial-react-hooks';
 import { isInboxView, isPostContextView, isPostPageView } from '../../lib/utils/view-utils';
 import { getHostname } from '../../lib/utils/url-utils';
 import { formatScore, getReplyScore } from '../../lib/utils/post-utils';
-import { flattenCommentsPages } from '@plebbit/plebbit-react-hooks/dist/lib/utils';
+import { flattenCommentsPages } from '@bitsocialnet/bitsocial-react-hooks/dist/lib/utils';
 import { CommentMediaInfo, getHasThumbnail } from '../../lib/utils/media-utils';
 import { formatLocalizedUTCTimestamp, getFormattedTimeAgo } from '../../lib/utils/time-utils';
 import { useCommentMediaInfo } from '../../hooks/use-comment-media-info';

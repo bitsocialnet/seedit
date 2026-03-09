@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Subplebbit } from '@plebbit/plebbit-react-hooks';
+import { Subplebbit } from '@bitsocialnet/bitsocial-react-hooks';
 import useContentOptionsStore from '../stores/use-content-options-store';
 
 export interface MultisubMetadata {

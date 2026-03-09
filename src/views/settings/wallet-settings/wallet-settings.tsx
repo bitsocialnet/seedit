@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { Account, setAccount, useAccount } from '@plebbit/plebbit-react-hooks';
+import { Account, setAccount, useAccount } from '@bitsocialnet/bitsocial-react-hooks';
 import styles from './wallet-settings.module.css';
 import { Trans, useTranslation } from 'react-i18next';
 import InfoTooltip from '../../../components/info-tooltip';

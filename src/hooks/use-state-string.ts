@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useClientsStates, useSubplebbit, useSubplebbitsStates } from '@plebbit/plebbit-react-hooks';
+import { useClientsStates, useSubplebbit, useSubplebbitsStates } from '@bitsocialnet/bitsocial-react-hooks';
 import { debounce } from 'lodash';
 
 interface CommentOrSubplebbit {

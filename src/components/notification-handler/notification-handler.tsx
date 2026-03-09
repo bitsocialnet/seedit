@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useNotifications } from '@plebbit/plebbit-react-hooks';
-import localForageLru from '@plebbit/plebbit-react-hooks/dist/lib/localforage-lru/index.js';
+import { useNotifications } from '@bitsocialnet/bitsocial-react-hooks';
+import localForageLru from '@bitsocialnet/bitsocial-react-hooks/dist/lib/localforage-lru/index.js';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import { showLocalNotification } from '../../lib/push';
 

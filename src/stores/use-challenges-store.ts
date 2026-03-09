@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Challenge } from '@plebbit/plebbit-react-hooks';
+import { Challenge } from '@bitsocialnet/bitsocial-react-hooks';
 
 interface State {
   challenges: Challenge[];

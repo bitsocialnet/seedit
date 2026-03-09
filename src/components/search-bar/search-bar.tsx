@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useFloating, autoUpdate, offset, shift, FloatingPortal } from '@floating-ui/react';
-import { useAccount } from '@plebbit/plebbit-react-hooks';
+import { useAccount } from '@bitsocialnet/bitsocial-react-hooks';
 import Plebbit from '@plebbit/plebbit-js';
 import {
   isHomeView,

@@ -1327,7 +1327,7 @@
 * **post:** use verified addresses with css effect to avoid virtuoso glitch ([c739801](https://github.com/plebbit/seedit/commit/c7398014b29fe00f5135e785a34d09c07161713e))
 * **profile settings:** better state management ([fcd2d6c](https://github.com/plebbit/seedit/commit/fcd2d6c7d7954c44559d446d5c4f785640ca60ea))
 * **profile settings:** pre-load address resolve, only show status when clicking check, reset state after clicking save ([b7e059b](https://github.com/plebbit/seedit/commit/b7e059b469555acd7e7e2f976d22a8832840b508))
-* reduce calls of plebbit-react-hooks ([c1514a9](https://github.com/plebbit/seedit/commit/c1514a98829156713ca0498ab2fcfe80fefed538))
+* reduce calls of bitsocial-react-hooks ([c1514a9](https://github.com/plebbit/seedit/commit/c1514a98829156713ca0498ab2fcfe80fefed538))
 * **sidebar:** use components instead of variables for conditional rendering ([7f73939](https://github.com/plebbit/seedit/commit/7f73939906f6680597b0284d8dbf63f3bb9e205d))
 * **use-default-subplebbits:** cache hook for faster navigation ([1fc9fce](https://github.com/plebbit/seedit/commit/1fc9fce32006611d9e9ba9e448eaee7ec520a9c4))
 * **use-default-subplebbits:** optimize cache ([9673b08](https://github.com/plebbit/seedit/commit/9673b08a0dd53b790c3ef60ff60ffb492efe7ba5))
@@ -1336,7 +1336,7 @@
 
 ### Reverts
 
-* Revert "chore(package.json): upgrade plebbit-react-hooks" ([2307bc2](https://github.com/plebbit/seedit/commit/2307bc23c7a46e148bc682c263fa7cb36e4cc7d5))
+* Revert "chore(package.json): upgrade bitsocial-react-hooks" ([2307bc2](https://github.com/plebbit/seedit/commit/2307bc23c7a46e148bc682c263fa7cb36e4cc7d5))
 * Revert "chore(translations): translate "settings", rename account_bar_preferences to settings" ([d79f5dd](https://github.com/plebbit/seedit/commit/d79f5ddf98ab19306219748081b479b266521110))
 * Revert "style(header): remove wiki button, because of inconsistent UI and not enough space" ([e940379](https://github.com/plebbit/seedit/commit/e94037990f6ed35b2ed6cf3fc3ab4894904892c2))
 * Revert "style: convert all css modules to scss" ([f1dfafe](https://github.com/plebbit/seedit/commit/f1dfafeb5e7d8b0fa6af273639e18181cc3236c8))

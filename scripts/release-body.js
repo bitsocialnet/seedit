@@ -102,7 +102,7 @@ const htmlSection = section('Static HTML build', [
 const downloads = [macSection, winSection, linuxSection, androidSection, htmlSection]
   .filter(Boolean).join('\n\n');
 
-const releaseBody = `This version fixes a bug that prevented the desktop app from opening in specific Linux environments. It also includes a plebbit-react-hooks fix for the user's wallet signature timestamps, which were invalid.
+const releaseBody = `This version fixes a bug that prevented the desktop app from opening in specific Linux environments. It also includes a bitsocial-react-hooks fix for the user's wallet signature timestamps, which were invalid.
 
 - Web app: https://seedit.app
 - Decentralized web app via IPFS/IPNS gateways (works on any browser): [seedit.eth.limo](https://seedit.eth.limo), [seedit.eth.link](https://seedit.eth.link), [dweb.link/ipfs.io](https://dweb.link/ipns/seedit.eth)

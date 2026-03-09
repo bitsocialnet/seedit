@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { setAccount, useAccount, useResolvedAuthorAddress } from '@plebbit/plebbit-react-hooks';
+import { setAccount, useAccount, useResolvedAuthorAddress } from '@bitsocialnet/bitsocial-react-hooks';
 import { useTranslation } from 'react-i18next';
 import styles from './address-settings.module.css';
 

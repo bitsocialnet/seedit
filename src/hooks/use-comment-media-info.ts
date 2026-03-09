@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
-import { Comment } from '@plebbit/plebbit-react-hooks';
+import { Comment } from '@bitsocialnet/bitsocial-react-hooks';
 import { getCommentMediaInfo, fetchWebpageThumbnailIfNeeded } from '../lib/utils/media-utils';
 import { isPendingPostView, isPostPageView } from '../lib/utils/view-utils';
 

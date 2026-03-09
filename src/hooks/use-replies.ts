@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { Comment, useAccountComments } from '@plebbit/plebbit-react-hooks';
+import { Comment, useAccountComments } from '@bitsocialnet/bitsocial-react-hooks';
 
 const useRepliesAndAccountReplies = (comment: Comment) => {
   // filter only the parent cid

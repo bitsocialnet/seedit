@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { decompressFrames, parseGIF } from 'gifuct-js';
-import localForageLru from '@plebbit/plebbit-react-hooks/dist/lib/localforage-lru/index.js';
+import localForageLru from '@bitsocialnet/bitsocial-react-hooks/dist/lib/localforage-lru/index.js';
 
 const gifFrameDb = localForageLru.createInstance({ name: 'seeditGifFrames', size: 500 });
 

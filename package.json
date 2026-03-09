@@ -14,7 +14,7 @@
     "@capacitor/status-bar": "7.0.1",
     "@capawesome/capacitor-android-edge-to-edge-support": "7.2.2",
     "@floating-ui/react": "0.26.1",
-    "@plebbit/plebbit-react-hooks": "https://github.com/plebbit/plebbit-react-hooks.git#a828bd598bcc392ed379136feaee0a7b1c8cd23f",
+    "@bitsocialnet/bitsocial-react-hooks": "https://github.com/bitsocialnet/bitsocial-react-hooks.git#4eebec914a3a918d5984777e11a9fc6ef8e821a9",
     "@types/node": "20.8.2",
     "@types/react": "19.1.2",
     "@types/react-dom": "19.1.2",

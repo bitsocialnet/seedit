@@ -3,7 +3,7 @@ import { HashLink } from 'react-router-hash-link';
 import useIsMobile from '../../hooks/use-is-mobile';
 import Sidebar, { Footer } from '../../components/sidebar';
 import styles from './about.module.css';
-import { useAccount, useComment, useSubplebbit } from '@plebbit/plebbit-react-hooks';
+import { useAccount, useComment, useSubplebbit } from '@bitsocialnet/bitsocial-react-hooks';
 import { Capacitor } from '@capacitor/core';
 import { isHomeAboutView } from '../../lib/utils/view-utils';
 import { useEffect } from 'react';
