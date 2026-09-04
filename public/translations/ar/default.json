@@ -441,7 +441,7 @@
   "back_to_all_directories": "العودة إلى جميع الأدلة",
   "directories": "الأدلة",
   "search_communities": "البحث عن مجتمعات في هذا الدليل",
-  "fivechan_quote": "اقتباس 5chan {{reference}}",
+  "fivechan_quote": "اقتباس {{reference}}",
   "quoting_user": "اقتباس من u/{{author}}",
-  "fivechan_quote_tooltip": "تؤدي الإشارات بأسلوب 5chan إلى المنشورات أو الردود المُقتبسة في عملاء مثل 5chan.app. يحولها Seedit إلى روابط عندما يمكن تحديد التعليق المُقتبس."
+  "fivechan_quote_tooltip": "الاقتباسات مثل >>123 تشير إلى منشور أو رد آخر برقمه في هذا المجتمع. يربط Seedit بينها عندما يمكن التعرف على التعليق المقتبس."
 }

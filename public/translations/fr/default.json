@@ -441,7 +441,7 @@
   "back_to_all_directories": "retour à tous les annuaires",
   "directories": "annuaires",
   "search_communities": "rechercher des communautés dans cet annuaire",
-  "fivechan_quote": "citation de 5chan {{reference}}",
+  "fivechan_quote": "cite {{reference}}",
   "quoting_user": "cite u/{{author}}",
-  "fivechan_quote_tooltip": "Les références de style 5chan renvoient vers les publications ou réponses citées dans des clients tels que 5chan.app. Seedit les transforme en liens lorsque le commentaire cité peut être identifié."
+  "fivechan_quote_tooltip": "Les citations comme >>123 font référence à un autre message ou une réponse par son numéro dans cette communauté. Seedit les lie lorsque le commentaire cité peut être identifié."
 }

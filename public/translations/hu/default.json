@@ -441,7 +441,7 @@
   "back_to_all_directories": "vissza az összes címtárhoz",
   "directories": "címtárak",
   "search_communities": "közösségek keresése ebben a címtárban",
-  "fivechan_quote": "5chan-idézet {{reference}}",
+  "fivechan_quote": "idézése {{reference}}",
   "quoting_user": "u/{{author}} idézése",
-  "fivechan_quote_tooltip": "Az 5chan-stílusú hivatkozások az idézett bejegyzésekre vagy válaszokra mutatnak az olyan kliensekben, mint a 5chan.app. A Seedit akkor alakítja őket hivatkozássá, ha az idézett hozzászólás azonosítható."
+  "fivechan_quote_tooltip": "Az olyan idézetek, mint >>123, egy másik bejegyzésre vagy válaszra hivatkoznak az ennek a közösségben szereplő száma alapján. A Seedit összekapcsolja őket, amikor az idézett megjegyzés azonosítható."
 }

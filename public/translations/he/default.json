@@ -441,7 +441,7 @@
   "back_to_all_directories": "חזרה לכל הספריות",
   "directories": "ספריות",
   "search_communities": "חיפוש קהילות בספרייה זו",
-  "fivechan_quote": "ציטוט מ־5chan {{reference}}",
+  "fivechan_quote": "מצטט את {{reference}}",
   "quoting_user": "מצטט את u/{{author}}",
-  "fivechan_quote_tooltip": "הפניות בסגנון 5chan מקשרות לפוסטים מצוטטים או לתגובות מצוטטות בלקוחות כגון 5chan.app. Seedit הופך אותן לקישורים כאשר ניתן לזהות את התגובה המצוטטת."
+  "fivechan_quote_tooltip": "ציטוטים כמו >>123 מתייחסים ללעומת זאת פוסט או תשובה אחרת לפי מספרם בקהילה זו. Seedit מקשר אותם כאשר ניתן לזהות את ההערה שצוטטה."
 }

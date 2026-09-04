@@ -441,7 +441,7 @@
   "back_to_all_directories": "すべてのディレクトリに戻る",
   "directories": "ディレクトリ",
   "search_communities": "このディレクトリ内のコミュニティを検索",
-  "fivechan_quote": "5chanの引用 {{reference}}",
+  "fivechan_quote": "{{reference}}を引用",
   "quoting_user": "u/{{author}}を引用",
-  "fivechan_quote_tooltip": "5chan形式の参照は、5chan.appなどのクライアントでは引用された投稿や返信へのリンクになります。Seeditでは、引用されたコメントを特定できる場合にリンクとして表示します。"
+  "fivechan_quote_tooltip": ">>123 のような引用は、このコミュニティ内の番号で別の投稿や返信を参照します。引用されたコメントを特定できる場合、Seedit はそれをリンクします。"
 }

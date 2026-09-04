@@ -441,7 +441,7 @@
   "back_to_all_directories": "bumalik sa lahat ng direktoryo",
   "directories": "mga direktoryo",
   "search_communities": "maghanap ng mga komunidad sa direktoryong ito",
-  "fivechan_quote": "sipi mula sa 5chan {{reference}}",
+  "fivechan_quote": "sinisipi {{reference}}",
   "quoting_user": "sinisipi si u/{{author}}",
-  "fivechan_quote_tooltip": "Ang mga 5chan-style na reference ay nagli-link sa mga siniping post o reply sa mga client gaya ng 5chan.app. Nili-link ng Seedit ang mga ito kapag matutukoy ang siniping comment."
+  "fivechan_quote_tooltip": "Ang mga quote tulad ng >>123 ay tumutukoy sa ibang post o reply ayon sa bilang nito sa komunidad na ito. Ang Seedit ay nag-link sa kanila kapag matukoy ang quoted na komento."
 }

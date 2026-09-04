@@ -441,7 +441,7 @@
   "back_to_all_directories": "kthehu te të gjitha drejtoritë",
   "directories": "drejtori",
   "search_communities": "kërko komunitete në këtë direktori",
-  "fivechan_quote": "citim nga 5chan {{reference}}",
+  "fivechan_quote": "duke cituar {{reference}}",
   "quoting_user": "duke cituar u/{{author}}",
-  "fivechan_quote_tooltip": "Referencat në stilin e 5chan lidhen me postimet ose përgjigjet e cituara në klientë si 5chan.app. Seedit i kthen ato në lidhje kur komenti i cituar mund të identifikohet."
+  "fivechan_quote_tooltip": "Citatet si >>123 referohen në një tjetër postim ose përgjigje sipas numrit të tij në këtë komunitet. Seedit i lidh ato kur komentimi i cituar mund të identifikohet."
 }

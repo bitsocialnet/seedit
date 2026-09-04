@@ -441,7 +441,7 @@
   "back_to_all_directories": "kembali ke semua direktori",
   "directories": "direktori",
   "search_communities": "cari komunitas di direktori ini",
-  "fivechan_quote": "kutipan 5chan {{reference}}",
+  "fivechan_quote": "mengutip {{reference}}",
   "quoting_user": "mengutip u/{{author}}",
-  "fivechan_quote_tooltip": "Referensi bergaya 5chan menautkan ke postingan atau balasan yang dikutip di klien seperti 5chan.app. Seedit menjadikannya tautan ketika komentar yang dikutip dapat diidentifikasi."
+  "fivechan_quote_tooltip": "Kutipan seperti >>123 merujuk ke pos atau balasan lain berdasarkan nomornya di komunitas ini. Seedit menautkannya ketika komentar yang dikutip dapat diidentifikasi."
 }

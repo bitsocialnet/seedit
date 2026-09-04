@@ -441,7 +441,7 @@
   "back_to_all_directories": "înapoi la toate directoarele",
   "directories": "directoare",
   "search_communities": "caută comunități în acest director",
-  "fivechan_quote": "citat de pe 5chan {{reference}}",
+  "fivechan_quote": "citând {{reference}}",
   "quoting_user": "citând u/{{author}}",
-  "fivechan_quote_tooltip": "Referințele în stil 5chan trimit la postările sau răspunsurile citate în clienți precum 5chan.app. Seedit le transformă în linkuri atunci când comentariul citat poate fi identificat."
+  "fivechan_quote_tooltip": "Citatele cum ar fi >>123 fac referință la un alt articol sau răspuns după numărul acestuia în această comunitate. Seedit le leagă atunci când comentariul citat poate fi identificat."
 }

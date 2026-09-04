@@ -441,7 +441,7 @@
   "back_to_all_directories": "tilbake til alle kataloger",
   "directories": "kataloger",
   "search_communities": "søk etter fellesskap i denne katalogen",
-  "fivechan_quote": "5chan-sitat {{reference}}",
+  "fivechan_quote": "siterer {{reference}}",
   "quoting_user": "siterer u/{{author}}",
-  "fivechan_quote_tooltip": "Referanser i 5chan-stil lenker til siterte innlegg eller svar i klienter som 5chan.app. Seedit gjør dem til lenker når den siterte kommentaren kan identifiseres."
+  "fivechan_quote_tooltip": "Sitater som >>123 refererer til et annet innlegg eller svar etter nummeret i dette fellesskapet. Seedit lenker dem når den siterte kommentaren kan identifiseres."
 }

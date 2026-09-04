@@ -441,7 +441,7 @@
   "back_to_all_directories": "quay lại tất cả danh mục",
   "directories": "danh mục",
   "search_communities": "tìm kiếm cộng đồng trong danh mục này",
-  "fivechan_quote": "trích dẫn từ 5chan {{reference}}",
+  "fivechan_quote": "trích dẫn {{reference}}",
   "quoting_user": "trích dẫn u/{{author}}",
-  "fivechan_quote_tooltip": "Các tham chiếu kiểu 5chan liên kết đến bài đăng hoặc câu trả lời được trích dẫn trong các ứng dụng khách như 5chan.app. Seedit biến chúng thành liên kết khi có thể xác định được bình luận được trích dẫn."
+  "fivechan_quote_tooltip": "Các trích dẫn như >>123 đề cập đến một bài đăng hoặc câu trả lời khác theo số của nó trong cộng đồng này. Seedit liên kết chúng khi có thể xác định được nhận xét được trích dẫn."
 }

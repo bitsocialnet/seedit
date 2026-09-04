@@ -441,7 +441,7 @@
   "back_to_all_directories": "torna a tutte le directory",
   "directories": "directory",
   "search_communities": "cerca comunità in questa directory",
-  "fivechan_quote": "citazione di 5chan {{reference}}",
+  "fivechan_quote": "citando {{reference}}",
   "quoting_user": "citando u/{{author}}",
-  "fivechan_quote_tooltip": "I riferimenti in stile 5chan rimandano ai post o alle risposte citati nei client come 5chan.app. Seedit li trasforma in link quando è possibile identificare il commento citato."
+  "fivechan_quote_tooltip": "Le citazioni come >>123 fanno riferimento a un altro post o risposta dal suo numero in questa comunità. Seedit li collega quando il commento citato può essere identificato."
 }

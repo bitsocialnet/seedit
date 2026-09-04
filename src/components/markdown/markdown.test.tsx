@@ -22,9 +22,9 @@ vi.mock('react-i18next', () => ({
   useTranslation: () => ({
     t: (key: string, values?: Record<string, string>) => {
       if (key === 'quoting_user') return `quoting u/${values?.author}`;
-      if (key === 'fivechan_quote') return `5chan quote ${values?.reference}`;
+      if (key === 'fivechan_quote') return `quoting ${values?.reference}`;
       if (key === 'fivechan_quote_tooltip') {
-        return '5chan-style references link to quoted posts or replies in clients such as 5chan.app. Seedit links them when the quoted comment can be identified.';
+        return 'Quotes like >>123 reference another post or reply by its number in this community. Seedit links them when the quoted comment can be identified.';
       }
       return key;
     },
@@ -90,7 +90,7 @@ describe('Markdown', () => {
     expect(link?.textContent).toBe('[quoting u/alice.bso]');
     expect(link?.getAttribute('href')).toBe('#/s/music-posting.eth/comments/quoted-cid');
     expect(container.querySelector('blockquote')).toBeNull();
-    expect(container.querySelector('[data-tooltip]')?.getAttribute('data-tooltip')).toContain('5chan-style references');
+    expect(container.querySelector('[data-tooltip]')?.getAttribute('data-tooltip')).toContain('Quotes like >>123');
   });
 
   it('keeps unresolved same-board and cross-board quotes understandable', async () => {
@@ -107,8 +107,8 @@ describe('Markdown', () => {
       ),
     );
 
-    expect(container.textContent).toContain('[5chan quote >>99]');
-    expect(container.textContent).toContain('[5chan quote >>>/fit/77]');
+    expect(container.textContent).toContain('[quoting >>99]');
+    expect(container.textContent).toContain('[quoting >>>/fit/77]');
     expect(container.querySelectorAll('[data-tooltip]')).toHaveLength(2);
     expect(container.querySelector('blockquote')).toBeNull();
   });
