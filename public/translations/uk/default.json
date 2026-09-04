@@ -440,5 +440,8 @@
   "search_directories": "шукати в каталогах",
   "back_to_all_directories": "назад до всіх каталогів",
   "directories": "каталоги",
-  "search_communities": "пошук спільнот у цьому каталозі"
+  "search_communities": "пошук спільнот у цьому каталозі",
+  "fivechan_quote": "цитата з 5chan {{reference}}",
+  "quoting_user": "цитує u/{{author}}",
+  "fivechan_quote_tooltip": "Посилання у стилі 5chan ведуть на цитовані дописи або відповіді в клієнтах, як-от 5chan.app. Seedit перетворює їх на посилання, коли цитований коментар можна ідентифікувати."
 }

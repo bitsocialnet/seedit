@@ -440,5 +440,8 @@
   "search_directories": "dizinlerde ara",
   "back_to_all_directories": "tüm dizinlere geri dön",
   "directories": "dizinler",
-  "search_communities": "bu dizindeki toplulukları ara"
+  "search_communities": "bu dizindeki toplulukları ara",
+  "fivechan_quote": "5chan alıntısı {{reference}}",
+  "quoting_user": "u/{{author}} kullanıcısından alıntı",
+  "fivechan_quote_tooltip": "5chan tarzı referanslar, 5chan.app gibi istemcilerde alıntılanan gönderilere veya yanıtlara bağlantı verir. Seedit, alıntılanan yorum belirlenebildiğinde bunları bağlantıya dönüştürür."
 }

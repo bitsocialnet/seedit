@@ -439,5 +439,8 @@
   "search_directories": "etsi hakemistoja",
   "back_to_all_directories": "takaisin kaikkiin hakemistoihin",
   "directories": "hakemistot",
-  "search_communities": "etsi yhteisöjä tästä hakemistosta"
+  "search_communities": "etsi yhteisöjä tästä hakemistosta",
+  "fivechan_quote": "5chan-lainaus {{reference}}",
+  "quoting_user": "lainaa käyttäjää u/{{author}}",
+  "fivechan_quote_tooltip": "5chan-tyyliset viittaukset linkittävät lainattuihin julkaisuihin tai vastauksiin 5chan.appin kaltaisissa asiakasohjelmissa. Seedit tekee niistä linkkejä, kun lainattu kommentti voidaan tunnistaa."
 }

@@ -3,9 +3,37 @@
 import * as React from 'react';
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { HashRouter } from 'react-router-dom';
 import Markdown from './markdown';
+
+const testState = vi.hoisted(() => ({
+  comments: [] as Array<Record<string, any>>,
+}));
+
+vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
+  useAuthorAddress: ({ comment }: { comment?: { author?: { address?: string; shortAddress?: string } } }) => ({
+    shortAuthorAddress: comment?.author?.shortAddress || comment?.author?.address,
+  }),
+  useComments: () => ({ comments: testState.comments }),
+}));
+
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, values?: Record<string, string>) => {
+      if (key === 'quoting_user') return `quoting u/${values?.author}`;
+      if (key === 'fivechan_quote') return `5chan quote ${values?.reference}`;
+      if (key === 'fivechan_quote_tooltip') {
+        return '5chan-style references link to quoted posts or replies in clients such as 5chan.app. Seedit links them when the quoted comment can be identified.';
+      }
+      return key;
+    },
+  }),
+}));
+
+vi.mock('../info-tooltip', () => ({
+  default: ({ content }: { content: string }) => <sup data-tooltip={content}>[?]</sup>,
+}));
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 const act = (React as { act?: (callback: () => void | Promise<void>) => void | Promise<void> }).act as (callback: () => void | Promise<void>) => void | Promise<void>;
@@ -15,6 +43,7 @@ describe('Markdown', () => {
   let root: Root;
 
   beforeEach(() => {
+    testState.comments = [];
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -31,5 +60,83 @@ describe('Markdown', () => {
     expect(container.querySelector('table')).not.toBeNull();
     expect(container.querySelectorAll('th')).toHaveLength(2);
     expect(container.querySelectorAll('td')).toHaveLength(2);
+  });
+
+  it('renders 5chan number quotes as links to identifiable quoted comments', async () => {
+    testState.comments = [
+      {
+        author: { address: 'alice.eth' },
+        cid: 'quoted-cid',
+        communityAddress: 'music-posting.eth',
+        number: 42,
+      },
+    ];
+
+    await act(() =>
+      root.render(
+        createElement(
+          HashRouter,
+          null,
+          createElement(Markdown, {
+            content: '>>42\nA reply',
+            enableFivechanQuotes: true,
+            quotedCids: ['quoted-cid'],
+          }),
+        ),
+      ),
+    );
+
+    const link = container.querySelector('a');
+    expect(link?.textContent).toBe('[quoting u/alice.bso]');
+    expect(link?.getAttribute('href')).toBe('#/s/music-posting.eth/comments/quoted-cid');
+    expect(container.querySelector('blockquote')).toBeNull();
+    expect(container.querySelector('[data-tooltip]')?.getAttribute('data-tooltip')).toContain('5chan-style references');
+  });
+
+  it('keeps unresolved same-board and cross-board quotes understandable', async () => {
+    await act(() =>
+      root.render(
+        createElement(
+          HashRouter,
+          null,
+          createElement(Markdown, {
+            content: '>>99\n>>>/fit/77\nReplying to both',
+            enableFivechanQuotes: true,
+          }),
+        ),
+      ),
+    );
+
+    expect(container.textContent).toContain('[5chan quote >>99]');
+    expect(container.textContent).toContain('[5chan quote >>>/fit/77]');
+    expect(container.querySelectorAll('[data-tooltip]')).toHaveLength(2);
+    expect(container.querySelector('blockquote')).toBeNull();
+  });
+
+  it('preserves regular Markdown quotes and code containing 5chan-shaped text', async () => {
+    await act(() =>
+      root.render(
+        createElement(
+          HashRouter,
+          null,
+          createElement(Markdown, {
+            content: '> quoted text\n\n```text\n>>42\n```',
+            enableFivechanQuotes: true,
+          }),
+        ),
+      ),
+    );
+
+    expect(container.querySelector('blockquote')?.textContent).toContain('quoted text');
+    expect(container.querySelector('code')?.textContent).toContain('>>42');
+    expect(container.querySelector('[data-tooltip]')).toBeNull();
+  });
+
+  it('does not reinterpret 5chan-shaped text without the numbered-comment signal', async () => {
+    await act(() => root.render(createElement(HashRouter, null, createElement(Markdown, { content: '>>42\n\n[ordinary link](/__seedit-fivechan-quote/42)' }))));
+
+    expect(container.querySelectorAll('blockquote')).toHaveLength(2);
+    expect(container.querySelector('[data-tooltip]')).toBeNull();
+    expect(container.querySelector('a')?.textContent).toBe('ordinary link');
   });
 });

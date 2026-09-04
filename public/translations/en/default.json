@@ -450,5 +450,8 @@
   "search_directories": "search directories",
   "back_to_all_directories": "back to all directories",
   "directories": "directories",
-  "search_communities": "search communities in this directory"
+  "search_communities": "search communities in this directory",
+  "fivechan_quote": "5chan quote {{reference}}",
+  "quoting_user": "quoting u/{{author}}",
+  "fivechan_quote_tooltip": "5chan-style references link to quoted posts or replies in clients such as 5chan.app. Seedit links them when the quoted comment can be identified."
 }

@@ -440,5 +440,8 @@
   "search_directories": "ডিরেক্টরি খুঁজুন",
   "back_to_all_directories": "সব ডিরেক্টরিতে ফিরে যান",
   "directories": "ডিরেক্টরি",
-  "search_communities": "এই ডিরেক্টরিতে সম্প্রদায় খুঁজুন"
+  "search_communities": "এই ডিরেক্টরিতে সম্প্রদায় খুঁজুন",
+  "fivechan_quote": "5chan উদ্ধৃতি {{reference}}",
+  "quoting_user": "u/{{author}}-কে উদ্ধৃত করা হচ্ছে",
+  "fivechan_quote_tooltip": "5chan-শৈলীর রেফারেন্স 5chan.app-এর মতো ক্লায়েন্টে উদ্ধৃত পোস্ট বা উত্তরের লিংক হিসেবে কাজ করে। উদ্ধৃত মন্তব্যটি শনাক্ত করা গেলে Seedit সেগুলোকে লিংক করে।"
 }

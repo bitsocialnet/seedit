@@ -440,5 +440,8 @@
   "search_directories": "keresés a címtárakban",
   "back_to_all_directories": "vissza az összes címtárhoz",
   "directories": "címtárak",
-  "search_communities": "közösségek keresése ebben a címtárban"
+  "search_communities": "közösségek keresése ebben a címtárban",
+  "fivechan_quote": "5chan-idézet {{reference}}",
+  "quoting_user": "u/{{author}} idézése",
+  "fivechan_quote_tooltip": "Az 5chan-stílusú hivatkozások az idézett bejegyzésekre vagy válaszokra mutatnak az olyan kliensekben, mint a 5chan.app. A Seedit akkor alakítja őket hivatkozássá, ha az idézett hozzászólás azonosítható."
 }

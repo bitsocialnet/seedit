@@ -257,11 +257,11 @@ const InboxParentLink = ({ commentCid }: ParentLinkProps) => {
 const InboxParentComment = ({ parentCid }: { parentCid: string | undefined }) => {
   const { t } = useTranslation();
   const parentComment = useComment({ commentCid: parentCid });
-  const { content } = parentComment || {};
+  const { content, number, quotedCids } = parentComment || {};
   const communityAddress = getCommentCommunityAddress(parentComment);
   return (
     <>
-      <Expando content={content} expanded={true} showContent={true} />
+      <Expando content={content} expanded={true} number={number} quotedCids={quotedCids} showContent={true} />
       <Link className={styles.viewParentComment} to={communityAddress && parentCid ? getCommunityPostPath(communityAddress, parentCid) : ''}>
         {t('view_parent_comment')}
       </Link>
@@ -334,9 +334,11 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
     linkHeight,
     linkWidth,
     markedAsRead,
+    number,
     pinned,
     parentCid,
     postCid,
+    quotedCids,
     reason,
     removed,
     spoiler,
@@ -534,7 +536,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                       ) : deleted ? (
                         <span className={styles.deletedContent}>[{t('deleted')}]</span>
                       ) : (
-                        <Markdown content={content} />
+                        <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} quotedCids={quotedCids} />
                       ))}
                     {reason && (
                       <p className={styles.modReason}>

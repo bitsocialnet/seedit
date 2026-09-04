@@ -440,5 +440,8 @@
   "search_directories": "ڈائریکٹریاں تلاش کریں",
   "back_to_all_directories": "تمام ڈائریکٹریوں پر واپس جائیں",
   "directories": "ڈائریکٹریاں",
-  "search_communities": "اس ڈائریکٹری میں کمیونٹیز تلاش کریں"
+  "search_communities": "اس ڈائریکٹری میں کمیونٹیز تلاش کریں",
+  "fivechan_quote": "5chan اقتباس {{reference}}",
+  "quoting_user": "u/{{author}} کا حوالہ دیتے ہوئے",
+  "fivechan_quote_tooltip": "5chan طرز کے حوالہ جات 5chan.app جیسے کلائنٹس میں نقل کردہ پوسٹس یا جوابات سے لنک ہوتے ہیں۔ جب نقل کردہ تبصرے کی شناخت ممکن ہو تو Seedit انہیں لنکس بنا دیتا ہے۔"
 }

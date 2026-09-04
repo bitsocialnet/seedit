@@ -440,5 +440,8 @@
   "search_directories": "doorzoek directory's",
   "back_to_all_directories": "terug naar alle directory's",
   "directories": "directory's",
-  "search_communities": "gemeenschappen zoeken in deze directory"
+  "search_communities": "gemeenschappen zoeken in deze directory",
+  "fivechan_quote": "5chan-citaat {{reference}}",
+  "quoting_user": "citeert u/{{author}}",
+  "fivechan_quote_tooltip": "Verwijzingen in 5chan-stijl linken in clients zoals 5chan.app naar geciteerde berichten of reacties. Seedit maakt er links van wanneer de geciteerde reactie kan worden geïdentificeerd."
 }

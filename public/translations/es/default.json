@@ -440,5 +440,8 @@
   "search_directories": "buscar directorios",
   "back_to_all_directories": "volver a todos los directorios",
   "directories": "directorios",
-  "search_communities": "buscar comunidades en este directorio"
+  "search_communities": "buscar comunidades en este directorio",
+  "fivechan_quote": "cita de 5chan {{reference}}",
+  "quoting_user": "citando a u/{{author}}",
+  "fivechan_quote_tooltip": "Las referencias al estilo de 5chan enlazan a publicaciones o respuestas citadas en clientes como 5chan.app. Seedit las enlaza cuando se puede identificar el comentario citado."
 }

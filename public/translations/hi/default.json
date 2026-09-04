@@ -440,5 +440,8 @@
   "search_directories": "डायरेक्टरी खोजें",
   "back_to_all_directories": "सभी डायरेक्टरी पर वापस जाएँ",
   "directories": "डायरेक्टरी",
-  "search_communities": "इस डायरेक्टरी में समुदाय खोजें"
+  "search_communities": "इस डायरेक्टरी में समुदाय खोजें",
+  "fivechan_quote": "5chan उद्धरण {{reference}}",
+  "quoting_user": "u/{{author}} को उद्धृत करते हुए",
+  "fivechan_quote_tooltip": "5chan-शैली के संदर्भ 5chan.app जैसे क्लाइंट में उद्धृत पोस्ट या जवाब से लिंक होते हैं। उद्धृत टिप्पणी की पहचान हो पाने पर Seedit उन्हें लिंक कर देता है।"
 }

@@ -440,5 +440,8 @@
   "search_directories": "搜索目录",
   "back_to_all_directories": "返回所有目录",
   "directories": "目录",
-  "search_communities": "搜索此目录中的社区"
+  "search_communities": "搜索此目录中的社区",
+  "fivechan_quote": "5chan 引用 {{reference}}",
+  "quoting_user": "引用 u/{{author}}",
+  "fivechan_quote_tooltip": "5chan 风格的引用会在 5chan.app 等客户端中链接到被引用的帖子或回复。当能够识别被引用的评论时，Seedit 会将其转换为链接。"
 }

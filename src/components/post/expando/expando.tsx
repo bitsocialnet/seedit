@@ -19,6 +19,8 @@ interface ExpandoProps {
   link?: string;
   modEditReason?: string;
   nsfw?: boolean;
+  number?: number;
+  quotedCids?: string[];
   removed?: boolean;
   showContent: boolean;
   spoiler?: boolean;
@@ -35,6 +37,8 @@ const Expando = ({
   link,
   modEditReason,
   nsfw,
+  number,
+  quotedCids,
   removed,
   showContent,
   spoiler = false,
@@ -121,7 +125,7 @@ const Expando = ({
       {content && showContent && (
         <div className={styles.usertext}>
           <div className={styles.markdown}>
-            <Markdown content={content} />
+            <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} quotedCids={quotedCids} />
             {modEditReason && (
               <p className={styles.modReason}>
                 {_.lowerCase(t('mod_edit_reason'))}: {modEditReason}

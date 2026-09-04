@@ -440,5 +440,8 @@
   "search_directories": "디렉터리 검색",
   "back_to_all_directories": "모든 디렉터리로 돌아가기",
   "directories": "디렉터리",
-  "search_communities": "이 디렉터리에서 커뮤니티 검색"
+  "search_communities": "이 디렉터리에서 커뮤니티 검색",
+  "fivechan_quote": "5chan 인용 {{reference}}",
+  "quoting_user": "u/{{author}} 인용",
+  "fivechan_quote_tooltip": "5chan 스타일 참조는 5chan.app 같은 클라이언트에서 인용된 게시물이나 답글로 연결됩니다. Seedit는 인용된 댓글을 식별할 수 있을 때 이를 링크로 만듭니다."
 }

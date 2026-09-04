@@ -440,5 +440,8 @@
   "search_directories": "prohledat adresáře",
   "back_to_all_directories": "zpět na všechny adresáře",
   "directories": "adresáře",
-  "search_communities": "hledat komunity v tomto adresáři"
+  "search_communities": "hledat komunity v tomto adresáři",
+  "fivechan_quote": "citace z 5chan {{reference}}",
+  "quoting_user": "cituje u/{{author}}",
+  "fivechan_quote_tooltip": "Odkazy ve stylu 5chan vedou v klientech, jako je 5chan.app, na citované příspěvky nebo odpovědi. Seedit je propojí, když lze citovaný komentář identifikovat."
 }

@@ -440,5 +440,8 @@
   "search_directories": "جستجو در فهرست‌ها",
   "back_to_all_directories": "بازگشت به همه فهرست‌ها",
   "directories": "فهرست‌ها",
-  "search_communities": "جستجوی انجمن‌ها در این فهرست"
+  "search_communities": "جستجوی انجمن‌ها در این فهرست",
+  "fivechan_quote": "نقل‌قول 5chan {{reference}}",
+  "quoting_user": "نقل‌قول از u/{{author}}",
+  "fivechan_quote_tooltip": "ارجاع‌های سبک 5chan در کلاینت‌هایی مانند 5chan.app به پست‌ها یا پاسخ‌های نقل‌شده پیوند دارند. Seedit وقتی بتواند نظر نقل‌شده را شناسایی کند، آن‌ها را به لینک تبدیل می‌کند."
 }

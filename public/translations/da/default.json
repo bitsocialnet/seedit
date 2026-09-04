@@ -440,5 +440,8 @@
   "search_directories": "søg i kataloger",
   "back_to_all_directories": "tilbage til alle kataloger",
   "directories": "kataloger",
-  "search_communities": "søg efter fællesskaber i dette katalog"
+  "search_communities": "søg efter fællesskaber i dette katalog",
+  "fivechan_quote": "5chan-citat {{reference}}",
+  "quoting_user": "citerer u/{{author}}",
+  "fivechan_quote_tooltip": "Referencer i 5chan-stil linker til citerede opslag eller svar i klienter som 5chan.app. Seedit linker dem, når den citerede kommentar kan identificeres."
 }

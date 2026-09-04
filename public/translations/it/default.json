@@ -440,5 +440,8 @@
   "search_directories": "cerca nelle directory",
   "back_to_all_directories": "torna a tutte le directory",
   "directories": "directory",
-  "search_communities": "cerca comunità in questa directory"
+  "search_communities": "cerca comunità in questa directory",
+  "fivechan_quote": "citazione di 5chan {{reference}}",
+  "quoting_user": "citando u/{{author}}",
+  "fivechan_quote_tooltip": "I riferimenti in stile 5chan rimandano ai post o alle risposte citati nei client come 5chan.app. Seedit li trasforma in link quando è possibile identificare il commento citato."
 }

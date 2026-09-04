@@ -440,5 +440,8 @@
   "search_directories": "rechercher dans les annuaires",
   "back_to_all_directories": "retour à tous les annuaires",
   "directories": "annuaires",
-  "search_communities": "rechercher des communautés dans cet annuaire"
+  "search_communities": "rechercher des communautés dans cet annuaire",
+  "fivechan_quote": "citation de 5chan {{reference}}",
+  "quoting_user": "cite u/{{author}}",
+  "fivechan_quote_tooltip": "Les références de style 5chan renvoient vers les publications ou réponses citées dans des clients tels que 5chan.app. Seedit les transforme en liens lorsque le commentaire cité peut être identifié."
 }

@@ -440,5 +440,8 @@
   "search_directories": "Verzeichnisse durchsuchen",
   "back_to_all_directories": "zurück zu allen Verzeichnissen",
   "directories": "Verzeichnisse",
-  "search_communities": "Communities in diesem Verzeichnis durchsuchen"
+  "search_communities": "Communities in diesem Verzeichnis durchsuchen",
+  "fivechan_quote": "5chan-Zitat {{reference}}",
+  "quoting_user": "zitiert u/{{author}}",
+  "fivechan_quote_tooltip": "Verweise im 5chan-Stil führen in Clients wie 5chan.app zu zitierten Beiträgen oder Antworten. Seedit verlinkt sie, wenn der zitierte Kommentar identifiziert werden kann."
 }
