@@ -113,6 +113,77 @@ describe('Markdown', () => {
     expect(container.querySelector('blockquote')).toBeNull();
   });
 
+  it('drops a 5chan quote that only points at the parent rendered above the reply', async () => {
+    testState.comments = [{ author: { address: 'alice.eth' }, cid: 'parent-cid', communityAddress: 'music-posting.eth', number: 88 }];
+
+    await act(() =>
+      root.render(
+        createElement(
+          HashRouter,
+          null,
+          createElement(Markdown, {
+            content: '>>88\nclassic tactic',
+            enableFivechanQuotes: true,
+            parentNumber: 88,
+            quotedCids: ['parent-cid'],
+          }),
+        ),
+      ),
+    );
+
+    expect(container.textContent?.trim()).toBe('classic tactic');
+    expect(container.querySelector('a')).toBeNull();
+    expect(container.querySelector('[data-tooltip]')).toBeNull();
+    expect(container.querySelectorAll('p')).toHaveLength(1);
+  });
+
+  it('keeps a parent quote when the parent is not rendered above the reply', async () => {
+    testState.comments = [{ author: { address: 'alice.eth' }, cid: 'parent-cid', communityAddress: 'music-posting.eth', number: 88 }];
+
+    await act(() =>
+      root.render(
+        createElement(
+          HashRouter,
+          null,
+          createElement(Markdown, {
+            content: '>>88\nclassic tactic',
+            enableFivechanQuotes: true,
+            quotedCids: ['parent-cid'],
+          }),
+        ),
+      ),
+    );
+
+    expect(container.querySelector('a')?.textContent).toBe('[quoting u/alice.bso]');
+    expect(container.querySelectorAll('[data-tooltip]')).toHaveLength(1);
+  });
+
+  it('keeps a parent quote that appears next to other quotes', async () => {
+    testState.comments = [
+      { author: { address: 'alice.eth' }, cid: 'parent-cid', communityAddress: 'music-posting.eth', number: 88 },
+      { author: { address: 'bob.eth' }, cid: 'other-cid', communityAddress: 'music-posting.eth', number: 42 },
+    ];
+
+    await act(() =>
+      root.render(
+        createElement(
+          HashRouter,
+          null,
+          createElement(Markdown, {
+            content: '>>88\n>>42\nreplying to both',
+            enableFivechanQuotes: true,
+            parentNumber: 88,
+            quotedCids: ['parent-cid', 'other-cid'],
+          }),
+        ),
+      ),
+    );
+
+    const links = [...container.querySelectorAll('a')].map((link) => link.textContent);
+    expect(links).toEqual(['[quoting u/alice.bso]', '[quoting u/bob.bso]']);
+    expect(container.querySelectorAll('[data-tooltip]')).toHaveLength(2);
+  });
+
   it('preserves regular Markdown quotes and code containing 5chan-shaped text', async () => {
     await act(() =>
       root.render(

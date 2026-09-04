@@ -14,6 +14,9 @@ import { parseFivechanQuoteHref, preprocessFivechanQuoteLines } from './fivechan
 interface MarkdownProps {
   content: string;
   enableFivechanQuotes?: boolean;
+  // 5chan number of the comment this content replies to. Pass it only when that parent is rendered right above the
+  // content, so a 5chan quote that merely points at the parent can be dropped (see preprocessFivechanQuoteLines).
+  parentNumber?: number;
   quotedCids?: string[];
 }
 
@@ -114,11 +117,11 @@ const renderAnchorLink = (children: React.ReactNode, href: string, enableFivecha
   );
 };
 
-const Markdown = ({ content, enableFivechanQuotes = false, quotedCids = EMPTY_QUOTED_CIDS }: MarkdownProps) => {
+const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, quotedCids = EMPTY_QUOTED_CIDS }: MarkdownProps) => {
   // Preprocess content to convert plain text seedit patterns to markdown links
   const preprocessedContent = useMemo(
-    () => preprocessSeeditPatterns(enableFivechanQuotes ? preprocessFivechanQuoteLines(content) : content),
-    [content, enableFivechanQuotes],
+    () => preprocessSeeditPatterns(enableFivechanQuotes ? preprocessFivechanQuoteLines(content, parentNumber) : content),
+    [content, enableFivechanQuotes, parentNumber],
   );
 
   const remarkPlugins: any[] = [[supersub]];

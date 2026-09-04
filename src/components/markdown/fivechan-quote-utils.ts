@@ -10,44 +10,87 @@ export type FivechanQuoteReference = {
   raw: string;
 };
 
+type FivechanQuoteLineMatch = {
+  indentation: string;
+  // The matched quote prefix, indentation included; the rest of the line follows it.
+  match: string;
+  reference: FivechanQuoteReference;
+};
+
 const getFivechanQuoteMarkdown = (reference: FivechanQuoteReference) => {
   const boardPath = reference.board ? `/${encodeURIComponent(reference.board)}` : '';
   return `[5chan quote](${FIVECHAN_QUOTE_PATH}${boardPath}/${reference.number})`;
 };
 
-export const preprocessFivechanQuoteLines = (content: string): string => {
+const matchFivechanQuoteLine = (line: string): FivechanQuoteLineMatch | undefined => {
+  const crossBoardMatch = line.match(FIVECHAN_CROSS_BOARD_QUOTE_LINE_REGEX);
+  if (crossBoardMatch) {
+    const [match, indentation, board, numberText] = crossBoardMatch;
+    return { indentation, match, reference: { board, number: Number(numberText), raw: `>>>/${board}/${numberText}` } };
+  }
+
+  const numberMatch = line.match(FIVECHAN_NUMBER_QUOTE_LINE_REGEX);
+  if (numberMatch) {
+    const [match, indentation, numberText] = numberMatch;
+    return { indentation, match, reference: { number: Number(numberText), raw: `>>${numberText}` } };
+  }
+
+  return undefined;
+};
+
+// Walks the content line by line, leaving fenced code untouched, and lets `mapQuoteLine` rewrite each 5chan quote line.
+// Returning `undefined` from `mapQuoteLine` drops that line.
+const mapFivechanQuoteLines = (content: string, mapQuoteLine: (line: string, quoteLine: FivechanQuoteLineMatch) => string | undefined): string => {
   let activeFence: string | undefined;
+  const lines: string[] = [];
 
-  return content
-    .split('\n')
-    .map((line) => {
-      const fence = line.match(MARKDOWN_FENCE_REGEX)?.[1];
-      if (activeFence) {
-        if (fence?.[0] === activeFence[0] && fence.length >= activeFence.length) activeFence = undefined;
-        return line;
-      }
-      if (fence) {
-        activeFence = fence;
-        return line;
-      }
+  for (const line of content.split('\n')) {
+    const fence = line.match(MARKDOWN_FENCE_REGEX)?.[1];
+    if (activeFence) {
+      if (fence?.[0] === activeFence[0] && fence.length >= activeFence.length) activeFence = undefined;
+      lines.push(line);
+      continue;
+    }
+    if (fence) {
+      activeFence = fence;
+      lines.push(line);
+      continue;
+    }
 
-      const crossBoardMatch = line.match(FIVECHAN_CROSS_BOARD_QUOTE_LINE_REGEX);
-      if (crossBoardMatch) {
-        const [, indentation, board, numberText] = crossBoardMatch;
-        const raw = `>>>/${board}/${numberText}`;
-        return line.replace(FIVECHAN_CROSS_BOARD_QUOTE_LINE_REGEX, `${indentation}${getFivechanQuoteMarkdown({ board, number: Number(numberText), raw })}`);
-      }
+    const quoteLine = matchFivechanQuoteLine(line);
+    const mappedLine = quoteLine ? mapQuoteLine(line, quoteLine) : line;
+    if (mappedLine !== undefined) lines.push(mappedLine);
+  }
 
-      const numberMatch = line.match(FIVECHAN_NUMBER_QUOTE_LINE_REGEX);
-      if (numberMatch) {
-        const [, indentation, numberText] = numberMatch;
-        const raw = `>>${numberText}`;
-        return line.replace(FIVECHAN_NUMBER_QUOTE_LINE_REGEX, `${indentation}${getFivechanQuoteMarkdown({ number: Number(numberText), raw })}`);
-      }
+  return lines.join('\n');
+};
 
-      return line;
-    })
-    .join('\n');
+export const getFivechanQuoteReferences = (content: string): FivechanQuoteReference[] => {
+  const references: FivechanQuoteReference[] = [];
+  mapFivechanQuoteLines(content, (line, { reference }) => {
+    references.push(reference);
+    return line;
+  });
+  return references;
+};
+
+// 5chan threads are flat, so a `>>N` quote is the only visible link between a reply and the comment it answers, and 5chan
+// pre-fills a quote of the parent whenever someone replies to a comment. Seedit nests each reply under its parent instead,
+// so when every quote in a reply points at its own parent (`parentNumber`, passed only when that parent is rendered right
+// above the reply) the quote repeats what the thread layout already shows and is stripped rather than rendered as
+// "[quoting u/...]". Quotes that add context are kept: another comment, several targets, or a cross-board reference.
+export const preprocessFivechanQuoteLines = (content: string, parentNumber?: number): string => {
+  const references = getFivechanQuoteReferences(content);
+  const quotesOnlyParent = parentNumber !== undefined && references.length > 0 && references.every((reference) => !reference.board && reference.number === parentNumber);
+
+  return mapFivechanQuoteLines(content, (line, { indentation, match, reference }) => {
+    const rest = line.slice(match.length);
+    if (quotesOnlyParent) {
+      const remainder = rest.trim();
+      return remainder ? `${indentation}${remainder}` : undefined;
+    }
+    return `${indentation}${getFivechanQuoteMarkdown(reference)}${rest}`;
+  });
 };
 
 export const parseFivechanQuoteHref = (href: string): FivechanQuoteReference | undefined => {

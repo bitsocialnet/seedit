@@ -313,10 +313,12 @@ interface ReplyProps {
   isSingleReply?: boolean;
   /** Indexer-served copy of the reply's post, for the context line when the live post is unreachable. */
   parentComment?: Comment;
+  /** 5chan number of the parent reply this reply is nested under, so a 5chan quote of that parent can be dropped. */
+  parentNumber?: number;
   reply: Comment | undefined;
 }
 
-const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleReply, isNotification = false, parentComment, reply = {} }: ReplyProps) => {
+const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleReply, isNotification = false, parentComment, parentNumber, reply = {} }: ReplyProps) => {
   // handle pending mod or author edit
   const { state: editState, editedComment } = useEditedComment({ comment: reply });
   if (editedComment) {
@@ -418,6 +420,11 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
   );
 
   const post = useComment({ commentCid: postCid, onlyIfCached: true });
+
+  // Thread views render a reply right under its parent, which makes a 5chan quote of that parent redundant. Single-reply
+  // views (inbox, profile, author) and a single nested comment show no parent above, so their quotes stay as context.
+  const isRenderedUnderParent = !isSingleReply && (!isSingleComment || parentCid === postCid);
+  const renderedParentNumber = isRenderedUnderParent ? (parentCid === postCid ? post?.number : parentNumber) : undefined;
 
   // auto scroll to context reply
   const replyContextContentRef = useRef<HTMLDivElement>(null);
@@ -536,7 +543,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                       ) : deleted ? (
                         <span className={styles.deletedContent}>[{t('deleted')}]</span>
                       ) : (
-                        <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} quotedCids={quotedCids} />
+                        <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} parentNumber={renderedParentNumber} quotedCids={quotedCids} />
                       ))}
                     {reason && (
                       <p className={styles.modReason}>
@@ -583,6 +590,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                           reply={reply}
                           depth={(depth || 0) + 1}
                           cidOfReplyWithContext={isInPostContextView ? params?.commentCid : undefined}
+                          parentNumber={number}
                         />
                       ) : (
                         <div className={styles.continueThisThread}>
