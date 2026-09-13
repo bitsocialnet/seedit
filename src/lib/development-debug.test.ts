@@ -58,3 +58,25 @@ describe('configureDevelopmentMockContent', () => {
     expect(mocks.setPkcJs).toHaveBeenCalledWith(mocks.mockClient);
   });
 });
+
+describe('getDevelopmentDebugPreferences', () => {
+  beforeEach(() => {
+    vi.stubGlobal('localStorage', createStorage());
+    vi.resetModules();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('falls back safely when persisted data is invalid', async () => {
+    localStorage.setItem('development-debug:v1', '{invalid');
+
+    const { getDevelopmentDebugPreferences } = await import('./development-debug');
+
+    expect(getDevelopmentDebugPreferences()).toEqual({
+      mockContentEnabled: false,
+      showFeedResetButton: false,
+    });
+  });
+});

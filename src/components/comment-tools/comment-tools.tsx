@@ -1,0 +1,407 @@
+import { useCallback, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { Author, Comment, createCrosspost, useAccount, useComment, useCommunity, useSaveComment } from '@bitsocial/bitsocial-react-hooks';
+import useScheduledReset from '../../hooks/use-scheduled-reset';
+import styles from './comment-tools.module.css';
+import EditMenu from './edit-menu';
+import HideMenu from './hide-menu';
+import Label from '../label';
+import ModMenu from './mod-menu';
+import { isInboxView } from '../../lib/utils/view-utils';
+import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
+import { copyShareLinkToClipboard } from '../../lib/utils/url-utils';
+import { getCommunityPostPath } from '../../lib/utils/community-route-utils';
+import usePublishPostStore from '../../stores/use-publish-post-store';
+
+interface CommentToolsProps {
+  author?: Author;
+  cid: string;
+  comment?: Comment;
+  deleted?: boolean;
+  failed?: boolean;
+  editState?: string;
+  hasLabel?: boolean;
+  hasThumbnail?: boolean;
+  index?: number;
+  isAuthor?: boolean;
+  isAccountMod?: boolean;
+  isCommentAuthorMod?: boolean;
+  isReply?: boolean;
+  isSingleReply?: boolean;
+  nsfw?: boolean;
+  parentCid?: string;
+  postCid?: string;
+  removed?: boolean;
+  replyCount?: number;
+  spoiler?: boolean | undefined;
+  communityAddress: string;
+  showCommentEditForm?: () => void;
+  showReplyForm?: () => void;
+}
+
+interface ModOrReportButtonProps {
+  cid: string;
+  isAuthor: boolean | undefined;
+  isAccountMod: boolean | undefined;
+  isCommentAuthorMod?: boolean;
+}
+
+const ModOrReportButton = ({ cid, isAuthor, isAccountMod, isCommentAuthorMod }: ModOrReportButtonProps) => {
+  const { t } = useTranslation();
+
+  return isAccountMod ? (
+    <ModMenu cid={cid} isCommentAuthorMod={isCommentAuthorMod} />
+  ) : (
+    !isAuthor && (
+      <li className={`${styles.button} ${styles.reportButton}`}>
+        <button type='button' className={styles.actionButton} onClick={() => window.alert(t('feature_not_available_yet'))}>
+          {t('report')}
+        </button>
+      </li>
+    )
+  );
+};
+
+const SaveButton = ({ cid }: { cid?: string }) => {
+  const { t } = useTranslation();
+  const { saved, saveComment, unsaveComment } = useSaveComment({ commentCid: cid });
+
+  if (!cid || saved === undefined) return null;
+
+  return (
+    <li className={styles.button}>
+      <button type='button' className={styles.actionButton} onClick={saved ? unsaveComment : saveComment}>
+        {saved ? t('unsave') : t('save')}
+      </button>
+    </li>
+  );
+};
+
+const ShareButton = ({ cid, communityAddress }: { cid: string; communityAddress: string }) => {
+  const { t } = useTranslation();
+  const [hasCopied, setHasCopied] = useState(false);
+
+  const resetCopied = useCallback(() => setHasCopied(false), []);
+  const [scheduleReset, clearReset] = useScheduledReset(resetCopied, 2000);
+
+  const handleCopy = async () => {
+    try {
+      setHasCopied(true);
+      scheduleReset();
+      await copyShareLinkToClipboard(communityAddress, cid);
+    } catch (error) {
+      console.error('Failed to copy share link:', error);
+      setHasCopied(false);
+      clearReset();
+    }
+  };
+
+  return (
+    <li className={`${!hasCopied ? styles.button : styles.text}`} onClick={() => cid && handleCopy()}>
+      {hasCopied ? t('link_copied') : t('share')}
+    </li>
+  );
+};
+
+const PostTools = ({
+  author,
+  cid,
+  comment,
+  failed,
+  hasLabel,
+  index,
+  isAuthor,
+  isAccountMod,
+  isCommentAuthorMod,
+  communityAddress,
+  replyCount = 0,
+  showCommentEditForm,
+}: CommentToolsProps) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const validReplyCount = isNaN(replyCount) ? 0 : replyCount;
+  const commentCount = validReplyCount === 0 ? t('post_no_comments') : `${validReplyCount} ${validReplyCount === 1 ? t('post_comment') : t('post_comments')}`;
+
+  // show gray dotted border around last clicked post
+  const handlePostClick = () => {
+    if (cid) {
+      if (sessionStorage.getItem('lastClickedPost') === cid) {
+        sessionStorage.removeItem('lastClickedPost');
+      } else {
+        sessionStorage.setItem('lastClickedPost', cid);
+      }
+    }
+  };
+
+  const commentCountButton = failed ? (
+    <span>{commentCount}</span>
+  ) : (
+    <Link to={cid ? getCommunityPostPath(communityAddress, cid) : `/profile/${index}`} onClick={() => cid && handlePostClick?.()}>
+      {commentCount}
+    </Link>
+  );
+
+  const handleCrosspost = () => {
+    if (!comment?.raw?.comment) return;
+
+    const sourceTitle = comment.title?.trim() || comment.content?.trim().slice(0, 300) || t('crosspost');
+    const { resetPublishPostStore, setPublishPostStore } = usePublishPostStore.getState();
+    resetPublishPostStore();
+    setPublishPostStore({
+      title: sourceTitle,
+      crosspost: createCrosspost(comment),
+    });
+    navigate('/submit');
+  };
+
+  return (
+    <>
+      <li className={`${styles.button} ${!hasLabel ? styles.firstButton : ''}`}>{commentCountButton}</li>
+      <ShareButton cid={cid} communityAddress={communityAddress} />
+      <SaveButton cid={cid} />
+      {isAuthor && <EditMenu commentCid={cid} showCommentEditForm={showCommentEditForm} />}
+      <HideMenu author={author} cid={cid} isAccountMod={isAccountMod} communityAddress={communityAddress} />
+      <ModOrReportButton cid={cid} isAuthor={isAuthor} isAccountMod={isAccountMod} isCommentAuthorMod={isCommentAuthorMod} />
+      {cid && comment?.raw?.comment && !failed && (
+        <li className={`${styles.button} ${styles.crosspostButton}`}>
+          <button type='button' className={styles.actionButton} onClick={handleCrosspost}>
+            {t('crosspost')}
+          </button>
+        </li>
+      )}
+    </>
+  );
+};
+
+const ReplyTools = ({
+  author,
+  cid,
+  failed,
+  hasLabel,
+  index,
+  isAuthor,
+  isAccountMod,
+  isCommentAuthorMod,
+  showReplyForm,
+  communityAddress,
+  showCommentEditForm,
+}: CommentToolsProps) => {
+  const { t } = useTranslation();
+
+  const permalink = failed ? (
+    <span>permalink</span>
+  ) : (
+    <Link to={cid ? getCommunityPostPath(communityAddress, cid) : `/profile/${index}`} onClick={(e) => !cid && e.preventDefault()}>
+      permalink
+    </Link>
+  );
+
+  return (
+    <>
+      <li className={`${styles.button} ${!hasLabel ? styles.firstButton : ''}`}>{permalink}</li>
+      <ShareButton cid={cid} communityAddress={communityAddress} />
+      <SaveButton cid={cid} />
+      {isAuthor && <EditMenu commentCid={cid} showCommentEditForm={showCommentEditForm} />}
+      <HideMenu author={author} cid={cid} isAccountMod={isAccountMod} communityAddress={communityAddress} />
+      <li className={!cid ? styles.hideReply : styles.button}>
+        <span onClick={() => cid && showReplyForm?.()}>{t('reply_reply')}</span>
+      </li>
+      <ModOrReportButton cid={cid} isAuthor={isAuthor} isAccountMod={isAccountMod} isCommentAuthorMod={isCommentAuthorMod} />
+    </>
+  );
+};
+
+const SingleReplyTools = ({
+  author,
+  cid,
+  hasLabel,
+  index,
+  isAuthor,
+  isAccountMod,
+  isCommentAuthorMod,
+  parentCid,
+  postCid,
+  showReplyForm,
+  communityAddress,
+  showCommentEditForm,
+}: CommentToolsProps) => {
+  const { t } = useTranslation();
+  const comment = useComment({ commentCid: postCid, onlyIfCached: true });
+
+  const hasContext = parentCid !== postCid;
+
+  const permalinkButton = cid ? (
+    <Link to={cid ? getCommunityPostPath(communityAddress, cid) : `/profile/${index}`} onClick={(e) => !cid && e.preventDefault()}>
+      permalink
+    </Link>
+  ) : (
+    <span>permalink</span>
+  );
+
+  const contextButton = cid ? (
+    <Link to={cid ? (hasContext ? `${getCommunityPostPath(communityAddress, cid)}/?context=3` : getCommunityPostPath(communityAddress, cid)) : `/profile/${index}`}>
+      {t('context')}
+    </Link>
+  ) : (
+    <span>{t('context')}</span>
+  );
+
+  const fullCommentsButton = cid ? (
+    <Link to={cid ? getCommunityPostPath(communityAddress, postCid!) : `/profile/${index}`}>
+      {t('full_comments')} {comment?.replyCount ? `(${comment?.replyCount})` : ''}
+    </Link>
+  ) : (
+    <span>
+      {t('full_comments')} {comment?.replyCount ? `(${comment?.replyCount})` : ''}
+    </span>
+  );
+
+  return (
+    <>
+      <li className={`${styles.button} ${!hasLabel ? styles.firstButton : ''}`}>{permalinkButton}</li>
+      <SaveButton cid={cid} />
+      {isAuthor && <EditMenu commentCid={cid} showCommentEditForm={showCommentEditForm} />}
+      <li className={styles.button}>{contextButton}</li>
+      <li className={styles.button}>{fullCommentsButton}</li>
+      <HideMenu author={author} cid={cid} isAccountMod={isAccountMod} communityAddress={communityAddress} />
+      <li className={!cid ? styles.hideReply : styles.button}>
+        <span onClick={() => cid && showReplyForm?.()}>{t('reply_reply')}</span>
+      </li>
+      <ModOrReportButton cid={cid} isAuthor={isAuthor} isAccountMod={isAccountMod} isCommentAuthorMod={isCommentAuthorMod} />
+    </>
+  );
+};
+
+const CommentToolsLabel = ({ cid, deleted, failed, editState, isReply, nsfw, removed, spoiler }: CommentToolsProps) => {
+  const { t } = useTranslation();
+  const pending = cid === undefined && !isReply && !failed;
+  const failedEdit = editState === 'failed';
+  const pendingEdit = editState === 'pending';
+
+  const labels = [
+    { show: nsfw, color: 'nsfw-red', text: t('nsfw') },
+    { show: spoiler, color: 'black', text: t('spoiler') },
+    { show: pending, color: 'yellow', text: t('pending') },
+    { show: failed, color: 'red', text: t('failed') },
+    { show: deleted, color: 'red', text: t('deleted') },
+    { show: removed, color: 'red', text: t('removed') },
+    { show: failedEdit, color: 'red', text: t('failed_edit') },
+    { show: pendingEdit, color: 'yellow', text: t('pending_edit') },
+  ];
+
+  const visibleLabels = labels.filter((label) => label.show);
+
+  return (
+    <>
+      {visibleLabels.map((label, index) => (
+        <Label key={label.text} color={label.color} text={label.text} isFirstInLine={index === 0} />
+      ))}
+    </>
+  );
+};
+
+const CommentTools = ({
+  author,
+  cid,
+  comment,
+  deleted,
+  failed,
+  editState,
+  hasLabel = false,
+  hasThumbnail = false,
+  index,
+  isReply,
+  isSingleReply,
+  nsfw,
+  parentCid,
+  postCid,
+  removed,
+  replyCount,
+  spoiler,
+  communityAddress,
+  showCommentEditForm,
+  showReplyForm,
+}: CommentToolsProps) => {
+  const account = useAccount();
+  const isAuthor = account?.author?.address === author?.address;
+  const community = useCommunity(communityAddress ? { community: getCommunityIdentifier(communityAddress), onlyIfCached: true } : undefined);
+  const accountAuthorRole = community?.roles?.[account?.author?.address]?.role;
+  const commentAuthorRole = community?.roles?.[author?.address]?.role;
+  const isAccountMod = accountAuthorRole === 'admin' || accountAuthorRole === 'owner' || accountAuthorRole === 'moderator';
+  const isCommentAuthorMod = commentAuthorRole === 'admin' || commentAuthorRole === 'owner' || commentAuthorRole === 'moderator';
+  const isInInboxView = isInboxView(useLocation().pathname);
+
+  return (
+    (!(deleted || removed) || (!deleted && isAccountMod)) && (
+      <ul className={`${styles.buttons} ${isReply && !isInInboxView ? styles.buttonsReply : ''} ${hasLabel ? styles.buttonsLabel : ''}`}>
+        {isReply ? (
+          isSingleReply ? (
+            <SingleReplyTools
+              author={author}
+              cid={cid}
+              failed={failed}
+              hasLabel={hasLabel}
+              hasThumbnail={hasThumbnail}
+              index={index}
+              isAuthor={isAuthor}
+              isAccountMod={isAccountMod}
+              isCommentAuthorMod={isCommentAuthorMod}
+              parentCid={parentCid}
+              postCid={postCid}
+              showCommentEditForm={showCommentEditForm}
+              showReplyForm={showReplyForm}
+              communityAddress={communityAddress}
+            />
+          ) : (
+            <ReplyTools
+              author={author}
+              cid={cid}
+              failed={failed}
+              hasLabel={hasLabel}
+              hasThumbnail={hasThumbnail}
+              index={index}
+              isAuthor={isAuthor}
+              isAccountMod={isAccountMod}
+              isCommentAuthorMod={isCommentAuthorMod}
+              showCommentEditForm={showCommentEditForm}
+              showReplyForm={showReplyForm}
+              communityAddress={communityAddress}
+            />
+          )
+        ) : (
+          <>
+            <CommentToolsLabel
+              cid={cid}
+              deleted={deleted}
+              failed={failed}
+              editState={editState}
+              isReply={isReply}
+              nsfw={nsfw}
+              removed={removed}
+              spoiler={spoiler}
+              communityAddress={communityAddress}
+            />
+            <PostTools
+              author={author}
+              cid={cid}
+              comment={comment}
+              failed={failed}
+              hasLabel={hasLabel}
+              hasThumbnail={hasThumbnail}
+              index={index}
+              isAuthor={isAuthor}
+              isAccountMod={isAccountMod}
+              isCommentAuthorMod={isCommentAuthorMod}
+              replyCount={replyCount}
+              showCommentEditForm={showCommentEditForm}
+              communityAddress={communityAddress}
+            />
+          </>
+        )}
+      </ul>
+    )
+  );
+};
+
+export default CommentTools;

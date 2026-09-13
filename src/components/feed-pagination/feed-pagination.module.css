@@ -1,0 +1,29 @@
+.stateString {
+  text-transform: lowercase;
+}
+
+.loadMoreContainer {
+  padding-bottom: 15px;
+}
+
+@media (max-width: 640px) {
+  .loadMoreContainer {
+    padding-bottom: 10px;
+  }
+}
+
+.loadMore {
+  text-decoration: none;
+  padding: 1px 4px;
+  background: var(--pagination-button-background);
+  border: var(--pagination-button-border);
+  border-radius: 3px;
+  font-weight: bold;
+  cursor: pointer;
+  text-transform: lowercase;
+  color: var(--link-primary);
+}
+
+.loadMore:hover {
+  border: var(--pagination-button-border-hover);
+}

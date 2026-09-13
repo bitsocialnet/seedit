@@ -1,13 +1,3 @@
-.mdContainer {
-  font-size: small;
-  padding: 0 1px;
-  max-width: 500px;
-  unicode-bidi: isolate;
-  margin-top: 5px;
-  margin-bottom: -9px;
-  padding-bottom: 10px;
-}
-
 .infobar {
   width: 100%;
   box-sizing: border-box;
@@ -21,22 +11,6 @@
   font-size: 14px;
 }
 
-.md {
-  margin-bottom: 5px;
-  font-weight: 400;
-  width: 100%;
-  max-width: 60em;
-}
-
-.url {
-  background-color: var(--background);
-  color: var(--text-markdown);
-}
-
-.spoiler {
-  padding-left: 5px;
-}
-
 .mdContainerReplying {
   border-left: var(--reply-child-border-left);
   margin-left: 25px;
@@ -48,48 +22,6 @@
 
 .urlVisible, .spoilerVisible {
   display: inline-block;
-}
-
-.textarea {
-  width: 100%;
-  height: 100px;
-  background-color: var(--background);
-  color: var(--text-markdown);
-  font: normal small verdana,arial,helvetica,sans-serif;
-  line-height: 1.42em;
-  font-size: 14px;
-  word-wrap: break-word;
-  box-sizing: border-box;
-}
-
-.save, .cancel, .previewButton {
-  margin: 5px 5px 0 0;
-  -webkit-appearance: button;
-  appearance: button;
-  cursor: pointer;
-  padding: 2px 6px 3px;
-  text-transform: lowercase;
-}
-
-.optionsButton {
-  font-size: smaller;
-  float: right;
-  margin-top: 5px;
-  margin-left: 10px;
-  margin-right: 5px;
-  color: var(--text-primary);
-  cursor: pointer;
-  text-transform: lowercase;
-}
-
-.options {
-  font-size: 12px;
-  padding-bottom: 2px;
-  padding-top: 2px;
-  display: flex;
-  gap: 10px;
-  margin-bottom: 0;
-  overflow: hidden;
 }
 
 .markdownHelp {
@@ -137,10 +69,6 @@
 }
 
 @media (max-width: 640px) {
-  .mdContainer {
-    max-width: calc(100vw - 31px);
-  }
-  
   .markdownHelp table {
     font-size: 13px;
   }
@@ -150,24 +78,6 @@
     word-break: break-word;
     hyphens: auto;
   }
-}
-
-.editReason {
-  font-size: 12px;
-  float: left;
-}
-
-.editReason input {
-  width: 60%;
-}
-
-.preview {
-  min-height: 98.5px;
-  word-wrap: break-word;
-  padding-left: 3px;
-  padding-top: 4px;
-  font-size: 14px;
-  color: var(--text);
 }
 
 .spaces {

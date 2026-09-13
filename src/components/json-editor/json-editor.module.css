@@ -1,0 +1,70 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding-bottom: 60px;
+  padding: 5px;
+}
+
+.editor {
+  width: 100%;
+  border: 1px solid var(--gray-light);
+  border-radius: 5px;
+  font-family: monospace;
+  font-size: 14px;
+  box-shadow: var(--box-shadow-input);
+  overflow: auto;
+}
+
+.buttons {
+  margin-top: 20px;
+  font-size: 14px;
+  padding-left: 10px;
+  color: var(--text);
+}
+
+.buttons button {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.loading {
+  font-size: 14px;
+  color: var(--text);
+  text-align: left;
+  margin: 10px 0 0 5px;
+}
+
+.infobar {
+  width: 100%;
+  box-sizing: border-box;
+  background-color: var(--background-orange);
+  border-color: var(--border-orange);
+  border-style: solid;
+  border-width: 1px;
+  padding: 6px 10px;
+  color: var(--text);
+  word-wrap: break-word;
+  font-size: 14px;
+  text-transform: lowercase;
+}
+
+.fallbackEditor {
+  width: 100%;
+  font-family: monospace;
+  font-size: 14px;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: var(--background);
+  color: var(--text);
+  resize: vertical;
+  white-space: pre;
+  overflow-wrap: normal;
+}
+
+.error {
+  color: var(--red);
+  font-size: 12px;
+  margin: 20px 10px 0 10px;
+}

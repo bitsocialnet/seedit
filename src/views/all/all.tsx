@@ -6,7 +6,7 @@ import { useDefaultSubscriptionAddresses } from '../../hooks/use-default-subscri
 import useTimeFilter, { isValidTimeFilterName, isValidTopTimeFilterName } from '../../hooks/use-time-filter';
 import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
 import FeedFooter from '../../components/feed-footer';
-import DevelopmentFeedResetButton from '../../components/development-feed-reset-button/development-feed-reset-button-lazy';
+import DevelopmentFeedResetButton from '../../components/development-feed-reset-button';
 import TopTimeFilter from '../../components/top-time-filter';
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import Post from '../../components/post';
@@ -14,7 +14,7 @@ import Sidebar from '../../components/sidebar';
 import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute, isValidRouteSortType } from '../../constants/sort-types';
 import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
-import styles from '../home/home.module.css';
+import layoutStyles from '../../components/feed-layout';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
 
@@ -97,11 +97,11 @@ const All = () => {
 
   return (
     <div>
-      <div className={styles.content}>
-        <div className={`${styles.sidebar}`}>
+      <div className={layoutStyles.content}>
+        <div className={`${layoutStyles.sidebar}`}>
           <Sidebar />
         </div>
-        <div className={styles.feed}>
+        <div className={layoutStyles.feed}>
           <DevelopmentFeedResetButton onReset={reset} />
           {sortType === 'top' && <TopTimeFilter selectedTimeFilterName={currentTimeFilterName} sessionKey={sessionKey} />}
           <Virtuoso

@@ -1,0 +1,22 @@
+.blockConfirm {
+  color: var(--red);
+}
+
+.blockConfirm span {
+  color: var(--text-info);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.blockSub {
+  font-weight: 700;
+  color: var(--text-info);
+  cursor: pointer;
+}
+
+.error {
+  font-size: 12px;
+  padding-left: 5px;
+  padding-bottom: 10px;
+  padding-top: 5px;
+}

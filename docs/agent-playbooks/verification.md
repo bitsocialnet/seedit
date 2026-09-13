@@ -11,7 +11,7 @@ Choose checks that establish the requested behavior. Finish the authorized imple
 | Shared runtime behavior, dependencies, build/package configuration, or substantial integration | Focused behavior tests plus `corepack yarn agent:verify` for build, lint, and type-check |
 | CSS, themes, or layout only | Affected browser/viewport/theme checks below; add a build for CSS processing, assets/import wiring, or integration uncertainty. Styling alone does not require React Doctor |
 | React state/effects/data flow or rendering performance | Inspect the relevant architecture; run `yarn doctor` when diagnostics would resolve a concern or a check explicitly requires it |
-| Dependencies or import graph | Advisory `yarn knip`; resolve relevant new findings |
+| Dependencies or import graph | `yarn boundaries` (part of `yarn lint`) must pass when `src/` files move or imports change; advisory `yarn knip`; resolve relevant new findings |
 | Release, CI, or explicitly requested full verification | Run that workflow's required checks even when a smaller local edit would normally need less |
 
 For a small edit, name the behavior being checked and why the chosen evidence is enough. Broaden checks when the impact crosses a shared boundary, a failure appears, or uncertainty remains. Do not add tests that only mirror wording or formatting. An existing reliable test is preferable to new instrumentation.

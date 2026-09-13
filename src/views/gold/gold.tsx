@@ -3,21 +3,21 @@ import { HashLink } from 'react-router-hash-link';
 import useIsMobile from '../../hooks/use-is-mobile';
 import Sidebar from '../../components/sidebar';
 import { DIRECTORY_INDEX_PATH } from '../../lib/utils/community-route-utils';
-// the gold page is the about FAQ with gold accents, so it reuses that page's chrome
-import faqStyles from '../about/about.module.css';
+// the gold page is a FAQ with gold accents, so it reuses the shared static-page chrome
+import pageStyles from '../../components/static-page';
 import styles from './gold.module.css';
 
 export const GoldFaq = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className={faqStyles.about}>
+    <div className={pageStyles.about}>
       <div className={styles.notice}>
         <span className={styles.goldName}>seedit gold</span> is a planned yearly supporter subscription. It is <strong>not available yet</strong>: there is nothing to
         buy, activate, or renew today. When it launches, gold holders will publish without solving a challenge on communities that support the gold challenge, and will be
         eligible to vote on <Link to={DIRECTORY_INDEX_PATH}>directory pages</Link>. Checkout will be crypto only.
       </div>
-      <ul className={isMobile ? faqStyles.tocMobile : faqStyles.toc}>
+      <ul className={isMobile ? pageStyles.tocMobile : pageStyles.toc}>
         <li>
           <HashLink to='/gold#whatIsGold'>What is seedit gold?</HashLink>
         </li>
@@ -127,7 +127,7 @@ const Gold = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className={faqStyles.content}>
+    <div className={pageStyles.content}>
       {!isMobile && <Sidebar />}
       <GoldFaq />
     </div>

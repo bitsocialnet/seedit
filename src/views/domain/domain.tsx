@@ -10,7 +10,7 @@ import TopTimeFilter from '../../components/top-time-filter';
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
-import styles from '../home/home.module.css';
+import layoutStyles from '../../components/feed-layout';
 import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute, isValidRouteSortType } from '../../constants/sort-types';
 import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
@@ -135,15 +135,15 @@ const Domain = () => {
 
   return (
     <div>
-      <div className={styles.content}>
-        <div className={`${styles.sidebar}`}>
+      <div className={layoutStyles.content}>
+        <div className={`${layoutStyles.sidebar}`}>
           <Sidebar />
         </div>
         {showNoResults ? (
-          <div className={styles.feed}>
-            <div className={styles.footer}>
-              <div className={styles.stateString}>
-                <span className={styles.noMatchesFound}>No posts found from {domain}</span>
+          <div className={layoutStyles.feed}>
+            <div className={layoutStyles.footer}>
+              <div className={layoutStyles.stateString}>
+                <span className={layoutStyles.noMatchesFound}>No posts found from {domain}</span>
               </div>
             </div>
           </div>

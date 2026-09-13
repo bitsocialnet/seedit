@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useAccount } from '@bitsocial/bitsocial-react-hooks';
-import { vendoredDirectoryLists } from '../data/vendored-directory-lists';
+import { vendoredDirectoryLists } from '../lib/utils/vendored-directory-lists';
 import { searchCommunities, type CommunitySearchResult } from '../lib/utils/community-search-utils';
 import type { DirectoryListCommunity } from '../lib/utils/directory-list-utils';
 import { useArchiveCommunities } from './use-archive-communities';

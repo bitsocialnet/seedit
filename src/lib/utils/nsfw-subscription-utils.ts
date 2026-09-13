@@ -1,5 +1,5 @@
 import { setAccount } from '@bitsocial/bitsocial-react-hooks';
-import type { DefaultSubscription } from '../../hooks/use-default-subscriptions';
+import type { DefaultSubscription } from './starter-community-list';
 
 const NSFW_SUBSCRIPTION_PROMPT_KEY = 'seedit-nsfw-subscription-prompt-shown';
 

@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { vendoredDirectoryLists } from '../data/vendored-directory-lists';
+import { vendoredDirectoryLists } from '../lib/utils/vendored-directory-lists';
 import { getShortDisplayAddress } from '../lib/utils/address-utils';
 import { pickDirectoryWinner } from '../lib/utils/directory-list-utils';
 import useResolvedCommunityRoute from './use-resolved-community-route';

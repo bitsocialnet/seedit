@@ -7,6 +7,7 @@ import usePublishReply from '../../hooks/use-publish-reply';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import Markdown from '../markdown';
 import styles from './reply-form.module.css';
+import formStyles from '../comment-form';
 
 type ReplyFormProps = {
   cid: string;
@@ -118,7 +119,7 @@ const ReplyForm = ({ cid, isReplyingToReply, hideReplyForm, communityAddress, po
   const [showPreview, setShowPreview] = useState(false);
   const { setPublishReplyOptions, resetPublishReplyOptions, replyIndex, publishReply, publishReplyOptions } = usePublishReply({ cid, communityAddress, postCid });
 
-  const mdContainerClass = isReplyingToReply ? `${styles.mdContainer} ${styles.mdContainerReplying}` : styles.mdContainer;
+  const mdContainerClass = isReplyingToReply ? `${formStyles.mdContainer} ${styles.mdContainerReplying}` : formStyles.mdContainer;
   const urlClass = showOptions ? styles.urlVisible : styles.urlHidden;
   const spoilerClass = showOptions ? styles.spoilerVisible : styles.spoilerHidden;
   const nsfwClass = showOptions ? styles.spoilerVisible : styles.spoilerHidden;
@@ -162,19 +163,19 @@ const ReplyForm = ({ cid, isReplyingToReply, hideReplyForm, communityAddress, po
 
   return (
     <div className={mdContainerClass}>
-      <div className={styles.md}>
+      <div className={formStyles.md}>
         {isOffline && isTextareaFocused && <div className={styles.infobar}>{offlineTitle}</div>}
         {showOptions && (
-          <div className={styles.options}>
+          <div className={formStyles.options}>
             <span className={urlClass}>
-              {t('media_url')}: <input className={`${styles.url} ${urlClass}`} onChange={(e) => setPublishReplyOptions.link(e.target.value)} />
+              {t('media_url')}: <input className={`${formStyles.url} ${urlClass}`} onChange={(e) => setPublishReplyOptions.link(e.target.value)} />
             </span>
-            <span className={`${styles.spoiler} ${spoilerClass}`}>
+            <span className={`${formStyles.spoiler} ${spoilerClass}`}>
               <label>
                 {t('spoiler')}: <input type='checkbox' className={styles.checkbox} onChange={(e) => setPublishReplyOptions.spoiler(e.target.checked)} />
               </label>
             </span>
-            <span className={`${styles.spoiler} ${nsfwClass}`}>
+            <span className={`${formStyles.spoiler} ${nsfwClass}`}>
               <label>
                 {t('nsfw')}: <input type='checkbox' className={styles.checkbox} onChange={(e) => setPublishReplyOptions.nsfw(e.target.checked)} />
               </label>
@@ -183,36 +184,36 @@ const ReplyForm = ({ cid, isReplyingToReply, hideReplyForm, communityAddress, po
         )}
         {!showPreview ? (
           <textarea
-            className={styles.textarea}
+            className={formStyles.textarea}
             value={publishReplyOptions?.content || ''}
             onChange={(e) => setPublishReplyOptions.content(e.target.value)}
             onFocus={() => setIsTextareaFocused(true)}
             onBlur={() => setIsTextareaFocused(false)}
           />
         ) : (
-          <div className={styles.preview}>
+          <div className={formStyles.preview}>
             <Markdown content={publishReplyOptions?.content || ''} />
           </div>
         )}
       </div>
       <div className={styles.bottomArea}>
-        <button className={styles.save} onClick={onPublish}>
+        <button className={formStyles.save} onClick={onPublish}>
           {t('save')}
         </button>
         {showFormattingHelp && (
-          <button className={styles.previewButton} onClick={() => setShowPreview(!showPreview)} disabled={!publishReplyOptions?.content}>
+          <button className={formStyles.previewButton} onClick={() => setShowPreview(!showPreview)} disabled={!publishReplyOptions?.content}>
             {showPreview ? t('edit') : t('preview')}
           </button>
         )}
         {isReplyingToReply && (
-          <button className={styles.cancel} onClick={hideReplyForm}>
+          <button className={formStyles.cancel} onClick={hideReplyForm}>
             {t('cancel')}
           </button>
         )}
-        <span className={styles.optionsButton} onClick={() => setShowFormattingHelp(!showFormattingHelp)}>
+        <span className={formStyles.optionsButton} onClick={() => setShowFormattingHelp(!showFormattingHelp)}>
           {showFormattingHelp ? t('hide_help') : t('formatting_help')}
         </span>
-        <span className={styles.optionsButton} onClick={() => setShowOptions(!showOptions)}>
+        <span className={formStyles.optionsButton} onClick={() => setShowOptions(!showOptions)}>
           {showOptions ? t('hide_options') : t('options')}
         </span>
       </div>

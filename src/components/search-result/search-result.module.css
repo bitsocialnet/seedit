@@ -1,10 +1,6 @@
 /* The results page mirrors old.reddit's search layout: groups of dense rows,
    each group with its own heading and its own "load more". */
 
-.listing {
-  margin: 0 0 10px 10px;
-}
-
 .group + .group {
   margin-top: 10px;
 }
@@ -188,33 +184,16 @@
   cursor: default;
 }
 
-.info,
-.error {
+.info {
   color: var(--text-info);
   font-size: 12px;
   margin: 5px 0;
   text-transform: lowercase;
 }
 
-.retry {
-  background: none;
-  border: none;
-  color: var(--link-primary);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: inherit;
-  margin-left: 5px;
-  padding: 0;
-  text-transform: lowercase;
-}
-
-.retry:hover {
-  text-decoration: underline;
-}
-
 /* Search terms are marked by weight, not by a highlight fill, so the rows stay
    as flat as the rest of the feed and matches never rely on color alone. */
-.listing mark {
+.result mark {
   background: none;
   color: inherit;
   font-weight: bold;

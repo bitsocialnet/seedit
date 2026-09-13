@@ -36,7 +36,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 | Loading/navigation/performance work | Add a throttled Chromium pass; see [low-spec-verification.md](docs/agent-playbooks/low-spec-verification.md) |
 | Translation keys/values | Use the `translate` skill; one process applies locale changes at a time |
 | `package.json` changed | Run `corepack yarn install` to synchronize `yarn.lock` |
-| Dependencies/imports changed | Run advisory `yarn knip`; resolve relevant new findings |
+| Dependencies, moved files, or imports changed | `yarn boundaries` (part of `yarn lint`) must pass; see module boundaries in [src/AGENTS.md](src/AGENTS.md). Run advisory `yarn knip`; resolve relevant new findings |
 | AI workflow files changed | Edit shared sources, run `yarn ai-workflow:sync`, then `yarn ai-workflow:check` and `yarn ai-workflow:test` |
 | Public English docs or AI context changed | Run `yarn llms:generate` and include resulting `public/llms*.txt` changes |
 | Version, changelog, or release body changed | During release work, follow `release` and run `yarn changelog` when notes need regeneration |
@@ -47,7 +47,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 
 - Use Corepack-managed Yarn 4, never npm for project dependency changes. Pin exact versions and keep the lockfile synchronized.
 - Stack: React 19, TypeScript, Zustand, React Router v6, Vite, `@bitsocial/bitsocial-react-hooks`, i18next, oxlint, oxfmt.
-- Keep page composition in `src/views/`, reusable UI in `src/components/`, hooks in `src/hooks/`, shared state in `src/stores/`, helpers in `src/lib/`, static data in `src/data/`.
+- Keep page composition in `src/views/`, reusable UI in `src/components/`, hooks in `src/hooks/`, shared state in `src/stores/`, helpers in `src/lib/`, static data in `src/data/`. Dependencies flow one way between those layers; see module boundaries in [src/AGENTS.md](src/AGENTS.md).
 - Use Zustand for shared/global state; local component state may use `useState`.
 - Use Bitsocial hooks for React UI data access. Do not fetch data in effects or synchronize derived state with effects; derive values during render. Electron's RPC bootstrap intentionally imports `@pkcprotocol/pkc-js` directly.
 - Reuse hooks for repeated logic. Model complex flows clearly instead of accumulating boolean flags.
