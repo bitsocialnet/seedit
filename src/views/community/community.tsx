@@ -3,7 +3,8 @@ import { Navigate, useLocation, useParams, useNavigate } from 'react-router-dom'
 import { useAccountComments, useBlock, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { useTranslation } from 'react-i18next';
-import styles from '../home/home.module.css';
+import styles from './community.module.css';
+import layoutStyles from '../../components/feed-layout';
 import { useFeedStateString } from '../../hooks/use-state-string';
 import { filterOptimisticLocalPosts } from '../../lib/utils/account-history-utils';
 import useContentOptionsStore from '../../stores/use-content-options-store';
@@ -17,9 +18,9 @@ import useTimeFilter, { isValidTimeFilterName, isValidTopTimeFilterName } from '
 import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
 import { getCommunityIdentifier, getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import ErrorDisplay from '../../components/error-display';
-import EmptyFeedMessage from '../../components/empty-feed-message/empty-feed-message';
-import FeedPagination from '../../components/feed-footer/feed-pagination';
-import DevelopmentFeedResetButton from '../../components/development-feed-reset-button/development-feed-reset-button-lazy';
+import EmptyFeedMessage from '../../components/empty-feed-message';
+import FeedPagination from '../../components/feed-pagination';
+import DevelopmentFeedResetButton from '../../components/development-feed-reset-button';
 import TopTimeFilter from '../../components/top-time-filter';
 import LoadingEllipsis from '../../components/loading-ellipsis';
 import Over18Warning from '../../components/over-18-warning';
@@ -68,7 +69,7 @@ const Footer = ({
 
   const loadingString = (
     <>
-      <div className={styles.stateString}>{loadingStateString === 'Failed' ? 'failed' : <LoadingEllipsis string={loadingStateString} />}</div>
+      <div className={layoutStyles.stateString}>{loadingStateString === 'Failed' ? 'failed' : <LoadingEllipsis string={loadingStateString} />}</div>
     </>
   );
 
@@ -115,7 +116,7 @@ const Footer = ({
   }
 
   return (
-    <div className={styles.footer}>
+    <div className={layoutStyles.footer}>
       {footerFirstLine && (
         <>
           {footerFirstLine}
@@ -278,8 +279,8 @@ const CommunityView = () => {
   return isHiddenNsfwCommunity ? (
     <Over18Warning />
   ) : (
-    <div className={styles.content}>
-      <div className={styles.sidebar}>
+    <div className={layoutStyles.content}>
+      <div className={layoutStyles.sidebar}>
         <Sidebar
           community={community}
           communityAddress={communityAddress}
@@ -295,7 +296,7 @@ const CommunityView = () => {
           <ErrorDisplay error={error} />
         </div>
       )}
-      <div className={styles.feed}>
+      <div className={layoutStyles.feed}>
         <DevelopmentFeedResetButton onReset={reset} />
         {sortType === 'top' && <TopTimeFilter selectedTimeFilterName={timeFilterName || 'all'} sessionKey={sessionKey} />}
         <Virtuoso

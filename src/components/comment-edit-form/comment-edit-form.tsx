@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PublishCommentEditOptions, useComment, useEditedComment, usePublishCommentEdit } from '@bitsocial/bitsocial-react-hooks';
 import { FormattingHelpTable } from '../reply-form';
-import styles from '../reply-form/reply-form.module.css';
+import formStyles from '../comment-form';
+import styles from './comment-edit-form.module.css';
 import { alertChallengeVerificationFailed } from '../../lib/utils/challenge-utils';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
 import challengesStore from '../../stores/use-challenges-store';
@@ -87,35 +88,35 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
   }, []);
 
   return (
-    <div className={styles.mdContainer}>
-      <div className={styles.md}>
+    <div className={formStyles.mdContainer}>
+      <div className={formStyles.md}>
         {showOptions && (
-          <div className={styles.options}>
+          <div className={formStyles.options}>
             <span className={styles.editReason}>
               {t('edit_reason')}:{' '}
               <input
-                className={styles.url}
+                className={formStyles.url}
                 value={publishCommentEditOptions.reason}
                 onChange={(e) => setPublishCommentEditOptions((state) => ({ ...state, reason: e.target.value }))}
               />
             </span>
-            <span className={styles.spoiler}>
+            <span className={formStyles.spoiler}>
               <label>
                 {t('spoiler')}:{' '}
                 <input
                   type='checkbox'
-                  className={styles.checkbox}
+                  className={formStyles.checkbox}
                   checked={publishCommentEditOptions.spoiler}
                   onChange={(e) => setPublishCommentEditOptions((state) => ({ ...state, spoiler: e.target.checked }))}
                 />
               </label>
             </span>
-            <span className={styles.spoiler}>
+            <span className={formStyles.spoiler}>
               <label>
                 {t('nsfw')}:{' '}
                 <input
                   type='checkbox'
-                  className={styles.checkbox}
+                  className={formStyles.checkbox}
                   checked={publishCommentEditOptions.nsfw}
                   onChange={(e) => setPublishCommentEditOptions((state) => ({ ...state, nsfw: e.target.checked }))}
                 />
@@ -125,20 +126,20 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
         )}
         {!showPreview ? (
           <textarea
-            className={styles.textarea}
+            className={formStyles.textarea}
             value={publishCommentEditOptions.content}
             ref={textRef}
             onChange={(e) => setPublishCommentEditOptions((state) => ({ ...state, content: e.target.value }))}
           />
         ) : (
-          <div className={styles.preview}>
+          <div className={formStyles.preview}>
             <Markdown content={publishCommentEditOptions.content} />
           </div>
         )}
       </div>
-      <div className={styles.bottomArea}>
+      <div className={formStyles.bottomArea}>
         <span
-          className={styles.optionsButton}
+          className={formStyles.optionsButton}
           onClick={() => {
             setShowFormattingHelp(!showFormattingHelp);
             if (showFormattingHelp) {
@@ -148,11 +149,11 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
         >
           {showFormattingHelp ? t('hide_help') : t('formatting_help')}
         </span>
-        <span className={styles.optionsButton} onClick={() => setShowOptions(!showOptions)}>
+        <span className={formStyles.optionsButton} onClick={() => setShowOptions(!showOptions)}>
           {showOptions ? t('hide_options') : t('options')}
         </span>
         <button
-          className={styles.save}
+          className={formStyles.save}
           onClick={() => {
             const { content, reason } = parseEditContent(publishCommentEditOptions.content);
             setPublishCommentEditOptions((state) => ({
@@ -166,12 +167,12 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
           {t('save')}
         </button>
         {showFormattingHelp && (
-          <button className={styles.previewButton} onClick={() => setShowPreview(!showPreview)} disabled={!publishCommentEditOptions?.content}>
+          <button className={formStyles.previewButton} onClick={() => setShowPreview(!showPreview)} disabled={!publishCommentEditOptions?.content}>
             {showPreview ? t('edit') : t('preview')}
           </button>
         )}
         <button
-          className={styles.cancel}
+          className={formStyles.cancel}
           onClick={() => {
             if (hideCommentEditForm) hideCommentEditForm();
           }}

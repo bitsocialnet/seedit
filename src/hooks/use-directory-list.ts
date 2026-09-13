@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { getVendoredDirectoryList, vendoredDirectoryDefaults } from '../data/vendored-directory-lists';
+import { getVendoredDirectoryList, vendoredDirectoryDefaults } from '../lib/utils/vendored-directory-lists';
 import { isDirectoryCode, type SeeditDirectoryCode } from '../lib/utils/directory-codes';
 import { normalizeRemoteDirectoryList, type DirectoryList } from '../lib/utils/directory-list-utils';
 

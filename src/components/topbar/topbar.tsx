@@ -5,7 +5,8 @@ import { useAccount, useAccountCommunities } from '@bitsocial/bitsocial-react-ho
 import { isAllView, isHomeView, isModView } from '../../lib/utils/view-utils';
 import { getCompactCommunityDisplayName } from '../../lib/utils/address-utils';
 import useContentOptionsStore from '../../stores/use-content-options-store';
-import { useDefaultSubscriptions, useFilteredDefaultSubscriptions, type DefaultSubscription } from '../../hooks/use-default-subscriptions';
+import { useDefaultSubscriptions, useFilteredDefaultSubscriptions } from '../../hooks/use-default-subscriptions';
+import type { DefaultSubscription } from '../../lib/utils/starter-community-list';
 import { DIRECTORY_INDEX_PATH, getCommunityPath, getDirectoryPath } from '../../lib/utils/community-route-utils';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
 import styles from './topbar.module.css';

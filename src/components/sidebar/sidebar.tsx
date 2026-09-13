@@ -33,7 +33,7 @@ import { getCommunityPath, getCommunityPostUrl, getDirectoryCandidatesPath } fro
 import { isDirectoryCode, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
 import { getDirectoryCommunityProposalUrl, getNewDirectoryProposalUrl } from '../../lib/utils/directory-proposal-utils';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
-import { FAQ } from '../../views/about/about';
+import FAQ from '../faq';
 import LoadingEllipsis from '../loading-ellipsis';
 import Markdown from '../markdown';
 import SearchBar from '../search-bar';
@@ -145,7 +145,7 @@ interface SidebarProps {
   reset?: () => void;
 }
 
-export const Footer = () => {
+const Footer = () => {
   const location = useLocation();
   const params = useParams();
   const isMobile = useIsMobile();
@@ -401,7 +401,7 @@ const Sidebar = ({ comment, communityAddress, directoryCode, directoryRevision, 
             <Link to={`${getCommunityPath(address)}/settings`}>{t('community_settings')}</Link>
           </div>
         )}
-        {isMobile && isInHomeAboutView && <FAQ />}
+        {isMobile && isInHomeAboutView && <FAQ footer={<Footer />} />}
       </div>
     </div>
   );

@@ -5,7 +5,7 @@ import { SEEDIT_DIRECTORY_CODES, isDirectoryCode, type SeeditDirectoryCode } fro
 import { useDirectoryList } from '../../hooks/use-directory-list';
 import { pickDirectoryWinner, sortDirectoryCommunitiesByRank, type DirectoryListCommunity } from '../../lib/utils/directory-list-utils';
 import { deriveCommunityNsfw } from '../../lib/utils/nsfw-utils';
-import { vendoredDirectoryDefaults, vendoredDirectoryLists } from '../../data/vendored-directory-lists';
+import { vendoredDirectoryDefaults, vendoredDirectoryLists } from '../../lib/utils/vendored-directory-lists';
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { DIRECTORY_INDEX_PATH, getCommunityPath, getDirectoryCandidatesPath, getDirectoryPath } from '../../lib/utils/community-route-utils';
 import { getDisplayAddress } from '../../lib/utils/address-utils';

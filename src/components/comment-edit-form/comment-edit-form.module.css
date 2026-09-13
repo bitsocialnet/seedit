@@ -1,0 +1,8 @@
+.editReason {
+  font-size: 12px;
+  float: left;
+}
+
+.editReason input {
+  width: 60%;
+}

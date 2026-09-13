@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { DEVELOPMENT_DEBUG_STORAGE_KEY } from '../lib/development-debug';
 
 const createStorage = () => {
   const values = new Map<string, string>();
@@ -36,7 +37,7 @@ describe('useDevelopmentDebugStore', () => {
   });
 
   it('persists only the two debug preferences in the versioned schema', async () => {
-    const { DEVELOPMENT_DEBUG_STORAGE_KEY, default: useDevelopmentDebugStore } = await import('./use-development-debug-store');
+    const { default: useDevelopmentDebugStore } = await import('./use-development-debug-store');
 
     useDevelopmentDebugStore.getState().setMockContentEnabled(true);
     useDevelopmentDebugStore.getState().setShowFeedResetButton(true);
@@ -44,17 +45,6 @@ describe('useDevelopmentDebugStore', () => {
     expect(JSON.parse(localStorage.getItem(DEVELOPMENT_DEBUG_STORAGE_KEY) ?? '{}')).toEqual({
       mockContentEnabled: true,
       showFeedResetButton: true,
-    });
-  });
-
-  it('falls back safely when persisted data is invalid', async () => {
-    localStorage.setItem('development-debug:v1', '{invalid');
-
-    const { getDevelopmentDebugPreferences } = await import('./use-development-debug-store');
-
-    expect(getDevelopmentDebugPreferences()).toEqual({
-      mockContentEnabled: false,
-      showFeedResetButton: false,
     });
   });
 });

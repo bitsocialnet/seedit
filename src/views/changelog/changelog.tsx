@@ -4,8 +4,8 @@ import Sidebar from '../../components/sidebar';
 import packageJson from '../../../package.json';
 import changelogMarkdown from '../../../CHANGELOG.md?raw';
 import { getReleaseAnchorId, parseChangelog } from '../../lib/utils/changelog-utils';
-// the changelog is the about page's chrome with a dense release log inside it
-import faqStyles from '../about/about.module.css';
+// the changelog uses the shared static-page chrome with a dense release log inside it
+import pageStyles from '../../components/static-page';
 import styles from './changelog.module.css';
 
 // the changelog ships with the build, so parsing it once per chunk load is enough
@@ -13,7 +13,7 @@ const releases = parseChangelog(changelogMarkdown);
 const { version: currentVersion } = packageJson;
 
 export const ChangelogLog = () => (
-  <div className={faqStyles.about}>
+  <div className={pageStyles.about}>
     <div className={styles.notice}>
       Every Seedit release, newest first, taken from the repository changelog at build time. You are running{' '}
       <span className={styles.currentVersion}>v{currentVersion}</span>. Downloads and full release notes live on{' '}
@@ -80,7 +80,7 @@ const Changelog = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className={faqStyles.content}>
+    <div className={pageStyles.content}>
       {!isMobile && <Sidebar />}
       <ChangelogLog />
     </div>

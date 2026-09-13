@@ -1,0 +1,29 @@
+/* Page-level layout and status lines of the results page; group and row styles live in components/search-result. */
+
+.listing {
+  margin: 0 0 10px 10px;
+}
+
+.info,
+.error {
+  color: var(--text-info);
+  font-size: 12px;
+  margin: 5px 0;
+  text-transform: lowercase;
+}
+
+.retry {
+  background: none;
+  border: none;
+  color: var(--link-primary);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  margin-left: 5px;
+  padding: 0;
+  text-transform: lowercase;
+}
+
+.retry:hover {
+  text-decoration: underline;
+}

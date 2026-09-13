@@ -1,7 +1,7 @@
 import localForageLru from '@bitsocial/bitsocial-react-hooks/dist/lib/localforage-lru/index.js';
 import { Comment } from '@bitsocial/bitsocial-react-hooks';
 import extName from 'ext-name';
-import { canEmbed } from '../../components/post/embed';
+import { canEmbed } from './embed-utils';
 import memoize from 'memoizee';
 import { isValidURL } from './url-utils';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';

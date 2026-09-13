@@ -1,5 +1,5 @@
 import type { IndexedCommunity } from '../search-indexer';
-import type { DefaultSubscription } from '../../hooks/use-default-subscriptions';
+import type { DefaultSubscription } from './starter-community-list';
 import type { DirectoryListCommunity } from './directory-list-utils';
 import { getHighlightTerms, matchesQuery } from './search-highlight-utils';
 

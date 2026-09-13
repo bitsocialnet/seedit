@@ -1,0 +1,31 @@
+.feed {
+  position: relative;
+}
+
+.footer {
+  padding-left: 5px;
+  text-transform: lowercase;
+  padding-bottom: 40px;
+  padding-top: 5px;
+  font-size: 12px;
+}
+
+@media (max-width: 639px) {
+  .content {
+    padding: 7px 2px 0px 2px;
+  }
+
+  .sidebar {
+    display: none;
+  }
+}
+
+@media (min-width: 640px) {
+  .content {
+    padding: 7px 5px 0px 5px;
+  }
+
+  .stateString {
+    max-width: calc(100% - 305px);
+  }
+}

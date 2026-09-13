@@ -13,13 +13,14 @@ import FeedFooter from '../../components/feed-footer';
 import LoadingEllipsis from '../../components/loading-ellipsis';
 import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
-import StarterSubscriptionsNotice from '../../components/starter-subscriptions-notice/starter-subscriptions-notice';
+import StarterSubscriptionsNotice from '../../components/starter-subscriptions-notice';
 import DirectorySubscriptionUpdatesNotice from '../../components/directory-subscription-updates-notice';
-import DevelopmentFeedResetButton from '../../components/development-feed-reset-button/development-feed-reset-button-lazy';
+import DevelopmentFeedResetButton from '../../components/development-feed-reset-button';
 import TopTimeFilter from '../../components/top-time-filter';
 import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute, isValidRouteSortType } from '../../constants/sort-types';
 import { getHomeSubscriptionState } from './subscription-state';
 import styles from './home.module.css';
+import layoutStyles from '../../components/feed-layout';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
@@ -141,13 +142,13 @@ const Home = () => {
     <div>
       <DirectorySubscriptionUpdatesNotice />
       <StarterSubscriptionsNotice />
-      <div className={styles.content}>
-        <div className={`${styles.sidebar}`}>
+      <div className={layoutStyles.content}>
+        <div className={`${layoutStyles.sidebar}`}>
           <Sidebar />
         </div>
         {subscriptionState === 'loading' ? (
-          <div className={styles.feed}>
-            <div className={styles.footer}>
+          <div className={layoutStyles.feed}>
+            <div className={layoutStyles.footer}>
               <LoadingEllipsis string={t('loading_feed')} />
             </div>
           </div>
@@ -171,7 +172,7 @@ const Home = () => {
             </div>
           </div>
         ) : (
-          <div className={styles.feed}>
+          <div className={layoutStyles.feed}>
             <DevelopmentFeedResetButton onReset={reset} />
             {sortType === 'top' && <TopTimeFilter selectedTimeFilterName={currentTimeFilterName} sessionKey={sessionKey} />}
             <Virtuoso

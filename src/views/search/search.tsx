@@ -7,12 +7,10 @@ import { DEFAULT_SEARCH_QUERY, getSearchOptions, getSearchPath, getSearchQuery }
 import { parseSearchQuery } from '../../lib/utils/search-query-utils';
 import { getHighlightTerms } from '../../lib/utils/search-highlight-utils';
 import useCommunityDisplayName from '../../hooks/use-community-display-name';
-import SearchResultCommunity from '../../components/search-result/search-result-community';
-import SearchResultGroup from '../../components/search-result/search-result-group';
-import SearchResultPost from '../../components/search-result/search-result-post';
+import { SearchResultCommunity, SearchResultGroup, SearchResultPost } from '../../components/search-result';
 import Sidebar from '../../components/sidebar';
-import homeStyles from '../home/home.module.css';
-import styles from '../../components/search-result/search-result.module.css';
+import layoutStyles from '../../components/feed-layout';
+import styles from './search.module.css';
 
 /** How many community matches a group shows before "load more" reveals the next batch. */
 const COMMUNITY_PAGE_SIZE = 5;
@@ -63,8 +61,8 @@ const Search = () => {
 
   return (
     <div>
-      <div className={homeStyles.content}>
-        <div className={homeStyles.sidebar}>
+      <div className={layoutStyles.content}>
+        <div className={layoutStyles.sidebar}>
           <Sidebar />
         </div>
         <div className={styles.listing}>

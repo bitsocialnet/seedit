@@ -9,7 +9,7 @@ import { getCommunityPath } from '../../lib/utils/community-route-utils';
 import useIsMobile from '../../hooks/use-is-mobile';
 import useIsCommunityOffline from '../../hooks/use-is-community-offline';
 import Markdown from '../../components/markdown';
-import Label from '../../components/post/label';
+import Label from '../../components/label';
 import SubscribeButton from '../../components/subscribe-button';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 

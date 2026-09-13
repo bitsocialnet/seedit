@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { StateSnapshot, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { useAccount, useNotifications } from '@bitsocial/bitsocial-react-hooks';
 import styles from './inbox.module.css';
-import Reply from '../../components/reply/reply';
+import Reply from '../../components/reply';
 import { isInboxCommentRepliesView, isInboxPostRepliesView, isInboxUnreadView } from '../../lib/utils/view-utils';
 import { useTranslation } from 'react-i18next';
 import _ from 'lodash';

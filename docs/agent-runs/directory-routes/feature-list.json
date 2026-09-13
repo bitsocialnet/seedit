@@ -12,7 +12,7 @@
       ],
       "files": [
         "src/data/seedit-directories",
-        "src/data/vendored-directory-lists.ts",
+        "src/lib/utils/vendored-directory-lists.ts",
         "src/hooks/use-directory-list.ts",
         "src/lib/utils/directory-list-utils.ts"
       ],
@@ -30,7 +30,7 @@
         "src/hooks/use-resolved-community-route.ts",
         "src/lib/utils/community-route-utils.ts",
         "src/views/community/community.tsx",
-        "src/views/post-page/post-page.tsx",
+        "src/views/post/post.tsx",
         "src/components/exact-community-action-route"
       ],
       "notes": "Home and subscription navigation must never resolve directory slugs at read time."
