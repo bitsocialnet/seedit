@@ -1,66 +1,17 @@
-import React, { useEffect, useState, lazy, Suspense, Component } from 'react';
+import { useEffect, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { setAccount, useAccount } from '@bitsocial/bitsocial-react-hooks';
-import useTheme from '../../stores/use-theme-store';
 import stringify from 'json-stringify-pretty-compact';
 import styles from './account-data-editor.module.css';
-import editorStyles from '../../components/json-editor';
-import useIsMobile from '../../hooks/use-is-mobile';
-import LoadingEllipsis from '../../components/loading-ellipsis';
+import JsonEditor from '../../components/json-editor';
 import ErrorDisplay from '../../components/error-display';
 import { getEditableAccountData } from '../../lib/utils/account-data-utils';
-import { normalizeReactAceModule } from '../../lib/utils/react-ace-utils';
-
-class EditorErrorBoundary extends Component<{ children: React.ReactNode; fallback: React.ReactNode }> {
-  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    console.error('Ace Editor failed to load:', error, errorInfo);
-  }
-
-  render() {
-    if ((this.state as any).hasError) {
-      return this.props.fallback;
-    }
-    return this.props.children;
-  }
-}
-
-const LazyAceEditor = lazy(async () => {
-  const ReactAceModule = await import('react-ace');
-  await Promise.all([
-    import('ace-builds/src-noconflict/mode-json'),
-    import('ace-builds/src-noconflict/theme-github'),
-    import('ace-builds/src-noconflict/theme-tomorrow_night'),
-  ]);
-  return normalizeReactAceModule(ReactAceModule);
-});
-
-const FallbackEditor = ({ value, onChange, height }: { value: string; onChange: (value: string) => void; height: string }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div>
-      <div className={editorStyles.infobar}>{t('editor_fallback_warning', 'Advanced editor failed to load. Using basic text editor as fallback.')}</div>
-      <textarea value={value} onChange={(e) => onChange(e.target.value)} className={editorStyles.fallbackEditor} style={{ height }} spellCheck={false} />
-    </div>
-  );
-};
 
 const AccountDataEditor = () => {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const account = useAccount();
-  const theme = useTheme((state) => state.theme);
   const [text, setText] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [currentError, setCurrentError] = useState<Error | undefined>(undefined);
@@ -109,64 +60,23 @@ const AccountDataEditor = () => {
   }
 
   return (
-    <div className={editorStyles.content}>
-      <EditorErrorBoundary
-        fallback={
-          <FallbackEditor
-            value={text}
-            onChange={(value) => {
-              setText(value);
-              if (currentError) {
-                setCurrentError(undefined);
-              }
-            }}
-            height={isMobile ? 'calc(80vh - 95px)' : 'calc(90vh - 77px)'}
-          />
-        }
-      >
-        <Suspense
-          fallback={
-            <div className={editorStyles.loading}>
-              <LoadingEllipsis string={t('loading_editor')} />
-            </div>
+    <div className={styles.content}>
+      <JsonEditor
+        name='ACCOUNT_DATA_EDITOR'
+        value={text}
+        onChange={(value) => {
+          setText(value);
+          if (currentError) {
+            setCurrentError(undefined);
           }
-        >
-          <LazyAceEditor
-            mode='json'
-            theme={theme === 'dark' ? 'tomorrow_night' : 'github'}
-            value={text}
-            onChange={(value) => {
-              setText(value);
-              if (currentError) {
-                setCurrentError(undefined);
-              }
-            }}
-            name='ACCOUNT_DATA_EDITOR'
-            editorProps={{ $blockScrolling: true }}
-            className={editorStyles.editor}
-            width='100%'
-            height={isMobile ? 'calc(80vh - 95px)' : 'calc(90vh - 77px)'}
-            setOptions={{
-              useWorker: false,
-              enableBasicAutocompletion: false,
-              enableLiveAutocompletion: false,
-              enableSnippets: false,
-              showPrintMargin: false,
-              highlightActiveLine: true,
-              showGutter: true,
-              foldStyle: 'markbeginend',
-              showFoldWidgets: true,
-            }}
-            fontSize={14}
-          />
-        </Suspense>
-      </EditorErrorBoundary>
+        }}
+      />
       {currentError && (
-        <div className={editorStyles.error}>
+        <div className={styles.error}>
           <ErrorDisplay error={currentError} />
         </div>
       )}
-      <div className={editorStyles.buttons}>
+      <div className={styles.buttons}>
         <Trans
           i18nKey='save_reset_changes'
           components={{
