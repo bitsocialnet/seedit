@@ -1,1 +1,1 @@
-export { default } from './json-editor.module.css';
+export { default } from './json-editor';

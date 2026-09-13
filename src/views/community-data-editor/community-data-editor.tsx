@@ -1,9 +1,8 @@
-import React, { useEffect, useMemo, useState, useRef, lazy, Suspense, Component } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { usePublishCommunityEdit, useCommunity } from '@bitsocial/bitsocial-react-hooks';
-import useTheme from '../../stores/use-theme-store';
-import editorStyles from '../../components/json-editor';
-import useIsMobile from '../../hooks/use-is-mobile';
+import styles from './community-data-editor.module.css';
+import JsonEditor from '../../components/json-editor';
 import LoadingEllipsis from '../../components/loading-ellipsis';
 import useCommunitySettingsStore from '../../stores/use-community-settings-store';
 import { useNavigate } from 'react-router-dom';
@@ -13,63 +12,10 @@ import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
 import { removeSuggestedAvatarUrl } from './community-data-editor-utils';
-import { normalizeReactAceModule } from '../../lib/utils/react-ace-utils';
-
-class EditorErrorBoundary extends Component<{ children: React.ReactNode; fallback: React.ReactNode }> {
-  constructor(props: { children: React.ReactNode; fallback: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-
-  componentDidCatch(error: any, errorInfo: any) {
-    console.error('Ace Editor failed to load:', error, errorInfo);
-  }
-
-  render() {
-    if ((this.state as any).hasError) {
-      return this.props.fallback;
-    }
-    return this.props.children;
-  }
-}
-
-const LazyAceEditor = lazy(async () => {
-  const ReactAceModule = await import('react-ace');
-  await Promise.all([
-    import('ace-builds/src-noconflict/mode-json'),
-    import('ace-builds/src-noconflict/theme-github'),
-    import('ace-builds/src-noconflict/theme-tomorrow_night'),
-  ]);
-  return normalizeReactAceModule(ReactAceModule);
-});
-
-const FallbackEditor = ({ value, onChange, height, disabled }: { value: string; onChange: (value: string) => void; height: string; disabled?: boolean }) => {
-  const { t } = useTranslation();
-
-  return (
-    <div>
-      <div className={editorStyles.infobar}>{t('editor_fallback_warning', 'Advanced editor failed to load. Using basic text editor as fallback.')}</div>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={editorStyles.fallbackEditor}
-        style={{ height }}
-        spellCheck={false}
-        disabled={disabled}
-      />
-    </div>
-  );
-};
 
 const CommunityDataEditor = () => {
   const { t } = useTranslation();
-  const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const theme = useTheme((state) => state.theme);
   const [text, setText] = useState('');
 
   const { communityAddress } = useResolvedCommunityRoute();
@@ -270,11 +216,11 @@ const CommunityDataEditor = () => {
     return (
       <>
         {error?.message && (
-          <div className={editorStyles.error}>
+          <div className={styles.error}>
             <ErrorDisplay error={error} />
           </div>
         )}
-        <div className={editorStyles.loading}>
+        <div className={styles.loading}>
           <LoadingEllipsis string={loadingStateString || t('loading')} />
         </div>
       </>
@@ -282,54 +228,19 @@ const CommunityDataEditor = () => {
   }
 
   return (
-    <div className={editorStyles.content}>
-      <EditorErrorBoundary
-        fallback={<FallbackEditor value={text} onChange={handleTextChange} height={isMobile ? 'calc(80vh - 95px)' : 'calc(90vh - 77px)'} disabled={showSaving} />}
-      >
-        <Suspense
-          fallback={
-            <div className={editorStyles.loading}>
-              <LoadingEllipsis string={t('loading_editor')} />
-            </div>
-          }
-        >
-          <LazyAceEditor
-            mode='json'
-            theme={theme === 'dark' ? 'tomorrow_night' : 'github'}
-            value={text}
-            onChange={handleTextChange}
-            name='ACCOUNT_DATA_EDITOR'
-            editorProps={{ $blockScrolling: true }}
-            className={editorStyles.editor}
-            width='100%'
-            height={isMobile ? 'calc(80vh - 95px)' : 'calc(90vh - 77px)'}
-            setOptions={{
-              useWorker: false,
-              enableBasicAutocompletion: false,
-              enableLiveAutocompletion: false,
-              enableSnippets: false,
-              showPrintMargin: false,
-              highlightActiveLine: true,
-              showGutter: true,
-              foldStyle: 'markbeginend',
-              showFoldWidgets: true,
-              readOnly: showSaving,
-            }}
-            fontSize={14}
-          />
-        </Suspense>
-      </EditorErrorBoundary>
+    <div className={styles.content}>
+      <JsonEditor name='COMMUNITY_DATA_EDITOR' value={text} onChange={handleTextChange} readOnly={showSaving} />
       {currentError && (
-        <div className={editorStyles.error}>
+        <div className={styles.error}>
           <ErrorDisplay error={currentError} />
         </div>
       )}
       {showSaving ? (
-        <div className={editorStyles.loading}>
+        <div className={styles.loading}>
           <LoadingEllipsis string={t('saving')} />
         </div>
       ) : (
-        <div className={editorStyles.buttons}>
+        <div className={styles.buttons}>
           <Trans
             i18nKey='save_reset_changes'
             components={{
