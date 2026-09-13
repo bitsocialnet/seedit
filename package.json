@@ -90,7 +90,7 @@
     "release:manifest:keygen": "node scripts/generate-release-manifest-keypair.mjs",
     "android:build:icons": "cordova-res android --skip-config --copy --resources /tmp/seedit-android-icons --icon-source ./android/icons/icon.png --splash-source ./android/icons/splash.png --icon-foreground-source ./android/icons/icon-foreground.png --icon-background-source '#ffffee'",
     "prettier": "oxfmt src/**/*.{js,ts,tsx} electron/**/*.{js,mjs}",
-    "lint": "oxlint src electron && yarn boundaries",
+    "lint": "oxlint --deny-warnings src electron && yarn boundaries",
     "boundaries": "node scripts/check-module-boundaries.mjs",
     "type-check": "tsc --noEmit",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0",

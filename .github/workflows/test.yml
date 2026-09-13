@@ -42,6 +42,9 @@ jobs:
           yarn ai-workflow:check
           yarn ai-workflow:test
 
+      - name: Lint and module boundaries
+        run: yarn lint
+
       - name: Build React App
         run: yarn build
         env:

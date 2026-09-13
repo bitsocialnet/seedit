@@ -46,15 +46,11 @@ const SpoilerText = ({ children }: { children: React.ReactNode }) => {
   const [revealed, setRevealed] = useState(false);
 
   return (
-    <SpoilerTooltip
-      children={
-        <span className={revealed ? 'spoilerTextRevealed' : 'spoilerText'} onClick={() => setRevealed(true)}>
-          {children}
-        </span>
-      }
-      content='Reveal spoiler'
-      showTooltip={!revealed}
-    />
+    <SpoilerTooltip content='Reveal spoiler' showTooltip={!revealed}>
+      <span className={revealed ? 'spoilerTextRevealed' : 'spoilerText'} onClick={() => setRevealed(true)}>
+        {children}
+      </span>
+    </SpoilerTooltip>
   );
 };
 
@@ -132,7 +128,6 @@ const Markdown = ({ content }: MarkdownProps) => {
   return (
     <span className={styles.markdown}>
       <ReactMarkdown
-        children={preprocessedContent}
         remarkPlugins={remarkPlugins}
         rehypePlugins={[[rehypeRaw as any], [rehypeSanitize as any, customSchema]]}
         components={
@@ -155,7 +150,9 @@ const Markdown = ({ content }: MarkdownProps) => {
             spoiler: ({ children }: { children?: React.ReactNode }) => <SpoilerText>{children}</SpoilerText>,
           } as ExtendedComponents
         }
-      />
+      >
+        {preprocessedContent}
+      </ReactMarkdown>
     </span>
   );
 };
