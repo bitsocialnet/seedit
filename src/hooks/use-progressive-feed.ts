@@ -88,26 +88,42 @@ const useProgressiveFeed = ({ enabled, feedOptions }: UseProgressiveFeedOptions)
     targetFeedLength: suggestionTargetLength,
   });
 
+  // useFeedWithCompatibleSort returns a new result object every render, so the probes memo keys on the primitives it
+  // reads instead of on feed identity; otherwise probes (and the loadMore callback below) would change every render.
+  const { hasMore: weeklyHasMore, state: weeklyState } = weeklyFeed;
+  const { hasMore: monthlyHasMore, state: monthlyState } = monthlyFeed;
+  const { hasMore: yearlyHasMore, state: yearlyState } = yearlyFeed;
+  const { hasMore: allTimeHasMore, state: allTimeState } = allTimeFeed;
+  const weeklyFeedLength = weeklyFeed.feed.length;
+  const monthlyFeedLength = monthlyFeed.feed.length;
+  const yearlyFeedLength = yearlyFeed.feed.length;
+  const allTimeFeedLength = allTimeFeed.feed.length;
+
   const probes = useMemo<ProgressiveTimeWindowProbe[]>(
     () =>
-      [weeklyFeed, monthlyFeed, yearlyFeed, allTimeFeed].map((feed, index) => ({
+      [
+        { feedLength: weeklyFeedLength, hasMore: weeklyHasMore, state: weeklyState },
+        { feedLength: monthlyFeedLength, hasMore: monthlyHasMore, state: monthlyState },
+        { feedLength: yearlyFeedLength, hasMore: yearlyHasMore, state: yearlyState },
+        { feedLength: allTimeFeedLength, hasMore: allTimeHasMore, state: allTimeState },
+      ].map(({ feedLength, hasMore, state }, index) => ({
         ...progressiveTimeWindows[index],
-        feedLength: feed.feed.length,
-        settled: feed.state !== 'fetching-ipns' && !feed.hasMore,
+        feedLength,
+        settled: state !== 'fetching-ipns' && !hasMore,
       })),
     [
-      allTimeFeed.feed.length,
-      allTimeFeed.hasMore,
-      allTimeFeed.state,
-      monthlyFeed.feed.length,
-      monthlyFeed.hasMore,
-      monthlyFeed.state,
-      weeklyFeed.feed.length,
-      weeklyFeed.hasMore,
-      weeklyFeed.state,
-      yearlyFeed.feed.length,
-      yearlyFeed.hasMore,
-      yearlyFeed.state,
+      allTimeFeedLength,
+      allTimeHasMore,
+      allTimeState,
+      monthlyFeedLength,
+      monthlyHasMore,
+      monthlyState,
+      weeklyFeedLength,
+      weeklyHasMore,
+      weeklyState,
+      yearlyFeedLength,
+      yearlyHasMore,
+      yearlyState,
     ],
   );
 
@@ -132,15 +148,18 @@ const useProgressiveFeed = ({ enabled, feedOptions }: UseProgressiveFeedOptions)
     void expandToWindow({ name: automaticWindowName, newerThan: automaticWindowNewerThan });
   }, [automaticWindowName, automaticWindowNewerThan, baseFeed.feed.length, baseFeed.hasMore, baseFeed.state, expandToWindow, feedKey]);
 
+  // Call the function directly rather than as a method so the callback depends on the function, not on the per-render
+  // baseFeed object.
+  const { loadMore: loadMoreBaseFeed } = baseFeed;
   const loadMore = useCallback(async () => {
     if (baseFeed.hasMore) {
-      await baseFeed.loadMore();
+      await loadMoreBaseFeed();
       return;
     }
 
     const nextWindow = enabled ? getManualProgressiveTimeWindow(currentNewerThan, baseFeed.feed.length, probes) : undefined;
     if (nextWindow) await expandToWindow(nextWindow);
-  }, [baseFeed.feed.length, baseFeed.hasMore, baseFeed.loadMore, currentNewerThan, enabled, expandToWindow, probes]);
+  }, [baseFeed.feed.length, baseFeed.hasMore, currentNewerThan, enabled, expandToWindow, loadMoreBaseFeed, probes]);
 
   return {
     ...baseFeed,

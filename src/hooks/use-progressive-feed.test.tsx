@@ -108,6 +108,19 @@ describe('useProgressiveFeed', () => {
     expect(hookResult.feed).toHaveLength(31);
   });
 
+  it('keeps the same loadMore callback across re-renders while the feed results only change identity', async () => {
+    testState.baseFeedLength = 4;
+    testState.probeLengths = new Map([[undefined, 1]]);
+
+    await act(() => root.render(createElement(HookHarness)));
+    const firstLoadMore = hookResult.loadMore;
+
+    // The mocked feed hook returns new result objects and arrays on every render, like the real hook does.
+    await act(() => root.render(createElement(HookHarness)));
+
+    expect(hookResult.loadMore).toBe(firstLoadMore);
+  });
+
   it('starts from the configured window again after the feed remounts', async () => {
     testState.probeLengths = new Map([[undefined, 1]]);
 

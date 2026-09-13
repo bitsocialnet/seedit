@@ -1,36 +1,30 @@
-import { useEffect, useRef, useReducer, useCallback, useState } from 'react';
+import { useCallback, useState } from 'react';
+
+const haveDependenciesChanged = (previous: readonly unknown[], next: readonly unknown[]) =>
+  previous.length !== next.length || previous.some((value, index) => !Object.is(value, next[index]));
 
 const useDisplayedSubscriptions = (
   getCurrentList: () => string[],
-  resetDependencies: readonly any[], // Dependencies that trigger a full list reset
+  resetDependencies: readonly unknown[], // Dependencies that trigger a full list reset
 ) => {
-  // Ref to store the latest getCurrentList to avoid including it in the main effect's dependencies,
-  // which could cause unnecessary re-runs if the function reference changes too often.
-  const getCurrentListRef = useRef(getCurrentList);
-  useEffect(() => {
-    getCurrentListRef.current = getCurrentList;
-  }, [getCurrentList]);
+  // The list is a snapshot taken on mount and again whenever resetDependencies change. It deliberately does not track
+  // getCurrentList, so an address the user just unsubscribed from stays in the list (rendered as unsubscribed) until
+  // the next reset instead of disappearing.
+  const [snapshot, setSnapshot] = useState(() => ({ resetDependencies, list: getCurrentList(), unsubscribed: new Set<string>() }));
 
-  const [displayedList, setDisplayedList] = useState(() => getCurrentListRef.current());
-
-  const unsubscribedRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    setDisplayedList(getCurrentListRef.current());
-    unsubscribedRef.current.clear();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, resetDependencies); // Intentionally uses resetDependencies directly for this effect
-
-  const [, forceUpdate] = useReducer((x) => x + 1, 0);
+  // Reset during render (React re-renders immediately) rather than in an effect, so the stale list is never committed.
+  if (haveDependenciesChanged(snapshot.resetDependencies, resetDependencies)) {
+    setSnapshot({ resetDependencies, list: getCurrentList(), unsubscribed: new Set() });
+  }
 
   const handleUnsubscribe = useCallback((address: string) => {
-    unsubscribedRef.current.add(address);
-    forceUpdate(); // Force re-render to apply visual style via isUnsubscribed
+    setSnapshot((previous) => ({ ...previous, unsubscribed: new Set(previous.unsubscribed).add(address) }));
   }, []);
 
-  const isUnsubscribed = useCallback((address: string) => unsubscribedRef.current.has(address), []);
+  const { unsubscribed } = snapshot;
+  const isUnsubscribed = useCallback((address: string) => unsubscribed.has(address), [unsubscribed]);
 
-  return { list: displayedList, isUnsubscribed, handleUnsubscribe };
+  return { list: snapshot.list, isUnsubscribed, handleUnsubscribe };
 };
 
 export default useDisplayedSubscriptions;

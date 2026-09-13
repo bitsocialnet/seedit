@@ -1,15 +1,19 @@
 {
-  "plugins": ["react"],
+  "plugins": [
+    "react",
+    "typescript",
+    "unicorn",
+    "oxc"
+  ],
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
     "react/exhaustive-deps": "warn"
   },
-  "ignore": [
+  "ignorePatterns": [
     "android/**",
     "build/**",
     "node_modules/**",
-    "public/**",
-    "electron/**"
+    "public/**"
   ]
 }
