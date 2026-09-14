@@ -31,7 +31,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 | Visual design, layout, CSS, or themes | Read the relevant guidance in [DESIGN.md](DESIGN.md); review against its Do/Don't list |
 | Files under `src/` or `scripts/` | Read the directory's `AGENTS.md` |
 | Code or automation changed | Select affected checks using [verification.md](docs/agent-playbooks/verification.md); use `agent:verify` for integration/build changes or an explicitly requested full pass |
-| React state, effects, data flow, or rendering performance changed | Review relevant React guidance; use `yarn doctor` when architecture/performance diagnostics would resolve a concern |
+| React state, effects, data flow, or rendering performance changed | Review relevant React guidance; run `yarn doctor:check` and affected `yarn perf:check` scenarios |
 | UI behavior/layout changed | Verify the affected flow; select browsers/viewports using [verification.md](docs/agent-playbooks/verification.md) |
 | Loading/navigation/performance work | Add a throttled Chromium pass; see [low-spec-verification.md](docs/agent-playbooks/low-spec-verification.md) |
 | Translation keys/values | Use the `translate` skill; one process applies locale changes at a time |
@@ -105,6 +105,12 @@ Common checks: `yarn agent:verify`, `yarn doctor`, `yarn knip`, `yarn ai-workflo
 
 Load details on demand: [hooks](docs/agent-playbooks/hooks-setup.md), [verification](docs/agent-playbooks/verification.md), [translations](docs/agent-playbooks/translations.md), [skills/tools](docs/agent-playbooks/skills-and-tools.md), [long-running work](docs/agent-playbooks/long-running-agent-workflow.md), [known surprises](docs/agent-playbooks/known-surprises.md).
 
-## React diagnostics and visual feedback
+## React diagnostics and runtime performance
 
-Use the pinned `yarn doctor:verbose` for React source diagnostics and `yarn doctor:scan <url> --format json` for runtime traces when performance attribution is needed. Follow `.agents/skills/profile-browsing/references/measurement.md`; the scan owns isolated Chrome and must be serialized with other browsers. Treat findings as guidance for affected code, not an aggregate-score gate. Development builds expose the Agentation annotation toolbar, suppressed by the existing visual-testing, profiling, and no-toolbar flags. Use `.agents/skills/inspect-elements/SKILL.md` for visual context and independent source lookup.
+`yarn agent:verify` and Linux CI run advisory task-diff source diagnostics with `yarn doctor:check` and deterministic runtime scenarios with `yarn perf:check`. The runtime command includes collector compatibility fixtures; use `yarn perf:test` to run those alone after React/Bippy/collector upgrades. Run affected scenarios after React state/effect/subscription/rendering changes. `yarn perf:install` installs the pinned browser once; per-edit hooks still only format files.
+
+Development builds initialize the bounded Bippy collector before ReactDOM and expose `window.__REACT_PERF__.reset()` / `.snapshot()`. It counts committed component work by instance; root React Profiler callbacks supply measured subtree render duration. Missing instrumentation, dropped evidence, and exceeded scenario budgets fail checks. Counts do not identify waste or count aborted work. `yarn perf:record --scenario <name>` saves JSON and native Chrome traces under `.react-perf/`; use `profile-browsing` for interpretation and coverage.
+
+Covered flows are unsaved display-name editing, theme changes, and the built-in populated mock feed's expansion/scrolling. These do not prove performance of live peer transport or unvisited routes. Ordinary production excludes profiling instrumentation. `yarn build:profile` and `yarn preview:profile` use a separate `build-profile/` with `react-dom/profiling`; a normal production preview lacks React component timing.
+
+The runner owns its browser/server lifecycle through the shared resource lock; serialize captures and heavy checks, preserving existing sessions. Agentation and the independent element-source helper remain development-only; the runner suppresses the toolbar during capture.

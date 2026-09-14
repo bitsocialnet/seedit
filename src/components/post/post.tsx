@@ -397,4 +397,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   );
 };
 
+// Keep the profiling identity stable when production bundling renames Post.
+if (import.meta.env.DEV || import.meta.env.MODE === 'profiling') Post.displayName = 'FeedPost';
+
 export default React.memo(Post);

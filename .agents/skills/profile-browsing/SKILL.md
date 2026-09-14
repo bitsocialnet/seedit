@@ -1,18 +1,16 @@
 ---
 name: profile-browsing
-description: Measure seedit loading, navigation, or interaction performance and investigate observed bottlenecks.
+description: Measure seedit loading, navigation, interaction timing, and committed React updates using repeatable scenarios.
 ---
 
 # Browsing performance
 
-Define the affected route/interaction and the symptom or comparison to establish. Use current routes in `src/app.tsx`, hash URLs from `src/index.tsx`, and real populated content; do not assume example boards or community addresses are available.
+Define the affected route/interaction and observable completion. Use `scripts/react-perf/config.mjs` for covered deterministic flows; do not treat passing settings scenarios as proof about an unvisited feed.
 
-Reuse a compatible server in this worktree. If one is needed, the task owner starts it in an owned terminal, records its process/session, and stops only that server afterward. A profiling child does not manage servers. Other tasks may have valid Vite processes.
+Run `corepack yarn perf:check --scenario <name>` after a relevant React state/effect/subscription/rendering change. Use `corepack yarn perf:record --scenario <name>` for JSON and native Chrome traces, optionally `--url <origin>` to reuse a compatible instrumented server. The approved runner manages its isolated browser, resource lock, and owned server; a delegated profiler may use it directly. Keep browser work and heavy checks serialized and leave preexisting servers untouched. Install the pinned browser with `yarn perf:install` when absent. `perf:check` also runs compatibility fixtures; use `yarn perf:test` to run those alone after React/Bippy/collector upgrades.
 
-Keep one browser active machine-wide through `./scripts/pw-session.sh`. Use the `playwright-cli` skill for session lifecycle and affected-flow coverage. Browser work and other heavy checks remain serialized. Profile a small flow directly; delegate a substantial independent route set to `profiler` only when useful, with a supplied URL, unique session name, criteria, and evidence to return. Wait for its browser cleanup before another browser task starts.
+Run `corepack yarn doctor:check` for source diagnostics on the task diff (`--base <base>` when the default base is unsuitable). Doctor findings guide investigation; its runtime summary is not a complete rerender counter. Runtime counts come from the bounded `window.__REACT_PERF__` Bippy collector, and actual subtree render timing comes from React's Profiler.
 
-Run `yarn doctor:verbose` for source diagnostics; use `yarn doctor:scan <url> --format json` when a measured React runtime trace is needed. React Doctor runs outside the app and does not expose a browser report global. Follow the measurement reference for browser ownership and capture limits.
+Read [measurement guidance](references/measurement.md) for covered scenarios, collector limits, profiling builds, and the evidence to return. If a new interaction is needed, the task owner can add an authorized scenario; a read-only profiling child reports the missing coverage without changing product code. Manual browser investigations still use `playwright-cli` through `./scripts/pw-session.sh`.
 
-Read [measurement guidance](references/measurement.md) for browser observers, document-versus-hash timing, and this checkout's React evidence. Capture only what resolves the performance question; do not add instrumentation or new app tooling to satisfy a reporting template.
-
-Compare the same narrow flow before/after with equivalent throttle, viewport, content, and capture settings. Report URLs, methods, observed cost, evidence paths, and unavailable metrics. Separate symptoms from inferred causes; cheap rerenders alone do not justify an optimization. Close the exact session on every exit path and leave preexisting servers/profiles untouched.
+Compare the same flow with equivalent content, viewport, throttle, build mode, and capture settings. Return measured costs and counts with evidence, separating observed symptoms from suspected causes. Cheap expected updates alone do not justify an optimization.

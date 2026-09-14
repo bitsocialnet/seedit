@@ -154,6 +154,8 @@ dev-dist
 
 # production
 /build
+/build-profile/
+/.react-perf/
 
 # misc
 .DS_Store

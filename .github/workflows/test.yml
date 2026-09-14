@@ -45,10 +45,34 @@ jobs:
       - name: Lint and module boundaries
         run: yarn lint
 
+      - name: React Doctor diagnostics
+        run: yarn doctor:check
+        env:
+          PERF_BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || (github.event.before != '0000000000000000000000000000000000000000' && github.event.before) || '' }}
+
       - name: Build React App
         run: yarn build
         env:
           CI: ''
+
+      - name: Verify production excludes React development instrumentation
+        run: |
+          if grep -rlE "__REACT_PERF__|agentation-dev-tools|data-feedback-toolbar|__ELEMENT_SOURCE__" build/assets; then
+            echo "::error::React profiling or development inspectors leaked into the production bundle"
+            exit 1
+          fi
+
+      - name: Install performance browser
+        run: yarn perf:install --with-deps
+      - name: Check React collector and runtime scenarios
+        run: yarn perf:check --output .react-perf/ci
+      - name: Upload React performance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: react-performance
+          path: .react-perf/
+          if-no-files-found: warn
 
       - name: Build Preload Script
         run: yarn build:preload

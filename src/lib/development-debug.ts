@@ -31,7 +31,7 @@ export const saveDevelopmentDebugPreferences = (preferences: DevelopmentDebugPre
 };
 
 export const configureDevelopmentMockContent = async () => {
-  if (!import.meta.env.DEV) return;
+  if (!import.meta.env.DEV && import.meta.env.MODE !== 'profiling') return;
 
   if (!getDevelopmentDebugPreferences().mockContentEnabled) return;
 

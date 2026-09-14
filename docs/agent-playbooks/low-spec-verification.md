@@ -62,3 +62,5 @@ Seedit is a React Router SPA, so in-app route changes do not create new navigati
 - The `low` profile is intentionally aggressive. Fall back to `mid` if decentralized requests time out rather than treating the timeout alone as a rendering regression.
 - Separate network delay from render cost with `cpu4` or `cpu6`.
 - For rerender hotspots, use the `profile-browsing` skill on the already-throttled session.
+
+For covered React interactions, `yarn perf:check --scenario <name>` runs repeated 4x-CPU checks with committed-update budgets and root Profiler timing. This CPU-only runner does not replace the network-throttled checks above when peer loading is in scope. Use `profile-browsing` for native traces and the current deterministic coverage.

@@ -25,30 +25,40 @@ const renderApp = async () => {
   await configureDevelopmentMockContent();
   const { default: App } = await import('./app');
 
-  registerSW({
-    immediate: true,
-    onNeedRefresh() {
-      // Reload the page to load the new version
-      // Use window.location.reload() as it's more reliable than reloadSW(true)
-      if (!sessionStorage.getItem('sw-update-reload')) {
-        sessionStorage.setItem('sw-update-reload', 'true');
-        window.location.reload();
-      }
-    },
-    onOfflineReady() {
-      // Clear the reload flag when offline-ready (prevents loops)
-      sessionStorage.removeItem('sw-update-reload');
-    },
-  });
+  if (import.meta.env.MODE !== 'profiling')
+    registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        // Reload the page to load the new version
+        // Use window.location.reload() as it's more reliable than reloadSW(true)
+        if (!sessionStorage.getItem('sw-update-reload')) {
+          sessionStorage.setItem('sw-update-reload', 'true');
+          window.location.reload();
+        }
+      },
+      onOfflineReady() {
+        // Clear the reload flag when offline-ready (prevents loops)
+        sessionStorage.removeItem('sw-update-reload');
+      },
+    });
 
   const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
-  root.render(
+  const tree = (
     <React.StrictMode>
       <Router>
         <App />
         {isVercelDeployment && <Analytics />}
       </Router>
-    </React.StrictMode>,
+    </React.StrictMode>
+  );
+  root.render(
+    (import.meta.env.DEV || import.meta.env.MODE === 'profiling') && window.__REACT_PERF__ ? (
+      <React.Profiler id='app' onRender={window.__REACT_PERF__.onProfilerRender}>
+        {tree}
+      </React.Profiler>
+    ) : (
+      tree
+    ),
   );
 };
 

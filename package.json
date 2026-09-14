@@ -103,7 +103,14 @@
     "ai-workflow:sync": "node scripts/sync-ai-workflow.mjs",
     "ai-workflow:test": "node --test --test-concurrency=1 scripts/__tests__/*.node-test.mjs",
     "agent:verify": "node scripts/agent-verify.mjs",
-    "doctor:scan": "react-doctor scan"
+    "doctor:scan": "react-doctor scan",
+    "perf:check": "node scripts/react-perf/runner.mjs check",
+    "perf:record": "node scripts/react-perf/runner.mjs record",
+    "perf:test": "node scripts/react-perf/runner.mjs selftest",
+    "perf:install": "node scripts/react-perf/install-browser.mjs",
+    "doctor:check": "node scripts/react-perf/doctor-check.mjs",
+    "build:profile": "cross-env REACT_PERF_PROFILE=1 NODE_ENV=production vite build --mode profiling",
+    "preview:profile": "vite preview --outDir build-profile"
   },
   "browserslist": {
     "production": [
@@ -165,7 +172,10 @@
     "vite-plugin-node-polyfills": "0.28.0",
     "vite-plugin-pwa": "1.2.0",
     "vitest": "4.1.0",
-    "wait-on": "9.0.4"
+    "wait-on": "9.0.4",
+    "@playwright/cli": "0.1.19",
+    "bippy": "0.7.3",
+    "esbuild": "0.28.2"
   },
   "optionalDependencies": {
     "portless": "0.11.1"

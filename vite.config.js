@@ -6,6 +6,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = process.env.NODE_ENV === 'development';
+const isProfilingBuild = process.env.REACT_PERF_PROFILE === '1';
 
 export default defineConfig({
   plugins: [
@@ -31,6 +32,7 @@ export default defineConfig({
       include: ['crypto', 'stream', 'util', 'buffer', 'events'],
     }),
     VitePWA({
+      disable: isProfilingBuild || process.env.REACT_PERF_RUN === '1',
       registerType: 'autoUpdate',
       strategies: 'injectManifest',
       injectManifest: {
@@ -143,6 +145,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: [
+      ...(isProfilingBuild ? [{ find: /^react-dom\/client$/, replacement: 'react-dom/profiling' }] : []),
       {
         find: /^@\//,
         replacement: `${resolve(__dirname, 'src')}/`,
@@ -186,7 +189,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
-    open: process.env.PORTLESS_URL ? false : true,
+    open: process.env.REACT_PERF_RUN === '1' || process.env.PORTLESS_URL ? false : true,
     watch: {
       usePolling: true,
     },
@@ -196,9 +199,10 @@ export default defineConfig({
   },
   build: {
     // Use 'build' to match what electron/main.js expects (../build/index.html)
-    outDir: 'build',
+    outDir: isProfilingBuild ? 'build-profile' : 'build',
     emptyOutDir: true,
-    sourcemap: process.env.GENERATE_SOURCEMAP === 'true',
+    sourcemap: isProfilingBuild || process.env.GENERATE_SOURCEMAP === 'true',
+    ...(isProfilingBuild ? { minify: false } : {}),
     target: process.env.ELECTRON ? 'electron-renderer' : 'esnext',
     rollupOptions: {
       output: {

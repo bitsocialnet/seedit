@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url';
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 // Bitsocial checkouts, including 5chan and Seedit, deliberately share this slot.
 export const verificationLockPath = path.join(tmpdir(), '5chan-agent-verify.lock');
-const defaultCommands = ['build', 'lint', 'type-check'].map((name) => ['corepack', 'yarn', name]);
+const defaultCommands = ['build', 'lint', 'type-check', 'doctor:check', 'perf:check'].map((name) => ['corepack', 'yarn', name]);
 const signalExitCode = (signal) => 128 + (constants.signals[signal] || 1);
 
 function acquireLock(lockPath, cwd) {
@@ -110,7 +110,7 @@ export async function runVerification({ cwd = repoRoot, lockPath = verificationL
 
   if (interrupted) return signalExitCode(interrupted);
   if (failures.length) error(`[agent verify] ${failures.length} check(s) failed; returning exit ${exitCode}.`);
-  else if (exitCode === 0) log('[agent verify] Build, lint, and type-check passed.');
+  else if (exitCode === 0) log('[agent verify] Build, lint, type-check, Doctor diagnostics, and runtime performance checks passed.');
   return exitCode;
 }
 
