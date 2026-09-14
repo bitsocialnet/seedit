@@ -27,7 +27,6 @@
     "buffer",
     "crypto-browserify",
     "cz-conventional-changelog",
-    "react-grab",
     "stream-browserify",
     // The PWA service worker entry is injected by vite-plugin-pwa, which Knip does not trace here.
     "workbox-core",

@@ -7,6 +7,8 @@ description: Map a visible seedit DOM node to its React source when file or comp
 
 # Inspect Elements
 
+For contributor-supplied visual feedback, use the development-only Agentation toolbar: select the element, annotate it, and copy its structured context into the task. Verify the supplied selector and nearby source before editing. The toolbar is hidden when `__NO_DEV_TOOLBAR__`, `__VISUAL_TESTING__`, or `__PROFILING__` is set; source inspection remains available independently. Agentation is not a render profiler.
+
 Map the requested live DOM node to source using the dev-only `window.__ELEMENT_SOURCE__` helper. Use an existing compatible dev server in this worktree or record ownership of one started for the task; production does not expose the helper.
 
 Reuse a compatible session supplied by the calling task when it already owns the browser slot; use its exact name and leave its lifecycle with that caller. Otherwise open an owned session through `./scripts/pw-session.sh`. Use `-s=<session>` on every command. The examples use `inspect`; substitute the actual name and URL, and skip `open` when reusing a session:

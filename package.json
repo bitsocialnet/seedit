@@ -102,7 +102,8 @@
     "doctor:verbose": "react-doctor . --verbose -y",
     "ai-workflow:sync": "node scripts/sync-ai-workflow.mjs",
     "ai-workflow:test": "node --test --test-concurrency=1 scripts/__tests__/*.node-test.mjs",
-    "agent:verify": "node scripts/agent-verify.mjs"
+    "agent:verify": "node scripts/agent-verify.mjs",
+    "doctor:scan": "react-doctor scan"
   },
   "browserslist": {
     "production": [
@@ -131,6 +132,7 @@
     "@reforged/maker-appimage": "5.1.1",
     "@types/memoizee": "0.4.9",
     "@vitejs/plugin-react": "6.0.0",
+    "agentation": "3.0.2",
     "assert": "2.1.0",
     "babel-plugin-react-compiler": "1.0.0",
     "buffer": "6.0.3",
@@ -155,9 +157,7 @@
     "oxfmt": "0.24.0",
     "oxlint": "1.39.0",
     "progress": "2.0.3",
-    "react-doctor": "0.8.1",
-    "react-grab": "0.1.48",
-    "react-scan": "0.5.3",
+    "react-doctor": "0.9.14",
     "smol-toml": "1.6.1",
     "stream-browserify": "3.0.0",
     "tar": "7.5.20",

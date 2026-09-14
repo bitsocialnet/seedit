@@ -25,7 +25,7 @@ async page => {
 }
 ```
 
-`__PROFILING__` suppresses the app's react-scan toolbar. Preserve the installed React DevTools hook; do not replace or wrap it merely to count commits. Unsupported observer types are unavailable measurements, not zero values.
+`__PROFILING__` suppresses the app's Agentation toolbar. Preserve the installed React DevTools hook; do not replace or wrap it merely to count commits. Unsupported observer types are unavailable measurements, not zero values.
 
 - **Document load:** navigate to the full hash URL, explicitly reloading if the preceding navigation changed only the hash. Read `performance.getEntriesByType("navigation")` and measure when the actual feed/control becomes ready. The document load event can finish before peer content arrives; a reload is not automatically a cold-cache test.
 - **Hash transition or interaction:** mark phase start, perform the action, wait for its observable completion, then mark phase end in the same document. Put those operations in one `run-code` invocation to avoid including idle time between CLI calls. Do not compare marks across reloads.
@@ -41,18 +41,18 @@ Raw layout-shift events, even with recent-input events excluded, are not the com
 
 Use a [Playwright trace](../../playwright-cli/references/tracing.md) to correlate actions with requests/DOM state when useful; it is not a CPU sampling profile. Record missing peer content, dynamic tooling readiness, background activity, and instrumentation overhead as limitations.
 
-## Seedit React evidence
+## React evidence
 
-`window.__getReactScanReport` is the raw react-scan API exposed by `src/lib/react-scan.ts`. There is no `__resetReactScanReport` and no app-owned plain-object collector. The API arrives via dynamic import; check readiness, report type, and entry count before extracting any component metrics.
+Use `yarn doctor:verbose` for source diagnostics and inspect findings against the affected code. Static findings and scores do not measure runtime cost.
+
+For runtime attribution, run the pinned CLI with an explicit app URL:
 
 ```bash
-playwright-cli -s=profile-task eval '() => {
-  if (typeof window.__getReactScanReport !== "function") return { available: false };
-  const report = window.__getReactScanReport();
-  return { type: report?.constructor?.name, entries: report instanceof Map ? report.size : report && typeof report === "object" ? Object.keys(report).length : null };
-}'
+yarn doctor:scan <url> --format json --trace-out /tmp/doctor-profile.json.gz
 ```
 
-Inspect the actual schema before reading component counts/timing. `JSON.stringify(new Map())` returns `{}` even when entries exist; serializing a fiber graph may fail. An absent or empty report means unavailable attribution, not zero renders or good performance. Use browser timings/traces for the assigned question; do not add an application collector solely to match 5chan's workflow.
+React Doctor launches isolated system Chrome and records until Enter or five minutes. Run it in an owned interactive terminal, reproduce only the assigned flow, stop recording with Enter, and retain its summary and local trace path. Prefer a production preview for representative timings; record capture overhead and dev-only toolbar state when profiling development.
 
-For a concrete visible node, the `inspect-elements` skill can resolve its source through `__ELEMENT_SOURCE__` even when render metrics are unavailable. Preserve missing peer-content and development-tooling limitations in the report.
+This command owns a browser outside `pw-session.sh`: coordinate with the parent and verify no browser session is active before starting. Close any owned Playwright session first; never overlap the capture with another browser task or use a personal browser. If the browser slot cannot be reserved, defer the capture and report the limitation. An explicit `--cdp` connection requires an authorized dedicated debug profile with no nonblank tabs; Chrome tracing affects the entire browser.
+
+Use the React trace for attribution and browser observers for load/interaction timing. Missing metrics mean unavailable evidence, not zero renders. Do not add an app-level collector or instrumentation just to populate a report. For visible-node attribution in a development build, the `inspect-elements` skill uses the independent `__ELEMENT_SOURCE__` helper. Agentation provides annotation context, not performance measurements.

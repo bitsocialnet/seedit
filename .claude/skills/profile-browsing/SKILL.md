@@ -13,7 +13,7 @@ Reuse a compatible server in this worktree. If one is needed, the task owner sta
 
 Keep one browser active machine-wide through `./scripts/pw-session.sh`. Use the `playwright-cli` skill for session lifecycle and affected-flow coverage. Browser work and other heavy checks remain serialized. Profile a small flow directly; delegate a substantial independent route set to `profiler` only when useful, with a supplied URL, unique session name, criteria, and evidence to return. Wait for its browser cleanup before another browser task starts.
 
-`src/lib/react-scan.ts` exposes react-scan’s raw `getReport`, with no app-owned collector or reset function. Inspect its type/schema before interpreting it; an empty report or a Map serialized as `{}` is unavailable evidence, not zero rerenders.
+Run `yarn doctor:verbose` for source diagnostics; use `yarn doctor:scan <url> --format json` when a measured React runtime trace is needed. React Doctor runs outside the app and does not expose a browser report global. Follow the measurement reference for browser ownership and capture limits.
 
 Read [measurement guidance](references/measurement.md) for browser observers, document-versus-hash timing, and this checkout's React evidence. Capture only what resolves the performance question; do not add instrumentation or new app tooling to satisfy a reporting template.
 
