@@ -59,7 +59,7 @@ const All = () => {
     [communityAddresses, feedSortType, timeFilterSeconds],
   );
 
-  const { feed, hasMore, loadMore, reset } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
+  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   const { t } = useTranslation();
 
@@ -91,8 +91,9 @@ const All = () => {
       hasMore,
       communityAddresses,
       onLoadMore: loadMore,
+      requestKey,
     }),
-    [feed, hasMore, communityAddresses, loadMore],
+    [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
   if (isLegacyTopRoute(params.sortType)) {

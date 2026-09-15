@@ -60,7 +60,7 @@ const Mod = () => {
     [communityAddresses, feedSortType, timeFilterSeconds],
   );
 
-  const { feed, hasMore, loadMore, reset } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
+  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   const documentTitle = 'seedit: ' + t('communities_you_moderate');
   useEffect(() => {
@@ -90,8 +90,9 @@ const Mod = () => {
       hasMore,
       communityAddresses,
       onLoadMore: loadMore,
+      requestKey,
     }),
-    [feed, hasMore, communityAddresses, loadMore],
+    [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
   if (isLegacyTopRoute(params.sortType)) {

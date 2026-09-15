@@ -2,7 +2,7 @@
 
 import { act, useSyncExternalStore, type ComponentType } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import type { Comment } from '@bitsocial/bitsocial-react-hooks';
 import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import useContentOptionsStore from '../../stores/use-content-options-store';
@@ -82,9 +82,9 @@ vi.mock('../../hooks/use-time-filter', () => ({
   isValidTopTimeFilterName: () => true,
 }));
 vi.mock('../../hooks/use-progressive-feed', () => ({
-  default: () => {
+  default: (options: unknown) => {
     testState.viewRender();
-    return { feed: testState.feed, hasMore: testState.hasMore, loadMore: testState.loadMore, reset: testState.reset };
+    return { feed: testState.feed, hasMore: testState.hasMore, loadMore: testState.loadMore, reset: testState.reset, requestKey: JSON.stringify(options) };
   },
 }));
 
@@ -116,6 +116,14 @@ vi.mock('../../components/sidebar', () => ({
   },
 }));
 
+const createPendingLoad = () => {
+  let resolve!: () => void;
+  const promise = new Promise<void>((complete) => {
+    resolve = complete;
+  });
+  return { loadMore: vi.fn(() => promise), resolve };
+};
+
 describe('Community feed updates', () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -124,6 +132,7 @@ describe('Community feed updates', () => {
     await act(async () => {
       root.render(
         <MemoryRouter initialEntries={['/s/news/hot']}>
+          <Link to='/s/news/new'>new posts</Link>
           <Routes>
             <Route path='/s/:communityAddress/:sortType' element={<CommunityView />} />
           </Routes>
@@ -192,6 +201,33 @@ describe('Community feed updates', () => {
     await act(async () => container.querySelector('button')?.click());
     expect(nextLoadMore).toHaveBeenCalledOnce();
     expect(firstLoadMore).toHaveBeenCalledOnce();
+  });
+
+  it('resets pagination on a sort change without losing a same-community confirmation or accepting stale completions', async () => {
+    const first = createPendingLoad();
+    const destination = createPendingLoad();
+    testState.loadMore = first.loadMore;
+    testState.blocked = true;
+    await renderCommunity();
+    await clickText('unblock_community');
+    await act(async () => container.querySelector('button')?.click());
+    expect(first.loadMore).toHaveBeenCalledOnce();
+    expect(container.querySelector('button')).toBeNull();
+
+    testState.loadMore = destination.loadMore;
+    await act(async () => container.querySelector('a')?.click());
+    expect(container.textContent).toContain('are_you_sure');
+    expect(container.querySelector('button')?.textContent).toBe('load_more');
+    await act(async () => container.querySelector('button')?.click());
+    expect(destination.loadMore).toHaveBeenCalledOnce();
+
+    await act(async () => first.resolve());
+    expect(container.querySelector('button')).toBeNull();
+    expect(container.textContent).toContain('looking_for_more_posts');
+    await act(async () => destination.resolve());
+    expect(container.querySelector('button')?.textContent).toBe('load_more');
+    expect(container.textContent).toContain('are_you_sure');
+    expect(testState.unblock).not.toHaveBeenCalled();
   });
 
   it('preserves an unblock confirmation for the same community and resets it when the directory resolves to another address', async () => {

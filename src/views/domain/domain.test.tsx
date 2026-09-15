@@ -42,7 +42,7 @@ vi.mock('../../hooks/use-time-filter', () => ({
 vi.mock('../../hooks/use-progressive-feed', () => ({
   default: (options: unknown) => {
     testState.readFeed(options);
-    return { feed: testState.feed, hasMore: testState.hasMore, loadMore: testState.loadMore };
+    return { feed: testState.feed, hasMore: testState.hasMore, loadMore: testState.loadMore, requestKey: JSON.stringify(options) };
   },
 }));
 vi.mock('../../components/post', () => ({ default: () => null }));
@@ -54,6 +54,14 @@ vi.mock('../../components/sidebar', () => ({
     return <aside>{useLocation().pathname}</aside>;
   },
 }));
+
+const createPendingLoad = () => {
+  let resolve!: () => void;
+  const promise = new Promise<void>((complete) => {
+    resolve = complete;
+  });
+  return { loadMore: vi.fn(() => promise), resolve };
+};
 
 describe('Domain feed updates', () => {
   let container: HTMLDivElement;
@@ -90,7 +98,34 @@ describe('Domain feed updates', () => {
     vi.useRealTimers();
   });
 
-  it('preserves pending pagination and updates the default communities, domain filter, and sidebar route', async () => {
+  it.each(['domain', 'default communities'])('resets pagination when %s changes and ignores the previous request completion', async (changedOption) => {
+    const first = createPendingLoad();
+    const destination = createPendingLoad();
+    testState.loadMore = first.loadMore;
+    await renderDomain();
+    await act(async () => container.querySelector('button')?.click());
+    expect(first.loadMore).toHaveBeenCalledOnce();
+    expect(container.querySelector('button')).toBeNull();
+
+    testState.loadMore = destination.loadMore;
+    if (changedOption === 'domain') {
+      await act(async () => container.querySelector('a')?.click());
+    } else {
+      testState.communityAddresses = ['destination.bso'];
+      await renderDomain();
+    }
+    expect(container.querySelector('button')?.textContent).toBe('load_more');
+    await act(async () => container.querySelector('button')?.click());
+    expect(destination.loadMore).toHaveBeenCalledOnce();
+
+    await act(async () => first.resolve());
+    expect(container.querySelector('button')).toBeNull();
+    expect(container.textContent).toContain('looking_for_more_posts');
+    await act(async () => destination.resolve());
+    expect(container.querySelector('button')?.textContent).toBe('load_more');
+  });
+
+  it('preserves pending pagination for feed updates and keeps communities, domain filters, and sidebar routes current', async () => {
     let finishLoading!: () => void;
     const firstLoadMore = vi.fn(
       () =>
@@ -115,21 +150,23 @@ describe('Domain feed updates', () => {
     const nextLoadMore = vi.fn();
     testState.loadMore = nextLoadMore;
     testState.feed = [...testState.feed, { cid: 'next-post' }];
-    testState.communityAddresses = ['updated.bso'];
     await renderDomain();
 
     expect(container.querySelector('button')).toBeNull();
     expect(container.textContent).toContain('looking_for_more_posts');
     expect(nextLoadMore).not.toHaveBeenCalled();
     expect(testState.sidebarRender).toHaveBeenCalledOnce();
-    expect(testState.readCommunities).toHaveBeenLastCalledWith({ communities: [{ name: 'updated.bso' }] });
-    expect(testState.readFeed).toHaveBeenLastCalledWith(expect.objectContaining({ feedOptions: expect.objectContaining({ communities: [{ name: 'updated.bso' }] }) }));
 
     await act(async () => finishLoading());
     expect(container.querySelector('button')?.textContent).toBe('load_more');
     await act(async () => container.querySelector('button')?.click());
     expect(nextLoadMore).toHaveBeenCalledOnce();
     expect(firstLoadMore).toHaveBeenCalledOnce();
+
+    testState.communityAddresses = ['updated.bso'];
+    await renderDomain();
+    expect(testState.readCommunities).toHaveBeenLastCalledWith({ communities: [{ name: 'updated.bso' }] });
+    expect(testState.readFeed).toHaveBeenLastCalledWith(expect.objectContaining({ feedOptions: expect.objectContaining({ communities: [{ name: 'updated.bso' }] }) }));
 
     testState.hasMore = false;
     await renderDomain();

@@ -14,6 +14,7 @@ const testState = vi.hoisted(() => ({
   accountListeners: new Set<() => void>(),
   feed: [{ cid: 'first-post' }],
   hasMore: true,
+  timeFilterSeconds: 86400,
   loadMore: vi.fn<() => void | Promise<void>>(),
   reset: vi.fn(),
   sidebarRender: vi.fn(),
@@ -55,12 +56,18 @@ vi.mock('../../hooks/use-redirect-to-default-sort', () => ({ default: () => unde
 vi.mock('../../hooks/use-feed-pagination', () => ({ FEED_POSTS_PER_PAGE: 25, useInfiniteFeedEnabled: () => false }));
 vi.mock('../../hooks/use-state-string', () => ({ useFeedStateString: () => '' }));
 vi.mock('../../hooks/use-time-filter', () => ({
-  default: () => ({ timeFilterName: '24h', timeFilterSeconds: 86400, sessionKey: 'home' }),
+  default: () => ({ timeFilterName: '24h', timeFilterSeconds: testState.timeFilterSeconds, sessionKey: 'home' }),
   isValidTimeFilterName: () => true,
   isValidTopTimeFilterName: () => true,
 }));
 vi.mock('../../hooks/use-progressive-feed', () => ({
-  default: () => ({ feed: testState.feed, hasMore: testState.hasMore, loadMore: testState.loadMore, reset: testState.reset }),
+  default: (options: unknown) => ({
+    feed: testState.feed,
+    hasMore: testState.hasMore,
+    loadMore: testState.loadMore,
+    reset: testState.reset,
+    requestKey: JSON.stringify([testState.account.author.address, options]),
+  }),
 }));
 
 vi.mock('../../components/post', () => ({ default: () => null }));
@@ -86,6 +93,14 @@ vi.mock('../../components/starter-subscriptions-notice', () => ({
   },
 }));
 
+const createPendingLoad = () => {
+  let resolve!: () => void;
+  const promise = new Promise<void>((complete) => {
+    resolve = complete;
+  });
+  return { loadMore: vi.fn(() => promise), resolve };
+};
+
 describe('Home feed updates', () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -106,6 +121,7 @@ describe('Home feed updates', () => {
     testState.account = { author: { address: 'account-address', displayName: 'Alice' }, subscriptions: ['community.bso'] };
     testState.feed = [{ cid: 'first-post' }];
     testState.hasMore = true;
+    testState.timeFilterSeconds = 86400;
     testState.loadMore = vi.fn();
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -154,6 +170,33 @@ describe('Home feed updates', () => {
     testState.hasMore = false;
     await renderHome();
     expect(container.querySelector('button')).toBeNull();
+  });
+
+  it.each(['subscriptions', 'time filter'])('resets pagination when %s changes and ignores the previous request completion', async (changedOption) => {
+    const first = createPendingLoad();
+    const destination = createPendingLoad();
+    testState.loadMore = first.loadMore;
+    await renderHome();
+    await act(async () => container.querySelector('button')?.click());
+    expect(first.loadMore).toHaveBeenCalledOnce();
+    expect(container.querySelector('button')).toBeNull();
+
+    testState.loadMore = destination.loadMore;
+    if (changedOption === 'subscriptions') {
+      testState.account = { ...testState.account, subscriptions: ['destination.bso'] };
+    } else {
+      testState.timeFilterSeconds = 604800;
+    }
+    await renderHome();
+    expect(container.querySelector('button')?.textContent).toBe('load_more');
+    await act(async () => container.querySelector('button')?.click());
+    expect(destination.loadMore).toHaveBeenCalledOnce();
+
+    await act(async () => first.resolve());
+    expect(container.querySelector('button')).toBeNull();
+    expect(container.textContent).toContain('looking_for_more_posts');
+    await act(async () => destination.resolve());
+    expect(container.querySelector('button')?.textContent).toBe('load_more');
   });
 
   it('isolates notices and the sidebar from feed updates while preserving their account subscriptions', async () => {

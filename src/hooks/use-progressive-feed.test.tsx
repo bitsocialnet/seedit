@@ -12,6 +12,7 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 
 const day = 60 * 60 * 24;
 const testState = vi.hoisted(() => ({
+  accountId: 'account-a',
   baseFeedLength: 0,
   baseHasMore: false,
   probeLengths: new Map<number | undefined, number>(),
@@ -19,6 +20,8 @@ const testState = vi.hoisted(() => ({
   expandTimeWindow: vi.fn(async (_newerThan?: number) => {}),
   loadMore: vi.fn(async () => {}),
 }));
+
+vi.mock('@bitsocial/bitsocial-react-hooks', () => ({ useAccount: () => ({ id: testState.accountId }) }));
 
 const posts = (count: number): Comment[] => Array.from({ length: count }, (_, index) => ({ cid: `post-${index}` }) as Comment);
 
@@ -44,23 +47,22 @@ vi.mock('./use-feed-with-compatible-sort', () => ({
 
 let container: HTMLDivElement;
 let root: Root;
-let hookResult: UseFeedResult;
+let hookResult: ReturnType<typeof useProgressiveFeed>;
 
-const HookHarness = () => {
-  hookResult = useProgressiveFeed({
-    enabled: true,
-    feedOptions: {
-      communities: [{ name: 'progressive-test.bso' }],
-      newerThan: day,
-      postsPerPage: 25,
-      sortType: 'new',
-    },
-  });
+const defaultFeedOptions: UseFeedOptions = {
+  communities: [{ name: 'progressive-test.bso' }],
+  newerThan: day,
+  postsPerPage: 25,
+  sortType: 'new',
+};
+const HookHarness = ({ feedOptions = defaultFeedOptions, enabled = true }: { feedOptions?: UseFeedOptions; enabled?: boolean }) => {
+  hookResult = useProgressiveFeed({ enabled, feedOptions });
   return null;
 };
 
 describe('useProgressiveFeed', () => {
   beforeEach(() => {
+    testState.accountId = 'account-a';
     testState.baseFeedLength = 0;
     testState.baseHasMore = false;
     testState.probeLengths = new Map();
@@ -102,7 +104,9 @@ describe('useProgressiveFeed', () => {
     ]);
 
     await act(() => root.render(createElement(HookHarness)));
+    const requestKey = hookResult.requestKey;
     await act(() => hookResult.loadMore());
+    expect(hookResult.requestKey).toBe(requestKey);
 
     expect(testState.expandTimeWindow).not.toHaveBeenCalled();
     expect(hookResult.feed).toHaveLength(31);
@@ -134,5 +138,44 @@ describe('useProgressiveFeed', () => {
     expect(testState.enabledWindows.filter((newerThan) => newerThan === day)).toHaveLength(2);
     expect(testState.expandTimeWindow).not.toHaveBeenCalled();
     expect(hookResult.feed).toHaveLength(1);
+  });
+  it('keeps pagination identity stable through equivalent inputs and automatic widening', async () => {
+    testState.baseHasMore = true;
+    testState.baseFeedLength = 4;
+    const options = { ...defaultFeedOptions, communities: [{ name: 'one.bso' }, { name: 'two.bso' }] };
+    await act(() => root.render(createElement(HookHarness, { feedOptions: options })));
+    const requestKey = hookResult.requestKey;
+    await act(() => root.render(createElement(HookHarness, { feedOptions: { ...options, communities: [...options.communities].reverse() } })));
+    expect(hookResult.requestKey).toBe(requestKey);
+    testState.baseHasMore = false;
+    testState.probeLengths = new Map([[7 * day, 25]]);
+    await act(() => root.render(createElement(HookHarness, { feedOptions: options })));
+    expect(hookResult.feed).toHaveLength(25);
+    expect(hookResult.requestKey).toBe(requestKey);
+  });
+
+  it.each([
+    ['sort', { sortType: 'hot' }],
+    ['time window', { newerThan: 7 * day }],
+    ['community set', { communities: [{ name: 'other.bso' }] }],
+    ['domain filter', { filter: { key: 'domain-other.bso', filter: () => true } }],
+  ])('changes pagination identity when the %s changes', async (_name, change) => {
+    testState.baseHasMore = true;
+    await act(() => root.render(createElement(HookHarness)));
+    const requestKey = hookResult.requestKey;
+    await act(() => root.render(createElement(HookHarness, { feedOptions: { ...defaultFeedOptions, ...change } })));
+    expect(hookResult.requestKey).not.toBe(requestKey);
+  });
+
+  it('changes pagination identity when the selected account or loading mode changes', async () => {
+    testState.baseHasMore = true;
+    await act(() => root.render(createElement(HookHarness)));
+    const firstKey = hookResult.requestKey;
+    testState.accountId = 'account-b';
+    await act(() => root.render(createElement(HookHarness)));
+    const secondKey = hookResult.requestKey;
+    expect(secondKey).not.toBe(firstKey);
+    await act(() => root.render(createElement(HookHarness, { enabled: false })));
+    expect(hookResult.requestKey).not.toBe(secondKey);
   });
 });

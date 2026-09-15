@@ -81,7 +81,7 @@ const Domain = () => {
     return options;
   }, [communityAddresses, feedSortType, timeFilterSeconds, matchesDomain, domain]);
 
-  const { feed, hasMore, loadMore } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
+  const { feed, hasMore, loadMore, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   useEffect(() => {
     let timer: NodeJS.Timeout | null = null;
@@ -127,8 +127,9 @@ const Domain = () => {
       hasMore,
       communityAddresses,
       onLoadMore: loadMore,
+      requestKey,
     }),
-    [feed, hasMore, communityAddresses, loadMore],
+    [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
   if (isLegacyTopRoute(params.sortType)) {

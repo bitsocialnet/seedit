@@ -86,7 +86,7 @@ const Home = () => {
     [communityAddresses, feedSortType, timeFilterSeconds],
   );
 
-  const { feed, hasMore, loadMore, reset } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
+  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
 
@@ -120,8 +120,9 @@ const Home = () => {
       hasMore,
       communityAddresses,
       onLoadMore: loadMore,
+      requestKey,
     }),
-    [feed, hasMore, communityAddresses, loadMore],
+    [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
   const [safeToShowNoSubscriptions, setSafeToShowNoSubscriptions] = useState(false);

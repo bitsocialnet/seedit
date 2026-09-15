@@ -45,6 +45,7 @@ interface FooterProps {
   hasMore: boolean;
   reset: () => void;
   onLoadMore: () => void;
+  requestKey: string;
 }
 
 const Footer = ({
@@ -59,6 +60,7 @@ const Footer = ({
   hasMore,
   reset,
   onLoadMore,
+  requestKey,
 }: FooterProps) => {
   const { t } = useTranslation();
   let footerFirstLine;
@@ -125,7 +127,7 @@ const Footer = ({
         </>
       )}
       {footerSecondLine}
-      <FeedPagination feedLength={paginationFeedLength} hasMore={hasMore} canLoadMore={isOnline} onLoadMore={onLoadMore} />
+      <FeedPagination key={requestKey} feedLength={paginationFeedLength} hasMore={hasMore} canLoadMore={isOnline} onLoadMore={onLoadMore} />
     </div>
   );
 };
@@ -182,7 +184,7 @@ const CommunityView = () => {
     [communityAddresses, feedSortType, timeFilterSeconds],
   );
 
-  const { feed, hasMore, loadMore, reset } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
+  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   // show account comments instantly in the feed once published (cid defined), instead of waiting for the feed to update
   const { accountComments } = useAccountComments({ communityAddress, newerThan: 60 * 60 });
@@ -234,8 +236,22 @@ const CommunityView = () => {
       hasMore,
       reset,
       onLoadMore: loadMore,
+      requestKey,
     }),
-    [communityAddresses, communityAddress, combinedFeed.length, feed.length, isOnline, updatedAt, started, isSubCreatedButNotYetPublished, hasMore, reset, loadMore],
+    [
+      communityAddresses,
+      communityAddress,
+      combinedFeed.length,
+      feed.length,
+      isOnline,
+      updatedAt,
+      started,
+      isSubCreatedButNotYetPublished,
+      hasMore,
+      reset,
+      loadMore,
+      requestKey,
+    ],
   );
 
   // scrolling position state for virtuoso feed
