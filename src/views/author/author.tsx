@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAuthorComments, useAuthor } from '@bitsocial/bitsocial-react-hooks';
+import { useAuthorComments, useAuthor, type Comment } from '@bitsocial/bitsocial-react-hooks';
 import { StateSnapshot, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { isAuthorCommentsView, isAuthorSubmittedView } from '../../lib/utils/view-utils';
 import useWindowWidth from '../../hooks/use-window-width';
@@ -14,6 +14,24 @@ import ErrorDisplay from '../../components/error-display';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
+
+interface AuthorFeedContext {
+  hasMore: boolean;
+  loadingString: string;
+}
+
+const AuthorFeedFooter = ({ context }: { context: AuthorFeedContext }) => {
+  const { t } = useTranslation();
+  return context.hasMore ? (
+    <span className={styles.loadingString}>
+      <LoadingEllipsis string={context.loadingString || t('loading')} />
+    </span>
+  ) : null;
+};
+
+const feedComponents = { Footer: AuthorFeedFooter };
+const renderComment = (index: number, post: Comment | undefined) =>
+  post?.parentCid ? <Reply index={index} isSingleReply={true} reply={post} /> : <Post index={index} post={post} />;
 
 const Author = () => {
   const { t } = useTranslation();
@@ -40,14 +58,7 @@ const Author = () => {
   const postComments = useMemo(() => authorComments?.filter((comment) => comment && !comment.parentCid) || [], [authorComments]);
 
   const loadingString = isInAuthorCommentsView ? t('downloading_comments') : t('downloading_posts');
-
-  const Footer = () => {
-    return hasMore ? (
-      <span className={styles.loadingString}>
-        <LoadingEllipsis string={loadingString || t('loading')} />
-      </span>
-    ) : null;
-  };
+  const feedContext = useMemo(() => ({ hasMore, loadingString }), [hasMore, loadingString]);
 
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
 
@@ -108,16 +119,15 @@ const Author = () => {
           <ErrorDisplay error={error} />
         </div>
       )}
-      <Virtuoso
+      <Virtuoso<Comment | undefined, AuthorFeedContext>
         increaseViewportBy={{ bottom: 1200, top: 600 }}
         totalCount={authorComments?.length || 0}
         data={virtuosoData}
-        itemContent={(index, post) => {
-          const isReply = post?.parentCid;
-          return !isReply ? <Post index={index} post={post} /> : <Reply index={index} isSingleReply={true} reply={post} />;
-        }}
+        computeItemKey={(index, post) => post?.cid || index}
+        itemContent={renderComment}
         useWindowScroll={true}
-        components={{ Footer }}
+        components={feedComponents}
+        context={feedContext}
         endReached={loadMore}
         ref={virtuosoRef}
         restoreStateFrom={lastVirtuosoState}
