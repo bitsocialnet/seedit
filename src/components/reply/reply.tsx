@@ -574,14 +574,9 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
               {!isSingleReply &&
                 replies.map((reply, index) => {
                   return (
-                    <Fragment key={`${index}-${reply.cid}`}>
+                    <Fragment key={reply.cid ?? `pending-reply-${index}`}>
                       {!depth || depth < 9 ? (
-                        <Reply
-                          key={`${index}${reply.cid}`}
-                          reply={reply}
-                          depth={(depth || 0) + 1}
-                          cidOfReplyWithContext={isInPostContextView ? params?.commentCid : undefined}
-                        />
+                        <Reply reply={reply} depth={(depth || 0) + 1} cidOfReplyWithContext={isInPostContextView ? params?.commentCid : undefined} />
                       ) : (
                         <div className={styles.continueThisThread}>
                           <Link to={communityAddress && cid ? getCommunityPostPath(communityAddress, cid) : ''}>{t('continue_thread')}</Link>
