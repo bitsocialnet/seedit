@@ -126,6 +126,7 @@ const VirtualizedCommentList = ({ comments }: { comments: any[] }) => {
       increaseViewportBy={{ bottom: 1200, top: 600 }}
       data={comments}
       totalCount={comments.length}
+      computeItemKey={(index, post) => post?.cid || index}
       itemContent={(index, post: any) =>
         post?.parentCid ? <Reply key={post?.cid} index={index} isSingleReply={true} reply={post} /> : <Post key={post?.cid} index={index} post={post} />
       }

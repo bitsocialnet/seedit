@@ -27,7 +27,11 @@ type StatsAction =
     };
 
 const statsReducer = (state: StatsState, action: StatsAction): StatsState => {
-  if (action.type === 'loading') return { ...state, error: undefined, loading: state.rows.length === 0 };
+  if (action.type === 'loading') {
+    const loading = state.rows.length === 0;
+    if (state.error === undefined && state.loading === loading) return state;
+    return { ...state, error: undefined, loading };
+  }
   if (action.type === 'loaded') return { loading: false, rows: action.rows, updatedAt: action.timestamp };
   return { ...state, error: action.error, loading: false, updatedAt: action.timestamp };
 };

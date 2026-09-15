@@ -13,7 +13,8 @@ const clearTimeoutRef = (timeoutRef: { current: ReturnType<typeof setTimeout> | 
 
 const NotificationsSettings = () => {
   const { t } = useTranslation();
-  const { enableLocalNotifications, setEnableLocalNotifications } = useContentOptionsStore();
+  const enableLocalNotifications = useContentOptionsStore((state) => state.enableLocalNotifications);
+  const setEnableLocalNotifications = useContentOptionsStore((state) => state.setEnableLocalNotifications);
   const [permissionStatus, setPermissionStatus] = useState<string | null>(null);
   const [platform, setPlatform] = useState<NodeJS.Platform | null>(null);
   const [isLoading, setIsLoading] = useState(false);

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -29,9 +29,10 @@ import styles from './community-settings.module.css';
 import _ from 'lodash';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 
-const Title = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
+const Title = memo(function Title({ isReadOnly = false }: { isReadOnly?: boolean }) {
   const { t } = useTranslation();
-  const { title, setCommunitySettingsStore } = useCommunitySettingsStore();
+  const title = useCommunitySettingsStore((state) => state.title);
+  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
 
   return (
     <div className={`${styles.box} ${isReadOnly && !title ? styles.hidden : styles.visible}`}>
@@ -42,11 +43,12 @@ const Title = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
       </div>
     </div>
   );
-};
+});
 
-const Description = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
+const Description = memo(function Description({ isReadOnly = false }: { isReadOnly?: boolean }) {
   const { t } = useTranslation();
-  const { description, setCommunitySettingsStore } = useCommunitySettingsStore();
+  const description = useCommunitySettingsStore((state) => state.description);
+  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
   const [showFormattingHelp, setShowFormattingHelp] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -95,11 +97,12 @@ const Description = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
       </div>
     </div>
   );
-};
+});
 
-const Address = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
+const Address = memo(function Address({ isReadOnly = false }: { isReadOnly?: boolean }) {
   const { t } = useTranslation();
-  const { address, setCommunitySettingsStore } = useCommunitySettingsStore();
+  const address = useCommunitySettingsStore((state) => state.address);
+  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
 
   const alertCryptoAddressInfo = () => {
     alert(
@@ -123,11 +126,12 @@ const Address = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
       </div>
     </div>
   );
-};
+});
 
-const Rules = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
+const Rules = memo(function Rules({ isReadOnly = false }: { isReadOnly?: boolean }) {
   const { t } = useTranslation();
-  const { rules, setCommunitySettingsStore } = useCommunitySettingsStore();
+  const rules = useCommunitySettingsStore((state) => state.rules);
+  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
   const lastRuleRef = useRef(null);
 
   const handleRuleChange = (index: number, newRule: string) => {
@@ -183,11 +187,12 @@ const Rules = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
       </div>
     </div>
   );
-};
+});
 
-const Moderators = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
+const Moderators = memo(function Moderators({ isReadOnly = false }: { isReadOnly?: boolean }) {
   const { t } = useTranslation();
-  const { roles, setCommunitySettingsStore } = useCommunitySettingsStore();
+  const roles = useCommunitySettingsStore((state) => state.roles);
+  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
   const lastModeratorRef = useRef(null);
 
   const addedModeratorRef = useRef(false);
@@ -283,9 +288,9 @@ const Moderators = ({ isReadOnly = false }: { isReadOnly?: boolean }) => {
       </div>
     </div>
   );
-};
+});
 
-const JSONSettings = ({ isReadOnly: _isReadOnly = false }: { isReadOnly?: boolean }) => {
+const JSONSettings = memo(function JSONSettings({ isReadOnly: _isReadOnly = false }: { isReadOnly?: boolean }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { communityAddress } = useResolvedCommunityRoute();
@@ -301,7 +306,7 @@ const JSONSettings = ({ isReadOnly: _isReadOnly = false }: { isReadOnly?: boolea
       </div>
     </div>
   );
-};
+});
 
 const CommunitySettings = () => {
   const { t } = useTranslation();
@@ -310,8 +315,9 @@ const CommunitySettings = () => {
   const { address, challenges, createdAt, description, error, rules, shortAddress, settings, suggested, roles, title } = community || {};
   const hasLoaded = !!createdAt;
 
-  const { challenges: rpcChallenges } = usePkcRpcSettings().pkcRpcSettings || {};
-  const challengeNames = Object.keys(rpcChallenges || {});
+  const { pkcRpcSettings, state: rpcState } = usePkcRpcSettings();
+  const { challenges: rpcChallenges } = pkcRpcSettings || {};
+  const challengeNames = useMemo(() => Object.keys(rpcChallenges || {}), [rpcChallenges]);
 
   const account = useAccount();
   const location = useLocation();
@@ -319,7 +325,7 @@ const CommunitySettings = () => {
   const params = useParams();
   const isInCreateCommunityView = isCreateCommunityView(location.pathname);
   const isInCommunitySettingsView = isCommunitySettingsView(location.pathname, params);
-  const isConnectedToRpc = usePkcRpcSettings()?.state === 'connected';
+  const isConnectedToRpc = rpcState === 'connected';
 
   useEffect(() => {
     if (isInCreateCommunityView && !isConnectedToRpc) {
@@ -338,7 +344,10 @@ const CommunitySettings = () => {
   // Challenges are always read-only when not connected to RPC
   const isChallengesReadOnly = (!isConnectedToRpc || !settings) && !isInCreateCommunityView;
 
-  const { publishCommunityEditOptions, resetCommunitySettingsStore, setCommunitySettingsStore, title: storeTitle } = useCommunitySettingsStore();
+  const publishCommunityEditOptions = useCommunitySettingsStore((state) => state.publishCommunityEditOptions);
+  const resetCommunitySettingsStore = useCommunitySettingsStore((state) => state.resetCommunitySettingsStore);
+  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
+  const storeTitle = useCommunitySettingsStore((state) => state.title);
   const { error: publishCommunityEditError, publishCommunityEdit } = usePublishCommunityEdit(publishCommunityEditOptions);
   const { error: createCommunityError, createdCommunity, createCommunity } = useCreateCommunity(publishCommunityEditOptions);
 

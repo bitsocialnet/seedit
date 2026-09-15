@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { CommunityIdentifier, UseFeedOptions, UseFeedResult } from '@bitsocial/bitsocial-react-hooks';
+import { useAccount, type CommunityIdentifier, type UseFeedOptions, type UseFeedResult } from '@bitsocial/bitsocial-react-hooks';
 import { FEED_POSTS_PER_PAGE } from './use-feed-pagination';
 import useFeedWithCompatibleSort from './use-feed-with-compatible-sort';
 import useSuggestionFeedLoader from './use-suggestion-feed-loader';
@@ -29,9 +29,12 @@ const getProgressiveFeedKey = (options: UseFeedOptions): string =>
     [...(options.communities || [])].map(getCommunityKey).sort().join(','),
   ].join('|');
 
-const useProgressiveFeed = ({ enabled, feedOptions }: UseProgressiveFeedOptions): UseFeedResult => {
+const useProgressiveFeed = ({ enabled, feedOptions }: UseProgressiveFeedOptions): UseFeedResult & { requestKey: string } => {
   const lastAutomaticExpansionRef = useRef<{ feedKey: string; feedLength: number; hasMore: boolean; state: string } | undefined>(undefined);
-  const feedKey = useMemo(() => getProgressiveFeedKey(feedOptions), [feedOptions]);
+  const accountId = useAccount({ accountName: feedOptions.accountName })?.id;
+  const feedKey = useMemo(() => JSON.stringify([accountId, getProgressiveFeedKey(feedOptions)]), [accountId, feedOptions]);
+  // Widening the time window continues the same request; changing its inputs does not.
+  const requestKey = JSON.stringify([enabled, feedKey]);
   const [activeWindow, setActiveWindow] = useState<{ feedKey: string; newerThan?: number }>({ feedKey, newerThan: feedOptions.newerThan });
   const currentNewerThan = activeWindow.feedKey === feedKey ? activeWindow.newerThan : feedOptions.newerThan;
   const currentFeedOptions = useMemo(
@@ -163,6 +166,7 @@ const useProgressiveFeed = ({ enabled, feedOptions }: UseProgressiveFeedOptions)
 
   return {
     ...baseFeed,
+    requestKey,
     hasMore: baseFeed.hasMore || (enabled && currentNewerThan !== undefined),
     loadMore,
   };

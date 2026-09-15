@@ -14,6 +14,7 @@ import styles from './feed-footer.module.css';
 import React from 'react';
 
 interface FeedFooterProps {
+  requestKey: string;
   feedLength: number;
   hasFeedLoaded: boolean;
   hasMore: boolean;
@@ -21,7 +22,7 @@ interface FeedFooterProps {
   onLoadMore: () => void;
 }
 
-const FeedFooter = ({ feedLength, hasFeedLoaded, hasMore, communityAddresses, onLoadMore }: FeedFooterProps) => {
+const FeedFooter = ({ requestKey, feedLength, hasFeedLoaded, hasMore, communityAddresses, onLoadMore }: FeedFooterProps) => {
   let footerContent;
   const { t } = useTranslation();
   const location = useLocation();
@@ -88,7 +89,7 @@ const FeedFooter = ({ feedLength, hasFeedLoaded, hasMore, communityAddresses, on
   return (
     <div className={styles.footer}>
       {footerContent}
-      <FeedPagination feedLength={feedLength} hasMore={hasMore} onLoadMore={onLoadMore} />
+      <FeedPagination key={requestKey} feedLength={feedLength} hasMore={hasMore} onLoadMore={onLoadMore} />
     </div>
   );
 };

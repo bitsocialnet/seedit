@@ -128,6 +128,7 @@ const Inbox = () => {
         increaseViewportBy={{ bottom: 1200, top: 600 }}
         totalCount={notifications?.length || 0}
         data={comments}
+        computeItemKey={(index, notification) => notification?.cid || index}
         itemContent={(index, notification) => (
           <div className={styles.notification}>
             <Reply index={index} isSingleReply={true} reply={notification} isNotification={true} />

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
 import { Navigate, useLocation, useParams, useNavigate } from 'react-router-dom';
-import { useAccountComments, useBlock, useCommunity } from '@bitsocial/bitsocial-react-hooks';
+import { useAccountComments, useBlock, useCommunity, type Comment } from '@bitsocial/bitsocial-react-hooks';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { useTranslation } from 'react-i18next';
 import styles from './community.module.css';
@@ -45,6 +45,7 @@ interface FooterProps {
   hasMore: boolean;
   reset: () => void;
   onLoadMore: () => void;
+  requestKey: string;
 }
 
 const Footer = ({
@@ -59,6 +60,7 @@ const Footer = ({
   hasMore,
   reset,
   onLoadMore,
+  requestKey,
 }: FooterProps) => {
   const { t } = useTranslation();
   let footerFirstLine;
@@ -125,10 +127,16 @@ const Footer = ({
         </>
       )}
       {footerSecondLine}
-      <FeedPagination feedLength={paginationFeedLength} hasMore={hasMore} canLoadMore={isOnline} onLoadMore={onLoadMore} />
+      <FeedPagination key={requestKey} feedLength={paginationFeedLength} hasMore={hasMore} canLoadMore={isOnline} onLoadMore={onLoadMore} />
     </div>
   );
 };
+
+// Preserve footer state through feed updates, but scope confirmations to the exact community.
+const CommunityFeedFooter = ({ context }: { context: FooterProps }) => <Footer key={context.communityAddress} {...context} />;
+const feedComponents = { Footer: CommunityFeedFooter };
+const renderPost = (index: number, post: Comment) => <Post key={post?.cid} index={index} post={post} />;
+const CommunitySidebar = memo(Sidebar);
 
 const CommunityView = () => {
   const params = useParams();
@@ -176,7 +184,7 @@ const CommunityView = () => {
     [communityAddresses, feedSortType, timeFilterSeconds],
   );
 
-  const { feed, hasMore, loadMore, reset } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
+  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   // show account comments instantly in the feed once published (cid defined), instead of waiting for the feed to update
   const { accountComments } = useAccountComments({ communityAddress, newerThan: 60 * 60 });
@@ -207,7 +215,7 @@ const CommunityView = () => {
     return newFeed;
   }, [feed, filteredComments]);
 
-  const { setPinnedPostsCount } = usePinnedPostsStore();
+  const setPinnedPostsCount = usePinnedPostsStore((state) => state.setPinnedPostsCount);
   useEffect(() => {
     if (feed) {
       const pinnedCount = feed.filter((post) => post.pinned).length;
@@ -215,19 +223,36 @@ const CommunityView = () => {
     }
   }, [feed, setPinnedPostsCount]);
 
-  const footerProps: FooterProps = {
-    communityAddresses,
-    communityAddress,
-    feedLength: combinedFeed.length || 0,
-    paginationFeedLength: feed?.length ?? 0,
-    isOnline,
-    hasCommunityLoaded: Boolean(updatedAt),
-    started,
-    isSubCreatedButNotYetPublished,
-    hasMore,
-    reset,
-    onLoadMore: loadMore,
-  };
+  const footerProps = useMemo<FooterProps>(
+    () => ({
+      communityAddresses,
+      communityAddress,
+      feedLength: combinedFeed.length,
+      paginationFeedLength: feed.length,
+      isOnline,
+      hasCommunityLoaded: Boolean(updatedAt),
+      started,
+      isSubCreatedButNotYetPublished,
+      hasMore,
+      reset,
+      onLoadMore: loadMore,
+      requestKey,
+    }),
+    [
+      communityAddresses,
+      communityAddress,
+      combinedFeed.length,
+      feed.length,
+      isOnline,
+      updatedAt,
+      started,
+      isSubCreatedButNotYetPublished,
+      hasMore,
+      reset,
+      loadMore,
+      requestKey,
+    ],
+  );
 
   // scrolling position state for virtuoso feed
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
@@ -245,7 +270,7 @@ const CommunityView = () => {
   const lastVirtuosoState = lastVirtuosoStates?.[communityAddress + sortType + timeFilterName];
 
   // Show the warning when default-community metadata marks this community NSFW.
-  const { hideNsfwCommunities } = useContentOptionsStore();
+  const hideNsfwCommunities = useContentOptionsStore((state) => state.hideNsfwCommunities);
   const isHiddenNsfwCommunity = useIsNsfwCommunity(communityAddress || '') && hideNsfwCommunities;
 
   const prevErrorMessageRef = useRef<string | undefined>(undefined);
@@ -281,7 +306,7 @@ const CommunityView = () => {
   ) : (
     <div className={layoutStyles.content}>
       <div className={layoutStyles.sidebar}>
-        <Sidebar
+        <CommunitySidebar
           community={community}
           communityAddress={communityAddress}
           directoryCode={directoryCode}
@@ -299,14 +324,15 @@ const CommunityView = () => {
       <div className={layoutStyles.feed}>
         <DevelopmentFeedResetButton onReset={reset} />
         {sortType === 'top' && <TopTimeFilter selectedTimeFilterName={timeFilterName || 'all'} sessionKey={sessionKey} />}
-        <Virtuoso
+        <Virtuoso<Comment, FooterProps>
           increaseViewportBy={{ bottom: 1200, top: 600 }}
           totalCount={combinedFeed?.length || 0}
           data={combinedFeed}
           computeItemKey={(index, post) => post?.cid || index}
-          itemContent={(index, post) => <Post key={post?.cid} index={index} post={post} />}
+          itemContent={renderPost}
           useWindowScroll={true}
-          components={{ Footer: () => <Footer {...footerProps} /> }}
+          components={feedComponents}
+          context={footerProps}
           endReached={infiniteFeedEnabled ? loadMore : undefined}
           ref={virtuosoRef}
           restoreStateFrom={lastVirtuosoState}

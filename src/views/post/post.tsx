@@ -184,7 +184,7 @@ const Post = ({ post }: { post: Comment }) => {
             {isSingleComment ? (
               <Reply key={`singleComment-${cid}`} reply={post} depth={0} isSingleComment={true} />
             ) : (
-              replies.map((reply, index) => <Reply key={`${index}${reply.cid}`} reply={reply} depth={depth} />)
+              replies.map((reply, index) => <Reply key={reply.cid ?? `pending-reply-${index}`} reply={reply} depth={depth} />)
             )}
           </div>
         </div>

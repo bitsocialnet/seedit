@@ -61,7 +61,7 @@ const MyCommunitiesTabs = () => {
 const Infobar = () => {
   const account = useAccount();
   const { accountCommunities, error: accountCommunitiesError } = useAccountCommunities();
-  const { setError } = useErrorStore();
+  const setError = useErrorStore((state) => state.setError);
 
   useEffect(() => {
     setError('Infobar_useAccountCommunities', accountCommunitiesError);
@@ -116,7 +116,7 @@ const Infobar = () => {
 const AccountCommunities = ({ viewRole }: { viewRole: string }) => {
   const account = useAccount();
   const { accountCommunities, error: accountCommunitiesError } = useAccountCommunities();
-  const { setError } = useErrorStore();
+  const setError = useErrorStore((state) => state.setError);
   const location = useLocation();
   const defaultCommunities = useDefaultSubscriptions();
 
@@ -147,7 +147,13 @@ const AccountCommunities = ({ viewRole }: { viewRole: string }) => {
     .map((communityData, index) => {
       const defaultCommunity = defaultCommunities.find((defaultSub) => defaultSub.address === (communityData as any).address);
       return (
-        <CommunityItem key={index} community={communityData} nsfw={deriveCommunityNsfw(communityData, defaultCommunity)} tags={defaultCommunity?.tags} index={index} />
+        <CommunityItem
+          key={communityData.address}
+          community={communityData}
+          nsfw={deriveCommunityNsfw(communityData, defaultCommunity)}
+          tags={defaultCommunity?.tags}
+          index={index}
+        />
       );
     });
 
@@ -159,7 +165,7 @@ const AccountCommunities = ({ viewRole }: { viewRole: string }) => {
 
 const SubscriberCommunities = () => {
   const account = useAccount();
-  const { setError } = useErrorStore();
+  const setError = useErrorStore((state) => state.setError);
   const location = useLocation();
   const defaultCommunities = useDefaultSubscriptions();
 
@@ -221,7 +227,7 @@ const SubscriberCommunities = () => {
 const AllAccountCommunities = () => {
   const account = useAccount();
   const { accountCommunities, error: accountCommunitiesError } = useAccountCommunities();
-  const { setError } = useErrorStore();
+  const setError = useErrorStore((state) => state.setError);
   const location = useLocation();
   const defaultCommunities = useDefaultSubscriptions();
 
@@ -281,17 +287,9 @@ const AllAccountCommunities = () => {
   return <>{communityElements}</>;
 };
 
-const Communities = () => {
-  const { t } = useTranslation();
+const CommunitiesErrors = () => {
   const location = useLocation();
-  const { directoryCode } = useParams();
-  const { errors, clearAllErrors } = useErrorStore();
-
-  useEffect(() => {
-    return () => {
-      clearAllErrors();
-    };
-  }, [location, clearAllErrors]);
+  const errors = useErrorStore((state) => state.errors);
 
   useEffect(() => {
     Object.entries(errors).forEach(([source, errorObj]) => {
@@ -300,6 +298,57 @@ const Communities = () => {
       }
     });
   }, [errors]);
+
+  const isInCommunitiesSubscriberView = isCommunitiesSubscriberView(location.pathname);
+  const isInCommunitiesModeratorView = isCommunitiesModeratorView(location.pathname);
+  const isInCommunitiesAdminView = isCommunitiesAdminView(location.pathname);
+  const isInCommunitiesOwnerView = isCommunitiesOwnerView(location.pathname);
+  const isInCommunitiesDirectoryView = isCommunitiesDirectoryView(location.pathname);
+  const isInCommunitiesView =
+    isCommunitiesView(location.pathname) &&
+    !isInCommunitiesSubscriberView &&
+    !isInCommunitiesModeratorView &&
+    !isInCommunitiesAdminView &&
+    !isInCommunitiesOwnerView &&
+    !isInCommunitiesDirectoryView;
+
+  const renderErrors = () => {
+    const errorsToDisplay: React.JSX.Element[] = [];
+    Object.entries(errors).forEach(([source, errorObj]) => {
+      if (!errorObj) return;
+
+      if (
+        source === 'Infobar_useAccountCommunities' &&
+        (isInCommunitiesView || isInCommunitiesSubscriberView || isInCommunitiesModeratorView || isInCommunitiesAdminView || isInCommunitiesOwnerView)
+      ) {
+        errorsToDisplay.push(<ErrorDisplay key={source} error={errorObj} />);
+      } else if (source === 'AccountCommunities_useAccountCommunities' && (isInCommunitiesModeratorView || isInCommunitiesAdminView || isInCommunitiesOwnerView)) {
+        errorsToDisplay.push(<ErrorDisplay key={source} error={errorObj} />);
+      } else if (source === 'SubscriberCommunities_useCommunities' && isInCommunitiesSubscriberView) {
+        errorsToDisplay.push(<ErrorDisplay key={source} error={errorObj} />);
+      } else if (source === 'AllAccountCommunities_useAccountCommunities' && isInCommunitiesView) {
+        errorsToDisplay.push(<ErrorDisplay key={source} error={errorObj} />);
+      } else if (source === 'AllAccountCommunities_useCommunities' && isInCommunitiesView) {
+        errorsToDisplay.push(<ErrorDisplay key={`${source}_communities`} error={errorObj} />);
+      }
+    });
+    return errorsToDisplay;
+  };
+
+  return <div className={styles.error}>{renderErrors()}</div>;
+};
+
+const Communities = () => {
+  const { t } = useTranslation();
+  const location = useLocation();
+  const { directoryCode } = useParams();
+  const clearAllErrors = useErrorStore((state) => state.clearAllErrors);
+
+  useEffect(() => {
+    return () => {
+      clearAllErrors();
+    };
+  }, [location, clearAllErrors]);
 
   const isInCommunitiesSubscriberView = isCommunitiesSubscriberView(location.pathname);
   const isInCommunitiesModeratorView = isCommunitiesModeratorView(location.pathname);
@@ -358,29 +407,6 @@ const Communities = () => {
     document.title = documentTitle;
   }, [documentTitle]);
 
-  const renderErrors = () => {
-    const errorsToDisplay: React.JSX.Element[] = [];
-    Object.entries(errors).forEach(([source, errorObj]) => {
-      if (!errorObj) return;
-
-      if (
-        source === 'Infobar_useAccountCommunities' &&
-        (isInCommunitiesView || isInCommunitiesSubscriberView || isInCommunitiesModeratorView || isInCommunitiesAdminView || isInCommunitiesOwnerView)
-      ) {
-        errorsToDisplay.push(<ErrorDisplay key={source} error={errorObj} />);
-      } else if (source === 'AccountCommunities_useAccountCommunities' && (isInCommunitiesModeratorView || isInCommunitiesAdminView || isInCommunitiesOwnerView)) {
-        errorsToDisplay.push(<ErrorDisplay key={source} error={errorObj} />);
-      } else if (source === 'SubscriberCommunities_useCommunities' && isInCommunitiesSubscriberView) {
-        errorsToDisplay.push(<ErrorDisplay key={source} error={errorObj} />);
-      } else if (source === 'AllAccountCommunities_useAccountCommunities' && isInCommunitiesView) {
-        errorsToDisplay.push(<ErrorDisplay key={source} error={errorObj} />);
-      } else if (source === 'AllAccountCommunities_useCommunities' && isInCommunitiesView) {
-        errorsToDisplay.push(<ErrorDisplay key={`${source}_communities`} error={errorObj} />);
-      }
-    });
-    return errorsToDisplay;
-  };
-
   return (
     <div className={styles.content}>
       <div className={styles.sidebar}>
@@ -388,7 +414,7 @@ const Communities = () => {
       </div>
       {!isInCommunitiesDirectoryView && <MyCommunitiesTabs />}
       {isInCommunitiesDirectoryView ? <DirectoryVoteNotice /> : <Infobar />}
-      <div className={styles.error}>{renderErrors()}</div>
+      <CommunitiesErrors />
       {isInCommunitiesDirectoryView && (directoryCode ? <DirectoryCandidates /> : <DirectoryIndex />)}
       {(isInCommunitiesModeratorView || isInCommunitiesAdminView || isInCommunitiesOwnerView) && <AccountCommunities viewRole={viewRole} />}
       {isInCommunitiesSubscriberView && <SubscriberCommunities />}

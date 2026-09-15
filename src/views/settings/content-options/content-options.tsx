@@ -9,18 +9,16 @@ import { useTopbarAutoHideEnabled } from '../../../hooks/use-topbar-auto-hide';
 
 const MediaOptions = () => {
   const { t } = useTranslation();
-  const {
-    blurNsfwThumbnails,
-    setBlurNsfwThumbnails,
-    thumbnailDisplayOption,
-    setThumbnailDisplayOption,
-    mediaPreviewOption,
-    setMediaPreviewOption,
-    autoplayVideosOnComments,
-    setAutoplayVideosOnComments,
-    muteVideosOnComments,
-    setMuteVideosOnComments,
-  } = useContentOptionsStore();
+  const blurNsfwThumbnails = useContentOptionsStore((state) => state.blurNsfwThumbnails);
+  const setBlurNsfwThumbnails = useContentOptionsStore((state) => state.setBlurNsfwThumbnails);
+  const thumbnailDisplayOption = useContentOptionsStore((state) => state.thumbnailDisplayOption);
+  const setThumbnailDisplayOption = useContentOptionsStore((state) => state.setThumbnailDisplayOption);
+  const mediaPreviewOption = useContentOptionsStore((state) => state.mediaPreviewOption);
+  const setMediaPreviewOption = useContentOptionsStore((state) => state.setMediaPreviewOption);
+  const autoplayVideosOnComments = useContentOptionsStore((state) => state.autoplayVideosOnComments);
+  const setAutoplayVideosOnComments = useContentOptionsStore((state) => state.setAutoplayVideosOnComments);
+  const muteVideosOnComments = useContentOptionsStore((state) => state.muteVideosOnComments);
+  const setMuteVideosOnComments = useContentOptionsStore((state) => state.setMuteVideosOnComments);
 
   return (
     <div className={styles.contentOptions}>
@@ -131,7 +129,10 @@ const CommunitiesOptions = () => {
   const { t } = useTranslation();
   const account = useAccount();
   const defaultCommunities = useDefaultSubscriptions();
-  const { hideNsfwCommunities, setHideNsfwCommunities, hideDefaultCommunities, setHideDefaultCommunities } = useContentOptionsStore();
+  const hideNsfwCommunities = useContentOptionsStore((state) => state.hideNsfwCommunities);
+  const setHideNsfwCommunities = useContentOptionsStore((state) => state.setHideNsfwCommunities);
+  const hideDefaultCommunities = useContentOptionsStore((state) => state.hideDefaultCommunities);
+  const setHideDefaultCommunities = useContentOptionsStore((state) => state.setHideDefaultCommunities);
 
   return (
     <div className={styles.contentOptions}>

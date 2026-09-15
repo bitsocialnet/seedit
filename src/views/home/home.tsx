@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { memo, useEffect, useRef, useState, useMemo, useCallback, type ComponentProps } from 'react';
 import { Link, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { useAccount, Comment } from '@bitsocial/bitsocial-react-hooks';
@@ -26,6 +26,23 @@ import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
+
+type HomeFeedContext = ComponentProps<typeof FeedFooter>;
+
+// Keep the component type stable so feed updates preserve pagination state.
+const HomeFeedFooter = ({ context }: { context: HomeFeedContext }) => <FeedFooter {...context} />;
+const feedComponents = { Footer: HomeFeedFooter };
+
+// These sections subscribe to their own data, independently of feed updates.
+const HomeSidebar = memo(Sidebar);
+const HomeNotices = memo(function HomeNotices() {
+  return (
+    <>
+      <DirectorySubscriptionUpdatesNotice />
+      <StarterSubscriptionsNotice />
+    </>
+  );
+});
 
 const Home = () => {
   const { t } = useTranslation();
@@ -69,7 +86,7 @@ const Home = () => {
     [communityAddresses, feedSortType, timeFilterSeconds],
   );
 
-  const { feed, hasMore, loadMore, reset } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
+  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
 
@@ -103,8 +120,9 @@ const Home = () => {
       hasMore,
       communityAddresses,
       onLoadMore: loadMore,
+      requestKey,
     }),
-    [feed, hasMore, communityAddresses, loadMore],
+    [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
   const [safeToShowNoSubscriptions, setSafeToShowNoSubscriptions] = useState(false);
@@ -140,11 +158,10 @@ const Home = () => {
 
   return (
     <div>
-      <DirectorySubscriptionUpdatesNotice />
-      <StarterSubscriptionsNotice />
+      <HomeNotices />
       <div className={layoutStyles.content}>
         <div className={`${layoutStyles.sidebar}`}>
-          <Sidebar />
+          <HomeSidebar />
         </div>
         {subscriptionState === 'loading' ? (
           <div className={layoutStyles.feed}>
@@ -175,16 +192,15 @@ const Home = () => {
           <div className={layoutStyles.feed}>
             <DevelopmentFeedResetButton onReset={reset} />
             {sortType === 'top' && <TopTimeFilter selectedTimeFilterName={currentTimeFilterName} sessionKey={sessionKey} />}
-            <Virtuoso
+            <Virtuoso<Comment, HomeFeedContext>
               increaseViewportBy={{ bottom: 1200, top: 1200 }}
               totalCount={feed?.length || 0}
               data={feed}
               computeItemKey={(index, post) => post?.cid || index}
               itemContent={renderPost}
               useWindowScroll={true}
-              components={{
-                Footer: () => <FeedFooter {...footerProps} />,
-              }}
+              components={feedComponents}
+              context={footerProps}
               endReached={infiniteFeedEnabled ? loadMore : undefined}
               ref={virtuosoRef}
               restoreStateFrom={lastVirtuosoState}
