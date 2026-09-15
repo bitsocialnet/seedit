@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { isCreateCommunityView } from '../../../lib/utils/view-utils';
@@ -415,7 +415,7 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
   );
 };
 
-const Challenges = ({
+const Challenges = memo(function Challenges({
   isReadOnly,
   readOnlyChallenges,
   challengeNames,
@@ -425,9 +425,10 @@ const Challenges = ({
   readOnlyChallenges: any;
   challengeNames: string[];
   challengesSettings: any;
-}) => {
+}) {
   const { t } = useTranslation();
-  const { settings, setCommunitySettingsStore } = useCommunitySettingsStore();
+  const settings = useCommunitySettingsStore((state) => state.settings);
+  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
   const location = useLocation();
   const isInCreateCommunityView = isCreateCommunityView(location.pathname);
   const challenges = settings?.challenges || readOnlyChallenges || [];
@@ -543,6 +544,6 @@ const Challenges = ({
       </div>
     </div>
   );
-};
+});
 
 export default Challenges;
