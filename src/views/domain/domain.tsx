@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { memo, useEffect, useRef, useState, useMemo, useCallback, type ComponentProps } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { Comment, CommentsFilter } from '@bitsocial/bitsocial-react-hooks';
@@ -16,6 +16,14 @@ import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
+
+type DomainFeedContext = ComponentProps<typeof FeedFooter>;
+
+// Keep the component type stable so feed updates preserve pagination state.
+const DomainFeedFooter = ({ context }: { context: DomainFeedContext }) => <FeedFooter {...context} />;
+const feedComponents = { Footer: DomainFeedFooter };
+const DomainSidebar = memo(Sidebar);
+const renderPost = (index: number, post: Comment) => <Post index={index} post={post} />;
 
 const Domain = () => {
   const communityAddresses = useDefaultSubscriptionAddresses();
@@ -112,14 +120,16 @@ const Domain = () => {
 
   const lastVirtuosoState = lastVirtuosoStates?.[sortType + currentTimeFilterName + 'domain'];
 
-  const footerProps = {
-    feedLength: feed?.length ?? 0,
-    hasFeedLoaded: !!feed,
-    hasMore,
-    communityAddresses,
-    domain,
-    onLoadMore: loadMore,
-  };
+  const footerProps = useMemo<DomainFeedContext>(
+    () => ({
+      feedLength: feed?.length ?? 0,
+      hasFeedLoaded: !!feed,
+      hasMore,
+      communityAddresses,
+      onLoadMore: loadMore,
+    }),
+    [feed, hasMore, communityAddresses, loadMore],
+  );
 
   if (isLegacyTopRoute(params.sortType)) {
     return <Navigate to={getCanonicalTopPath(location.pathname, location.search)} replace />;
@@ -137,7 +147,7 @@ const Domain = () => {
     <div>
       <div className={layoutStyles.content}>
         <div className={`${layoutStyles.sidebar}`}>
-          <Sidebar />
+          <DomainSidebar />
         </div>
         {showNoResults ? (
           <div className={layoutStyles.feed}>
@@ -150,13 +160,14 @@ const Domain = () => {
         ) : (
           <>
             {sortType === 'top' && <TopTimeFilter selectedTimeFilterName={currentTimeFilterName} sessionKey={sessionKey} />}
-            <Virtuoso
+            <Virtuoso<Comment, DomainFeedContext>
               increaseViewportBy={{ bottom: 1200, top: 600 }}
               totalCount={feed?.length || 0}
               data={feed}
-              itemContent={(index, post) => <Post index={index} post={post} />}
+              itemContent={renderPost}
               useWindowScroll={true}
-              components={{ Footer: () => <FeedFooter {...footerProps} /> }}
+              components={feedComponents}
+              context={footerProps}
               endReached={infiniteFeedEnabled ? loadMore : undefined}
               ref={virtuosoRef}
               restoreStateFrom={lastVirtuosoState}
