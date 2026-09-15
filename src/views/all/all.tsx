@@ -1,7 +1,8 @@
-import { useEffect, useRef, useMemo } from 'react';
+import { memo, useEffect, useRef, useMemo, type ComponentProps } from 'react';
 import { Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
+import type { Comment } from '@bitsocial/bitsocial-react-hooks';
 import { useDefaultSubscriptionAddresses } from '../../hooks/use-default-subscriptions';
 import useTimeFilter, { isValidTimeFilterName, isValidTopTimeFilterName } from '../../hooks/use-time-filter';
 import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
@@ -17,6 +18,14 @@ import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 import layoutStyles from '../../components/feed-layout';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
+
+type AllFeedContext = ComponentProps<typeof FeedFooter>;
+
+// Keep the component type stable so feed updates preserve pagination state.
+const AllFeedFooter = ({ context }: { context: AllFeedContext }) => <FeedFooter {...context} />;
+const feedComponents = { Footer: AllFeedFooter };
+const AllSidebar = memo(Sidebar);
+const renderPost = (index: number, post: Comment) => <Post key={post?.cid} index={index} post={post} />;
 
 const All = () => {
   const communityAddresses = useDefaultSubscriptionAddresses();
@@ -75,13 +84,16 @@ const All = () => {
 
   const lastVirtuosoState = lastVirtuosoStates?.[sortType + currentTimeFilterName + 'all'];
 
-  const footerProps = {
-    feedLength: feed?.length ?? 0,
-    hasFeedLoaded: !!feed,
-    hasMore,
-    communityAddresses,
-    onLoadMore: loadMore,
-  };
+  const footerProps = useMemo<AllFeedContext>(
+    () => ({
+      feedLength: feed?.length ?? 0,
+      hasFeedLoaded: !!feed,
+      hasMore,
+      communityAddresses,
+      onLoadMore: loadMore,
+    }),
+    [feed, hasMore, communityAddresses, loadMore],
+  );
 
   if (isLegacyTopRoute(params.sortType)) {
     return <Navigate to={getCanonicalTopPath(location.pathname, location.search)} replace />;
@@ -99,19 +111,20 @@ const All = () => {
     <div>
       <div className={layoutStyles.content}>
         <div className={`${layoutStyles.sidebar}`}>
-          <Sidebar />
+          <AllSidebar />
         </div>
         <div className={layoutStyles.feed}>
           <DevelopmentFeedResetButton onReset={reset} />
           {sortType === 'top' && <TopTimeFilter selectedTimeFilterName={currentTimeFilterName} sessionKey={sessionKey} />}
-          <Virtuoso
+          <Virtuoso<Comment, AllFeedContext>
             increaseViewportBy={{ bottom: 1200, top: 600 }}
             totalCount={feed?.length || 0}
             data={feed}
             computeItemKey={(index, post) => post?.cid || index}
-            itemContent={(index, post) => <Post key={post?.cid} index={index} post={post} />}
+            itemContent={renderPost}
             useWindowScroll={true}
-            components={{ Footer: () => <FeedFooter {...footerProps} /> }}
+            components={feedComponents}
+            context={footerProps}
             endReached={infiniteFeedEnabled ? loadMore : undefined}
             ref={virtuosoRef}
             restoreStateFrom={lastVirtuosoState}
