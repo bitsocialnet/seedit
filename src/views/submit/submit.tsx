@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
@@ -26,9 +26,10 @@ import CrosspostPreview from '../../components/crosspost-preview';
 const isAndroid = Capacitor.getPlatform() === 'android';
 const isElectron = window.electronApi?.isElectron === true;
 
-const UrlField = () => {
+const UrlField = memo(function UrlField() {
   const { t } = useTranslation();
-  const { link: url, setPublishPostStore } = usePublishPostStore();
+  const url = usePublishPostStore((state) => state.link);
+  const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
   const [mediaError, setMediaError] = useState(false);
 
   const mediaInfo = url ? getLinkMediaInfo(url) : null;
@@ -91,11 +92,11 @@ const UrlField = () => {
       </div>
     </div>
   );
-};
+});
 
-const UploadMediaForm = () => {
+const UploadMediaForm = memo(function UploadMediaForm() {
   const { t } = useTranslation();
-  const { setPublishPostStore } = usePublishPostStore();
+  const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
 
   // on android or electron, auto upload file to image hosting sites with open api
   const [isUploading, setIsUploading] = useState(false);
@@ -236,11 +237,12 @@ const UploadMediaForm = () => {
       </div>
     </div>
   );
-};
+});
 
-const TitleField = () => {
+const TitleField = memo(function TitleField() {
   const { t } = useTranslation();
-  const { title, setPublishPostStore } = usePublishPostStore();
+  const title = usePublishPostStore((state) => state.title);
+  const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
 
   return (
     <div className={styles.box}>
@@ -256,14 +258,15 @@ const TitleField = () => {
       </div>
     </div>
   );
-};
+});
 
-const ContentField = () => {
+const ContentField = memo(function ContentField() {
   const { t } = useTranslation();
   const [showPreview, setShowPreview] = useState(false);
   const [showFormattingHelp, setShowFormattingHelp] = useState(false);
 
-  const { content, setPublishPostStore } = usePublishPostStore();
+  const content = usePublishPostStore((state) => state.content);
+  const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
 
   return (
     <div className={styles.box}>
@@ -307,13 +310,14 @@ const ContentField = () => {
       </div>
     </div>
   );
-};
+});
 
-const CommunityAddressField = () => {
+const CommunityAddressField = memo(function CommunityAddressField() {
   const { t } = useTranslation();
   const { subscriptions } = useAccount() || {};
   const defaultCommunityAddresses = useDefaultSubscriptionAddresses();
-  const { communityAddress: inputAddress, setPublishPostStore } = usePublishPostStore();
+  const inputAddress = usePublishPostStore((state) => state.communityAddress);
+  const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
 
   const filteredCommunityAddresses = defaultCommunityAddresses.filter((address) => address?.toLowerCase()?.includes(inputAddress?.toLowerCase() || '')).slice(0, 10);
   const [isInputAddressFocused, setIsInputAddressFocused] = useState(false);
@@ -417,9 +421,9 @@ const CommunityAddressField = () => {
       </div>
     </div>
   );
-};
+});
 
-const RulesInfo = ({ shortAddress, rules }: { shortAddress: string; rules: string[] }) => {
+const RulesInfo = memo(function RulesInfo({ shortAddress, rules }: { shortAddress: string; rules: string[] }) {
   const { t } = useTranslation();
 
   return (
@@ -438,11 +442,11 @@ const RulesInfo = ({ shortAddress, rules }: { shortAddress: string; rules: strin
       </div>
     </div>
   );
-};
+});
 
-const SubmitOptions = () => {
+const SubmitOptions = memo(function SubmitOptions() {
   const { t } = useTranslation();
-  const { setPublishPostStore } = usePublishPostStore();
+  const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
 
   return (
     <div className={styles.box}>
@@ -465,9 +469,9 @@ const SubmitOptions = () => {
       </div>
     </div>
   );
-};
+});
 
-const CrosspostField = () => {
+const CrosspostField = memo(function CrosspostField() {
   const { t } = useTranslation();
   const crosspost = usePublishPostStore((state) => state.crosspost);
   const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
@@ -491,7 +495,7 @@ const CrosspostField = () => {
       </div>
     </div>
   );
-};
+});
 
 const SubmitPage = () => {
   const { t } = useTranslation();
