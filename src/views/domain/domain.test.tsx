@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, type ComponentType } from 'react';
+import { act, useState, type Key, type ReactNode, type ComponentType } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -26,9 +26,28 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
 }));
 vi.mock('react-i18next', () => ({ Trans: () => null, useTranslation: () => ({ t: (key: string) => key }) }));
 vi.mock('react-virtuoso', () => ({
-  Virtuoso: ({ components, context }: { components: { Footer: ComponentType<{ context: unknown }> }; context?: unknown }) => {
+  Virtuoso: ({
+    components,
+    context,
+    data = [],
+    itemContent,
+    computeItemKey,
+  }: {
+    components: { Footer: ComponentType<{ context: unknown }> };
+    context?: unknown;
+    data?: { cid: string }[];
+    itemContent: (index: number, post: { cid: string }) => ReactNode;
+    computeItemKey?: (index: number, post: { cid: string }) => Key;
+  }) => {
     const Footer = components.Footer;
-    return <Footer context={context} />;
+    return (
+      <>
+        <Footer context={context} />
+        {data.map((post, index) => (
+          <div key={computeItemKey?.(index, post) ?? index}>{itemContent(index, post)}</div>
+        ))}
+      </>
+    );
   },
 }));
 vi.mock('../../hooks/use-default-subscriptions', () => ({ useDefaultSubscriptionAddresses: () => testState.communityAddresses }));
@@ -45,7 +64,12 @@ vi.mock('../../hooks/use-progressive-feed', () => ({
     return { feed: testState.feed, hasMore: testState.hasMore, loadMore: testState.loadMore, requestKey: JSON.stringify(options) };
   },
 }));
-vi.mock('../../components/post', () => ({ default: () => null }));
+vi.mock('../../components/post', () => ({
+  default: function PostProbe({ post }: { post: { cid: string } }) {
+    const [expanded, setExpanded] = useState(false);
+    return <input type='checkbox' data-post={post.cid} checked={expanded} onChange={() => setExpanded(!expanded)} />;
+  },
+}));
 vi.mock('../../components/empty-feed-message', () => ({ default: () => null }));
 vi.mock('../../components/top-time-filter', () => ({ default: () => null }));
 vi.mock('../../components/sidebar', () => ({
@@ -96,6 +120,19 @@ describe('Domain feed updates', () => {
     await act(async () => root.unmount());
     container.remove();
     vi.useRealTimers();
+  });
+
+  it('keeps expanded row state with its CID through prepends and reordering', async () => {
+    testState.feed = [{ cid: 'first-post' }, { cid: 'second-post' }];
+    await renderDomain();
+    const row = (cid: string) => container.querySelector<HTMLInputElement>(`[data-post="${cid}"]`)!;
+    await act(async () => row('first-post').click());
+    expect(row('first-post').checked).toBe(true);
+    testState.feed = [{ cid: 'new-post' }, { cid: 'second-post' }, { cid: 'first-post' }];
+    await renderDomain();
+    expect(row('first-post').checked).toBe(true);
+    expect(row('new-post').checked).toBe(false);
+    expect(row('second-post').checked).toBe(false);
   });
 
   it.each(['domain', 'default communities'])('resets pagination when %s changes and ignores the previous request completion', async (changedOption) => {

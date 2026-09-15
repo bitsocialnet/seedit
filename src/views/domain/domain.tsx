@@ -165,6 +165,7 @@ const Domain = () => {
               increaseViewportBy={{ bottom: 1200, top: 600 }}
               totalCount={feed?.length || 0}
               data={feed}
+              computeItemKey={(index, post) => post?.cid || index}
               itemContent={renderPost}
               useWindowScroll={true}
               components={feedComponents}
