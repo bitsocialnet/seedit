@@ -45,32 +45,9 @@ export default defineConfig({
         type: 'module',
       },
       includeAssets: ['favicon.ico', 'robots.txt', 'apple-touch-icon.png'],
-      manifest: {
-        name: 'Seedit',
-        short_name: 'Seedit',
-        description: 'A serverless, adminless, decentralized reddit alternative',
-        theme_color: '#ffffff',
-        background_color: '#ffffee',
-        display: 'standalone',
-        icons: [
-          {
-            src: '/android-chrome-192x192.png',
-            sizes: '192x192',
-            type: 'image/png',
-          },
-          {
-            src: '/android-chrome-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-          },
-          {
-            src: '/android-chrome-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable',
-          },
-        ],
-      },
+      // index.html links public/manifest.json, and a browser only reads the first
+      // manifest link, so generating a second one here would be dead weight.
+      manifest: false,
       workbox: {
         clientsClaim: true,
         skipWaiting: true,
