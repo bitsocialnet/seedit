@@ -972,6 +972,220 @@ The lock coordinates invocations of this command. Other heavyweight work, such a
 Source: https://github.com/bitsocialnet/seedit/blob/master/CHANGELOG.md
 
 ```markdown
+# [0.6.0](https://github.com/bitsocialnet/seedit/compare/v0.5.10...v0.6.0) (2026-09-16)
+
+
+### Bug Fixes
+
+* **about:** improve about page content and table of contents ([1207d23](https://github.com/bitsocialnet/seedit/commit/1207d2369e381aedbd5f6014737ca3017efa1326))
+* add leading slashes to sort links in header for all/mod/domain views ([1ce08b3](https://github.com/bitsocialnet/seedit/commit/1ce08b388bc489e57a9335d09ff8cb0a65422857))
+* **android:** repair cap sync under typescript 7 and tar 7 ([#833](https://github.com/bitsocialnet/seedit/issues/833)) ([138e583](https://github.com/bitsocialnet/seedit/commit/138e583afbc8d3aecd603bfb12cf84adc89b00fe))
+* **assets:** remove nose from not-found mascot images ([0b43c83](https://github.com/bitsocialnet/seedit/commit/0b43c83f844e6dffd20a16c3ef369d7355bd3c33))
+* **assets:** update fakepost subscribe label images ([d52b7e5](https://github.com/bitsocialnet/seedit/commit/d52b7e5d35d30bcd3459f8ec35155a85f7b91346))
+* **challenge-modal:** add allow-same-origin to iframe sandbox ([0bdcb4b](https://github.com/bitsocialnet/seedit/commit/0bdcb4b985dc840fa62cf7d8fb97e62622232bab))
+* **challenge-modal:** align iframe challenge flow with Spamblocker parity ([badbe59](https://github.com/bitsocialnet/seedit/commit/badbe59c1476c0aa7168cbf95a0cc742a9685af4))
+* **challenge-modal:** prevent stale closures in keyboard event handler ([2e12622](https://github.com/bitsocialnet/seedit/commit/2e1262232cc76b7ee3e53611bdb12cdcb97f3631))
+* **challenge-modal:** tighten iframe handling, fix styling ([acf0130](https://github.com/bitsocialnet/seedit/commit/acf01304678e3a7c8cf405ec3d8787e714b117ce))
+* **challenge:** adjust padding and improve error log ([7603ba9](https://github.com/bitsocialnet/seedit/commit/7603ba990c3b670e406e529b0459130265a8a702))
+* **challenge:** scope iframe messaging to trusted origin ([bcea4eb](https://github.com/bitsocialnet/seedit/commit/bcea4eb6420f6ec803d338fdff4cc828a253c52c))
+* **challenge:** update challenge iframe type ([d66fc83](https://github.com/bitsocialnet/seedit/commit/d66fc83a687115c03efc31597de0d2f1c9c42d3e))
+* **ci:** add explicit executableName to electron-builder config ([5e1c40c](https://github.com/bitsocialnet/seedit/commit/5e1c40cc723e585f66f70ad9aa8c419f3a5efd13))
+* **ci:** correct APP_PID to reference the app instead of timeout wrapper ([b2e1500](https://github.com/bitsocialnet/seedit/commit/b2e1500935ca7a39705901e2c378dbad396846aa))
+* **ci:** drop legacy yarn install flags ([c4b83e6](https://github.com/bitsocialnet/seedit/commit/c4b83e66d7c3c4a09cc52f901ecb8208747f1b18))
+* **ci:** fix electron-builder command and smoke test executable detection ([2663d88](https://github.com/bitsocialnet/seedit/commit/2663d8853cb052a3c533ae5d89e5f3c366ccf98c))
+* **ci:** make smoke tests dynamically find electron artifacts ([8335aaf](https://github.com/bitsocialnet/seedit/commit/8335aaf46a77232d4a43573c8d3258e2b83b6867))
+* **ci:** package Electron app for CI smoke tests ([c686692](https://github.com/bitsocialnet/seedit/commit/c686692f9323975badb7645298d40690d23a8f18))
+* **ci:** remove setup-node yarn cache ([3a7e1fe](https://github.com/bitsocialnet/seedit/commit/3a7e1fea48c883fb6a081ef15d23ece04938a161))
+* **ci:** restore executableName config and make smoke tests robust ([b84ee93](https://github.com/bitsocialnet/seedit/commit/b84ee93c501f13e6cb533b332d25d23b1986b7c9))
+* **ci:** update macos runner image ([f9a12e3](https://github.com/bitsocialnet/seedit/commit/f9a12e3557bf98fc87d28af83f4ec003890dd190))
+* **community-rebrand:** address Cursor Bugbot and CodeRabbit findings ([c5348a0](https://github.com/bitsocialnet/seedit/commit/c5348a0aa174aa0bb15c292e992ec359321e0fdc))
+* **copy:** say download backup instead of export backup ([d5346e5](https://github.com/bitsocialnet/seedit/commit/d5346e54cc9d99c98bc13c597d27891d8cef71f7))
+* **crossposts:** center badge with domain ([b7ec1f0](https://github.com/bitsocialnet/seedit/commit/b7ec1f0e600dd2053e015b8740396c641186657a))
+* **crossposts:** match old Reddit expansion ([b9204b5](https://github.com/bitsocialnet/seedit/commit/b9204b54c15851fe652117487e231803b95ce9fe))
+* **crossposts:** position badge after domain ([864ad5b](https://github.com/bitsocialnet/seedit/commit/864ad5babd56b3d9377ff0a6c1b6261752099b19))
+* **default-subscriptions:** unblock home when default list is empty ([0da6e32](https://github.com/bitsocialnet/seedit/commit/0da6e32decb4698c739de2c2ecff85324524522f))
+* dep version mismatches, vite config, upgrade hooks ([786d2a6](https://github.com/bitsocialnet/seedit/commit/786d2a64b5b8f6a0fe53de0e3eba48025de0026f))
+* **deps:** bump axios to 1.18.1 for Dependabot alerts ([876cbe6](https://github.com/bitsocialnet/seedit/commit/876cbe60eb3e65404fddfc4939a95a6898805d7e))
+* **deps:** dedupe multiformats so pkc-js and helia share one CID class ([d6329b3](https://github.com/bitsocialnet/seedit/commit/d6329b337a9ad4f675e59b3b05c7003a7a42d875))
+* **deps:** patch dependabot alerts ([162e0b9](https://github.com/bitsocialnet/seedit/commit/162e0b99ab0ff7522c634828fd73ebc51269280a))
+* **deps:** patch transitive tar vulnerabilities ([23f627b](https://github.com/bitsocialnet/seedit/commit/23f627b73c2eb8f535b623006205546f26e6ea35))
+* **deps:** patch vulnerable transitive packages [skip github-alerts] [skip ci] ([22c17b6](https://github.com/bitsocialnet/seedit/commit/22c17b6152fc2e8e4ff22c93d85ee8231d321dce))
+* **deps:** resolve Dependabot alerts (electron, lodash, axios, transitive) ([da41bc8](https://github.com/bitsocialnet/seedit/commit/da41bc8406b1765e0126052a42159cb6a4b3265b))
+* **deps:** resolve open Dependabot security alerts ([ded8d51](https://github.com/bitsocialnet/seedit/commit/ded8d51371a726cb6a3b8bd61c28b58b0396c3bd))
+* **deps:** update browserslist security patch [skip github-alerts] [skip ci] ([7dea685](https://github.com/bitsocialnet/seedit/commit/7dea685aec4d220c2630c029a21d6ea306774f99))
+* **deps:** update capacitor ([c81b6fa](https://github.com/bitsocialnet/seedit/commit/c81b6fa00630adbd574b894d57f4bcba567a0445))
+* **deps:** update mdast-util-to-hast resolution ([d9c6336](https://github.com/bitsocialnet/seedit/commit/d9c6336b37ae8fb3b0a2ec22c409eeaf91975006))
+* **deps:** upgrade hooks and pkc-js ([641daea](https://github.com/bitsocialnet/seedit/commit/641daea5b150f6f75e7aeda4f0b896b48ec2bd83))
+* **deps:** upgrade React to 19.1.2 to patch CVE-2025-55182 ([858c5bf](https://github.com/bitsocialnet/seedit/commit/858c5bf027f33f110c9143ad0cc849dd1ed56bde))
+* **dev server:** avoid portless route collisions ([6159ee1](https://github.com/bitsocialnet/seedit/commit/6159ee1ede942890e86a6f02088b9ed20d85035b))
+* **dev server:** route default start through portless ([579fd4a](https://github.com/bitsocialnet/seedit/commit/579fd4a50ee655eae40009ecabef368fee0e8b53))
+* **dev-tooling:** drop redundant reactDoctor block from package.json ([5b12a8b](https://github.com/bitsocialnet/seedit/commit/5b12a8bfde5a3e3d668e313e444ec7fef2e734ef))
+* **dev:** auto-open portless URL after vite is ready ([2553c43](https://github.com/bitsocialnet/seedit/commit/2553c43fd357cd375a8856879f4c50eb26b43956))
+* **dev:** restore dev home page render ([cc31ca7](https://github.com/bitsocialnet/seedit/commit/cc31ca7a745f5886ccc5a6d3cbd2255a68b13ffb))
+* **dev:** silence zustand shallow deprecation warning flood ([d28f2a9](https://github.com/bitsocialnet/seedit/commit/d28f2a9514319aac339f567493fa4669f4c1463a))
+* **directory:** align mobile search margin ([b9efc56](https://github.com/bitsocialnet/seedit/commit/b9efc5616e30f45c6a802733497a261244fe3921))
+* **directory:** align search with sidebar ([60f0274](https://github.com/bitsocialnet/seedit/commit/60f0274b47230d5843a37cd5f9b3ee2b9c2ac0d7))
+* disable asar to fix electron-forge packaging failure ([9feeace](https://github.com/bitsocialnet/seedit/commit/9feeace18895790edfb3a5857222f8a78e4f2e9a))
+* **domain:** retain post state when feed rows reorder ([32b31b0](https://github.com/bitsocialnet/seedit/commit/32b31b002f75700fd882c7ac497bfe84eeffd1c9))
+* **electron-forge:** add app icon configuration for all platforms ([e294bc3](https://github.com/bitsocialnet/seedit/commit/e294bc3c8bbbc8f37373fb46ba680fd858647365))
+* **electron:** fix production build crashes ([e1575de](https://github.com/bitsocialnet/seedit/commit/e1575de5fc79d871959e6b977e4756d16bbfb3df))
+* **electron:** use pathToFileURL for kubo dynamic import ([07a7dad](https://github.com/bitsocialnet/seedit/commit/07a7dad061282a563e501294f7ea63ac868b7b13))
+* **feeds:** auto-hide topbar while scrolling in infinite feeds ([2d41169](https://github.com/bitsocialnet/seedit/commit/2d41169021620399c6c1466b3aa050a202a35cd6))
+* **feed:** show completed empty state ([4217142](https://github.com/bitsocialnet/seedit/commit/4217142fe487a382e54577e32569810d5aefd48c))
+* **feeds:** reset pagination when the request changes ([e9fc277](https://github.com/bitsocialnet/seedit/commit/e9fc2774c2ede238f87cc4c89842750bcf7befad))
+* **footer:** add missing padding ([36c3f88](https://github.com/bitsocialnet/seedit/commit/36c3f880b68471f761414ad36888518d16b48c5b))
+* **forge.config.js:** remove malformed iconUrl from Squirrel config ([ca38336](https://github.com/bitsocialnet/seedit/commit/ca383365415e44365bf1be3a6dee1237f6cfd06b))
+* **gold:** scroll to top when opening from footer ([38258a6](https://github.com/bitsocialnet/seedit/commit/38258a65ce23a81034bd28c2f9d80575b964e9a3))
+* **header:** show community avatar alongside seedit text in header ([ca4da6b](https://github.com/bitsocialnet/seedit/commit/ca4da6b3f18f4b661546a2ac4b4644b1671294a7))
+* **hooks:** preserve account communities on updates ([1efff4f](https://github.com/bitsocialnet/seedit/commit/1efff4fed768b1e91d1c623483be47a90e013e15))
+* **i18n:** disable i18next Locize support notice ([836af64](https://github.com/bitsocialnet/seedit/commit/836af64bb8d22098f23093b5396871f960714e67))
+* **i18n:** update find communities copy to use s/all prefix ([cc117ef](https://github.com/bitsocialnet/seedit/commit/cc117ef21a4c30754d95fdfec722a4119bf96109))
+* improve timeout and interval cleanup to prevent memory leaks ([3ff4f3a](https://github.com/bitsocialnet/seedit/commit/3ff4f3ae661d32ca4d70afca88c48c86c6d0d641))
+* **media-utils:** avoid mutating memoized link info ([3ca6b47](https://github.com/bitsocialnet/seedit/commit/3ca6b47a838080deca805b8c96f69e3923168336))
+* **media-utils:** ignore blacklisted thumbnails ([f768a80](https://github.com/bitsocialnet/seedit/commit/f768a800af2368dd8b40ff830529e3ed225aa259))
+* **notifications:** avoid null platform ([a8e3047](https://github.com/bitsocialnet/seedit/commit/a8e30474ff83e76a0d0ff137b8cb15e3a5bc4d0b))
+* **nsfw:** derive community NSFW from protocol safeForWork ([38c3a00](https://github.com/bitsocialnet/seedit/commit/38c3a00b3f4d4a69465a8d53c05644a6b97ea8b0))
+* **p2p-stats:** align stats rows with the preferences layout ([b790899](https://github.com/bitsocialnet/seedit/commit/b7908991bdcb8a2881caf7b62bea0ec97ebaf837))
+* **p2p-stats:** keep connected peers map always visible ([00afcfa](https://github.com/bitsocialnet/seedit/commit/00afcfa003a8023160befb1e1520cea5f0f70457))
+* **p2p-stats:** stop peer boxes stretching the full settings width ([b3e6354](https://github.com/bitsocialnet/seedit/commit/b3e6354a5cdb7cb2cd46843b982e86c8e6c12537))
+* **p2p-stats:** style the leeching seed link as inline text ([5f871b5](https://github.com/bitsocialnet/seedit/commit/5f871b5ae3987773971edb46b2bc78e38a007e54))
+* **package.json:** remove unneeded var ([9300bef](https://github.com/bitsocialnet/seedit/commit/9300befd1a29a66eafe607ff35a7bbd38f3a188d))
+* **pkc options:** correct pubsub providers property name mismatch ([ccb104d](https://github.com/bitsocialnet/seedit/commit/ccb104d910c5dfd278498064d8d5c883bf6f797f))
+* **portless:** force HTTPS proxy startup ([3ab64e8](https://github.com/bitsocialnet/seedit/commit/3ab64e8394ea1fd9efad17ef3fd36d19e7506e56))
+* **publishing:** abandon publications when challenges close ([#829](https://github.com/bitsocialnet/seedit/issues/829)) ([4e0bfc4](https://github.com/bitsocialnet/seedit/commit/4e0bfc49b31062bbd9f4e752c076a37a5946b647))
+* **publish:** use communityAddress in publish and moderation options ([ced2022](https://github.com/bitsocialnet/seedit/commit/ced20227d441b58378ca614265dadf00999f6c39))
+* **release:** stop generated notes from reverting the rebrand ([646b324](https://github.com/bitsocialnet/seedit/commit/646b324a21411acac5b24256976e8e38dda21a51))
+* **release:** update macos runner images, avoid environment error ([0eec52f](https://github.com/bitsocialnet/seedit/commit/0eec52fd6de2411d86f3b78618f381190eceb1a6))
+* resolve open Dependabot security alerts ([d7f957b](https://github.com/bitsocialnet/seedit/commit/d7f957bda245577419a989a5e48164a2704df4e8))
+* **scripts:** treat an omitted agent model as harness-specific in the parity check ([23cf11b](https://github.com/bitsocialnet/seedit/commit/23cf11b457aea85d1bf8c10188f9806f85e41bb1))
+* **settings:** align account backup imports ([#836](https://github.com/bitsocialnet/seedit/issues/836)) ([5846c8a](https://github.com/bitsocialnet/seedit/commit/5846c8a2494d0d53c79528c971a25e7425ebd668))
+* **settings:** normalize react-ace lazy import for data editors ([57d8106](https://github.com/bitsocialnet/seedit/commit/57d810602d761911a796abf6e98a7e3b42081e64))
+* **settings:** some pkc options weren't loading because their naming changed ([4b076ce](https://github.com/bitsocialnet/seedit/commit/4b076ced7066f53d426172cf2926046a5eb675c6))
+* **sidebar:** remove community title route prefix ([9b20300](https://github.com/bitsocialnet/seedit/commit/9b20300b633d1b563403106e579ec16d15b86a34))
+* **submit:** restore draft when abandoning publish challenge ([e1ff51a](https://github.com/bitsocialnet/seedit/commit/e1ff51a0fbb7e65b9878d5efca3a35594fe469fb))
+* **subscribe button:** avoid loading-state flicker ([1728129](https://github.com/bitsocialnet/seedit/commit/1728129344875754aca81118f3272b16a1619cd0))
+* **theme:** lighten dark mode border-primary color ([615bdc0](https://github.com/bitsocialnet/seedit/commit/615bdc086b4c26ea482986b6cf8dc95996b23a2d))
+* **theme:** unify green accents with sprout asset color ([d43be94](https://github.com/bitsocialnet/seedit/commit/d43be949f2f0501fccf43a3098a8baa3c3255229))
+* **topbar:** drop dropdowns resurrected by directory merge that crash the app ([bf4a4d2](https://github.com/bitsocialnet/seedit/commit/bf4a4d2762a7f91ebfff899d987e2cc445b87175)), closes [#834](https://github.com/bitsocialnet/seedit/issues/834) [#834](https://github.com/bitsocialnet/seedit/issues/834) [#834](https://github.com/bitsocialnet/seedit/issues/834)
+* **topbar:** link directory defaults by code ([57ac011](https://github.com/bitsocialnet/seedit/commit/57ac0118e5fcf47be61a983d7e77cc3b2dcc1ad4))
+* **topbar:** link directory-backed subscriptions by code in My Communities ([3e40634](https://github.com/bitsocialnet/seedit/commit/3e406342649d09dc4df5c481574837ab854f9226))
+* update bitsocial GitHub org identifiers to bitsocialnet ([c62fa28](https://github.com/bitsocialnet/seedit/commit/c62fa2824123af30206ec08750dc71d8f879bd29))
+* **vercel:** use Yarn 4 install command ([9be1bd8](https://github.com/bitsocialnet/seedit/commit/9be1bd883bc93191799724ab2a9d58b113ce210d))
+* **verify-executable.js:** prevent overlapping port checks ([4705015](https://github.com/bitsocialnet/seedit/commit/4705015381efd61f5839bd9a9de9b901b1109d0d))
+* **vite.config.js:** PWA denylist regex fails to exclude /_ paths ([505b50d](https://github.com/bitsocialnet/seedit/commit/505b50d3b189a2dc43a1dbd29c1b36848ac9c99a))
+* **vite:** exclude [@peculiar](https://github.com/peculiar) packages from optimizeDeps ([0770000](https://github.com/bitsocialnet/seedit/commit/07700008f4f5d76ca020d71b24e7f28331d04993))
+* **votes:** abandon vote publications with hooks 0.1.44 and keep navigation after abandoned posts ([#838](https://github.com/bitsocialnet/seedit/issues/838)) ([3b5b96a](https://github.com/bitsocialnet/seedit/commit/3b5b96ae28855219afb9b8ef174441133348a227))
+
+
+* chore(rebrand)!: remove all plebbit references from seedit (#832) ([36fd5f3](https://github.com/bitsocialnet/seedit/commit/36fd5f39363df40e180cdef9406030ca5d475395)), closes [#832](https://github.com/bitsocialnet/seedit/issues/832)
+
+
+### Features
+
+* add CI ([86c1872](https://github.com/bitsocialnet/seedit/commit/86c1872291017dde262cb7f222f75fe0c0d9eba3))
+* add responsive feed pagination defaults ([#830](https://github.com/bitsocialnet/seedit/issues/830)) ([a3c6246](https://github.com/bitsocialnet/seedit/commit/a3c6246b284de4e9a260097cca6de8681b783ec7))
+* **branding:** refresh seedit mascot ([#823](https://github.com/bitsocialnet/seedit/issues/823)) ([2858fed](https://github.com/bitsocialnet/seedit/commit/2858fed76648092a46ba9beca8278cc1aaead2b0))
+* **challenge modal:** improve iframe challenge confirmation message ([ac7bb7c](https://github.com/bitsocialnet/seedit/commit/ac7bb7c436aea3565dda1b6b8a72096d1bfa524b))
+* **challenge:** add dark mode to iframe, improve security ([e881abf](https://github.com/bitsocialnet/seedit/commit/e881abf0b716bf05a2345f40f9fa6a4c6db796a1))
+* **challenges:** add iframe modal for external authentication challenges ([610ff8e](https://github.com/bitsocialnet/seedit/commit/610ff8ee35248e6e17b00702caeb6f07fc414d63))
+* **challenges:** handle iframe challenges in regular challenge flow ([56b5555](https://github.com/bitsocialnet/seedit/commit/56b5555b4a19d5ca61bb5df221a0899dbf7a2c4f))
+* **changelog:** add in-app changelog page linked from footer and version ([22005c3](https://github.com/bitsocialnet/seedit/commit/22005c344395722e332b7571cda188a82640429f))
+* **communities:** add per-directory vote candidate pages ([a168760](https://github.com/bitsocialnet/seedit/commit/a168760264f6dde865b85ee2c396f32c70ba3f33))
+* **crossposts:** add publishing flow ([f158643](https://github.com/bitsocialnet/seedit/commit/f158643b9d0793cf0871371ad243bbb79c3b927d))
+* **crossposts:** match old Reddit previews ([9830b60](https://github.com/bitsocialnet/seedit/commit/9830b600497d046c92d4424e25f6049fae2548f1))
+* **dev:** add debug settings for mock content and feed reset ([47f3428](https://github.com/bitsocialnet/seedit/commit/47f3428d4233e4f7f6b57ddf840e4ccc16166632))
+* **devtools:** add automated React render checks ([c5988cb](https://github.com/bitsocialnet/seedit/commit/c5988cb0861c5fc43f105e13462d3e8e7fd146fb))
+* **directory:** add join controls and Reddit-style search ([b5c90df](https://github.com/bitsocialnet/seedit/commit/b5c90df1d4d786f153c5315ade283917b9950331))
+* **directory:** add searchable tags and rules ([dfd5e33](https://github.com/bitsocialnet/seedit/commit/dfd5e33f25fd9b7dcc48f516481f723af093d56f))
+* **directory:** align navigation and routes ([75590d8](https://github.com/bitsocialnet/seedit/commit/75590d8813535b5067c366c89001fe94b4bebc64))
+* **directory:** expose mobile about actions ([6c719ed](https://github.com/bitsocialnet/seedit/commit/6c719edbde0a61b19749174e2be4167da63fb674))
+* **directory:** redesign vote directory ([13163f5](https://github.com/bitsocialnet/seedit/commit/13163f5c92e5175dc95a5c1ba1a79450e6cd3f94))
+* **directory:** search candidate communities ([e9429fb](https://github.com/bitsocialnet/seedit/commit/e9429fbc253ce60ae23d2553c9dca67dc88c8ca0))
+* **feed:** auto-expand empty feeds to a wider time filter ([16807aa](https://github.com/bitsocialnet/seedit/commit/16807aab74a7991d8353dcf792fa62f33fb819c6))
+* **feeds:** refine sorting and progressive time filters ([#834](https://github.com/bitsocialnet/seedit/issues/834)) ([9f7f754](https://github.com/bitsocialnet/seedit/commit/9f7f7543168d17360e73a58feecaf36d11e22804))
+* **footer:** add old.reddit-style home footer ([43be59f](https://github.com/bitsocialnet/seedit/commit/43be59fbc3f9f2309e6cd90417b67dbeca446358))
+* **footer:** show the site footer on every page ([1288d3c](https://github.com/bitsocialnet/seedit/commit/1288d3c17e4d0bf82db191b87170e2c195a2ac9a))
+* **gold:** add seedit gold footer link and explainer page ([1a13427](https://github.com/bitsocialnet/seedit/commit/1a13427ca0392d3ca8cc8cce0caba148b024d6c2))
+* **header,account-bar:** remove unnecessary effects and derive values from route/visibility ([6b5e002](https://github.com/bitsocialnet/seedit/commit/6b5e002d780a7b038a65b1ce40cd7ebada355483))
+* **hooks:** migrate seedit to bitsocial-react-hooks ([6040835](https://github.com/bitsocialnet/seedit/commit/6040835a948a6185960a223a010ec3ebcb2f1d36))
+* **posts:** add saved posts ([#835](https://github.com/bitsocialnet/seedit/issues/835)) ([8d79dfb](https://github.com/bitsocialnet/seedit/commit/8d79dfbc06ae99f606142012b5a07cd5627376a7))
+* pure p2p by default with p2p stats tab and 5chan-style advanced settings ([#821](https://github.com/bitsocialnet/seedit/issues/821)) ([8de11b8](https://github.com/bitsocialnet/seedit/commit/8de11b8357aa07c2503f07a4b9a326a80c3336e3))
+* **release:** add signed release manifest ([b69bd76](https://github.com/bitsocialnet/seedit/commit/b69bd764ec8dd6ea5f5f06459bbbbd2223d75de8))
+* **search-bar:** add same community alert ([1d6ab6f](https://github.com/bitsocialnet/seedit/commit/1d6ab6f2212aed7c094159612ad2b84aef6e26f6))
+* **search:** add the advanced search parameter panel ([126146d](https://github.com/bitsocialnet/seedit/commit/126146de132075bed00676e8266dbf950779ed7e))
+* **search:** let the indexer decide what is nsfw ([7f01bbd](https://github.com/bitsocialnet/seedit/commit/7f01bbd8eddf21f992e41347dfe8e6b3a5c75973))
+* **search:** name communities by route, show their age, honour search prefixes ([f19e1db](https://github.com/bitsocialnet/seedit/commit/f19e1dbc02b7f2d065362ef54b174f2757a8afd9))
+* **search:** old.reddit-style results page with community matches ([699ccab](https://github.com/bitsocialnet/seedit/commit/699ccab37e9168fdc68df37e34f4056d96a5c876))
+* **search:** seeditarchive-powered archive search ([638861e](https://github.com/bitsocialnet/seedit/commit/638861e2229839e2be86377e90b864e0b0e807fd))
+* **search:** wire every advanced search prefix to the indexer ([36ce9b4](https://github.com/bitsocialnet/seedit/commit/36ce9b47c0040ff1e3000bdc7a0194178be7847c))
+* **settings:** remove account dropdown and inline account creation ([98b1851](https://github.com/bitsocialnet/seedit/commit/98b185171b05df267ec9afe88328192f0b8f8457))
+* **share:** use s.seedit.app subdomain for share links ([8cf73d7](https://github.com/bitsocialnet/seedit/commit/8cf73d77281ba176dfea9fdddf0726d7c82394ac))
+
+
+### Performance Improvements
+
+* **all:** preserve pagination during feed updates ([1091d33](https://github.com/bitsocialnet/seedit/commit/1091d3336a58606cdfdbc1f5f6fe14be4eede3d0))
+* **author:** preserve footer and published row identity ([85037f1](https://github.com/bitsocialnet/seedit/commit/85037f19c2acbea773ba210c93f01437acdb4470))
+* **CI:** remove redundant yarn build from Electron build step ([033372b](https://github.com/bitsocialnet/seedit/commit/033372badc81d4f53147208dd5f4a1581ea65da9))
+* **communities:** isolate errors from community list rendering ([ca64de6](https://github.com/bitsocialnet/seedit/commit/ca64de673db93d36057ca5b923c6b049ede1422e))
+* **community-settings:** isolate draft field rendering ([616830e](https://github.com/bitsocialnet/seedit/commit/616830e427372c450e5deaa8be90816e8c493945))
+* **community:** preserve footer state and narrow feed subscriptions ([d9ad65b](https://github.com/bitsocialnet/seedit/commit/d9ad65b75ac4569853792650d11364a6ec7dac76))
+* **domain:** preserve pagination during filtered feed updates ([5f7a076](https://github.com/bitsocialnet/seedit/commit/5f7a076c2508462cbf35f2350924d21f05587bd6))
+* **home:** preserve footer state and isolate feed updates ([bfc2aea](https://github.com/bitsocialnet/seedit/commit/bfc2aea0de9b292df469571f66daa7ecd0c3ded8))
+* **inbox:** retain notification state across feed changes ([cb43437](https://github.com/bitsocialnet/seedit/commit/cb434375ad70ef04cc3821d2208e71bd14bda83c))
+* **mod:** preserve pagination during feed updates ([5b1134d](https://github.com/bitsocialnet/seedit/commit/5b1134d16f81909fb4a34c272a495076ffdeb2c5))
+* **post-page,community,submit:** remove effects that sync derived booleans, replace a mount-only randomizer with useMemo ([70bc289](https://github.com/bitsocialnet/seedit/commit/70bc289c0b810d6135a18b4faa06fdcd1e57ffa6))
+* **post:** retain reply drafts when replies reorder ([64e8eea](https://github.com/bitsocialnet/seedit/commit/64e8eea69b654295ed46a4a1b24e39e67e14f939))
+* pre-optimize workbox dependencies to prevent dev server reload ([679763e](https://github.com/bitsocialnet/seedit/commit/679763eb08bad72c2525fbd16eb834f7160628f4))
+* **profile:** retain published row state across history changes ([51dd9ad](https://github.com/bitsocialnet/seedit/commit/51dd9adcc2d2905a6b9c78cfcdb39fc114643032))
+* **settings:** narrow subscriptions and skip unchanged refresh state ([66fd3ce](https://github.com/bitsocialnet/seedit/commit/66fd3ce24971b3b26b3ec2a59b31b7910ef3665e))
+* **submit:** isolate draft field rendering ([4c51b18](https://github.com/bitsocialnet/seedit/commit/4c51b1824dd999ff944372b4b1a775b99b797f9d))
+
+
+### Reverts
+
+* Revert "init fork" ([b3ae087](https://github.com/bitsocialnet/seedit/commit/b3ae087020cefb40a41c5c6ea9bd78fe14a96e47))
+
+
+### BREAKING CHANGES
+
+* accounts created before the pkc rename are no longer
+migrated. Existing .plebbit data dirs, exported accounts using
+plebbitOptions, and pre-directory subscription cohorts are ignored.
+
+The release workflow now reads the BITSOCIAL_KEYSTORE_PASSWORD secret,
+which must be created before the next release or APK signing will fail.
+
+* docs(rebrand): retire plebbit naming from the changelog and llms indexes
+
+Historical release notes were the last tracked source of plebbit
+references, and public/llms-full.txt is generated from them.
+
+- rewrite github.com/plebbit/seedit commit and compare links to
+  github.com/bitsocialnet/seedit, the repository's current remote;
+  verified the rewritten links still resolve
+- rebrand the release-note prose: subplebbit(s) to community/communities,
+  plebbit options to pkc options, plebbit rpc to pkc rpc,
+  plebbit-react-hooks to bitsocial-react-hooks, plebbit-cli to bitsocial-cli
+- regenerate public/llms.txt and public/llms-full.txt
+
+* fix(rebrand): align wallet signatures and challenge theme with pkc naming
+
+The author wallet domain separator was signer-only: nothing in the
+ecosystem verified 'plebbit-author-wallet'. bitsocial-react-hooks,
+spam-blocker-server and bitbones all verify 'pkc-author-wallet', so the
+settings UI produced signatures that could never validate. Align it,
+which fixes verification as well as the naming.
+
+The challenge iframe theme postMessage has no listener anywhere; iframes
+read the theme from the URL query param instead. Rename its type and
+source for consistency, with no protocol impact.
+
+- wallet-settings: domainSeparator 'plebbit-author-wallet' -> 'pkc-author-wallet'
+- challenge-modal: postMessage type/source -> 'bitsocial-theme'/'bitsocial-seedit'
+
+
+
 ## [0.5.10](https://github.com/bitsocialnet/seedit/compare/v0.5.9...v0.5.10) (2025-09-26)
 
 

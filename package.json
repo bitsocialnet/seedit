@@ -1,6 +1,6 @@
 {
   "name": "seedit",
-  "version": "0.5.10",
+  "version": "0.6.0",
   "description": "A bitsocial client with an old.reddit UI",
   "author": "Bitsocial Forge",
   "type": "module",
