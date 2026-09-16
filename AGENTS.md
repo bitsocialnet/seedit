@@ -38,6 +38,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 | `package.json` changed | Run `corepack yarn install` to synchronize `yarn.lock` |
 | Dependencies, moved files, or imports changed | `yarn boundaries` (part of `yarn lint`) must pass; see module boundaries in [src/AGENTS.md](src/AGENTS.md). Run advisory `yarn knip`; resolve relevant new findings |
 | AI workflow files changed | Edit shared sources, run `yarn ai-workflow:sync`, then `yarn ai-workflow:check` and `yarn ai-workflow:test` |
+| Bug fix or substantive review correction exposes a preventable mistake | Use [retro](.agents/skills/retro/SKILL.md) for the smallest worthwhile prevention |
 | Public English docs or AI context changed | Run `yarn llms:generate` and include resulting `public/llms*.txt` changes |
 | Version, changelog, or release body changed | During release work, follow `release` and run `yarn changelog` when notes need regeneration |
 | Open PR feedback or merge readiness | Use `review-and-merge-pr` within the user's requested scope |
