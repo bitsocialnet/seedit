@@ -108,3 +108,13 @@ If uncertain, ask the developer before adding an entry.
 - **Impact:** Pinned Codex agent models or reasoning levels silently become stale and can diverge from the parent session a contributor intentionally selected.
 - **Mitigation:** Keep Cursor and Claude model controls harness-specific. In every committed Codex custom-agent TOML under `.codex/**/agents/*.toml`, omit both `model` and `model_reasoning_effort` so the agent inherits the current parent session settings.
 - **Status:** confirmed
+
+### Regenerating the whole changelog reverts the rebrand
+
+- **Date:** 2026-09-16
+- **Observed by:** Tommaso + Claude
+- **Context:** preparing the 0.6.0 release, where `yarn changelog` was the documented step for regenerating `CHANGELOG.md`
+- **What was surprising:** the script passed `--release-count 0`, which rebuilds every historical section from raw commit subjects. `CHANGELOG.md` is not purely generated: `chore(rebrand)!` (36fd5f39) hand-rewrote its prose to remove plebbit naming, so regenerating everything reintroduced 151 plebbit/subplebbit references and deleted 136 rebranded lines. `scripts/release-body.js` regenerated its own section the same way, so the published GitHub notes disagreed with the committed file.
+- **Impact:** a routine release step silently reverts the rebrand in a file the app ships at `/changelog`, and publishes old-brand wording in the release notes.
+- **Mitigation:** keep the `changelog` script on `--release-count 1` so it only prepends the new section, and keep `scripts/release-body.js` reading the top section of the committed `CHANGELOG.md` rather than regenerating it. After running `yarn changelog`, confirm the diff is insertions only and apply the established mapping to new entries: subplebbit(s) to community/communities, plebbit options to pkc options, plebbit rpc to pkc rpc, plebbit-react-hooks to bitsocial-react-hooks. Breaking-change notes that name what is no longer migrated (`.plebbit` data dirs, `plebbitOptions`) keep the old name on purpose.
+- **Status:** confirmed
