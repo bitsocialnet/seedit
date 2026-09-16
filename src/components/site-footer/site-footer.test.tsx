@@ -40,11 +40,11 @@ describe('SiteFooter', () => {
 
     expect(linkDestinations).toMatchObject({
       blog: 'https://bitsocial.net/blog?q=seedit',
-      about: 'https://bitsocial.net/apps/seedit',
+      about: 'https://bitsocial.net/projects/seedit',
       docs: 'https://bitsocial.net/docs',
       feedback: 'https://github.com/bitsocialnet/seedit/issues/new',
       contributors: 'https://github.com/bitsocialnet/seedit/graphs/contributors',
-      seedit: 'https://bitsocial.net/apps/seedit',
+      seedit: 'https://bitsocial.net/projects/seedit',
       Bitsocial: 'https://bitsocial.net/',
     });
     expect(container.textContent).not.toContain('advertising');

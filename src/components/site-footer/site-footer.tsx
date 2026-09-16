@@ -17,7 +17,7 @@ const SiteFooter = () => (
             <ExternalLink href='https://bitsocial.net/blog?q=seedit'>blog</ExternalLink>
           </li>
           <li>
-            <ExternalLink href='https://bitsocial.net/apps/seedit'>about</ExternalLink>
+            <ExternalLink href='https://bitsocial.net/projects/seedit'>about</ExternalLink>
           </li>
           <li>
             <Link to='/changelog'>changelog</Link>
@@ -42,7 +42,7 @@ const SiteFooter = () => (
         <h2 className={styles.heading}>apps &amp; tools</h2>
         <ul>
           <li>
-            <ExternalLink href='https://bitsocial.net/apps/seedit'>seedit</ExternalLink>
+            <ExternalLink href='https://bitsocial.net/projects/seedit'>seedit</ExternalLink>
           </li>
         </ul>
       </section>
