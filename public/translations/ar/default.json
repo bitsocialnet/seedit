@@ -440,5 +440,8 @@
   "search_directories": "البحث في الأدلة",
   "back_to_all_directories": "العودة إلى جميع الأدلة",
   "directories": "الأدلة",
-  "search_communities": "البحث عن مجتمعات في هذا الدليل"
+  "search_communities": "البحث عن مجتمعات في هذا الدليل",
+  "fivechan_quote": "اقتباس {{reference}}",
+  "quoting_user": "اقتباس من u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} هو أسلوب اقتباس لا يستخدمه Seedit، ولم يتم العثور على التعليق المقتبس."
 }

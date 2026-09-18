@@ -440,5 +440,8 @@
   "search_directories": "doorzoek directory's",
   "back_to_all_directories": "terug naar alle directory's",
   "directories": "directory's",
-  "search_communities": "gemeenschappen zoeken in deze directory"
+  "search_communities": "gemeenschappen zoeken in deze directory",
+  "fivechan_quote": "citeert {{reference}}",
+  "quoting_user": "citeert u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} is een citaatstijl die Seedit niet gebruikt en de geciteerde reactie is niet gevonden."
 }

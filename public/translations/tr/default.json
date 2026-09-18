@@ -440,5 +440,8 @@
   "search_directories": "dizinlerde ara",
   "back_to_all_directories": "tüm dizinlere geri dön",
   "directories": "dizinler",
-  "search_communities": "bu dizindeki toplulukları ara"
+  "search_communities": "bu dizindeki toplulukları ara",
+  "fivechan_quote": "{{reference}} alıntısı",
+  "quoting_user": "u/{{author}} kullanıcısından alıntı",
+  "fivechan_quote_tooltip": "{{reference}}, Seedit'in kullanmadığı bir alıntı biçimidir ve alıntılanan yorum bulunamadı."
 }

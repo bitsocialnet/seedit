@@ -440,5 +440,8 @@
   "search_directories": "ڈائریکٹریاں تلاش کریں",
   "back_to_all_directories": "تمام ڈائریکٹریوں پر واپس جائیں",
   "directories": "ڈائریکٹریاں",
-  "search_communities": "اس ڈائریکٹری میں کمیونٹیز تلاش کریں"
+  "search_communities": "اس ڈائریکٹری میں کمیونٹیز تلاش کریں",
+  "fivechan_quote": "کا حوالہ دیتے ہوئے {{reference}}",
+  "quoting_user": "u/{{author}} کا حوالہ دیتے ہوئے",
+  "fivechan_quote_tooltip": "{{reference}} ایک ایسا حوالہ انداز ہے جو Seedit استعمال نہیں کرتا، اور حوالہ دیا گیا تبصرہ نہیں مل سکا۔"
 }

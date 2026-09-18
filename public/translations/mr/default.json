@@ -440,5 +440,8 @@
   "search_directories": "डिरेक्टरी शोधा",
   "back_to_all_directories": "सर्व डिरेक्टरींवर परत जा",
   "directories": "डिरेक्टरी",
-  "search_communities": "या डिरेक्टरीमध्ये समुदाय शोधा"
+  "search_communities": "या डिरेक्टरीमध्ये समुदाय शोधा",
+  "fivechan_quote": "यांना उद्धृत करत आहे {{reference}}",
+  "quoting_user": "u/{{author}} यांना उद्धृत करत आहे",
+  "fivechan_quote_tooltip": "{{reference}} ही उद्धरण शैली Seedit वापरत नाही, आणि उद्धृत टिप्पणी सापडली नाही."
 }

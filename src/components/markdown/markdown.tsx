@@ -8,9 +8,16 @@ import styles from './markdown.module.css';
 import rehypeRaw from 'rehype-raw';
 import SpoilerTooltip from '../spoiler-tooltip';
 import { isSeeditLink, transformSeeditLinkToInternal, preprocessSeeditPatterns } from '../../lib/utils/url-utils';
+import FivechanQuote from './fivechan-quote';
+import { parseFivechanQuoteHref, preprocessFivechanQuoteLines } from './fivechan-quote-utils';
 
 interface MarkdownProps {
   content: string;
+  enableFivechanQuotes?: boolean;
+  // 5chan number of the comment this content replies to. Pass it only when that parent is rendered right above the
+  // content, so a 5chan quote that merely points at the parent can be dropped (see preprocessFivechanQuoteLines).
+  parentNumber?: number;
+  quotedCids?: string[];
 }
 
 type ExtendedComponents = Partial<Components> & {
@@ -23,6 +30,7 @@ type ExtendedComponents = Partial<Components> & {
 };
 
 const MAX_LENGTH_FOR_GFM = 10000; // remarkGfm lags with large content
+const EMPTY_QUOTED_CIDS: string[] = [];
 
 const spoilerTransform = () => (tree: any) => {
   const visit = (node: any) => {
@@ -54,9 +62,14 @@ const SpoilerText = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const renderAnchorLink = (children: React.ReactNode, href: string) => {
+const renderAnchorLink = (children: React.ReactNode, href: string, enableFivechanQuotes: boolean, quotedCids: string[]) => {
   if (!href) {
     return <span>{children}</span>;
+  }
+
+  const fivechanQuoteReference = enableFivechanQuotes ? parseFivechanQuoteHref(href) : undefined;
+  if (fivechanQuoteReference) {
+    return <FivechanQuote quotedCids={quotedCids} reference={fivechanQuoteReference} />;
   }
 
   // Check if this is a valid seedit link that should be handled internally
@@ -100,9 +113,12 @@ const renderAnchorLink = (children: React.ReactNode, href: string) => {
   );
 };
 
-const Markdown = ({ content }: MarkdownProps) => {
+const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, quotedCids = EMPTY_QUOTED_CIDS }: MarkdownProps) => {
   // Preprocess content to convert plain text seedit patterns to markdown links
-  const preprocessedContent = useMemo(() => preprocessSeeditPatterns(content), [content]);
+  const preprocessedContent = useMemo(
+    () => preprocessSeeditPatterns(enableFivechanQuotes ? preprocessFivechanQuoteLines(content, parentNumber) : content),
+    [content, enableFivechanQuotes, parentNumber],
+  );
 
   const remarkPlugins: any[] = [[supersub]];
 
@@ -132,7 +148,7 @@ const Markdown = ({ content }: MarkdownProps) => {
         rehypePlugins={[[rehypeRaw as any], [rehypeSanitize as any, customSchema]]}
         components={
           {
-            a: ({ children, href }: { children?: React.ReactNode; href?: string }) => renderAnchorLink(children, href || ''),
+            a: ({ children, href }: { children?: React.ReactNode; href?: string }) => renderAnchorLink(children, href || '', enableFivechanQuotes, quotedCids),
             p: ({ children }: { children?: React.ReactNode }) => {
               const isEmpty =
                 !children ||

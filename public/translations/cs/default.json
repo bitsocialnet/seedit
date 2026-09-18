@@ -440,5 +440,8 @@
   "search_directories": "prohledat adresáře",
   "back_to_all_directories": "zpět na všechny adresáře",
   "directories": "adresáře",
-  "search_communities": "hledat komunity v tomto adresáři"
+  "search_communities": "hledat komunity v tomto adresáři",
+  "fivechan_quote": "cituje {{reference}}",
+  "quoting_user": "cituje u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} je styl citace, který Seedit nepoužívá, a citovaný komentář se nepodařilo najít."
 }

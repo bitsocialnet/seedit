@@ -440,5 +440,8 @@
   "search_directories": "tìm kiếm danh mục",
   "back_to_all_directories": "quay lại tất cả danh mục",
   "directories": "danh mục",
-  "search_communities": "tìm kiếm cộng đồng trong danh mục này"
+  "search_communities": "tìm kiếm cộng đồng trong danh mục này",
+  "fivechan_quote": "trích dẫn {{reference}}",
+  "quoting_user": "trích dẫn u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} là kiểu trích dẫn mà Seedit không sử dụng, và không tìm thấy bình luận được trích dẫn."
 }

@@ -19,7 +19,7 @@ interface CrosspostPreviewProps {
 const CrosspostPreview = ({ crosspost }: CrosspostPreviewProps) => {
   const { t, i18n } = useTranslation();
   const source = useCrosspost({ crosspost });
-  const { author, cid, content, downvoteCount, isCommunityVerified, link, nsfw, replyCount, spoiler, state, timestamp, title, upvoteCount } = source;
+  const { author, cid, content, downvoteCount, isCommunityVerified, link, nsfw, number, quotedCids, replyCount, spoiler, state, timestamp, title, upvoteCount } = source;
   const communityAddress = isCommunityVerified ? getCommentCommunityAddress(source) : undefined;
   const sourcePath = communityAddress && cid ? getCommunityPostPath(communityAddress, cid) : undefined;
   const authorAddress = author?.address;
@@ -115,7 +115,7 @@ const CrosspostPreview = ({ crosspost }: CrosspostPreviewProps) => {
             <>
               <hr className={styles.selfDivider} />
               <div className={styles.usertext}>
-                <Markdown content={trimmedContent} />
+                <Markdown content={trimmedContent} enableFivechanQuotes={typeof number === 'number'} quotedCids={quotedCids} />
               </div>
             </>
           )}

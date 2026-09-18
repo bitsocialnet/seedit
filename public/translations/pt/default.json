@@ -440,5 +440,8 @@
   "search_directories": "pesquisar diretórios",
   "back_to_all_directories": "voltar para todos os diretórios",
   "directories": "diretórios",
-  "search_communities": "pesquisar comunidades neste diretório"
+  "search_communities": "pesquisar comunidades neste diretório",
+  "fivechan_quote": "citando {{reference}}",
+  "quoting_user": "citando u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} é um estilo de citação que o Seedit não usa, e o comentário citado não foi encontrado."
 }

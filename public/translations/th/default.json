@@ -440,5 +440,8 @@
   "search_directories": "ค้นหาไดเรกทอรี",
   "back_to_all_directories": "กลับไปที่ไดเรกทอรีทั้งหมด",
   "directories": "ไดเรกทอรี",
-  "search_communities": "ค้นหาชุมชนในไดเรกทอรีนี้"
+  "search_communities": "ค้นหาชุมชนในไดเรกทอรีนี้",
+  "fivechan_quote": "กำลังอ้างถึง {{reference}}",
+  "quoting_user": "กำลังอ้างถึง u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} เป็นรูปแบบการอ้างอิงที่ Seedit ไม่ได้ใช้ และไม่พบความคิดเห็นที่ถูกอ้างถึง"
 }

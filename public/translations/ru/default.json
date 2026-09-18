@@ -440,5 +440,8 @@
   "search_directories": "искать в каталогах",
   "back_to_all_directories": "назад ко всем каталогам",
   "directories": "каталоги",
-  "search_communities": "поиск сообществ в этом каталоге"
+  "search_communities": "поиск сообществ в этом каталоге",
+  "fivechan_quote": "цитирует {{reference}}",
+  "quoting_user": "цитирует u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} — стиль цитирования, который Seedit не использует, а процитированный комментарий не найден."
 }

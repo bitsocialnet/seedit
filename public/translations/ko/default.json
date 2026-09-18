@@ -440,5 +440,8 @@
   "search_directories": "디렉터리 검색",
   "back_to_all_directories": "모든 디렉터리로 돌아가기",
   "directories": "디렉터리",
-  "search_communities": "이 디렉터리에서 커뮤니티 검색"
+  "search_communities": "이 디렉터리에서 커뮤니티 검색",
+  "fivechan_quote": "인용 {{reference}}",
+  "quoting_user": "u/{{author}} 인용",
+  "fivechan_quote_tooltip": "{{reference}}은(는) Seedit에서 사용하지 않는 인용 형식이며, 인용된 댓글을 찾을 수 없습니다."
 }

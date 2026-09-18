@@ -439,5 +439,8 @@
   "search_directories": "etsi hakemistoja",
   "back_to_all_directories": "takaisin kaikkiin hakemistoihin",
   "directories": "hakemistot",
-  "search_communities": "etsi yhteisöjä tästä hakemistosta"
+  "search_communities": "etsi yhteisöjä tästä hakemistosta",
+  "fivechan_quote": "lainaa {{reference}}",
+  "quoting_user": "lainaa käyttäjää u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} on lainaustyyli, jota Seedit ei käytä, eikä lainattua kommenttia löytynyt."
 }

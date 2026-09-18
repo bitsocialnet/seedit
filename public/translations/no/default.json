@@ -440,5 +440,8 @@
   "search_directories": "søk i kataloger",
   "back_to_all_directories": "tilbake til alle kataloger",
   "directories": "kataloger",
-  "search_communities": "søk etter fellesskap i denne katalogen"
+  "search_communities": "søk etter fellesskap i denne katalogen",
+  "fivechan_quote": "siterer {{reference}}",
+  "quoting_user": "siterer u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} er en sitatstil som Seedit ikke bruker, og den siterte kommentaren ble ikke funnet."
 }

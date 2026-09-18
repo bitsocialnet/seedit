@@ -440,5 +440,8 @@
   "search_directories": "caută directoare",
   "back_to_all_directories": "înapoi la toate directoarele",
   "directories": "directoare",
-  "search_communities": "caută comunități în acest director"
+  "search_communities": "caută comunități în acest director",
+  "fivechan_quote": "citând {{reference}}",
+  "quoting_user": "citând u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} este un stil de citare pe care Seedit nu îl folosește, iar comentariul citat nu a fost găsit."
 }

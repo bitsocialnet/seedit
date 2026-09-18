@@ -440,5 +440,8 @@
   "search_directories": "חיפוש בספריות",
   "back_to_all_directories": "חזרה לכל הספריות",
   "directories": "ספריות",
-  "search_communities": "חיפוש קהילות בספרייה זו"
+  "search_communities": "חיפוש קהילות בספרייה זו",
+  "fivechan_quote": "מצטט את {{reference}}",
+  "quoting_user": "מצטט את u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} הוא סגנון ציטוט ש-Seedit אינו משתמש בו, והתגובה המצוטטת לא נמצאה."
 }

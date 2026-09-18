@@ -112,7 +112,9 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
     link,
     linkHeight,
     linkWidth,
+    number,
     pinned,
+    quotedCids,
     reason,
     removed,
     replyCount,
@@ -360,6 +362,8 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                       link={link}
                       modEditReason={reason}
                       nsfw={nsfw}
+                      number={number}
+                      quotedCids={quotedCids}
                       deleted={deleted}
                       removed={removed}
                       showContent={true}
@@ -383,6 +387,8 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                   link={link}
                   modEditReason={reason}
                   nsfw={nsfw}
+                  number={number}
+                  quotedCids={quotedCids}
                   deleted={deleted}
                   removed={removed}
                   showContent={true}

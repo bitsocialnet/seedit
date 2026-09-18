@@ -440,5 +440,8 @@
   "search_directories": "αναζήτηση καταλόγων",
   "back_to_all_directories": "επιστροφή σε όλους τους καταλόγους",
   "directories": "κατάλογοι",
-  "search_communities": "αναζήτηση κοινοτήτων σε αυτόν τον κατάλογο"
+  "search_communities": "αναζήτηση κοινοτήτων σε αυτόν τον κατάλογο",
+  "fivechan_quote": "παράθεση {{reference}}",
+  "quoting_user": "παράθεση από u/{{author}}",
+  "fivechan_quote_tooltip": "Το {{reference}} είναι ένα στυλ παράθεσης που δεν χρησιμοποιεί το Seedit και το σχόλιο που παρατίθεται δεν βρέθηκε."
 }

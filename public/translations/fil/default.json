@@ -440,5 +440,8 @@
   "search_directories": "maghanap sa mga direktoryo",
   "back_to_all_directories": "bumalik sa lahat ng direktoryo",
   "directories": "mga direktoryo",
-  "search_communities": "maghanap ng mga komunidad sa direktoryong ito"
+  "search_communities": "maghanap ng mga komunidad sa direktoryong ito",
+  "fivechan_quote": "sinisipi {{reference}}",
+  "quoting_user": "sinisipi si u/{{author}}",
+  "fivechan_quote_tooltip": "Ang {{reference}} ay isang istilo ng pagsipi na hindi ginagamit ng Seedit, at hindi nahanap ang sinipi na komento."
 }

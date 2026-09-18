@@ -450,5 +450,8 @@
   "search_directories": "search directories",
   "back_to_all_directories": "back to all directories",
   "directories": "directories",
-  "search_communities": "search communities in this directory"
+  "search_communities": "search communities in this directory",
+  "fivechan_quote": "quoting {{reference}}",
+  "quoting_user": "quoting u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} is a quote style Seedit does not use, and the quoted comment could not be found."
 }

@@ -440,5 +440,8 @@
   "search_directories": "cari direktori",
   "back_to_all_directories": "kembali ke semua direktori",
   "directories": "direktori",
-  "search_communities": "cari komunitas di direktori ini"
+  "search_communities": "cari komunitas di direktori ini",
+  "fivechan_quote": "mengutip {{reference}}",
+  "quoting_user": "mengutip u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} adalah gaya kutipan yang tidak digunakan Seedit, dan komentar yang dikutip tidak ditemukan."
 }

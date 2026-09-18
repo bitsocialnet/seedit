@@ -440,5 +440,8 @@
   "search_directories": "ডিরেক্টরি খুঁজুন",
   "back_to_all_directories": "সব ডিরেক্টরিতে ফিরে যান",
   "directories": "ডিরেক্টরি",
-  "search_communities": "এই ডিরেক্টরিতে সম্প্রদায় খুঁজুন"
+  "search_communities": "এই ডিরেক্টরিতে সম্প্রদায় খুঁজুন",
+  "fivechan_quote": "উদ্ধৃত করা হচ্ছে {{reference}}",
+  "quoting_user": "u/{{author}}-কে উদ্ধৃত করা হচ্ছে",
+  "fivechan_quote_tooltip": "{{reference}} হলো এমন একটি উদ্ধৃতি রীতি যা Seedit ব্যবহার করে না, এবং উদ্ধৃত মন্তব্যটি খুঁজে পাওয়া যায়নি।"
 }

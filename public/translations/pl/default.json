@@ -440,5 +440,8 @@
   "search_directories": "przeszukaj katalogi",
   "back_to_all_directories": "powrót do wszystkich katalogów",
   "directories": "katalogi",
-  "search_communities": "szukaj społeczności w tym katalogu"
+  "search_communities": "szukaj społeczności w tym katalogu",
+  "fivechan_quote": "cytuje {{reference}}",
+  "quoting_user": "cytuje u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} to styl cytowania, którego Seedit nie używa, a cytowanego komentarza nie znaleziono."
 }

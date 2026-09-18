@@ -440,5 +440,8 @@
   "search_directories": "ディレクトリを検索",
   "back_to_all_directories": "すべてのディレクトリに戻る",
   "directories": "ディレクトリ",
-  "search_communities": "このディレクトリ内のコミュニティを検索"
+  "search_communities": "このディレクトリ内のコミュニティを検索",
+  "fivechan_quote": "{{reference}}を引用",
+  "quoting_user": "u/{{author}}を引用",
+  "fivechan_quote_tooltip": "{{reference}} は Seedit が使用しない引用形式で、引用されたコメントは見つかりませんでした。"
 }

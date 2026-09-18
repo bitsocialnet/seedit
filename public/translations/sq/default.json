@@ -440,5 +440,8 @@
   "search_directories": "kërko në drejtori",
   "back_to_all_directories": "kthehu te të gjitha drejtoritë",
   "directories": "drejtori",
-  "search_communities": "kërko komunitete në këtë direktori"
+  "search_communities": "kërko komunitete në këtë direktori",
+  "fivechan_quote": "duke cituar {{reference}}",
+  "quoting_user": "duke cituar u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} është një stil citimi që Seedit nuk e përdor, dhe komenti i cituar nuk u gjet."
 }

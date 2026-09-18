@@ -440,5 +440,8 @@
   "search_directories": "جستجو در فهرست‌ها",
   "back_to_all_directories": "بازگشت به همه فهرست‌ها",
   "directories": "فهرست‌ها",
-  "search_communities": "جستجوی انجمن‌ها در این فهرست"
+  "search_communities": "جستجوی انجمن‌ها در این فهرست",
+  "fivechan_quote": "نقل‌قول {{reference}}",
+  "quoting_user": "نقل‌قول از u/{{author}}",
+  "fivechan_quote_tooltip": "{{reference}} یک شیوهٔ نقل‌قول است که Seedit از آن استفاده نمی‌کند و کامنت نقل‌شده پیدا نشد."
 }
