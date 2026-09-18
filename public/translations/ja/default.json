@@ -443,5 +443,5 @@
   "search_communities": "このディレクトリ内のコミュニティを検索",
   "fivechan_quote": "{{reference}}を引用",
   "quoting_user": "u/{{author}}を引用",
-  "fivechan_quote_tooltip": ">>123 のような引用は、このコミュニティ内の番号で別の投稿や返信を参照します。引用されたコメントを特定できる場合、Seedit はそれをリンクします。"
+  "fivechan_quote_tooltip": "{{reference}} は Seedit が使用しない引用形式で、引用されたコメントは見つかりませんでした。"
 }

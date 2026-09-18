@@ -18,18 +18,23 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useComments: () => ({ comments: testState.comments }),
 }));
 
-vi.mock('react-i18next', () => ({
-  useTranslation: () => ({
-    t: (key: string, values?: Record<string, string>) => {
-      if (key === 'quoting_user') return `quoting u/${values?.author}`;
-      if (key === 'fivechan_quote') return `quoting ${values?.reference}`;
-      if (key === 'fivechan_quote_tooltip') {
-        return 'Quotes like >>123 reference another post or reply by its number in this community. Seedit links them when the quoted comment can be identified.';
-      }
-      return key;
-    },
-  }),
-}));
+// Translates with the real English strings, and mirrors i18next's default HTML escaping so a call that forgets
+// `interpolation: { escapeValue: false }` surfaces here as `&gt;&gt;99` instead of the `>>99` a reader expects.
+vi.mock('react-i18next', async () => {
+  const strings = (await import('../../../public/translations/en/default.json')).default as Record<string, string>;
+  const escapeValue = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\//g, '&#x2F;');
+
+  return {
+    useTranslation: () => ({
+      t: (key: string, values?: Record<string, any>) =>
+        (strings[key] ?? key).replace(/\{\{(\w+)\}\}/g, (placeholder: string, name: string) => {
+          if (!(name in (values ?? {}))) return placeholder;
+          const value = String(values?.[name]);
+          return values?.interpolation?.escapeValue === false ? value : escapeValue(value);
+        }),
+    }),
+  };
+});
 
 vi.mock('../info-tooltip', () => ({
   default: ({ content }: { content: string }) => <sup data-tooltip={content}>[?]</sup>,
@@ -90,7 +95,7 @@ describe('Markdown', () => {
     expect(link?.textContent).toBe('[quoting u/alice.bso]');
     expect(link?.getAttribute('href')).toBe('#/s/music-posting.eth/comments/quoted-cid');
     expect(container.querySelector('blockquote')).toBeNull();
-    expect(container.querySelector('[data-tooltip]')?.getAttribute('data-tooltip')).toContain('Quotes like >>123');
+    expect(container.querySelector('[data-tooltip]')).toBeNull();
   });
 
   it('keeps unresolved same-board and cross-board quotes understandable', async () => {
@@ -109,7 +114,11 @@ describe('Markdown', () => {
 
     expect(container.textContent).toContain('[quoting >>99]');
     expect(container.textContent).toContain('[quoting >>>/fit/77]');
-    expect(container.querySelectorAll('[data-tooltip]')).toHaveLength(2);
+    const tooltips = [...container.querySelectorAll('[data-tooltip]')].map((tooltip) => tooltip.getAttribute('data-tooltip'));
+    expect(tooltips).toEqual([
+      '>>99 is a quote style Seedit does not use, and the quoted comment could not be found.',
+      '>>>/fit/77 is a quote style Seedit does not use, and the quoted comment could not be found.',
+    ]);
     expect(container.querySelector('blockquote')).toBeNull();
   });
 
@@ -155,7 +164,7 @@ describe('Markdown', () => {
     );
 
     expect(container.querySelector('a')?.textContent).toBe('[quoting u/alice.bso]');
-    expect(container.querySelectorAll('[data-tooltip]')).toHaveLength(1);
+    expect(container.querySelector('[data-tooltip]')).toBeNull();
   });
 
   it('keeps a parent quote that appears next to other quotes', async () => {
@@ -181,7 +190,7 @@ describe('Markdown', () => {
 
     const links = [...container.querySelectorAll('a')].map((link) => link.textContent);
     expect(links).toEqual(['[quoting u/alice.bso]', '[quoting u/bob.bso]']);
-    expect(container.querySelectorAll('[data-tooltip]')).toHaveLength(2);
+    expect(container.querySelector('[data-tooltip]')).toBeNull();
   });
 
   it('preserves regular Markdown quotes and code containing 5chan-shaped text', async () => {

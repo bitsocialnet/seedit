@@ -453,5 +453,5 @@
   "search_communities": "search communities in this directory",
   "fivechan_quote": "quoting {{reference}}",
   "quoting_user": "quoting u/{{author}}",
-  "fivechan_quote_tooltip": "Quotes like >>123 reference another post or reply by its number in this community. Seedit links them when the quoted comment can be identified."
+  "fivechan_quote_tooltip": "{{reference}} is a quote style Seedit does not use, and the quoted comment could not be found."
 }

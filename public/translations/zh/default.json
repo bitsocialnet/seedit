@@ -443,5 +443,5 @@
   "search_communities": "搜索此目录中的社区",
   "fivechan_quote": "引用 {{reference}}",
   "quoting_user": "引用 u/{{author}}",
-  "fivechan_quote_tooltip": "像 >>123 这样的引用通过其在此社区中的编号引用另一条帖子或回复。当能够识别引用的评论时，Seedit 会将它们链接起来。"
+  "fivechan_quote_tooltip": "{{reference}} 是 Seedit 不使用的引用格式，未能找到被引用的评论。"
 }

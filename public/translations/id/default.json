@@ -443,5 +443,5 @@
   "search_communities": "cari komunitas di direktori ini",
   "fivechan_quote": "mengutip {{reference}}",
   "quoting_user": "mengutip u/{{author}}",
-  "fivechan_quote_tooltip": "Kutipan seperti >>123 merujuk ke pos atau balasan lain berdasarkan nomornya di komunitas ini. Seedit menautkannya ketika komentar yang dikutip dapat diidentifikasi."
+  "fivechan_quote_tooltip": "{{reference}} adalah gaya kutipan yang tidak digunakan Seedit, dan komentar yang dikutip tidak ditemukan."
 }

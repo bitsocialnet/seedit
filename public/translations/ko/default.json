@@ -443,5 +443,5 @@
   "search_communities": "이 디렉터리에서 커뮤니티 검색",
   "fivechan_quote": "인용 {{reference}}",
   "quoting_user": "u/{{author}} 인용",
-  "fivechan_quote_tooltip": ">>123과 같은 인용문은 이 커뮤니티에서 번호로 다른 게시물이나 댓글을 참조합니다. 인용된 댓글을 식별할 수 있을 때 Seedit이 연결합니다."
+  "fivechan_quote_tooltip": "{{reference}}은(는) Seedit에서 사용하지 않는 인용 형식이며, 인용된 댓글을 찾을 수 없습니다."
 }

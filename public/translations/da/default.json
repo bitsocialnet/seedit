@@ -443,5 +443,5 @@
   "search_communities": "søg efter fællesskaber i dette katalog",
   "fivechan_quote": "citerer {{reference}}",
   "quoting_user": "citerer u/{{author}}",
-  "fivechan_quote_tooltip": "Citater som >>123 refererer til et andet opslag eller svar efter dets nummer i dette samfund. Seedit linker dem når den citerede kommentar kan identificeres."
+  "fivechan_quote_tooltip": "{{reference}} er en citatstil, som Seedit ikke bruger, og den citerede kommentar kunne ikke findes."
 }

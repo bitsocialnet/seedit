@@ -443,5 +443,5 @@
   "search_communities": "البحث عن مجتمعات في هذا الدليل",
   "fivechan_quote": "اقتباس {{reference}}",
   "quoting_user": "اقتباس من u/{{author}}",
-  "fivechan_quote_tooltip": "الاقتباسات مثل >>123 تشير إلى منشور أو رد آخر برقمه في هذا المجتمع. يربط Seedit بينها عندما يمكن التعرف على التعليق المقتبس."
+  "fivechan_quote_tooltip": "{{reference}} هو أسلوب اقتباس لا يستخدمه Seedit، ولم يتم العثور على التعليق المقتبس."
 }

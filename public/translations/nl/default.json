@@ -443,5 +443,5 @@
   "search_communities": "gemeenschappen zoeken in deze directory",
   "fivechan_quote": "citeert {{reference}}",
   "quoting_user": "citeert u/{{author}}",
-  "fivechan_quote_tooltip": "Citaten zoals >>123 verwijzen naar een ander bericht of antwoord op basis van het nummer ervan in deze gemeenschap. Seedit linkt ze wanneer het geciteerde commentaar kan worden geïdentificeerd."
+  "fivechan_quote_tooltip": "{{reference}} is een citaatstijl die Seedit niet gebruikt en de geciteerde reactie is niet gevonden."
 }

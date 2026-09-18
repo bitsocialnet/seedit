@@ -443,5 +443,5 @@
   "search_communities": "חיפוש קהילות בספרייה זו",
   "fivechan_quote": "מצטט את {{reference}}",
   "quoting_user": "מצטט את u/{{author}}",
-  "fivechan_quote_tooltip": "ציטוטים כמו >>123 מתייחסים ללעומת זאת פוסט או תשובה אחרת לפי מספרם בקהילה זו. Seedit מקשר אותם כאשר ניתן לזהות את ההערה שצוטטה."
+  "fivechan_quote_tooltip": "{{reference}} הוא סגנון ציטוט ש-Seedit אינו משתמש בו, והתגובה המצוטטת לא נמצאה."
 }

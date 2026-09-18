@@ -443,5 +443,5 @@
   "search_communities": "hledat komunity v tomto adresáři",
   "fivechan_quote": "cituje {{reference}}",
   "quoting_user": "cituje u/{{author}}",
-  "fivechan_quote_tooltip": "Citace jako >>123 odkazují na jiný příspěvek nebo odpověď podle jejího čísla v této komunitě. Seedit je propojuje, když lze identifikovat citovaný komentář."
+  "fivechan_quote_tooltip": "{{reference}} je styl citace, který Seedit nepoužívá, a citovaný komentář se nepodařilo najít."
 }

@@ -443,5 +443,5 @@
   "search_communities": "kërko komunitete në këtë direktori",
   "fivechan_quote": "duke cituar {{reference}}",
   "quoting_user": "duke cituar u/{{author}}",
-  "fivechan_quote_tooltip": "Citatet si >>123 referohen në një tjetër postim ose përgjigje sipas numrit të tij në këtë komunitet. Seedit i lidh ato kur komentimi i cituar mund të identifikohet."
+  "fivechan_quote_tooltip": "{{reference}} është një stil citimi që Seedit nuk e përdor, dhe komenti i cituar nuk u gjet."
 }
