@@ -72,7 +72,9 @@ const Thumbnail = ({
 
   let mediaComponent = null;
   let noMediaLinkIcon = '';
-  const { frameUrl: gifFrameUrl, isLoading: gifFrameLoading } = useFetchGifFirstFrame(commentMediaInfo?.type === 'gif' ? commentMediaInfo.url : undefined);
+  // Replies show the gif itself, animated, so no first frame has to be extracted for them
+  const shouldExtractGifFirstFrame = commentMediaInfo?.type === 'gif' && !isReply;
+  const { frameUrl: gifFrameUrl, isLoading: gifFrameLoading } = useFetchGifFirstFrame(shouldExtractGifFirstFrame ? commentMediaInfo.url : undefined);
 
   const isChromium = (() => {
     const ua = navigator.userAgent;
@@ -108,7 +110,10 @@ const Thumbnail = ({
   } else if (commentMediaInfo?.type === 'iframe') {
     mediaComponent = iframeThumbnail ? <img src={iframeThumbnail} alt='' onError={handleNotFound} /> : <span className={`${styles.iconThumbnail} ${styles.linkIcon}`} />;
   } else if (commentMediaInfo?.type === 'gif') {
-    if (gifFrameUrl) {
+    if (isReply) {
+      // Replies never hide a gif behind a placeholder icon, it stays visible at thumbnail size and expands on click
+      mediaComponent = <img src={commentMediaInfo.url} alt='' onError={handleNotFound} />;
+    } else if (gifFrameUrl) {
       mediaComponent = <img src={gifFrameUrl} alt='' onError={handleNotFound} />;
     } else if (gifFrameLoading) {
       displayWidth = '50px';
