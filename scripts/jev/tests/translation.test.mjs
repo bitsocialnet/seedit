@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
@@ -9,6 +9,7 @@ import { createJevClient } from '../client.mjs';
 import { evaluationMetrics, main as evaluateMain } from '../translations-eval.mjs';
 import {
   flattenTranslations,
+  gitRelativePath,
   loadLocalePairs,
   loadParagraphPairs,
   main as translationMain,
@@ -261,6 +262,66 @@ test('explicit locale keys report missing source and target entries', async (t) 
   assert.equal(pairs.length, 2);
   assert.deepEqual(structuralIssues(pairs[0]), ['missing_or_nonstring_translation']);
   assert.deepEqual(structuralIssues(pairs[1]), ['missing_or_nonstring_source']);
+});
+
+test('Git changed-file paths match English and target catalogs on Windows and POSIX', () => {
+  const changed = new Set(['public/translations/en/default.json', 'public/translations/it/default.json']);
+  for (const pathApi of [path.win32, path.posix]) {
+    const repository = pathApi.resolve('fixtures', 'repository');
+    for (const locale of ['en', 'it']) {
+      const file = pathApi.join(repository, 'public', 'translations', locale, 'default.json');
+      assert.ok(changed.has(gitRelativePath(repository, file, pathApi)), `${pathApi.sep} ${locale}`);
+    }
+    assert.ok(!changed.has(gitRelativePath(repository, pathApi.join(repository, 'public/translations/fr/default.json'), pathApi)));
+  }
+});
+
+test('malformed locale diagnostics identify the selected English or target catalog without contents', async (t) => {
+  const cwd = await temporary(t);
+  const sourceFile = path.join(cwd, 'public/translations/en/default.json');
+  const targetFile = path.join(cwd, 'public/translations/it/default.json');
+  await json(sourceFile, { a: 'One' });
+  await json(targetFile, { a: 'Uno' });
+  for (const [file, relative] of [
+    [targetFile, 'public/translations/it/default.json'],
+    [sourceFile, 'public/translations/en/default.json'],
+  ]) {
+    await fs.writeFile(file, '{"private-catalog-content": broken');
+    await assert.rejects(
+      () => loadLocalePairs({ cwd, locales: ['it'], keys: ['a'] }),
+      (error) => {
+        assert.equal(error.message, `Unable to read valid JSON input: ${relative}`);
+        assert.ok(!error.message.includes('private-catalog-content'));
+        return true;
+      },
+    );
+    await json(file, { a: 'Restored' });
+  }
+});
+
+test('both CLIs report bounded malformed pair or corpus paths and redact the API token', async (t) => {
+  const cwd = await temporary(t);
+  const token = 'fixture-diagnostic-secret';
+  const relative = path.join('a'.repeat(100), 'b'.repeat(100), token, 'broken.json');
+  const file = path.join(cwd, relative);
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, '{"private-pair-content": broken');
+  for (const [script, option] of [
+    ['translations.mjs', '--pairs'],
+    ['translations-eval.mjs', '--corpus'],
+  ]) {
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL(`../${script}`, import.meta.url)), option, relative], {
+      cwd,
+      encoding: 'utf8',
+      env: { ...process.env, TYPESAFE_API_KEY: ` ${token} ` },
+    });
+    assert.equal(result.status, 2);
+    assert.equal(result.stdout, '');
+    assert.match(result.stderr, /Unable to read valid JSON input: \.\.\..*\[redacted\]\/broken\.json/);
+    assert.ok(!result.stderr.includes(token));
+    assert.ok(!result.stderr.includes('private-pair-content'));
+    assert.ok(result.stderr.trim().length <= 'Unable to read valid JSON input: '.length + 180);
+  }
 });
 
 test('Git base includes only changed keys plus English changes across selected locales', async (t) => {

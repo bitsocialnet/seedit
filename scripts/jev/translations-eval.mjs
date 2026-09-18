@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { createJevClient } from './client.mjs';
-import { loadParagraphPairs, parseScopedCsv, reviewTranslations } from './translations.mjs';
+import { loadParagraphPairs, parseScopedCsv, reviewTranslations, TranslationInputError } from './translations.mjs';
 
 export function evaluationMetrics(labels, results) {
   const byIdentity = new Map(results.map((result) => [JSON.stringify([result.locale, result.key]), result]));
@@ -99,8 +99,10 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
     .then((code) => {
       process.exitCode = code;
     })
-    .catch(() => {
-      console.error('Translation evaluation could not run. Check the corpus, pinned model, and limits; use --help.');
+    .catch((error) => {
+      console.error(
+        error instanceof TranslationInputError ? error.message : 'Translation evaluation could not run. Check the corpus, pinned model, and limits; use --help.',
+      );
       process.exitCode = 2;
     });
 }

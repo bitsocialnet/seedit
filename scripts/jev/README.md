@@ -22,7 +22,7 @@ node scripts/jev/browser.mjs --plan /path/to/plan.json --live --model jev-X.Y.Z
 
 Do not put API keys in plans, CLI arguments, committed files, or page JavaScript. Supply `TYPESAFE_API_KEY` through the current process environment. The browser subprocess does not receive it. Requests go only to `https://api.typesafe.ai/v1/systemone`; redirects are rejected.
 
-The helper opens and closes its own isolated session through `scripts/pw-session.sh`. A busy shared browser slot returns `incomplete/browser_slot_busy`; retry after its owner finishes. It finds an installed `playwright-cli` in the root, `webui/`, or `packages/admin/`, then PATH. `PLAYWRIGHT_CLI_BIN` can select an existing executable. It never invokes `npx` or bypasses the lock.
+The helper opens and closes its own isolated session through `scripts/pw-session.sh`. A busy shared browser slot returns `incomplete/browser_slot_busy`; retry after its owner finishes. It finds an installed `playwright-cli` in the root, `webui/`, or `packages/admin/`, then PATH. `PLAYWRIGHT_CLI_BIN` can select an existing executable; relative paths resolve from the invocation directory before the session changes directories. It never invokes `npx` or bypasses the lock. `--baseline` requires `--live`; the incomplete result rejects that flag combination when execution was not explicitly enabled.
 
 This illustrative plan must be adapted to controls actually observed on the target page:
 
@@ -68,7 +68,7 @@ This illustrative plan must be adapted to controls actually observed on the targ
 
 Each decision uses a fresh snapshot, only currently observed approved controls, a strictly validated typed response, and a pinned returned model. After Jev answers, the helper refreshes the snapshot again and checks the same ref; fixed Playwright code checks the exact role/name locator, element identity, visibility, enabled state, and origin immediately before acting. The model cannot supply JavaScript, selectors, shell commands, arbitrary URLs, or a passing result.
 
-JSON stdout includes status, action IDs, exact assertion booleans, advisory results, the `staleReplans` count, elapsed time, and sanitized usage totals. Exit `0` means offline validation succeeded or the exact assertions and all requested semantic checks were satisfied; exit `2` means incomplete/invalid or semantic review is needed. Private temporary browser output is deleted after the owned session closes. Forced termination can leave the temporary directory/session behind; identify the exact session through the shared wrapper before cleanup.
+JSON stdout includes a bounded, key-redacted plan path relative to the invocation directory, status, action IDs, exact assertion booleans, advisory results, the `staleReplans` count, elapsed time, and sanitized usage totals. Exit `0` means offline validation succeeded or the exact assertions and all requested semantic checks were satisfied; exit `2` means incomplete/invalid or semantic review is needed. A wrapper warning that its browser close failed returns `incomplete/cleanup_failed`, even when the wrapper exits zero. The plan reference distinguishes route-specific runs without repeating full URLs that may contain query or hash secrets. Private temporary browser output is removed during cleanup. A failed close or forced termination can leave the owned session behind; identify the exact session through the shared wrapper before cleanup.
 
 ## Semantic text checks
 

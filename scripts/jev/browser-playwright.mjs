@@ -23,7 +23,8 @@ export const canonicalNavigationAllowed = (requestUrl, origin) => requestUrl.sta
 export const browserOriginGuard = (origin) => `if (await page.evaluate(() => location.origin) !== ${JSON.stringify(origin)}) throw new Error('origin_changed');`;
 
 export async function findPlaywrightCli() {
-  if (process.env.PLAYWRIGHT_CLI_BIN) return process.env.PLAYWRIGHT_CLI_BIN;
+  const override = process.env.PLAYWRIGHT_CLI_BIN;
+  if (override) return /[/\\]/.test(override) ? path.resolve(process.cwd(), override) : override;
   for (const relative of ['node_modules/.bin/playwright-cli', 'webui/node_modules/.bin/playwright-cli', 'packages/admin/node_modules/.bin/playwright-cli']) {
     const candidate = path.join(root, relative);
     try {
@@ -37,7 +38,7 @@ export async function findPlaywrightCli() {
   return 'playwright-cli';
 }
 
-export function createPlaywrightDriver() {
+export function createPlaywrightDriver({ execute = exec } = {}) {
   const session = `jev-${process.pid}-${randomBytes(4).toString('hex')}`;
   let directory,
     cli,
@@ -51,12 +52,13 @@ export function createPlaywrightDriver() {
     const remaining = cleanup ? 15_000 : plan.limits.deadlineMs - (Date.now() - started);
     if (remaining <= 0) throw new JevError('deadline_exceeded');
     try {
-      const result = await exec(wrapper ? path.join(root, 'scripts/pw-session.sh') : cli, args, {
+      const result = await execute(wrapper ? path.join(root, 'scripts/pw-session.sh') : cli, args, {
         cwd: directory,
         env: { ...childEnv, PLAYWRIGHT_CLI_BIN: cli },
         timeout: Math.min(remaining, 30_000),
         maxBuffer: 512_000,
       });
+      if (cleanup && /^pw-session: warning: closing browser .* exited \d+/m.test(result.stderr || '')) throw new JevError('cleanup_failed');
       if (/^### Error/m.test(result.stdout)) throw new JevError('browser_command_failed');
       return result.stdout;
     } catch (error) {

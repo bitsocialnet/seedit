@@ -154,7 +154,13 @@ export function validatePlan(plan) {
     limits.minProbability > 1
   )
     fail('invalid_limits');
-  return { ...plan, url: url.href, origin: url.origin, limits };
+  return {
+    ...plan,
+    url: url.href,
+    origin: url.origin,
+    assertions: plan.assertions.map((assertion) => (assertion.type === 'url' ? { ...assertion, equals: new URL(assertion.equals).href } : assertion)),
+    limits,
+  };
 }
 
 // Only snapshot nodes carrying a current CLI ref can become candidates. YAML content is never

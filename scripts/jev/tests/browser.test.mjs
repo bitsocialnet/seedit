@@ -2,8 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { validatePlan, candidatesFromSnapshot, runBrowserPlan } from '../browser-plan.mjs';
 import { createJevClient, JevError } from '../client.mjs';
-import { canonicalNavigationAllowed, browserOriginGuard } from '../browser-playwright.mjs';
+import { canonicalNavigationAllowed, browserOriginGuard, createPlaywrightDriver, findPlaywrightCli } from '../browser-playwright.mjs';
 import { runInNewContext } from 'node:vm';
+import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const basePlan = () => ({
   version: 1,
@@ -25,6 +30,60 @@ const snapshots = [
   '- button "Settings" [ref=e1]',
 ];
 
+test('baseline without the explicit live flag cannot report an unexecuted flow as valid', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'jev-cli-test-'));
+  try {
+    const planFile = path.join(directory, 'plan.json');
+    await writeFile(planFile, JSON.stringify(basePlan()));
+    const result = spawnSync(process.execPath, [fileURLToPath(new URL('../browser.mjs', import.meta.url)), '--plan', planFile, '--baseline'], { encoding: 'utf8' });
+    assert.equal(result.status, 2);
+    assert.equal(JSON.parse(result.stdout).reason, 'baseline_requires_live');
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('relative CLI overrides resolve before the browser changes its working directory', async () => {
+  const previous = process.env.PLAYWRIGHT_CLI_BIN;
+  try {
+    process.env.PLAYWRIGHT_CLI_BIN = './node_modules/.bin/playwright-cli';
+    assert.equal(await findPlaywrightCli(), path.resolve(process.cwd(), process.env.PLAYWRIGHT_CLI_BIN));
+    process.env.PLAYWRIGHT_CLI_BIN = 'custom-playwright-cli';
+    assert.equal(await findPlaywrightCli(), 'custom-playwright-cli');
+  } finally {
+    if (previous === undefined) delete process.env.PLAYWRIGHT_CLI_BIN;
+    else process.env.PLAYWRIGHT_CLI_BIN = previous;
+  }
+});
+
+test('unreadable plan diagnostics identify the bounded path without exposing an environment key', () => {
+  const result = spawnSync(process.execPath, [fileURLToPath(new URL('../browser.mjs', import.meta.url)), '--plan', '/missing/fixture-secret/plan.json'], {
+    encoding: 'utf8',
+    env: { ...process.env, TYPESAFE_API_KEY: ' fixture-secret ' },
+  });
+  assert.equal(result.status, 2);
+  const report = JSON.parse(result.stdout);
+  assert.equal(report.reason, 'invalid_or_unreadable_plan');
+  assert.ok(report.plan.endsWith('/missing/[redacted]/plan.json'));
+  assert.equal(result.stdout.includes('fixture-secret'), false);
+});
+
+test('a wrapper close warning with exit zero is still a cleanup failure', async () => {
+  let closed = 0;
+  const driver = createPlaywrightDriver({
+    execute: async (_file, args) => {
+      if (args[0] === 'close') {
+        closed++;
+        return { stdout: 'pw-session: released browser slot\n', stderr: `pw-session: warning: closing browser '${args[1]}' exited 1\n` };
+      }
+      return { stdout: '### Result\ntrue\n', stderr: '' };
+    },
+  });
+  await driver.open(validatePlan(basePlan()));
+  await assert.rejects(driver.close(), { code: 'cleanup_failed' });
+  assert.equal(closed, 1);
+});
+
 test('origin guards run in the CLI VM without a URL global and preserve exact origin boundaries', async () => {
   const permitted = runInNewContext(`(${canonicalNavigationAllowed.toString()})`, {});
   assert.equal(permitted('https://local.example/path', 'https://local.example'), true);
@@ -33,6 +92,37 @@ test('origin guards run in the CLI VM without a URL global and preserve exact or
   const guard = runInNewContext(`async page => { ${browserOriginGuard('https://local.example')} return true; }`, {});
   assert.equal(await guard({ evaluate: async () => 'https://local.example' }), true);
   await assert.rejects(guard({ evaluate: async () => 'https://evil.test' }), /origin_changed/);
+});
+
+test('URL completion assertions use the same canonical form as the browser without mutating the input', () => {
+  const plan = basePlan();
+  plan.url = 'http://LOCALHOST:80';
+  plan.assertions = [{ type: 'url', equals: 'http://LOCALHOST:80' }];
+  const validated = validatePlan(plan);
+  assert.equal(validated.assertions[0].equals, 'http://localhost/');
+  assert.equal(validated.assertions[0].equals, validated.url);
+  assert.equal(plan.assertions[0].equals, 'http://LOCALHOST:80');
+});
+
+test('live CLI preflights missing credentials and model before a browser command can run', async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'jev-cli-test-'));
+  try {
+    const planFile = path.join(directory, 'plan.json');
+    await writeFile(planFile, JSON.stringify(basePlan()));
+    for (const [key, model, reason] of [
+      ['', 'jev-1.13.0', 'missing_api_key'],
+      ['fixture-key', '', 'pinned_model_required'],
+    ]) {
+      const result = spawnSync(process.execPath, [fileURLToPath(new URL('../browser.mjs', import.meta.url)), '--plan', planFile, '--live'], {
+        encoding: 'utf8',
+        env: { ...process.env, TYPESAFE_API_KEY: key, JEV_MODEL: model, PLAYWRIGHT_CLI_BIN: path.join(directory, 'does-not-exist') },
+      });
+      assert.equal(result.status, 2);
+      assert.equal(JSON.parse(result.stdout).reason, reason);
+    }
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
 });
 function fixtureDriver(extra = {}) {
   let stage = 0,
