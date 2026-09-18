@@ -1,0 +1,29 @@
+name: Jev helper checks
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/jev/**'
+      - 'scripts/pw-session.sh'
+      - '.github/workflows/jev-helpers.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'scripts/jev/**'
+      - 'scripts/pw-session.sh'
+      - '.github/workflows/jev-helpers.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.12.0'
+      - name: Verify bounded helpers without browser or provider calls
+        run: node --test scripts/jev/tests/*.test.mjs
