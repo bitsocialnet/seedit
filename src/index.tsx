@@ -1,5 +1,4 @@
 import './polyfills.js';
-import './lib/dev-tools';
 import { configureDevelopmentMockContent } from './lib/development-debug';
 import { configureP2PBrowserPkcOptions } from './lib/p2p-browser-config';
 import React from 'react';
