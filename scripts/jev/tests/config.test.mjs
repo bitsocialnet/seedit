@@ -30,6 +30,12 @@ test('one machine configuration supplies every checkout and redacts the file-bac
   assert.equal(redactJevSecrets('path/file-fixture-key/plan.json'), 'path/[redacted]/plan.json');
 });
 
+test('redaction removes longer credentials before any previously loaded prefix', () => {
+  resolveJevSettings({ apiKey: 'prefix-fixture', model: 'jev-1.13.0', env: {} });
+  resolveJevSettings({ apiKey: 'prefix-fixture-private-suffix', model: 'jev-1.13.0', env: {} });
+  assert.equal(redactJevSecrets('path/prefix-fixture-private-suffix/plan.json prefix-fixture'), 'path/[redacted]/plan.json [redacted]');
+});
+
 test('explicit options then environment override local defaults; complete overrides ignore broken config', (t) => {
   const { home, configFile, keyFile } = fixture(t);
   const env = { TYPESAFE_API_KEY: 'environment-key', JEV_MODEL: 'jev-2.0.0', JEV_CONFIG_FILE: '/nonexistent' };

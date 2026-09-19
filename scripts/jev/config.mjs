@@ -76,8 +76,9 @@ export function resolveJevSettings({ apiKey, model, env = process.env, home = os
 
 export function redactJevSecrets(value) {
   let result = String(value);
-  for (const key of [...loadedKeys, process.env.TYPESAFE_API_KEY?.trim()]) {
-    if (key) result = result.split(key).join('[redacted]');
+  const keys = [...new Set([...loadedKeys, process.env.TYPESAFE_API_KEY?.trim()])].filter(Boolean).sort((left, right) => right.length - left.length);
+  for (const key of keys) {
+    result = result.split(key).join('[redacted]');
   }
   return result;
 }
