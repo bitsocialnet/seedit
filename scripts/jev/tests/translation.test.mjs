@@ -56,6 +56,93 @@ function fakeClient(choice = 'preserve') {
 function runGit(dir, args) {
   return execFileSync('git', ['-C', dir, ...args], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 }
+function isolatedEnvironment(t, overrides) {
+  const entries = Object.entries(overrides);
+  const previous = entries.map(([key]) => [key, process.env[key]]);
+  for (const [key, value] of entries) {
+    if (value === undefined) delete process.env[key];
+    else process.env[key] = value;
+  }
+  t.after(() => {
+    for (const [key, value] of previous) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  });
+}
+
+test('translation and evaluation resolve the machine model before reporting or caching live decisions', async (t) => {
+  const directory = await temporary(t);
+  const configDirectory = path.join(directory, 'bitsocial');
+  await fs.mkdir(configDirectory, { mode: 0o700 });
+  const apiKeyFile = path.join(directory, 'fixture-key.txt');
+  await fs.writeFile(apiKeyFile, 'sk-fixture-machine-translation-key', { mode: 0o600 });
+  const configFile = path.join(configDirectory, 'jev.json');
+  const configure = (selectedModel) => fs.writeFile(configFile, JSON.stringify({ apiKeyFile, model: selectedModel }), { mode: 0o600 });
+  await configure(model);
+  isolatedEnvironment(t, { XDG_CONFIG_HOME: directory, JEV_CONFIG_FILE: undefined, TYPESAFE_API_KEY: undefined, TYPESAFE_API_KEY_FILE: undefined, JEV_MODEL: undefined });
+  const file = path.join(directory, 'pairs.json');
+  await json(file, [{ ...goodPair, expected: 'pass', category: 'meaning' }]);
+  const cacheDir = path.join(directory, 'cache');
+  const reports = [];
+  const requestedModels = [];
+  t.mock.method(console, 'log', (value) => reports.push(JSON.parse(value)));
+  t.mock.method(globalThis, 'fetch', async (_url, options) => {
+    const request = JSON.parse(options.body);
+    requestedModels.push(request.model);
+    return new Response(
+      JSON.stringify({
+        model: request.model,
+        answers: Object.fromEntries(Object.entries(answers()).map(([id, answer]) => [id, { ...answer, type: 'choice' }])),
+        usage: { input_tokens: 500, output_tokens: 12 },
+      }),
+    );
+  });
+  assert.equal(await translationMain(['--pairs', file, '--live', '--cache-dir', cacheDir]), 0);
+  assert.equal(reports.at(-1).model, model);
+  assert.equal(reports.at(-1).results[0].origin, 'provider');
+  assert.equal(await translationMain(['--pairs', file, '--live', '--cache-dir', cacheDir]), 0);
+  assert.equal(reports.at(-1).results[0].origin, 'cache');
+  await configure('jev-1.14.0');
+  assert.equal(await translationMain(['--pairs', file, '--live', '--cache-dir', cacheDir]), 0);
+  assert.equal(reports.at(-1).model, 'jev-1.14.0');
+  assert.equal(reports.at(-1).results[0].origin, 'provider');
+  assert.deepEqual(
+    (await fs.readdir(cacheDir)).sort(),
+    [translationCacheKey(goodPair, model), translationCacheKey(goodPair, 'jev-1.14.0')].map((key) => `${key}.json`).sort(),
+  );
+  assert.equal(await evaluateMain(['--corpus', file, '--live']), 0);
+  assert.equal(reports.at(-1).model, 'jev-1.14.0');
+  assert.deepEqual(requestedModels, [model, 'jev-1.14.0', 'jev-1.14.0']);
+  assert.ok(!JSON.stringify(reports).includes('sk-fixture-machine-translation-key'));
+});
+
+test('offline translation and evaluation ignore malformed machine config and never read a key', async (t) => {
+  const directory = await temporary(t);
+  await fs.mkdir(path.join(directory, 'bitsocial'), { mode: 0o700 });
+  await fs.writeFile(path.join(directory, 'bitsocial', 'jev.json'), '{invalid', { mode: 0o600 });
+  isolatedEnvironment(t, {
+    XDG_CONFIG_HOME: directory,
+    JEV_CONFIG_FILE: undefined,
+    TYPESAFE_API_KEY: undefined,
+    TYPESAFE_API_KEY_FILE: '/nonexistent-fixture-key',
+    JEV_MODEL: undefined,
+  });
+  const file = path.join(directory, 'pairs.json');
+  await json(file, [{ ...goodPair, expected: 'pass', category: 'meaning' }]);
+  const reports = [];
+  t.mock.method(console, 'log', (value) => reports.push(JSON.parse(value)));
+  t.mock.method(globalThis, 'fetch', () => {
+    throw new Error('Offline mode must not call fetch');
+  });
+  assert.equal(await translationMain(['--pairs', file]), 2);
+  assert.equal(await evaluateMain(['--corpus', file]), 2);
+  for (const report of reports) {
+    assert.equal(report.model, null);
+    assert.equal(report.results[0].status, 'unverified');
+    assert.deepEqual(report.results[0].issues, ['live_disabled']);
+  }
+});
 
 test('placeholder-preserving reversed meaning is structurally valid and requires semantic QA', () => {
   assert.deepEqual(structuralIssues({ source: 'You cannot delete {{count}} posts.', translation: 'Vous pouvez supprimer {{count}} publications.' }), []);

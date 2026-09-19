@@ -47,6 +47,8 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
     opening = false;
   const childEnv = { ...process.env };
   delete childEnv.TYPESAFE_API_KEY;
+  delete childEnv.TYPESAFE_API_KEY_FILE;
+  delete childEnv.JEV_CONFIG_FILE;
   delete childEnv.JEV_MODEL;
   async function command(args, wrapper = false, cleanup = false) {
     const remaining = cleanup ? 15_000 : plan.limits.deadlineMs - (Date.now() - started);

@@ -23,3 +23,5 @@ Do not manually rewrite individual locale files. English fallback is allowed onl
 ## Optional semantic QA
 
 After deterministic coverage and placeholder checks, use `scripts/jev/translation-README.md` for read-only QA of explicitly selected changed keys/locales. It checks meaning, negation, conditions, scope, and terminology; it does not apply translations. Start with offline validation. Live calls require the task's authorization, runtime credentials, a pinned model, and a budget. Evaluate the labeled sample corpus before relying on a model/language combination; inspect false alarms and unverified results as well as detected errors. A model pass supplements review and does not replace the one-writer workflow or deterministic checks.
+
+The private machine configuration is shared across checkouts/worktrees. Run `node scripts/jev/config.mjs --check` for readiness without an API request; the helper reads the key itself. Do not read/print the key, copy it into a repo `.env`, or request it again when setup is ready. Use `--live` only for the task's bounded, authorized semantic QA.

@@ -84,6 +84,31 @@ test('a wrapper close warning with exit zero is still a cleanup failure', async 
   assert.equal(closed, 1);
 });
 
+test('browser commands never inherit the key, model or credential-location overrides', async () => {
+  const names = ['TYPESAFE_API_KEY', 'TYPESAFE_API_KEY_FILE', 'JEV_CONFIG_FILE', 'JEV_MODEL'];
+  const previous = Object.fromEntries(names.map((name) => [name, process.env[name]]));
+  let commands = 0;
+  let driver;
+  try {
+    for (const name of names) process.env[name] = 'private-fixture';
+    driver = createPlaywrightDriver({
+      execute: async (_file, _args, options) => {
+        commands++;
+        for (const name of names) assert.equal(options.env[name], undefined);
+        return { stdout: '### Result\ntrue\n', stderr: '' };
+      },
+    });
+    await driver.open(validatePlan(basePlan()));
+  } finally {
+    await driver?.close();
+    for (const name of names) {
+      if (previous[name] === undefined) delete process.env[name];
+      else process.env[name] = previous[name];
+    }
+  }
+  assert.ok(commands > 0);
+});
+
 test('origin guards run in the CLI VM without a URL global and preserve exact origin boundaries', async () => {
   const permitted = runInNewContext(`(${canonicalNavigationAllowed.toString()})`, {});
   assert.equal(permitted('https://local.example/path', 'https://local.example'), true);
