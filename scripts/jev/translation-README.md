@@ -2,7 +2,7 @@
 
 This development-only helper flags translation meaning changes for a human or the existing translator agent. It never edits locale files, proposes replacement text, publishes content, or runs as part of the client application. It is advisory, not a release gate or a substitute for a fluent reviewer.
 
-Use the Node version in `.nvmrc`. No new package is required. The shared `client.mjs` sends requests only to the official TypeSafe endpoint. Credentials come from `TYPESAFE_API_KEY` in the process environment; never put a key in a command argument, locale, task plan, or tracked file. Pin the model with `JEV_MODEL` or `--model`; model aliases are intentionally rejected.
+Use the Node version in `.nvmrc`. No new package is required. The shared `client.mjs` sends requests only to the official TypeSafe endpoint. Live commands use the private machine configuration described in [shared setup](README.md): `$XDG_CONFIG_HOME/bitsocial/jev.json` or `~/.config/bitsocial/jev.json` points to one existing key file and selects a pinned model. `TYPESAFE_API_KEY` or `TYPESAFE_API_KEY_FILE` can override the credential source; `--model` or `JEV_MODEL` can override the configured model. Never put a key in a command argument, locale, task plan, tracked file, or per-repo copy. Model aliases are rejected. Offline commands read neither the machine configuration nor its key file.
 
 ## Scope before requesting inference
 
@@ -24,7 +24,7 @@ node scripts/jev/translations.mjs --locales it --changed-files public/translatio
 
 # Run only after the selected text is appropriate to send to TypeSafe.
 node scripts/jev/translations.mjs --locales it --keys about_bitsocial \
-  --live --model jev-1.13.0 --max-requests 5 --max-cost-usd 0.01
+  --live --max-requests 5 --max-cost-usd 0.01
 ```
 
 No matching pairs is an error, not a successful empty audit. Default selection is capped at 30 pairs; use a smaller scope or explicitly set `--max-pairs` (maximum 500). Requests are sequential, capped at 20 by default, and stop reaching the API after the request, input, time, or estimated cost budget is exhausted. Remaining pairs are reported `unverified`. The request cap counts actual requests, excluding structural failures and valid cache hits. The cost budget reserves a conservative input estimate; actual reported usage remains separate. Missing usage or failed requests are not evidence of zero cost.
@@ -68,14 +68,14 @@ Supply explicit pairs instead of rewriting or automatically aligning Markdown. `
 ```sh
 node scripts/jev/translations.mjs --pairs /path/to/selected-pairs.json
 node scripts/jev/translations.mjs --pairs /path/to/selected-pairs.json \
-  --live --model jev-1.13.0 --max-requests 5 --max-cost-usd 0.01
+  --live --max-requests 5 --max-cost-usd 0.01
 ```
 
 Optional `--keys` and `--locales` narrow a pairs file. Duplicate locale/key identifiers are rejected. Existing docs structural checks should run before extracting paragraphs for semantic review.
 
 ## Cache and privacy
 
-Live review caches only a content hash, pinned model, timestamp, and validated choice/probability results. Cache files contain no source, translation, context, key, path, credential, or invented correction. Hash identity includes source, translation, locale, model, context, and the exact rubric; entries expire after seven days. Storage defaults to `$XDG_CACHE_HOME/bitsocial-jev/translations` or `~/.cache/bitsocial-jev/translations` with directory mode 0700 and file mode 0600. Use `--cache-dir` to choose a private directory or `--no-cache` to disable it. Offline previews do not consume cached semantic approvals. Cached results are clearly identified and do not claim new provider usage.
+Live review resolves the configured pinned model before reading or writing a cache entry; changing that model selects a different cache identity. It caches only a content hash, pinned model, timestamp, and validated choice/probability results. Cache files contain no source, translation, context, key, path, credential, or invented correction. Hash identity includes source, translation, locale, model, context, and the exact rubric; entries expire after seven days. Storage defaults to `$XDG_CACHE_HOME/bitsocial-jev/translations` or `~/.cache/bitsocial-jev/translations` with directory mode 0700 and file mode 0600. Use `--cache-dir` to choose a private directory or `--no-cache` to disable it. Offline previews do not consume cached semantic approvals. Cached results are clearly identified and do not claim new provider usage.
 
 ## Evaluate before relying on a language
 
@@ -86,13 +86,13 @@ The shipped 17-case pilot contains good and deliberately corrupted translations 
 node scripts/jev/translations-eval.mjs
 
 # Fresh, budgeted semantic evaluation: no cache, expected labels withheld.
-node scripts/jev/translations-eval.mjs --live --model jev-1.13.0 \
+node scripts/jev/translations-eval.mjs --live \
   --max-requests 20 --max-cost-usd 0.01
 
 # Small sample or a separately reviewed expanded corpus.
 node scripts/jev/translations-eval.mjs --cases it-negation-good,it-negation-bad \
-  --live --model jev-1.13.0 --max-requests 2
-node scripts/jev/translations-eval.mjs --corpus /path/to/labeled-pairs.json --live --model jev-1.13.0
+  --live --max-requests 2
+node scripts/jev/translations-eval.mjs --corpus /path/to/labeled-pairs.json --live
 
 node --test scripts/jev/tests/translation.test.mjs
 ```

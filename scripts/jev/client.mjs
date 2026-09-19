@@ -1,4 +1,5 @@
 // Development-only client. Never import this module into application code.
+import { resolveJevSettings, JevConfigError } from './config.mjs';
 export const JEV_ENDPOINT = 'https://api.typesafe.ai/v1/systemone';
 export const INPUT_USD_PER_MILLION = 0.042;
 
@@ -91,8 +92,8 @@ async function readBoundedJson(response) {
 
 export function createJevClient({
   live = false,
-  apiKey = process.env.TYPESAFE_API_KEY,
-  model = process.env.JEV_MODEL,
+  apiKey,
+  model,
   maxRequests = 20,
   maxCalls = maxRequests,
   maxInputBytes = 60_000,
@@ -114,6 +115,7 @@ export function createJevClient({
   )
     fail('invalid_limits');
   const started = Date.now();
+  let ready = false;
   const totals = { requests: 0, inputTokens: 0, outputTokens: 0, usageMissing: 0, reservedInputTokens: 0 };
   function stats() {
     const knownCostSubtotalUsd = (totals.inputTokens * INPUT_USD_PER_MILLION) / 1e6;
@@ -127,9 +129,16 @@ export function createJevClient({
   }
   function assertReady() {
     if (!live) fail('live_not_enabled');
-    if (typeof apiKey !== 'string' || !apiKey.trim()) fail('missing_api_key');
-    // Explicit versions make evaluations reproducible; aliases cannot silently change underneath a cache.
-    if (typeof model !== 'string' || !/^jev-\d+\.\d+\.\d+$/.test(model)) fail('pinned_model_required');
+    if (!ready) {
+      try {
+        ({ apiKey, model } = resolveJevSettings({ apiKey, model }));
+      } catch (error) {
+        if (error instanceof JevConfigError) fail(error.code);
+        throw error;
+      }
+      ready = true;
+    }
+    return { model };
   }
   async function ask({ state, questions }) {
     assertReady();

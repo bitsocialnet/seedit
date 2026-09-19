@@ -2,6 +2,31 @@
 
 These Node 22 scripts run outside the shipped application. They do not replace Playwright assertions, visual review, translation review, or Bippy/React Profiler measurements. No helper installs dependencies, starts an application server, or sends a model request by default.
 
+## One-time local credentials
+
+All Jev helpers share the developer-machine file `$XDG_CONFIG_HOME/bitsocial/jev.json`, or `~/.config/bitsocial/jev.json` when `XDG_CONFIG_HOME` is unset. Configure it once outside your repositories; new checkouts and worktrees use it automatically. Store a pointer to your existing key file, not a copy of the key:
+
+```json
+{
+  "apiKeyFile": "/absolute/path/to/private/typesafe-key.txt",
+  "model": "jev-X.Y.Z"
+}
+```
+
+Replace the path and model with your private key file and an available pinned version. The key file contains only the API key. On macOS/Linux, keep its permissions and the config file at `600` and the config directory at `700`. No user-specific path or model default belongs in the repository. `.env` files are not automatically loaded, and no shell startup changes are needed.
+
+Check setup from any checkout without making a provider request:
+
+```sh
+node scripts/jev/config.mjs --check
+```
+
+The result reports only readiness, pinned model, and a safe error code if unavailable. Live browser and translation commands then work without exporting the key. Helpers read configuration only for a live Jev run or this explicit check; offline validation and `--live --baseline` do not read credentials.
+
+Runtime overrides are supported: explicit client options/`--model`, then `TYPESAFE_API_KEY` (or `TYPESAFE_API_KEY_FILE` when no key is set) and `JEV_MODEL`, then machine defaults. `JEV_CONFIG_FILE` selects another absolute config path. Empty overrides fail instead of silently using another credential. Config and key-file paths must be absolute; `~` inside JSON or environment variables is not expanded. Complete key/model overrides work without reading a machine config. Invalid explicit configuration fails before the browser opens or an API request runs.
+
+For CI, supply `TYPESAFE_API_KEY` from the CI secret store and `JEV_MODEL` from workflow configuration only in an explicitly requested live job. The included Jev CI workflow stays offline. Never use `VITE_*` variables, commit credentials, add them to plans or CLI arguments, or expose them to page JavaScript. The helper sends credentials only to `https://api.typesafe.ai/v1/systemone` and rejects redirects. It strips the key and credential-location overrides from the browser subprocess environment; it never exports a file-loaded key into the parent environment.
+
 ## Browser plans
 
 Start with the repository's `playwright-cli` skill and inspect the actual page. Write a task-owned JSON plan with the exact allowed roles, accessible names, values, and completion assertions. Keep the plan outside tracked files if it contains private test content. The plan author, not page text or Jev, authorizes actions. Use an isolated local test server first.
@@ -13,14 +38,14 @@ node scripts/jev/browser.mjs --plan /path/to/plan.json
 # Same plan, no model: choose the first available unused action in plan order.
 node scripts/jev/browser.mjs --plan /path/to/plan.json --live --baseline
 
-# Environment contains TYPESAFE_API_KEY and an explicit pinned JEV_MODEL version.
+# Uses the private machine config, or runtime key/model overrides.
 node scripts/jev/browser.mjs --plan /path/to/plan.json --live
 
 # Runtime model override, if needed; no default or latest alias is committed.
 node scripts/jev/browser.mjs --plan /path/to/plan.json --live --model jev-X.Y.Z
 ```
 
-Do not put API keys in plans, CLI arguments, committed files, or page JavaScript. Supply `TYPESAFE_API_KEY` through the current process environment. The browser subprocess does not receive it. Requests go only to `https://api.typesafe.ai/v1/systemone`; redirects are rejected.
+Browser and translation helpers use the shared credential configuration above. Keep the key outside the repository and application bundle.
 
 The helper opens and closes its own isolated session through `scripts/pw-session.sh`. A busy shared browser slot returns `incomplete/browser_slot_busy`; retry after its owner finishes. It finds an installed `playwright-cli` in the root, `webui/`, or `packages/admin/`, then PATH. `PLAYWRIGHT_CLI_BIN` can select an existing executable; relative paths resolve from the invocation directory before the session changes directories. It never invokes `npx` or bypasses the lock. `--baseline` requires `--live`; the incomplete result rejects that flag combination when execution was not explicitly enabled.
 
@@ -102,7 +127,7 @@ Compare the same plan in baseline and Jev modes, across multiple representative 
 ## Offline verification
 
 ```sh
-node --test scripts/jev/tests/client.test.mjs scripts/jev/tests/browser.test.mjs
+node --test scripts/jev/tests/*.test.mjs
 node scripts/jev/browser.mjs --help
 ```
 

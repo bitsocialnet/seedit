@@ -3,22 +3,21 @@ import { readFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { createJevClient, JevError } from './client.mjs';
+import { redactJevSecrets } from './config.mjs';
 import { validatePlan, runBrowserPlan } from './browser-plan.mjs';
 import { createPlaywrightDriver } from './browser-playwright.mjs';
 
 export async function main(args = process.argv.slice(2)) {
   if (!args.length || args.includes('--help')) {
     process.stdout.write(
-      'Usage: node scripts/jev/browser.mjs --plan plan.json [--live [--baseline]] [--model jev-X.Y.Z]\nWithout --live, validates the plan offline. --live --baseline executes the same plan without AI calls; --baseline requires --live.\nLive Jev requires TYPESAFE_API_KEY and JEV_MODEL (or --model). JSON result, exit 0 complete/valid, 2 incomplete/invalid.\n',
+      'Usage: node scripts/jev/browser.mjs --plan plan.json [--live [--baseline]] [--model jev-X.Y.Z]\nWithout --live, validates the plan offline. --live --baseline executes the same plan without AI calls; --baseline requires --live.\nLive Jev reads the private machine config or TYPESAFE_API_KEY / TYPESAFE_API_KEY_FILE and JEV_MODEL (or --model). See scripts/jev/README.md. JSON result, exit 0 complete/valid, 2 incomplete/invalid.\n',
     );
     return 0;
   }
   const options = {};
   const planReference = () => {
     if (!options['--plan']) return undefined;
-    let reference = path.relative(process.cwd(), path.resolve(options['--plan']));
-    const key = process.env.TYPESAFE_API_KEY?.trim();
-    if (key) reference = reference.split(key).join('[redacted]');
+    const reference = redactJevSecrets(path.relative(process.cwd(), path.resolve(options['--plan'])));
     return reference.replace(/[\x00-\x1f\x7f]/g, '?').slice(0, 512);
   };
   try {

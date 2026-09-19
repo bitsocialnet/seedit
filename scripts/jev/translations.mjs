@@ -8,6 +8,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { createJevClient, JevError } from './client.mjs';
+import { redactJevSecrets } from './config.mjs';
 
 export class TranslationInputError extends Error {}
 
@@ -45,8 +46,7 @@ export function gitRelativePath(repository, file, pathApi = path) {
 
 function inputPath(file, cwd = process.cwd()) {
   let relative = gitRelativePath(cwd, path.resolve(file));
-  const token = process.env.TYPESAFE_API_KEY?.trim();
-  if (token) relative = relative.split(token).join('[redacted]');
+  relative = redactJevSecrets(relative);
   relative = relative.replace(/[\x00-\x1f\x7f]/g, '?');
   return relative.length > 180 ? `...${relative.slice(-177)}` : relative;
 }
@@ -428,7 +428,7 @@ export async function main(argv = process.argv.slice(2)) {
       'changed-files': { type: 'string' },
       'translations-root': { type: 'string', default: 'public/translations' },
       context: { type: 'string', default: '' },
-      model: { type: 'string', default: process.env.JEV_MODEL || '' },
+      model: { type: 'string' },
       'max-pairs': { type: 'string', default: '30' },
       'max-requests': { type: 'string', default: '20' },
       'max-cost-usd': { type: 'string', default: '0.01' },
@@ -455,10 +455,11 @@ export async function main(argv = process.argv.slice(2)) {
   if (pairs.length > maxPairs)
     throw new TranslationInputError(`Selected ${pairs.length} pairs; narrow selection or explicitly increase --max-pairs (currently ${maxPairs})`);
   const client = values.live ? createJevClient({ live: true, model: values.model, maxRequests, maxCostUsd }) : undefined;
+  const model = client ? client.assertReady().model : values.model || process.env.JEV_MODEL || '';
   const cacheDir = values['no-cache']
     ? undefined
     : values['cache-dir'] || path.join(process.env.XDG_CACHE_HOME || path.join(os.homedir(), '.cache'), 'bitsocial-jev', 'translations');
-  const report = await reviewTranslations(pairs, { client, live: values.live, model: values.model, context: values.context, cacheDir });
+  const report = await reviewTranslations(pairs, { client, live: values.live, model, context: values.context, cacheDir });
   console.log(JSON.stringify(report, null, 2));
   return report.summary.flagged ? 1 : report.summary.unverified ? 2 : 0;
 }
@@ -471,7 +472,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.ar
     .catch((error) => {
       // Report our bounded validation messages, never arbitrary provider or filesystem payloads.
       console.error(
-        error instanceof TranslationInputError ? error.message : 'Translation QA could not run. Check the scoped input, JSON, pinned model, and limits; use --help.',
+        error instanceof TranslationInputError
+          ? error.message
+          : error instanceof JevError
+            ? error.code
+            : 'Translation QA could not run. Check the scoped input, JSON, pinned model, and limits; use --help.',
       );
       process.exitCode = 2;
     });
