@@ -39,8 +39,8 @@ function readSmallFile(file, code, optional = false) {
 }
 
 export function resolveJevSettings({ apiKey, model, env = process.env, home = os.homedir() } = {}) {
-  let key = apiKey ?? env.TYPESAFE_API_KEY;
-  let selectedModel = model ?? env.JEV_MODEL;
+  let key = apiKey === undefined ? env.TYPESAFE_API_KEY : apiKey;
+  let selectedModel = model === undefined ? env.JEV_MODEL : model;
   const keyFile = key === undefined ? env.TYPESAFE_API_KEY_FILE : undefined;
   let config = {};
   // Explicit runtime credentials and model do not depend on this machine's config.
@@ -58,10 +58,10 @@ export function resolveJevSettings({ apiKey, model, env = process.env, home = os
       if (!config || typeof config !== 'object' || Array.isArray(config) || Object.keys(config).some((k) => !['apiKeyFile', 'model'].includes(k))) fail('invalid_config');
     }
   }
-  selectedModel ??= config.model;
+  if (selectedModel === undefined) selectedModel = config.model;
   if (typeof selectedModel !== 'string' || !/^jev-\d+\.\d+\.\d+$/.test(selectedModel)) fail('pinned_model_required');
   if (key === undefined) {
-    const file = keyFile ?? config.apiKeyFile;
+    const file = keyFile === undefined ? config.apiKeyFile : keyFile;
     if (file !== undefined) {
       if (typeof file !== 'string' || !path.isAbsolute(file)) fail('invalid_api_key_file');
       key = readSmallFile(file, 'api_key_file_unreadable');
