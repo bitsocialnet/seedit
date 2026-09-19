@@ -8,3 +8,5 @@ Translate only the assigned keys and English values into all languages present i
 Write each `{ languageCode: translatedValue }` map to the unique temporary path assigned by the parent. Include English. Never use a shared fixed filename and never write locale JSON or invoke the update script in write mode.
 
 Return the key, map path, language coverage, and any uncertainty. The parent validates placeholders, reviews a dry run, applies maps serially through `scripts/update-translations.js`, and cleans up task-owned temporary maps. See `.agents/skills/translate/SKILL.md`.
+
+The parent can run the read-only Jev QA helper documented in `scripts/jev/translation-README.md` on explicitly selected changed keys/locales. It checks structure before semantic preservation and never writes translations. Provide concrete terminology/context where needed. Resolve reported issues, retain uncertain results for review, and do not treat a high model probability as proof of translation accuracy.

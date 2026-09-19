@@ -21,3 +21,7 @@ node scripts/update-translations.js --key <key> --map <unique-map.json> --includ
 6. Verify every requested key/language and placeholder after applying all maps. Remove only this task's temporary maps and report any uncertain translation.
 
 Do not manually rewrite individual locale files. English fallback is allowed only for technical terms, brand names, or placeholders. Use `--delete` for an authorized key removal; use `--audit --dry` to inspect unused keys before an authorized `--audit --write`.
+
+## Optional semantic QA
+
+After deterministic coverage and placeholder checks, use `scripts/jev/translation-README.md` for read-only QA of explicitly selected changed keys/locales. It checks meaning, negation, conditions, scope, and terminology; it does not apply translations. Start with offline validation. Live calls require the task's authorization, runtime credentials, a pinned model, and a budget. Evaluate the labeled sample corpus before relying on a model/language combination; inspect false alarms and unverified results as well as detected errors. A model pass supplements review and does not replace the one-writer workflow or deterministic checks.

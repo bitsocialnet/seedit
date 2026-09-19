@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import { configDefaults } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
@@ -9,6 +10,10 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const isProfilingBuild = process.env.REACT_PERF_PROFILE === '1';
 
 export default defineConfig({
+  test: {
+    // These fixtures use node:test and run in the dedicated Jev helper workflow.
+    exclude: [...configDefaults.exclude, 'scripts/jev/tests/**'],
+  },
   plugins: [
     react({
       babel: {

@@ -1,7 +1,7 @@
 ---
 name: playwright-cli
 description: Verify browser behavior or reproduce a web UI issue with the installed Playwright CLI.
-allowed-tools: Bash(playwright-cli:*), Bash(./scripts/pw-session.sh:*)
+allowed-tools: Bash(playwright-cli:*), Bash(./scripts/pw-session.sh:*), Bash(node scripts/jev/browser.mjs:*)
 ---
 
 <!-- Generated from .agents/skills/playwright-cli/SKILL.md; run yarn ai-workflow:sync. -->
@@ -36,3 +36,7 @@ Read only the reference needed:
 - [Test generation](references/test-generation.md): turn an observed reproduction into a requested durable test.
 
 For performance evidence, use `profile-browsing`; ordinary UI verification does not require a profiling pass.
+
+## Optional Jev checks
+
+See `scripts/jev/README.md` for the bounded browser helper. A task-owned plan lists permitted controls/actions and deterministic completion assertions; the helper observes a fresh snapshot before each choice and owns its isolated browser session. Use semantic checks for text meaning or qualitative requirements after ordinary assertions, and report uncertainty as unverified. Run offline plan validation first. Provider calls require explicit `--live`, a runtime-selected pinned model, credentials, and a budget. Prefer ordinary scripted checks for known fixed flows; do not add model calls to edit hooks or replace Bippy measurements.
