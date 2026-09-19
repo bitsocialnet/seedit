@@ -198,7 +198,9 @@ export default defineConfig({
   },
   base: process.env.PUBLIC_URL || '/',
   optimizeDeps: {
-    include: ['ethers', 'assert', 'buffer', 'process', 'util', 'stream-browserify', 'isomorphic-fetch', 'workbox-core', 'workbox-precaching'],
+    // The PWA plugin injects workbox-window after dependency scanning. Prebundle
+    // it up front so registration cannot replace chunks while the app loads.
+    include: ['ethers', 'assert', 'buffer', 'process', 'util', 'stream-browserify', 'isomorphic-fetch', 'workbox-core', 'workbox-precaching', 'workbox-window'],
   },
   define: {
     'process.env.VITE_COMMIT_REF': JSON.stringify(process.env.COMMIT_REF),
