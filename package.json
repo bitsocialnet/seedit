@@ -242,7 +242,7 @@
     "undici@npm:^7.16.0": "7.29.0",
     "@babel/core": "7.29.7",
     "@babel/plugin-transform-modules-systemjs": "7.29.4",
-    "@libp2p/gossipsub": "16.0.4",
+    "@libp2p/gossipsub": "16.0.5",
     "multiformats@npm:^14.0.0": "14.0.5",
     "@libp2p/kad-dht": "16.2.6",
     "@protobufjs/utf8": "1.1.1",
