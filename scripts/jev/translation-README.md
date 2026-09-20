@@ -79,22 +79,58 @@ Live review resolves the configured pinned model before reading or writing a cac
 
 ## Evaluate before relying on a language
 
-The shipped 17-case pilot contains good and deliberately corrupted translations in Italian, French, German, Spanish, Portuguese, and Japanese, including a reversed prohibition whose placeholders still match. It also covers changed qualifiers, terminology, injection-like translated text, and deterministic failures. It is small and hand-labeled, not representative multilingual accuracy.
+The shipped 25-case corpus contains **model-authored synthetic** good/corrupt translations in Italian, French, German, Spanish, Portuguese, and Japanese. It is not human-reviewed gold or a representative multilingual benchmark. Contrast groups cover polarity, placeholders, qualification, terminology, publication state, actors, exceptions, scope, and injected instructions. Nineteen cases belong to calibration and six to a separate illustrative holdout. Those six were already present in the earlier pilot: they demonstrate split mechanics, not a newly unseen or independent test set. Their labels remain excluded from provider state.
 
 ```sh
-# Offline mechanics and structural checks only; accuracy metrics remain null.
+# Offline mechanics and structural checks: metrics remain null, zero requests.
 node scripts/jev/translations-eval.mjs
 
-# Fresh, budgeted semantic evaluation: no cache, expected labels withheld.
-node scripts/jev/translations-eval.mjs --live \
-  --max-requests 20 --max-cost-usd 0.01
+# Fresh calibration only; no cache. Compare routing thresholds without applying one.
+node scripts/jev/translations-eval.mjs --live --split calibration \
+  --thresholds 0.8,0.9,0.95,0.99 --max-requests 20 --max-cost-usd 0.01
 
-# Small sample or a separately reviewed expanded corpus.
-node scripts/jev/translations-eval.mjs --cases it-negation-good,it-negation-bad \
-  --live --max-requests 2
-node scripts/jev/translations-eval.mjs --corpus /path/to/labeled-pairs.json --live
+# Final holdout after fixing the threshold and corpus; copy SHA256 from the report.
+node scripts/jev/translations-eval.mjs --corpus /path/to/reviewed-pairs.json \
+  --split holdout --expected-corpus-sha256 CORPUS_SHA256 --pass-threshold 0.95 --live
 
-node --test scripts/jev/tests/translation.test.mjs
+# Human-review queue: uncertain examples plus a reproducible random complement.
+node scripts/jev/translations-eval.mjs --split calibration --live \
+  --audit-uncertain 5 --audit-random 5 --seed september-review
+
+node --test scripts/jev/tests/translation.test.mjs scripts/jev/tests/translation-evaluation.test.mjs
 ```
 
-An evaluation corpus uses the pairs schema plus `expected: "pass" | "flagged"` and a descriptive `category` (`structural` for deterministic-only cases). The report separates all checks from semantic cases, reports recall, false alarms, misses, unverified results, and actual provider usage with estimated cost. Unverified issue cases stay in the recall denominator. Offline tests prove scoping, privacy, and failure handling; they do not prove that Jev can assess a language correctly. Add independently reviewed examples from the languages and product copy being changed before making it a routine quality gate.
+`--cases` further narrows one selected split. A holdout case requested from calibration is an error. Holdout never participates in threshold sweeps or the audit queue; there is no mixed/all-splits mode. `--pass-threshold` changes this evaluation only, never the translation helper's existing 0.95 routing heuristic. Labels, groups, review metadata and split names are withheld from Jev. The CLI always bypasses cache and reports actual usage separately from estimated cost. Exit `1` means observed false pass/alarm, `2` means unverified or offline results, and `0` means no observed error or abstention on the selected cases; none establishes general accuracy.
+
+Metrics separate deterministic and semantic checks. They include issue recall (unverified issues remain in its denominator), false alarms, false passes among accepted pairs, pass coverage, abstention, and error among verified decisions. The Wilson 95% upper bound on false-pass risk is intentionally nonzero even after a small zero-error run; its sampling assumptions do not turn synthetic or targeted cases into representative data. Calibration score bands show empirical defect frequency versus the **minimum preservation probability across dimensions**, a routing score rather than calibrated pair correctness. Sweeps are descriptive and do not recommend or install a threshold.
+
+Audit output contains locale/key identifiers and selection reasons, never source/translation text. Resolve those identifiers in the private local corpus for human labeling. The random sample is reproducible for a seed and comes from the remaining selected cases after uncertain selection; it is not a population estimate. Reviewers should inspect source and target language independently of the model's verdict. Human review and approved corpus updates remain manual. New examples may omit `expected` only in an explicit `audit` split with `unreviewed` provenance. They enter the review queue, never the accuracy denominators; fully unlabeled runs report null accuracy metrics and exit `2`.
+
+### Bring an independently reviewed corpus
+
+Use the same paragraph-pairs fields, plus a versioned envelope and explicit per-pair assignments:
+
+```json
+{
+  "schemaVersion": 1,
+  "corpusId": "product-copy-review-2026-09-v1",
+  "provenance": { "kind": "independently-reviewed", "authoredBy": "human" },
+  "pairs": [
+    {
+      "key": "private_key_warning",
+      "locale": "it",
+      "source": "Do not share your private key.",
+      "translation": "Non condividere la tua chiave privata.",
+      "expected": "pass",
+      "category": "negation",
+      "group": "private-key-warning",
+      "split": "calibration",
+      "review": { "labelSource": "human", "reviewer": "reviewer-local-id" }
+    }
+  ]
+}
+```
+
+Provenance kinds are `synthetic`, `unreviewed`, or `independently-reviewed`; the last requires human reviewer metadata for each label. Metadata is an assertion by the corpus author, not authentication of a review. Assign whole contrast/paraphrase families to `calibration`, `holdout`, or `audit` **before** experimenting. Reused group IDs or normalized identical English source+locale across splits are rejected; semantic paraphrase leakage still requires human care. Keep the holdout fixed and use its corpus hash to detect any content/label/split change. Do not repeatedly tune from holdout results; reserve a new independent holdout after doing so.
+
+Legacy arrays and unversioned `{ "pairs": [...] }` files remain supported as **unreviewed calibration-only** input. They provide no independent holdout or accuracy claim. Inputs are capped at 4 MiB/5,000 records and each run selects at most 100 pairs. Add representative, independently reviewed examples from the actual locales and product copy before adopting any quality gate.

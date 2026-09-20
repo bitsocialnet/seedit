@@ -17,6 +17,30 @@ const locatorCode = `function locate(target) {
   return locator;
 }`;
 
+// Shared by both transports: combining observations must not change assertion semantics.
+const assertionCode = (assertions) => `${locatorCode}
+  const assertions = ${JSON.stringify(assertions)};
+  const results = [];
+  for (const assertion of assertions) {
+    try {
+      if (assertion.type === 'url') { results.push(page.url() === assertion.equals); continue; }
+      if (assertion.type === 'bodyClass') {
+        const has = await page.locator('body').evaluate((element, value) => element.classList.contains(value), assertion.value);
+        results.push(has === assertion.present); continue;
+      }
+      const locator = locate(assertion);
+      const count = await locator.count();
+      if (assertion.state === 'hidden') { results.push(count === 0 || (count === 1 && !await locator.isVisible())); continue; }
+      if (count !== 1 || !await locator.isVisible()) { results.push(false); continue; }
+      if (assertion.state === 'visible') results.push(true);
+      else if (assertion.state === 'checked') results.push(await locator.isChecked());
+      else if (assertion.state === 'unchecked') results.push(!await locator.isChecked());
+      else if (assertion.state === 'value') results.push(await locator.inputValue() === assertion.equals);
+      else if (assertion.state === 'text') results.push(await locator.innerText() === assertion.equals);
+      else results.push(false);
+    } catch { results.push(false); }
+  }`;
+
 // Playwright CLI's run-code VM omits URL. Requests are already canonical absolute URLs;
 // use the exact origin boundary there, and evaluate location/relative URLs inside the page.
 export const canonicalNavigationAllowed = (requestUrl, origin) => requestUrl.startsWith(origin + '/');
@@ -44,6 +68,7 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
     cli,
     plan,
     started,
+    combinedObservation = false,
     opening = false;
   const childEnv = { ...process.env };
   delete childEnv.TYPESAFE_API_KEY;
@@ -86,6 +111,9 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
     return browserOriginGuard(plan.origin);
   }
   return {
+    get adapterMode() {
+      return combinedObservation ? 'combined-aria' : 'snapshot-command';
+    },
     async open(validatedPlan) {
       plan = validatedPlan;
       started = Date.now();
@@ -97,7 +125,7 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
       opening = true;
       // Start blank so navigation guards exist before the plan URL is visited.
       await command(['open', session, 'about:blank', '--browser=chrome', `--config=${config}`], true);
-      await code(`
+      const capabilities = await code(`
         const origin = ${JSON.stringify(plan.origin)};
         const navigationAllowed = ${canonicalNavigationAllowed.toString()};
         page.setDefaultTimeout(4000);
@@ -110,14 +138,33 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
         });
         page.context().on('page', popup => { if (popup !== page) void popup.close(); });
         await page.goto(${JSON.stringify(plan.url)}, {waitUntil: 'domcontentloaded'});
-        return true;
+        return {ariaSnapshot: typeof page.ariaSnapshot === 'function'};
       `);
+      combinedObservation = capabilities?.ariaSnapshot === true;
     },
-    async observe() {
+    async observe(assertions = []) {
+      if (combinedObservation) {
+        const observation = await code(`${guard()}
+          const snapshot = await page.ariaSnapshot({mode: 'ai'});
+          ${assertionCode(assertions)}
+          ${guard()} return {url: page.url(), snapshot, assertions: results};`);
+        // A method can exist on an older installation without supporting AI mode.
+        // Default ARIA output has roles but no actionable refs. Preserve the CLI's
+        // supported serialization in that case; other failures still fail closed.
+        if (
+          typeof observation.snapshot !== 'string' ||
+          !/(?:^|\n)\s*-\s+(?!text:)[a-z]/.test(observation.snapshot) ||
+          /\[ref=[a-zA-Z0-9_-]+\]/.test(observation.snapshot)
+        )
+          return observation;
+        combinedObservation = false;
+      }
+      // Older installed CLIs keep their supported snapshot command. Never substitute
+      // a ref-less default ARIA snapshot or silently retry a failing combined call.
       const snapshotFile = path.join(directory, 'snapshot.yml');
       await command([`-s=${session}`, 'snapshot', `--filename=${snapshotFile}`]);
-      const url = await code(`${guard()} return page.url();`);
-      return { url, snapshot: await readFile(snapshotFile, 'utf8') };
+      const result = await code(`${guard()} ${assertionCode(assertions)} ${guard()} return {url: page.url(), assertions: results};`);
+      return { ...result, snapshot: await readFile(snapshotFile, 'utf8') };
     },
     async act(action) {
       const result = await code(`
@@ -144,31 +191,7 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
       if (result !== true) throw new JevError('stale_or_blocked_target');
     },
     async assert(assertions) {
-      return code(`
-        ${guard()} ${locatorCode}
-        const assertions = ${JSON.stringify(assertions)};
-        const results = [];
-        for (const assertion of assertions) {
-          try {
-            if (assertion.type === 'url') { results.push(page.url() === assertion.equals); continue; }
-            if (assertion.type === 'bodyClass') {
-              const has = await page.locator('body').evaluate((element, value) => element.classList.contains(value), assertion.value);
-              results.push(has === assertion.present); continue;
-            }
-            const locator = locate(assertion);
-            const count = await locator.count();
-            if (assertion.state === 'hidden') { results.push(count === 0 || (count === 1 && !await locator.isVisible())); continue; }
-            if (count !== 1 || !await locator.isVisible()) { results.push(false); continue; }
-            if (assertion.state === 'visible') results.push(true);
-            else if (assertion.state === 'checked') results.push(await locator.isChecked());
-            else if (assertion.state === 'unchecked') results.push(!await locator.isChecked());
-            else if (assertion.state === 'value') results.push(await locator.inputValue() === assertion.equals);
-            else if (assertion.state === 'text') results.push(await locator.innerText() === assertion.equals);
-            else results.push(false);
-          } catch { results.push(false); }
-        }
-        return results;
-      `);
+      return code(`${guard()} ${assertionCode(assertions)} return results;`);
     },
     async text(target) {
       return code(`${guard()} ${locatorCode} const locator = locate(${JSON.stringify(target)});

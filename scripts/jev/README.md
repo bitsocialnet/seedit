@@ -134,3 +134,7 @@ node scripts/jev/browser.mjs --help
 These fixtures cover multiple actions in one invocation, strict provider validation, bounded requests, injection-resistant action scope, changed targets, origin drift, persistence, uncertainty, and failure cleanup. They never open browsers or call an API. Real installed-CLI and application smoke checks remain necessary before relying on a new plan.
 
 For changed-locale semantic review and its labeled evaluation fixtures, see [translation QA](translation-README.md).
+
+For explicitly selected code and documentation changes, use [advisory semantic diff review](review-README.md). It is opt-in and never runs as an automatic repair or approval hook.
+
+For transport modes and an explicit paired measurement runner, see [browser transport measurement](browser-benchmark-README.md).

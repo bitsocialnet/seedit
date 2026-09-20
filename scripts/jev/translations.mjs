@@ -51,7 +51,7 @@ function inputPath(file, cwd = process.cwd()) {
   return relative.length > 180 ? `...${relative.slice(-177)}` : relative;
 }
 
-async function readJson(file, cwd) {
+export async function readTranslationJson(file, cwd) {
   const stat = await fs.stat(file);
   if (stat.size > MAX_FILE_BYTES) throw new TranslationInputError(`JSON input exceeds 4 MiB: ${inputPath(file, cwd)}`);
   try {
@@ -303,7 +303,7 @@ function git(root, args) {
 
 async function localeMap(file, cwd) {
   try {
-    return flattenTranslations(await readJson(file, cwd));
+    return flattenTranslations(await readTranslationJson(file, cwd));
   } catch (error) {
     if (error.code === 'ENOENT') return Object.create(null);
     throw error;
@@ -381,7 +381,7 @@ export async function loadLocalePairs({ cwd = process.cwd(), translationsRoot = 
 }
 
 export async function loadParagraphPairs(file, { locales = [], keys = [] } = {}) {
-  const input = await readJson(file);
+  const input = await readTranslationJson(file);
   const pairs = Array.isArray(input) ? input : input.pairs;
   if (!Array.isArray(pairs)) throw new TranslationInputError('Pairs JSON requires an array or {"pairs": [...]}');
   const seen = new Set();

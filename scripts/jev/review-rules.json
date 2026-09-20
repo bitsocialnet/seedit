@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "state_truth",
+      "criterion": "User-visible state claims must agree with the actual evidence available in the changed branch. Submission or queued work must not be described as confirmed publication or completion before confirmation. Missing transport data alone must not be described as authoritative removal or permanent unavailability.",
+      "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".md", ".mdx", ".html"]
+    },
+    {
+      "id": "error_guidance",
+      "criterion": "When the change introduces or changes a user-facing failure message, it should explain the failure in understandable terms and offer a next step supported by that error branch. Do not promise retries or recovery the supplied implementation cannot perform. Internal logs do not require user guidance.",
+      "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".md", ".mdx", ".html"]
+    },
+    {
+      "id": "claim_evidence",
+      "criterion": "Changed public documentation or explanatory UI must distinguish tested behavior from plans, estimates and limitations. A claimed guarantee, benchmark improvement, or completed test must be supported by supplied evidence; future plans clearly labeled as future are acceptable. Ordinary descriptions without a measured claim need no benchmark.",
+      "extensions": [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".json", ".md", ".mdx", ".html"]
+    }
+  ]
+}
