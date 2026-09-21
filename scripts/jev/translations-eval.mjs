@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import { createJevClient, JevError } from './client.mjs';
-import { parseScopedCsv, readTranslationJson, reviewTranslations, structuralIssues, TranslationInputError } from './translations.mjs';
+import { parseScopedCsv, readTranslationJson, reviewTranslations, structuralIssues, translationQuestions, TranslationInputError } from './translations.mjs';
 import {
   calibrationReport,
   evaluationMetrics,
@@ -16,12 +17,42 @@ import {
 
 export { evaluationMetrics } from './translation-evaluation.mjs';
 
+// Illustrative contrasts, not learned labels. This experiment never changes normal QA or its cache.
+export function evaluationQuestions(rubric = 'baseline') {
+  if (!['baseline', 'contrastive'].includes(rubric)) throw new TranslationInputError('Rubric must be baseline or contrastive');
+  const questions = translationQuestions();
+  if (rubric === 'baseline') return questions;
+  const examples = {
+    meaning: {
+      preserve: 'Example boundary: active and passive wording are equivalent when the same actor performs the same action.',
+      issue: 'Example boundary: permission to undo an operation becomes an obligation to undo it, or the actor receiving a notification becomes the sender.',
+    },
+    qualifications: {
+      preserve: 'Example boundary: a condition may move to another clause while retaining the same prerequisite and exception.',
+      issue: 'Example boundary: access while a session is open becomes permanent access; an action affecting one workspace is described as affecting every workspace.',
+    },
+    terminology: {
+      preserve: 'Example boundary: a conventional localized technical term denotes the same function even if its literal wording differs.',
+      issue: 'Example boundary: a recovery code is described as an account password, or exporting a copy is described as transferring ownership.',
+    },
+  };
+  for (const [id, question] of Object.entries(questions)) {
+    question.criteria = {
+      preserve: `${question.criteria.preserve} ${examples[id].preserve}`,
+      issue: `${question.criteria.issue} ${examples[id].issue}`,
+      uncertain: `${question.criteria.uncertain} Do not invent a product rule or infer correctness from fluency alone.`,
+    };
+  }
+  return questions;
+}
+
 export async function evaluateTranslationPairs(
   pairs,
   labels,
-  { client, live = false, model, passThreshold = 0.95, split = 'calibration', thresholds = [0.8, 0.9, 0.95, 0.99], audit = {} } = {},
+  { client, live = false, model, passThreshold = 0.95, split = 'calibration', thresholds = [0.8, 0.9, 0.95, 0.99], audit = {}, rubric = 'baseline' } = {},
 ) {
   // Validate every option before invoking the provider.
+  const questions = evaluationQuestions(rubric);
   thresholdResults([], new Map(), passThreshold);
   for (const threshold of thresholds) thresholdResults([], new Map(), threshold);
   selectAuditExamples([], [], new Map(), audit);
@@ -34,7 +65,7 @@ export async function evaluateTranslationPairs(
     ask: async (request) => {
       // reviewTranslations is sequential and this evaluation never enables its cache.
       const pair = pending[index++];
-      const response = await client.ask(request);
+      const response = await client.ask({ ...request, questions });
       if (response.model === model) observations.set(identity(pair), response.answers);
       return response;
     },
@@ -45,6 +76,9 @@ export async function evaluateTranslationPairs(
   const metrics = live && labeled.length ? evaluationMetrics(labeled, results) : null;
   return {
     ...report,
+    rubric: rubric === 'baseline' ? report.rubric : 'translation-qa-contrastive-v1',
+    rubricVariant: rubric,
+    rubricSha256: createHash('sha256').update(JSON.stringify(questions)).digest('hex'),
     results,
     summary: Object.fromEntries(['pass', 'flagged', 'unverified'].map((status) => [status, results.filter((item) => item.status === status).length])),
     evaluation: {
@@ -79,6 +113,7 @@ export async function main(argv = process.argv.slice(2)) {
       },
       cases: { type: 'string' },
       model: { type: 'string' },
+      rubric: { type: 'string', default: 'baseline' },
       split: { type: 'string', default: 'calibration' },
       'pass-threshold': { type: 'string', default: '0.95' },
       thresholds: { type: 'string' },
@@ -92,10 +127,11 @@ export async function main(argv = process.argv.slice(2)) {
   });
   if (values.help) {
     console.log(
-      'Usage: node scripts/jev/translations-eval.mjs [--live] [--corpus labeled-pairs.json] [--split calibration|holdout|audit] [--cases case1,case2]\n  [--pass-threshold 0.95] [--thresholds 0.8,0.9,0.95,0.99] [--expected-corpus-sha256 SHA256]\n  [--audit-uncertain 5 --audit-random 5 --seed translation-audit-v1] [--max-requests 20 --max-cost-usd 0.01]\nThreshold sweeps use calibration only. Holdout is explicit, never used for tuning/audit selection. Offline metrics remain null. No cache or policy writes.',
+      'Usage: node scripts/jev/translations-eval.mjs [--live] [--corpus labeled-pairs.json] [--split calibration|holdout|audit] [--cases case1,case2]\n  [--rubric baseline|contrastive] [--pass-threshold 0.95] [--thresholds 0.8,0.9,0.95,0.99] [--expected-corpus-sha256 SHA256]\n  [--audit-uncertain 5 --audit-random 5 --seed translation-audit-v1] [--max-requests 20 --max-cost-usd 0.01]\nThreshold sweeps use calibration only. Holdout is explicit, never used for tuning/audit selection. Offline metrics remain null. No cache or policy writes.',
     );
     return 0;
   }
+  evaluationQuestions(values.rubric);
   const keys = parseScopedCsv(values.cases, '--cases');
   const maxRequests = Number(values['max-requests']);
   const maxCostUsd = Number(values['max-cost-usd']);
@@ -127,6 +163,7 @@ export async function main(argv = process.argv.slice(2)) {
     split: values.split,
     thresholds,
     audit,
+    rubric: values.rubric,
   });
   console.log(JSON.stringify({ ...report, evaluation: { ...report.evaluation, corpus: corpus.metadata } }, null, 2));
   if (!values.live) return 2;

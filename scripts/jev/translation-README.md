@@ -147,3 +147,24 @@ node scripts/jev/translations-eval.mjs --corpus human-review-v1.corpus.json --sp
 Import requires a reviewer ID, valid date, and an explicit independent-human attestation. Duplicate/conflicting labels, changed identities, unknown items, and reused output paths are rejected. Source provenance stays separate from label provenance: actual repository strings may receive human labels, but reviewed synthetic examples stay synthetic. Reviewer identity is self-attested, not independently authenticated. A model field of null means no model was run for the handoff.
 
 Blank and uncertain / needs context labels remain pending in the complete manifest with their original group and split. Only decided labels enter the native evaluator corpus; if none are decided, no corpus is written. Deterministic structural failures keep their structural category and are excluded from semantic-only calibration metrics. Do not claim complete holdout accuracy while any holdout item remains pending, retune using holdout labels, or treat a small curated sample as representative multilingual accuracy. The second command above is offline validation only. Retain the original queue JSON unchanged; its hash binds returned reviews. These tools do not read credentials, call providers, ingest private traffic, or alter runtime thresholds. Inputs must already be sanitized; the common-secret guard is not a privacy guarantee.
+
+## Contrastive rubric trial
+
+The evaluation runner accepts `--rubric baseline|contrastive` (default: `baseline`).
+The trial adds illustrative boundaries for actor/action, permission, scope and technical concepts.
+These are authored examples, not learned human labels or a measured accuracy improvement.
+Normal `translations.mjs` QA, its cache and all thresholds remain unchanged.
+Each evaluation reports its rubric variant and exact question hash; evaluations never use the QA cache.
+
+```sh
+# Dry runs: no provider calls; metrics stay null (exit 2).
+node scripts/jev/translations-eval.mjs --corpus reviewed-pairs.json --split calibration --rubric baseline
+node scripts/jev/translations-eval.mjs --corpus reviewed-pairs.json --split calibration --rubric contrastive
+# Add --live with the existing request/cost limits for an explicit API evaluation.
+```
+
+Compare the same corpus hash, cases, pinned model, split and threshold, changing only the rubric.
+Review and revise examples on human-labeled calibration data before freezing the candidate rubric.
+Then evaluate the untouched holdout with `--expected-corpus-sha256 HASH --split holdout`.
+Do not copy holdout text or answers into examples; if inspected for tuning, replace that holdout.
+The current synthetic fixtures can check plumbing but cannot establish production accuracy.
