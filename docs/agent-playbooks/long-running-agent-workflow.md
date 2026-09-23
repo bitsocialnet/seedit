@@ -1,6 +1,6 @@
 # Long-Running Agent Workflow
 
-Use this playbook when work needs durable state across sessions or handoffs. A short task or a single delegated slice does not require these artifacts.
+Use this playbook when work needs durable state across sessions or handoffs, or when a single run is long enough that context compaction could lose track of the remaining work. A short task or a single delegated slice does not require these artifacts.
 
 ## Goals
 

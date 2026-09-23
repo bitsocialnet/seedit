@@ -42,7 +42,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 | Public English docs or AI context changed | Run `yarn llms:generate` and include resulting `public/llms*.txt` changes |
 | Version, changelog, or release body changed | During release work, follow `release` and run `yarn changelog` when notes need regeneration |
 | Open PR feedback or merge readiness | Use `review-and-merge-pr` within the user's requested scope |
-| Work needs a durable handoff/resumption | Use [long-running-agent-workflow.md](docs/agent-playbooks/long-running-agent-workflow.md) |
+| Work needs a durable handoff/resumption, or one run is long enough to hit context compaction | Use [long-running-agent-workflow.md](docs/agent-playbooks/long-running-agent-workflow.md) |
 
 ## Code and design
 
@@ -91,7 +91,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 - Keep harness-specific hooks, permissions, and metadata explicit; byte-identical files do not establish equivalent runtime behavior.
 - Keep model and reasoning choices out of committed skills and custom agents. Use the app’s runtime defaults, parent inheritance, and supported invocation-time choices; do not invent a `latest` alias or require model research for ordinary tasks.
 - Delegate substantial independent work when it improves speed, context isolation, or independent review. Small or tightly coupled tasks can stay with the parent.
-- Give each child its scope, acceptance criteria, context, file ownership, and evidence to return. For an independent review, omit the parent's verdict.
+- Give each child its scope, acceptance criteria, context, file ownership, and evidence to return. Check that evidence before accepting a child's result. For an independent review, omit the parent's verdict.
 - Parallelize read-heavy work and non-overlapping edits; use at most four active workers by default. Children do not each run full builds. Browser work always remains serialized.
 - Use built-in worker/explorer roles where available; custom roles cover browser checks, profiling, Android, translation, and review. Avoid a compulsory chain of specialist agents.
 - Use relevant React skill guidance for state/effect/data-flow or performance work. Load only rules that fit this Vite client; use `you-might-not-need-an-effect` for a focused effect review when the reason is unclear.

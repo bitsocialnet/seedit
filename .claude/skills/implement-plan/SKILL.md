@@ -15,4 +15,4 @@ description: Implement an approved plan, keeping small or coupled work local and
 6. Integrate the changes, inspect the final diff, and run the required checks once for the final state. Browser checks, when relevant, use the shared session lock and sequential engines.
 7. Report completed work, verification, and any unresolved limitation. Retry failed slices with new evidence or a clearer assignment, not the same prompt indefinitely.
 
-Create persistent task state only when resumption or a handoff needs it; a short delegated task does not require a feature board or app server.
+Create persistent task state only when resumption, a handoff, or a run long enough to hit context compaction needs it; a short delegated task does not require a feature board or app server.
