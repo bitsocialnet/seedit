@@ -6,7 +6,7 @@ import styles from './inbox.module.css';
 import Reply from '../../components/reply';
 import { isInboxCommentRepliesView, isInboxPostRepliesView, isInboxUnreadView } from '../../lib/utils/view-utils';
 import { useTranslation } from 'react-i18next';
-import _ from 'lodash';
+import startCase from 'lodash/startCase';
 import ErrorDisplay from '../../components/error-display';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
@@ -84,13 +84,13 @@ const Inbox = () => {
   }, [unreadNotificationCount]);
 
   const documentTitle = useMemo(() => {
-    let title = _.startCase(t('inbox'));
+    let title = startCase(t('inbox'));
     if (isInInboxUnreadView) {
-      title += ` - ${_.startCase(t('unread'))}`;
+      title += ` - ${startCase(t('unread'))}`;
     } else if (isInInboxCommentRepliesView) {
-      title += ` - ${_.startCase(t('comment_replies'))}`;
+      title += ` - ${startCase(t('comment_replies'))}`;
     } else if (isInInboxPostRepliesView) {
-      title += ` - ${_.startCase(t('post_replies'))}`;
+      title += ` - ${startCase(t('post_replies'))}`;
     }
     return `${title} - Seedit`;
   }, [isInInboxCommentRepliesView, isInInboxPostRepliesView, isInInboxUnreadView, t]);

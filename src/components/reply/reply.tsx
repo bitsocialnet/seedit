@@ -28,7 +28,7 @@ import Label from '../label';
 import Thumbnail from '../thumbnail';
 import ReplyForm from '../reply-form';
 import styles from './reply.module.css';
-import _ from 'lodash';
+import lowerCase from 'lodash/lowerCase';
 import { getCommunityPath, getCommunityPostPath } from '../../lib/utils/community-route-utils';
 
 interface ReplyAuthorProps {
@@ -547,7 +547,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                       ))}
                     {reason && (
                       <p className={styles.modReason}>
-                        {_.lowerCase(t('mod_edit_reason'))}: {reason}
+                        {lowerCase(t('mod_edit_reason'))}: {reason}
                       </p>
                     )}
                     {edit?.reason && !(removed || deleted) && (

@@ -3,10 +3,6 @@ declare module '*.module.css' {
   export default classes;
 }
 
-declare module 'ext-name';
-
-declare module 'lodash';
-
 declare module 'react-router-hash-link';
 
 declare module '*.png' {

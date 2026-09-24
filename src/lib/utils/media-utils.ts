@@ -1,10 +1,23 @@
 import localForageLru from '@bitsocial/bitsocial-react-hooks/dist/lib/localforage-lru/index.js';
 import { Comment } from '@bitsocial/bitsocial-react-hooks';
-import extName from 'ext-name';
+import { MEDIA_EXTENSIONS } from '../../data/media-extensions';
 import { canEmbed } from './embed-utils';
 import memoize from 'memoizee';
 import { isValidURL } from './url-utils';
 import { Capacitor, CapacitorHttp } from '@capacitor/core';
+
+const mediaTypeByExtension = new Map<string, keyof typeof MEDIA_EXTENSIONS>(
+  Object.entries(MEDIA_EXTENSIONS).flatMap(([type, extensions]) => extensions.split(' ').map((extension) => [extension, type as keyof typeof MEDIA_EXTENSIONS])),
+);
+
+// Classifies by the extension of the last path segment.
+const getPathMediaType = (pathname: string): string | undefined => {
+  const fileName = pathname.slice(pathname.lastIndexOf('/') + 1);
+  const dotIndex = fileName.lastIndexOf('.');
+  if (dotIndex === -1) return;
+  const extension = fileName.slice(dotIndex + 1);
+  return extension === 'gif' ? 'gif' : mediaTypeByExtension.get(extension);
+};
 
 export interface CommentMediaInfo {
   url: string;
@@ -74,7 +87,6 @@ export const getLinkMediaInfo = memoize(
     const url = new URL(link);
     let patternThumbnailUrl: string | undefined;
     let type: string = 'webpage';
-    let mime: string | undefined;
 
     if (url.pathname === '/_next/image' && url.search.startsWith('?url=')) {
       return { url: link, type: 'image' };
@@ -84,16 +96,7 @@ export const getLinkMediaInfo = memoize(
       if (url.pathname.toLowerCase().endsWith('.pdf')) {
         type = 'pdf';
       } else {
-        mime = extName(url.pathname.toLowerCase().replace('/', ''))[0]?.mime;
-        if (mime) {
-          if (mime.startsWith('image')) {
-            type = mime === 'image/gif' ? 'gif' : 'image';
-          } else if (mime.startsWith('video')) {
-            type = 'video';
-          } else if (mime.startsWith('audio')) {
-            type = 'audio';
-          }
-        }
+        type = getPathMediaType(url.pathname.toLowerCase()) || type;
 
         if (type === 'webpage' && !url.pathname.includes('.')) {
           if (canEmbed(url) || url.host.startsWith('yt.')) {

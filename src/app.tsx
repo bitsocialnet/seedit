@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react';
+import { ComponentType, lazy, Suspense, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { initializeNotificationSystem } from './lib/push';
@@ -6,30 +6,19 @@ import useTheme from './hooks/use-theme';
 import { useAutoSubscribe } from './hooks/use-auto-subscribe';
 import { useBrowserPureP2PAccountUpgrade } from './hooks/use-browser-pure-p2p-account-upgrade';
 import useCanonicalCommunityRoute from './hooks/use-canonical-community-route';
-import AboutView, { DirectoryAbout as DirectoryAboutView } from './views/about';
 import All from './views/all';
 import Author from './views/author';
 import Domain from './views/domain';
-import Gold from './views/gold';
 import Home from './views/home';
-import Inbox from './views/inbox';
-import Mod from './views/mod';
 import NotFound from './views/not-found';
 import PostPage from './views/post';
 import Profile from './views/profile';
-import Search from './views/search';
-import Settings from './views/settings';
-import AccountDataEditor from './views/account-data-editor';
-import CommunityDataEditor from './views/community-data-editor';
-import SubmitPage from './views/submit';
 import CommunityView from './views/community';
-import CommunitySettings from './views/community-settings';
-import Communities from './views/communities';
-import StarterSubscriptions from './views/starter-subscriptions';
 import AccountBar from './components/account-bar/';
 import ChallengeModal from './components/challenge-modal';
 import Header from './components/header';
 import LoadingEllipsis from './components/loading-ellipsis';
+import { preloadMarkdown } from './components/markdown';
 import NotificationHandler from './components/notification-handler';
 import SiteFooter from './components/site-footer';
 import DirectorySubscriptionReconciler from './components/directory-subscription-reconciler';
@@ -42,8 +31,47 @@ import styles from './app.module.css';
 initializeNotificationSystem();
 
 const SettingsUpgradeModal = lazy(() => import('./components/settings-upgrade-modal'));
+const LazyViewLoading = () => {
+  const { t } = useTranslation();
+  return (
+    <div className={styles.lazyRouteLoading}>
+      <LoadingEllipsis string={t('loading')} />
+    </div>
+  );
+};
+
+// Each lazy view gets its own boundary. One around a layout's outlet would also catch eager views
+// that suspend (on translations, for example) and commit the layout with an empty page first.
+const lazyView = (load: () => Promise<{ default: ComponentType }>) => {
+  const View = lazy(load);
+  return () => (
+    <Suspense fallback={<LazyViewLoading />}>
+      <View />
+    </Suspense>
+  );
+};
+
 // the changelog inlines the whole CHANGELOG.md, so it loads as its own chunk instead of weighing down first paint
-const Changelog = lazy(() => import('./views/changelog'));
+const Changelog = lazyView(() => import('./views/changelog'));
+// Views that visitors rarely land on first load on demand, keeping them out of the JavaScript
+// that must download before the first render. Feed and post views stay eager.
+const AboutView = lazyView(() => import('./views/about'));
+const DirectoryAboutView = lazyView(() => import('./views/about').then((module) => ({ default: module.DirectoryAbout })));
+const Gold = lazyView(() => import('./views/gold'));
+const Inbox = lazyView(() => import('./views/inbox'));
+const Mod = lazyView(() => import('./views/mod'));
+const Search = lazyView(() => import('./views/search'));
+const Settings = lazyView(() => import('./views/settings'));
+const AccountDataEditor = lazyView(() => import('./views/account-data-editor'));
+const CommunityDataEditor = lazyView(() => import('./views/community-data-editor'));
+const SubmitPage = lazyView(() => import('./views/submit'));
+const CommunitySettings = lazyView(() => import('./views/community-settings'));
+const Communities = lazyView(() => import('./views/communities'));
+const StarterSubscriptions = lazyView(() => import('./views/starter-subscriptions'));
+
+// Landing views render markdown as soon as peer content arrives; start its download now,
+// after the startup JavaScript has already loaded.
+preloadMarkdown();
 
 const LegacyDirectoryRouteRedirect = () => {
   const location = useLocation();
@@ -54,7 +82,6 @@ const LegacyDirectoryRouteRedirect = () => {
 };
 
 const App = () => {
-  const { t } = useTranslation();
   useAutoSubscribe();
   useBrowserPureP2PAccountUpgrade();
   useCanonicalCommunityRoute();
@@ -120,20 +147,7 @@ const App = () => {
         <Route element={globalLayout}>
           <Route element={pagesLayout}>
             <Route path='/about' element={<AboutView />} />
-            <Route
-              path='/changelog'
-              element={
-                <Suspense
-                  fallback={
-                    <div className={styles.lazyRouteLoading}>
-                      <LoadingEllipsis string={t('loading')} />
-                    </div>
-                  }
-                >
-                  <Changelog />
-                </Suspense>
-              }
-            />
+            <Route path='/changelog' element={<Changelog />} />
             <Route path='/gold' element={<Gold />} />
             <Route path='/submit' element={<SubmitPage />} />
 

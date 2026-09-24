@@ -74,6 +74,10 @@ describe('CrosspostPreview', () => {
     await act(async () => {
       root.render(createElement(CrosspostPreview, { crosspost: { cid: 'source-cid', comment: {} } }));
     });
+    // Markdown loads lazily; let its module resolve so React retries the suspended selftext.
+    await act(async () => {
+      await import('../markdown/markdown');
+    });
   };
 
   it('renders old Reddit metadata without an inner thumbnail or unverified community origin', async () => {

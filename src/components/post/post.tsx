@@ -25,7 +25,7 @@ import CommentTools from '../comment-tools';
 import Thumbnail from '../thumbnail';
 import CrosspostPreview from '../crosspost-preview';
 import styles from './post.module.css';
-import _ from 'lodash';
+import lowerCase from 'lodash/lowerCase';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import React from 'react';
 import { getCommunityPath, getCommunityPostPath } from '../../lib/utils/community-route-utils';
@@ -357,7 +357,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                     <Expando
                       authorEditReason={edit?.reason}
                       commentMediaInfo={commentMediaInfo}
-                      content={removed ? `[${_.lowerCase(t('removed'))}]` : deleted ? `[${_.lowerCase(t('deleted'))}]` : content}
+                      content={removed ? `[${lowerCase(t('removed'))}]` : deleted ? `[${lowerCase(t('deleted'))}]` : content}
                       expanded={isExpanded}
                       link={link}
                       modEditReason={reason}
@@ -382,7 +382,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                 <Expando
                   authorEditReason={edit?.reason}
                   commentMediaInfo={commentMediaInfo}
-                  content={removed ? `[${_.lowerCase(t('removed'))}]` : deleted ? `[${_.lowerCase(t('deleted'))}]` : content}
+                  content={removed ? `[${lowerCase(t('removed'))}]` : deleted ? `[${lowerCase(t('deleted'))}]` : content}
                   expanded={isExpanded}
                   link={link}
                   modEditReason={reason}

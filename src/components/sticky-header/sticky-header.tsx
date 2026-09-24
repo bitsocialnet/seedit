@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './sticky-header.module.css';
 import AccountBar from '../account-bar';
 import TopBar from '../topbar';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { useTopbarAutoHideEnabled } from '../../hooks/use-topbar-auto-hide';
 
 const StickyHeaderContent = ({ animate }: { animate: boolean }) => {

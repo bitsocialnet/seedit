@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { VitePWA } from 'vite-plugin-pwa';
+import { dynamicEntryPreloadPlugin } from './scripts/vite-app-preload.mjs';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -36,6 +37,7 @@ export default defineConfig({
       protocolImports: true,
       include: ['crypto', 'stream', 'util', 'buffer', 'events'],
     }),
+    dynamicEntryPreloadPlugin(),
     VitePWA({
       disable: isProfilingBuild || process.env.REACT_PERF_RUN === '1',
       registerType: 'autoUpdate',
