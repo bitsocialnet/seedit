@@ -132,6 +132,15 @@ async function runCase(browser, target, scenario, origin, sample) {
     process.stderr.write(
       `[perf] ${target.name}/${scenario.name} sample ${sample} ${name}: ${summary.commits} commits, ${summary.renderMs.toFixed(1)} ms React, ${failures.length ? failures.join('; ') : 'within budgets'}\n`,
     );
+    if (failures.length) {
+      // Name everything that committed in the failed window, so CI logs show which subscription or
+      // subtree caused the extra work without downloading the report artifact.
+      const committed = Object.entries(summary.components)
+        .filter(([, counts]) => counts.mounts + counts.updates + counts.unmounts > 0)
+        .sort(([, a], [, b]) => b.updates - a.updates || b.mounts + b.unmounts - (a.mounts + a.unmounts))
+        .map(([component, { updates, mounts, unmounts }]) => `${component} ${updates}u/${mounts}m/${unmounts}x`);
+      process.stderr.write(`[perf]   committed components (updates/mounts/unmounts): ${committed.join(', ')}\n`);
+    }
     return phase;
   };
   try {
