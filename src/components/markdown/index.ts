@@ -1,2 +1,2 @@
 export { default } from './lazy-markdown';
-export { preloadMarkdown } from './load-markdown';
+export { loadMarkdown, preloadMarkdown } from './load-markdown';

@@ -1,4 +1,4 @@
-import { startTransition, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Comment, useAuthorAddress, useBlock, useComment, useEditedComment, useCommunity, useSubscribe } from '@bitsocial/bitsocial-react-hooks';
@@ -30,6 +30,7 @@ import useContentOptionsStore from '../../stores/use-content-options-store';
 import React from 'react';
 import { getCommunityPath, getCommunityPostPath } from '../../lib/utils/community-route-utils';
 import usePrefetchIntent from '../../hooks/use-prefetch-intent';
+import { loadMarkdown } from '../markdown';
 
 interface PostAuthorProps {
   authorAddress: string;
@@ -157,9 +158,13 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   const { mediaPreviewOption, thumbnailDisplayOption } = useContentOptionsStore();
 
   const [isExpanded, setIsExpanded] = useState((isInPostPageView || isInPendingPostView) && mediaPreviewOption === 'autoExpandAll');
-  // A transition keeps the collapsed post on screen while the lazy markdown chunk loads, so the
-  // expansion commits once with its content instead of first committing an empty expando.
-  const toggleExpanded = () => startTransition(() => setIsExpanded((expanded) => !expanded));
+  // Expanded posts render markdown; wait for its chunk (normally already preloaded) so the expansion
+  // commits once with its content instead of growing again when the chunk arrives.
+  const toggleExpanded = () => {
+    loadMarkdown()
+      .catch(() => {})
+      .then(() => setIsExpanded((expanded) => !expanded));
+  };
 
   const [isEditing, setIsEditing] = useState(false);
   const showCommentEditForm = () => setIsEditing(true);

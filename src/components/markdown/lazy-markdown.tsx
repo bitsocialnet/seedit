@@ -1,11 +1,17 @@
-import { ComponentProps, lazy, Suspense } from 'react';
-import { loadMarkdown } from './load-markdown';
+import { ComponentProps, Suspense, use } from 'react';
+import type Markdown from './markdown';
+import { getLoadedMarkdown, loadMarkdown } from './load-markdown';
 
-const Markdown = lazy(loadMarkdown);
+type MarkdownProps = ComponentProps<typeof Markdown>;
 
-const LazyMarkdown = (props: ComponentProps<typeof Markdown>) => (
+const LoadedMarkdown = (props: MarkdownProps) => {
+  const Component = getLoadedMarkdown() ?? use(loadMarkdown());
+  return <Component {...props} />;
+};
+
+const LazyMarkdown = (props: MarkdownProps) => (
   <Suspense fallback={null}>
-    <Markdown {...props} />
+    <LoadedMarkdown {...props} />
   </Suspense>
 );
 
