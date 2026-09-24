@@ -23,6 +23,11 @@ describe('LazyMarkdown', () => {
       await vi.dynamicImportSettled();
     });
     expect(container.textContent).toBe('**still readable**');
+    // A re-render keeps the settled failure instead of suspending on a new request.
+    await act(async () => {
+      root.render(createElement(LazyMarkdown, { content: 'next render' }));
+    });
+    expect(container.textContent).toBe('next render');
     act(() => root.unmount());
   });
 });

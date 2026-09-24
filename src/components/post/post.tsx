@@ -166,7 +166,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
       setIsExpanded((expanded) => !expanded);
       return;
     }
-    void loadMarkdown().then(() => setIsExpanded(true));
+    void loadMarkdown({ retryFailed: true }).then(() => setIsExpanded(true));
   };
 
   const [isEditing, setIsEditing] = useState(false);
