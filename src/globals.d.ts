@@ -3,6 +3,8 @@ declare global {
     isElectron: boolean;
     BITSOCIAL_REACT_HOOKS_ACCOUNTS_STORE_INITIALIZING?: boolean;
     defaultPkcOptions?: Record<string, unknown>;
+    // Set by src/static-shell.tsx while index.html's static first frame is rendered at build time.
+    STATIC_SHELL_RENDER?: boolean;
   }
 }
 
