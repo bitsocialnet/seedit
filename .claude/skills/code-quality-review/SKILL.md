@@ -15,7 +15,7 @@ For simplification, use the repository's solution ladder: remove unnecessary wor
 
 When a bug fix or substantive review correction exposes a preventable mistake, use [retro](../retro/SKILL.md) to identify the smallest worthwhile prevention. Preserve review-only scope: recommend changes without editing unless implementation is authorized.
 
-Return actionable findings with file/line evidence, impact, and a practical correction, prioritized by risk. Skip tooling-handled style nits and speculative cleanup; if none remain, say so without a canned approval or publishing instruction.
+Return actionable findings with file/line evidence, impact, how to show the failure (an input, test, or command) for a bug, and a practical correction, prioritized by risk. Skip tooling-handled style nits and speculative cleanup; if none remain, say so without a canned approval or publishing instruction.
 
 A review-only request returns findings without edits. During an authorized implementation, apply high-confidence in-scope fixes without asking again for that authorization. This is an advisory pass, not an extra approval gate. Reuse verification evidence for the same final state; consult `docs/agent-playbooks/verification.md` only when a change or concrete uncertainty calls for more checks.
 
