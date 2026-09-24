@@ -55,6 +55,9 @@ jobs:
         env:
           CI: ''
 
+      - name: Check startup asset ceiling
+        run: yarn perf:startup-bytes
+
       - name: Verify production excludes React development instrumentation
         run: |
           if grep -rlE "__REACT_PERF__|agentation-dev-tools|data-feedback-toolbar|__ELEMENT_SOURCE__" build/assets; then
@@ -66,6 +69,8 @@ jobs:
         run: yarn perf:install --with-deps
       - name: Check React collector and runtime scenarios
         run: yarn perf:check --output .react-perf/ci
+      - name: Check cold-load layout stability and static shell handoff
+        run: yarn perf:load --check --profile cpu4 --samples 2 --output .react-perf/ci-load
       - name: Upload React performance evidence
         if: always()
         uses: actions/upload-artifact@v4

@@ -107,6 +107,8 @@
     "perf:record": "node scripts/react-perf/runner.mjs record",
     "perf:test": "node scripts/react-perf/runner.mjs selftest",
     "perf:install": "node scripts/react-perf/install-browser.mjs",
+    "perf:load": "node scripts/load-perf/runner.mjs",
+    "perf:startup-bytes": "node scripts/load-perf/startup-bytes.mjs",
     "doctor:check": "node scripts/react-perf/doctor-check.mjs",
     "build:profile": "cross-env REACT_PERF_PROFILE=1 NODE_ENV=production vite build --mode profiling",
     "preview:profile": "vite preview --outDir build-profile"

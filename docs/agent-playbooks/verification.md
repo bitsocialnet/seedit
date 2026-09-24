@@ -48,4 +48,10 @@ Record commands, outcomes, and limits in the task report. Use the [long-running 
 
 `yarn perf:record` retains JSON and native traces under `.react-perf/`. Use `--url <origin>` to reuse a compatible instrumented server; the runner owns its browser and any server it starts. The profile-browsing measurement reference documents the instance/commit/timing contract and scenario coverage. Current scenarios cover local settings and populated mock-feed expansion/scrolling, not live peer latency or every route.
 
+## Cold-load evidence
+
+After `yarn build`, `yarn perf:startup-bytes` compares what a first visit downloads before the first render (`build/index.html` with its inlined startup CSS and static shell, plus the scripts it loads) with the checked-in ceiling in `scripts/load-perf/startup-bytes-budget.json`. Keep new code out of that set with a lazy import; lower the ceiling with `--update` when it shrinks, and raise it only by editing the file with the reason.
+
+`yarn perf:load` cold-loads configured routes of the production build over HTTP/2 in fresh Chromium contexts (default `mid` throttling, peer requests blocked) and reports first paint, first React commit, blocking time, and layout shifts by page region. `--check` (run in Linux CI at `cpu4`) fails when a region moves between first paint and React's first commit, or when the static first frame from `scripts/vite-static-shell.mjs` differs from React's first commit; shifts after the first commit are reported for follow-up, not gated. `--network live` adds time to the first post over real peers; it is not deterministic.
+
 Budget failures must identify the measured phase and evidence. Exact local update limits follow the action; timing caps are deliberately generous smoke limits. Diagnose failures rather than raising limits to make the check pass. Root Profiler duration measures a subtree, not every component's self time. Normal production excludes the collector; `build:profile` / `preview:profile` provide a separate optimized build when React timing in production-like code is needed.
