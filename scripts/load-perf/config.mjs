@@ -21,6 +21,7 @@ export default {
     { name: 'home-dark', hash: '/', staticShell: true, storage: { theme: 'dark' } },
     { name: 'home-mobile', hash: '/', staticShell: true, viewport: { width: 375, height: 812 } },
     { name: 'home-german', hash: '/', staticShell: false, locale: 'de-DE' },
+    { name: 'home-content-options', hash: '/', staticShell: false, storage: { 'content-options': '{"state":{"hideDefaultCommunities":true},"version":1}' } },
     { name: 'community', hash: '/s/seedit.bso', staticShell: false, content: '[class*="_title_"] a' },
   ],
 };

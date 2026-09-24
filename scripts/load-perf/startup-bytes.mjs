@@ -1,8 +1,9 @@
 // Deterministic ratchet on what a first visit downloads before the app renders: index.html itself
 // (with its inlined startup CSS and static shell) plus the files it loads, which is the entry script
 // and the preload tags written by scripts/vite-app-preload.mjs for the deferred index and app graphs.
-// Disabled stylesheet links (inlined, never fetched) are skipped. Raw bytes are the gate because
-// gzip output varies with the zlib version; gzip is reported for context.
+// Disabled stylesheet links (inlined, never fetched) are skipped. Images, icons, and the manifest are
+// not counted: they do not block the first paint or commit. Raw bytes are the gate because gzip
+// output varies with the zlib version; gzip is reported for context.
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';

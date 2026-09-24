@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { startTransition, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import { Comment, useAuthorAddress, useBlock, useComment, useEditedComment, useCommunity, useSubscribe } from '@bitsocial/bitsocial-react-hooks';
@@ -157,7 +157,9 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   const { mediaPreviewOption, thumbnailDisplayOption } = useContentOptionsStore();
 
   const [isExpanded, setIsExpanded] = useState((isInPostPageView || isInPendingPostView) && mediaPreviewOption === 'autoExpandAll');
-  const toggleExpanded = () => setIsExpanded((expanded) => !expanded);
+  // A transition keeps the collapsed post on screen while the lazy markdown chunk loads, so the
+  // expansion commits once with its content instead of first committing an empty expando.
+  const toggleExpanded = () => startTransition(() => setIsExpanded((expanded) => !expanded));
 
   const [isEditing, setIsEditing] = useState(false);
   const showCommentEditForm = () => setIsEditing(true);

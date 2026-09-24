@@ -7,6 +7,7 @@ export interface PrefetchTarget {
 
 interface PrefetchState extends PrefetchTarget {
   setPrefetchTarget: (target: PrefetchTarget) => void;
+  clearPrefetchTarget: (target: PrefetchTarget) => void;
 }
 
 // The post or community the pointer last rested on. components/prefetcher subscribes to it with the
@@ -16,6 +17,9 @@ const usePrefetchStore = create<PrefetchState>((set) => ({
   commentCid: undefined,
   communityAddress: undefined,
   setPrefetchTarget: ({ commentCid, communityAddress }) => set({ commentCid, communityAddress }),
+  // Only the link that set the target clears it, so leaving an older link keeps a newer target.
+  clearPrefetchTarget: ({ commentCid, communityAddress }) =>
+    set((state) => (state.commentCid === commentCid && state.communityAddress === communityAddress ? { commentCid: undefined, communityAddress: undefined } : state)),
 }));
 
 export default usePrefetchStore;

@@ -5,7 +5,8 @@
 // theme and layout breakpoint. Each result goes into a <template>; a small inline script inserts
 // the one matching the visitor before first paint, and React replaces it on its first commit.
 // The script only inserts a shell when that commit will render the same frame: the home route,
-// an English UI, and a known theme. Everyone else sees exactly what they saw before.
+// an English UI, a known theme, and default content options. Everyone else sees exactly what they
+// saw before.
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -22,13 +23,15 @@ export const STATIC_SHELL_VARIANTS = {
 };
 
 // Mirrors the startup state the shell was rendered for: src/stores/use-theme-store.ts reads
-// localStorage "theme", and i18next-browser-languagedetector checks ?lng=, the i18next cookie,
-// then cached i18nextLng values before the browser languages.
+// localStorage "theme", i18next-browser-languagedetector checks ?lng=, the i18next cookie, then
+// cached i18nextLng values before the browser languages, and the persisted content options store
+// ("content-options", written only once a user changes an option) filters the top bar's links.
 const insertShellScript = `(function () {
   try {
     if (location.hash && location.hash !== '#' && location.hash !== '#/') return;
     var theme = localStorage.getItem('theme') || 'light';
     if (theme !== 'light' && theme !== 'dark') return;
+    if (localStorage.getItem('content-options') !== null) return;
     var cookie = document.cookie.match(/(?:^|;\\s*)i18next=([^;]*)/);
     var language =
       new URLSearchParams(location.search).get('lng') ||
@@ -78,7 +81,8 @@ export function injectStaticShell(html, variants) {
   const templates = Object.entries(variants)
     .map(([name, markup]) => `<template id="static-shell-${name}">${markup}</template>`)
     .join('');
-  return html.replace('<div id="root"></div>', `<div id="root"></div>${templates}<script>${insertShellScript}</script>`);
+  // A replacer function keeps `$` sequences in the rendered markup literal.
+  return html.replace('<div id="root"></div>', () => `<div id="root"></div>${templates}<script>${insertShellScript}</script>`);
 }
 
 export function staticShellPlugin({ preloadAttribute }) {

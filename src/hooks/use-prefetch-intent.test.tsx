@@ -45,4 +45,17 @@ describe('usePrefetchIntent', () => {
     act(() => vi.advanceTimersByTime(PREFETCH_INTENT_DELAY_MS));
     expect(usePrefetchStore.getState().commentCid).toBeUndefined();
   });
+
+  it('stops prefetching when the pointer leaves the link', () => {
+    hover('mouseover');
+    act(() => vi.advanceTimersByTime(PREFETCH_INTENT_DELAY_MS));
+    hover('mouseout');
+    expect(usePrefetchStore.getState().commentCid).toBeUndefined();
+  });
+
+  it('keeps a newer target when an older link is left', () => {
+    usePrefetchStore.getState().setPrefetchTarget({ commentCid: 'newer-cid' });
+    usePrefetchStore.getState().clearPrefetchTarget({ commentCid: 'post-cid' });
+    expect(usePrefetchStore.getState().commentCid).toBe('newer-cid');
+  });
 });

@@ -61,4 +61,5 @@ test('skips the shell when the first frame would differ', () => {
   assert.equal(loadWithShell({ languages: ['de-DE', 'en'] }), 'no shell');
   assert.equal(loadWithShell({ storage: { i18nextLng: 'de' } }), 'no shell');
   assert.equal(loadWithShell({ storage: { theme: 'sepia' } }), 'no shell');
+  assert.equal(loadWithShell({ storage: { 'content-options': '{"state":{"hideDefaultCommunities":true},"version":0}' } }), 'no shell');
 });
