@@ -6,7 +6,8 @@ type MarkdownProps = ComponentProps<typeof Markdown>;
 
 const LoadedMarkdown = (props: MarkdownProps) => {
   const Component = getLoadedMarkdown() ?? use(loadMarkdown());
-  return <Component {...props} />;
+  // If the chunk could not load, show the text unformatted rather than failing the page.
+  return Component ? <Component {...props} /> : <p style={{ whiteSpace: 'pre-wrap' }}>{props.content}</p>;
 };
 
 const LazyMarkdown = (props: MarkdownProps) => (

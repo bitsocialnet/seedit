@@ -3,15 +3,16 @@ import type Markdown from './markdown';
 // The markdown pipeline (remark/rehype, parse5 for raw HTML) is ~0.5 MB of JavaScript. It is
 // only needed once peer content arrives, so it loads after the first render instead of before it.
 let loadedMarkdown: typeof Markdown | undefined;
-let markdownPromise: Promise<typeof Markdown> | undefined;
+let markdownPromise: Promise<typeof Markdown | undefined> | undefined;
 
+// Resolves to the component, or to undefined when the chunk fails to load, so renders can fall
+// back to plain text instead of throwing. A later call retries a failed request.
 export const loadMarkdown = () =>
   (markdownPromise ||= import('./markdown').then(
     (module) => (loadedMarkdown = module.default),
-    (error) => {
-      // Let a later render retry a failed chunk request.
+    () => {
       markdownPromise = undefined;
-      throw error;
+      return undefined;
     },
   ));
 
@@ -20,5 +21,5 @@ export const loadMarkdown = () =>
 export const getLoadedMarkdown = () => loadedMarkdown;
 
 export const preloadMarkdown = () => {
-  loadMarkdown().catch(() => {});
+  void loadMarkdown();
 };
