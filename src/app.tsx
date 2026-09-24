@@ -20,6 +20,7 @@ import Header from './components/header';
 import LoadingEllipsis from './components/loading-ellipsis';
 import { preloadMarkdown } from './components/markdown';
 import NotificationHandler from './components/notification-handler';
+import Prefetcher from './components/prefetcher';
 import SiteFooter from './components/site-footer';
 import DirectorySubscriptionReconciler from './components/directory-subscription-reconciler';
 import ExactCommunityActionRoute from './components/exact-community-action-route';
@@ -90,6 +91,7 @@ const App = () => {
     <>
       <ChallengeModal />
       <NotificationHandler />
+      <Prefetcher />
       <DirectorySubscriptionReconciler />
       <Suspense fallback={null}>
         <SettingsUpgradeModal />
