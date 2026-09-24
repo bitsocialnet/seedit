@@ -53,6 +53,8 @@ For initial page load:
 playwright-cli -s=lowspec eval "() => Math.round(performance.getEntriesByType('navigation')[0].duration)"
 ```
 
+For repeatable cold-load numbers from the production build, `yarn perf:load` applies the same `mid` profile to fresh contexts and reports median first paint and first React commit per route (see [verification.md](verification.md)).
+
 Seedit is a React Router SPA, so in-app route changes do not create new navigation entries. For those flows, read `performance.now()` immediately before the action and again when the target content or stable loading state appears.
 
 ## Caveats

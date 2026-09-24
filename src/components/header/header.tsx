@@ -502,8 +502,9 @@ const Header = () => {
       >
         <div className={styles.logoContainer}>
           <Link to='/' className={styles.logoLink}>
-            <img className={styles.logo} src='assets/sprout/sprout.png' alt='' />
-            <img src={`assets/sprout/seedit-text-${theme === 'dark' ? 'dark' : 'light'}.svg`} className={styles.logoText} alt='' />
+            {/* Intrinsic sizes reserve the logo's space before the images load, so the header does not grow. */}
+            <img className={styles.logo} src='assets/sprout/sprout.png' width={61} height={100} alt='' />
+            <img src={`assets/sprout/seedit-text-${theme === 'dark' ? 'dark' : 'light'}.svg`} className={styles.logoText} width={1028} height={320} alt='' />
           </Link>
         </div>
         {!isInHomeView && !isInHomeAboutView && !isInModView && !isInAllView && (

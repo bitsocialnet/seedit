@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, memo } from 'react';
+import { ReactNode, useEffect, useRef, useState, useMemo, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAccount, useAccountCommunities } from '@bitsocial/bitsocial-react-hooks';
@@ -9,6 +9,7 @@ import { useDefaultSubscriptions, useFilteredDefaultSubscriptions } from '../../
 import type { DefaultSubscription } from '../../lib/utils/starter-community-list';
 import { DIRECTORY_INDEX_PATH, getCommunityPath, getDirectoryPath } from '../../lib/utils/community-route-utils';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
+import usePrefetchIntent from '../../hooks/use-prefetch-intent';
 import styles from './topbar.module.css';
 
 const getSubscriptionDisplayName = (subscription: string) => getCompactCommunityDisplayName(subscription);
@@ -17,6 +18,15 @@ const getTopbarCommunityLink = ({ address, directoryCode }: Pick<DefaultSubscrip
   displayName: directoryCode ?? getSubscriptionDisplayName(address),
   path: directoryCode ? getDirectoryPath(directoryCode) : getCommunityPath(address),
 });
+
+const CommunityLink = ({ address, path, className, children }: { address: string; path: string; className: string; children: ReactNode }) => {
+  const prefetchCommunity = usePrefetchIntent({ communityAddress: address });
+  return (
+    <Link to={path} className={className} {...prefetchCommunity}>
+      {children}
+    </Link>
+  );
+};
 
 export const CommunitiesDropdown = () => {
   const { t } = useTranslation();
@@ -127,9 +137,9 @@ const TopBar = memo(() => {
               return (
                 <li key={subscription}>
                   {index !== 0 && <span className={styles.separator}>-</span>}
-                  <Link to={path} className={isActive ? styles.selected : styles.choice}>
+                  <CommunityLink address={subscription} path={path} className={isActive ? styles.selected : styles.choice}>
                     {displayName}
-                  </Link>
+                  </CommunityLink>
                 </li>
               );
             })}
@@ -141,9 +151,9 @@ const TopBar = memo(() => {
                 return (
                   <li key={address}>
                     {index !== 0 && <span className={styles.separator}>-</span>}
-                    <Link to={path} className={isActive ? styles.selected : styles.choice}>
+                    <CommunityLink address={address} path={path} className={isActive ? styles.selected : styles.choice}>
                       {displayName}
-                    </Link>
+                    </CommunityLink>
                   </li>
                 );
               })}

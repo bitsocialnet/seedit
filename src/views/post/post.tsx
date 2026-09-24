@@ -23,7 +23,7 @@ import Reply from '../../components/reply';
 import ReplyForm from '../../components/reply-form';
 import Sidebar from '../../components/sidebar';
 import styles from './post.module.css';
-import _ from 'lodash';
+import lowerCase from 'lodash/lowerCase';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 
 type SortDropdownProps = {
@@ -143,7 +143,7 @@ const Post = ({ post }: { post: Comment }) => {
     <>
       {(deleted || locked || removed) && (
         <div className={styles.lockedInfobar}>
-          <div className={styles.lockedInfobarText}>{t('post_locked_info', { state: _.lowerCase(lockedState) })}</div>
+          <div className={styles.lockedInfobarText}>{t('post_locked_info', { state: lowerCase(lockedState) })}</div>
         </div>
       )}
       {isSingleComment ? <PostComponent post={postComment} /> : <PostComponent post={post} />}

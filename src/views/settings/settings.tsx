@@ -17,7 +17,7 @@ import WalletSettings from './wallet-settings';
 import NotificationsSettings from './notifications-settings';
 import styles from './settings.module.css';
 import packageJson from '../../../package.json';
-import _ from 'lodash';
+import startCase from 'lodash/startCase';
 
 const commitRef = import.meta.env.VITE_COMMIT_REF;
 const isAndroid = Capacitor.getPlatform() === 'android';
@@ -250,7 +250,7 @@ const Settings = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const documentTitle = `${_.startCase(t('preferences'))} - Seedit`;
+  const documentTitle = `${startCase(t('preferences'))} - Seedit`;
   useEffect(() => {
     document.title = documentTitle;
   }, [documentTitle]);

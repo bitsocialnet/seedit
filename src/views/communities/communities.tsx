@@ -19,7 +19,7 @@ import { deriveCommunityNsfw } from '../../lib/utils/nsfw-utils';
 import useDisplayedSubscriptions from '../../hooks/use-displayed-subscriptions';
 import ErrorDisplay from '../../components/error-display';
 import Sidebar from '../../components/sidebar';
-import _ from 'lodash';
+import startCase from 'lodash/startCase';
 import CommunityItem, { NoCommunitiesMessage } from './community-item';
 import { DirectoryCandidates, DirectoryIndex, DirectoryVoteNotice } from './directory-vote';
 
@@ -375,21 +375,21 @@ const Communities = () => {
   const documentTitle = useMemo(() => {
     let title = t('communities').charAt(0).toUpperCase() + t('communities').slice(1);
     if (isInCommunitiesDirectoryView) {
-      title += ` - ${_.startCase(t('directories'))}`;
+      title += ` - ${startCase(t('directories'))}`;
       // an unknown code redirects to /not-found, so it must not title the page after a directory
       if (isDirectoryCode(directoryCode)) {
         title += ` - s/${directoryCode}`;
       }
     } else if (isInCommunitiesSubscriberView) {
-      title += ` - ${_.startCase(t('subscriber'))}`;
+      title += ` - ${startCase(t('subscriber'))}`;
     } else if (isInCommunitiesModeratorView) {
-      title += ` - ${_.startCase(t('moderator'))}`;
+      title += ` - ${startCase(t('moderator'))}`;
     } else if (isInCommunitiesAdminView) {
-      title += ` - ${_.startCase(t('admin'))}`;
+      title += ` - ${startCase(t('admin'))}`;
     } else if (isInCommunitiesOwnerView) {
-      title += ` - ${_.startCase(t('owner'))}`;
+      title += ` - ${startCase(t('owner'))}`;
     } else if (isInCommunitiesView) {
-      title += ` - ${_.startCase(t('all'))}`;
+      title += ` - ${startCase(t('all'))}`;
     }
     return `${title} - Seedit`;
   }, [

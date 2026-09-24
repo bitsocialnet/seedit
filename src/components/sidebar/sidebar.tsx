@@ -5,6 +5,7 @@ import { Comment, useAccount, useBlock, Role, Community, useCommunityStats, useP
 import { getPostScore } from '../../lib/utils/post-utils';
 import { getFormattedDate, getFormattedTimeDuration, getFormattedTimeAgo } from '../../lib/utils/time-utils';
 import { findCommunityCreator } from '../../lib/utils/user-utils';
+import { isStaticShellFrame } from '../../lib/utils/static-shell-utils';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
 import {
   isAllView,
@@ -64,6 +65,11 @@ const getRandomSubtitleIndexes = (subtitleCount: number): [number | undefined, n
   const secondIndex = (firstIndex + 1 + Math.floor(Math.random() * (subtitleCount - 1))) % subtitleCount;
   return [firstIndex, secondIndex];
 };
+
+const getFirstSubtitleIndexes = (subtitleCount: number): [number | undefined, number | undefined] => [
+  subtitleCount > 0 ? 0 : undefined,
+  subtitleCount > 1 ? 1 : undefined,
+];
 
 const ModeratorsList = ({ roles }: { roles: Record<string, Role> }) => {
   const { t } = useTranslation();
@@ -260,7 +266,9 @@ const Sidebar = ({ comment, communityAddress, directoryCode, directoryRevision, 
   const isOwner = !!settings;
 
   const communitySubtitles = useCommunitySubtitles();
-  const [subtitleIndexes] = useState(() => getRandomSubtitleIndexes(communitySubtitles.length));
+  const [subtitleIndexes] = useState(() =>
+    isStaticShellFrame() ? getFirstSubtitleIndexes(communitySubtitles.length) : getRandomSubtitleIndexes(communitySubtitles.length),
+  );
   const [subtitleIndex1, subtitleIndex2] = subtitleIndexes;
   const subtitle1 = subtitleIndex1 === undefined ? '' : communitySubtitles[subtitleIndex1] || '';
   const subtitle2 = subtitleIndex2 === undefined ? '' : communitySubtitles[subtitleIndex2] || '';

@@ -7,7 +7,7 @@ import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
 import Markdown from '../markdown';
 import Embed from '../embed';
 import styles from './expando.module.css';
-import _ from 'lodash';
+import lowerCase from 'lodash/lowerCase';
 
 interface ExpandoProps {
   authorEditReason?: string;
@@ -128,7 +128,7 @@ const Expando = ({
             <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} quotedCids={quotedCids} />
             {modEditReason && (
               <p className={styles.modReason}>
-                {_.lowerCase(t('mod_edit_reason'))}: {modEditReason}
+                {lowerCase(t('mod_edit_reason'))}: {modEditReason}
               </p>
             )}
             {authorEditReason && !(removed || deleted) && (

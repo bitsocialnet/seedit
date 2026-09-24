@@ -11,7 +11,9 @@
     "electron/vite-config.js",
     "electron/vite.preload.config.js",
     "forge.config.js",
-    "src/sw.ts"
+    "src/sw.ts",
+    // Loaded by scripts/static-shell/render.mjs through Vite's SSR module loader during the build.
+    "src/static-shell.tsx"
   ],
   "ignoreDependencies": [
     // These packages are consumed by native Capacitor/Gradle config rather than JS imports.

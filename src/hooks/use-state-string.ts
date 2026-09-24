@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useClientsStates, useCommunity, useCommunitiesStates } from '@bitsocial/bitsocial-react-hooks';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { getCommunityIdentifier, getCommunityIdentifiers } from './use-community-identifier';
 
 interface CommentOrCommunity {

@@ -25,10 +25,12 @@ import CommentTools from '../comment-tools';
 import Thumbnail from '../thumbnail';
 import CrosspostPreview from '../crosspost-preview';
 import styles from './post.module.css';
-import _ from 'lodash';
+import lowerCase from 'lodash/lowerCase';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import React from 'react';
 import { getCommunityPath, getCommunityPostPath } from '../../lib/utils/community-route-utils';
+import usePrefetchIntent from '../../hooks/use-prefetch-intent';
+import { loadMarkdown } from '../markdown';
 
 interface PostAuthorProps {
   authorAddress: string;
@@ -156,7 +158,16 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   const { mediaPreviewOption, thumbnailDisplayOption } = useContentOptionsStore();
 
   const [isExpanded, setIsExpanded] = useState((isInPostPageView || isInPendingPostView) && mediaPreviewOption === 'autoExpandAll');
-  const toggleExpanded = () => setIsExpanded((expanded) => !expanded);
+  // An expanded post with text renders markdown; wait for its chunk (normally already preloaded) so
+  // the expansion commits once with its content instead of growing again when the chunk arrives.
+  // Collapsing, and expanding media-only posts, need no markdown and happen immediately.
+  const toggleExpanded = () => {
+    if (isExpanded || !(content || removed || deleted || crosspost)) {
+      setIsExpanded((expanded) => !expanded);
+      return;
+    }
+    void loadMarkdown({ retryFailed: true }).then(() => setIsExpanded(true));
+  };
 
   const [isEditing, setIsEditing] = useState(false);
   const showCommentEditForm = () => setIsEditing(true);
@@ -201,6 +212,8 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   };
 
   const isMobile = useIsMobile();
+  const prefetchPost = usePrefetchIntent({ commentCid: cid, communityAddress });
+  const prefetchCommunity = usePrefetchIntent({ communityAddress });
   const windowWidth = useWindowWidth();
   const pinnedPostsCount = usePinnedPostsStore((state) => state.pinnedPostsCount);
   let rank = (index ?? 0) + 1;
@@ -259,6 +272,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                       className={linkClass}
                       to={cid && communityAddress ? getCommunityPostPath(communityAddress, cid) : `/profile/${post?.index}`}
                       onClick={handlePostClick}
+                      {...prefetchPost}
                     >
                       {finalTitle}
                     </Link>
@@ -324,6 +338,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                         <Link
                           className={`${styles.community} ${subscribed && hasClickedSubscribe ? styles.greenCommunityAddress : ''}`}
                           to={communityAddress ? getCommunityPath(communityAddress) : ''}
+                          {...prefetchCommunity}
                         >
                           s/{communityDisplayAddress}
                         </Link>
@@ -357,7 +372,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                     <Expando
                       authorEditReason={edit?.reason}
                       commentMediaInfo={commentMediaInfo}
-                      content={removed ? `[${_.lowerCase(t('removed'))}]` : deleted ? `[${_.lowerCase(t('deleted'))}]` : content}
+                      content={removed ? `[${lowerCase(t('removed'))}]` : deleted ? `[${lowerCase(t('deleted'))}]` : content}
                       expanded={isExpanded}
                       link={link}
                       modEditReason={reason}
@@ -382,7 +397,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                 <Expando
                   authorEditReason={edit?.reason}
                   commentMediaInfo={commentMediaInfo}
-                  content={removed ? `[${_.lowerCase(t('removed'))}]` : deleted ? `[${_.lowerCase(t('deleted'))}]` : content}
+                  content={removed ? `[${lowerCase(t('removed'))}]` : deleted ? `[${lowerCase(t('deleted'))}]` : content}
                   expanded={isExpanded}
                   link={link}
                   modEditReason={reason}

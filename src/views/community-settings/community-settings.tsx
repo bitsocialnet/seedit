@@ -26,7 +26,7 @@ import Sidebar from '../../components/sidebar';
 import Challenges from './challenge-settings';
 import { FormattingHelpTable } from '../../components/reply-form';
 import styles from './community-settings.module.css';
-import _ from 'lodash';
+import startCase from 'lodash/startCase';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 
 const Title = memo(function Title({ isReadOnly = false }: { isReadOnly?: boolean }) {
@@ -519,9 +519,9 @@ const CommunitySettings = () => {
   const documentTitle = useMemo(() => {
     let title;
     if (isInCommunitySettingsView) {
-      title = _.startCase(t('community_settings', { interpolation: { escapeValue: false } }));
+      title = startCase(t('community_settings', { interpolation: { escapeValue: false } }));
     } else if (isInCreateCommunityView) {
-      title = _.startCase(t('create_community', { interpolation: { escapeValue: false } }));
+      title = startCase(t('create_community', { interpolation: { escapeValue: false } }));
     }
     return `${title} - Seedit`;
   }, [isInCreateCommunityView, isInCommunitySettingsView, t]);

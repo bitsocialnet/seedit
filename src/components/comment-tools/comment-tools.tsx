@@ -13,6 +13,7 @@ import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import { copyShareLinkToClipboard } from '../../lib/utils/url-utils';
 import { getCommunityPostPath } from '../../lib/utils/community-route-utils';
 import usePublishPostStore from '../../stores/use-publish-post-store';
+import usePrefetchIntent from '../../hooks/use-prefetch-intent';
 
 interface CommentToolsProps {
   author?: Author;
@@ -134,10 +135,11 @@ const PostTools = ({
     }
   };
 
+  const prefetchPost = usePrefetchIntent({ commentCid: cid, communityAddress });
   const commentCountButton = failed ? (
     <span>{commentCount}</span>
   ) : (
-    <Link to={cid ? getCommunityPostPath(communityAddress, cid) : `/profile/${index}`} onClick={() => cid && handlePostClick?.()}>
+    <Link to={cid ? getCommunityPostPath(communityAddress, cid) : `/profile/${index}`} onClick={() => cid && handlePostClick?.()} {...prefetchPost}>
       {commentCount}
     </Link>
   );

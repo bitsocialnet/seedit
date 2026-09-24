@@ -27,6 +27,7 @@
 }
 
 .logo {
+  width: auto;
   max-height: 40px;
   margin: 0 3px 0 5px;
   filter: var(--filter90);
