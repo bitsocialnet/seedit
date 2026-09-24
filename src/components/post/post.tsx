@@ -159,11 +159,16 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
 
   const [isExpanded, setIsExpanded] = useState((isInPostPageView || isInPendingPostView) && mediaPreviewOption === 'autoExpandAll');
   // Expanded posts render markdown; wait for its chunk (normally already preloaded) so the expansion
-  // commits once with its content instead of growing again when the chunk arrives.
+  // commits once with its content instead of growing again when the chunk arrives. Collapsing needs
+  // no markdown and happens immediately.
   const toggleExpanded = () => {
+    if (isExpanded) {
+      setIsExpanded(false);
+      return;
+    }
     loadMarkdown()
       .catch(() => {})
-      .then(() => setIsExpanded((expanded) => !expanded));
+      .then(() => setIsExpanded(true));
   };
 
   const [isEditing, setIsEditing] = useState(false);

@@ -53,6 +53,14 @@ describe('usePrefetchIntent', () => {
     expect(usePrefetchStore.getState().commentCid).toBeUndefined();
   });
 
+  it('keeps prefetching while the link stays focused after the pointer leaves', () => {
+    act(() => container.querySelector('a')!.focus());
+    act(() => vi.advanceTimersByTime(PREFETCH_INTENT_DELAY_MS));
+    hover('mouseover');
+    hover('mouseout');
+    expect(usePrefetchStore.getState().commentCid).toBe('post-cid');
+  });
+
   it('releases its target when the link unmounts', () => {
     hover('mouseover');
     act(() => vi.advanceTimersByTime(PREFETCH_INTENT_DELAY_MS));
