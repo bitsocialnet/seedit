@@ -10,9 +10,17 @@ const usePrefetchIntent = (target: PrefetchTarget) => {
   const setPrefetchTarget = usePrefetchStore((state) => state.setPrefetchTarget);
   const clearPrefetchTarget = usePrefetchStore((state) => state.clearPrefetchTarget);
   const timeout = useRef<ReturnType<typeof setTimeout>>(undefined);
-  useEffect(() => () => clearTimeout(timeout.current), []);
-
   const { commentCid, communityAddress } = target;
+  // A link that unmounts (scrolled out of a virtualized feed, or left by navigation) releases its
+  // target too. On navigation the destination page's hooks subscribe before the prefetcher lets go.
+  useEffect(
+    () => () => {
+      clearTimeout(timeout.current);
+      clearPrefetchTarget({ commentCid, communityAddress });
+    },
+    [clearPrefetchTarget, commentCid, communityAddress],
+  );
+
   if (!commentCid && !communityAddress) return {};
   const start = () => {
     clearTimeout(timeout.current);

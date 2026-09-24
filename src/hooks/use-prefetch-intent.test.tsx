@@ -53,6 +53,13 @@ describe('usePrefetchIntent', () => {
     expect(usePrefetchStore.getState().commentCid).toBeUndefined();
   });
 
+  it('releases its target when the link unmounts', () => {
+    hover('mouseover');
+    act(() => vi.advanceTimersByTime(PREFETCH_INTENT_DELAY_MS));
+    act(() => root.render(null));
+    expect(usePrefetchStore.getState().commentCid).toBeUndefined();
+  });
+
   it('keeps a newer target when an older link is left', () => {
     usePrefetchStore.getState().setPrefetchTarget({ commentCid: 'newer-cid' });
     usePrefetchStore.getState().clearPrefetchTarget({ commentCid: 'post-cid' });
