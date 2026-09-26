@@ -1,5 +1,6 @@
 import type { Comment } from '@bitsocial/bitsocial-react-hooks';
 import type { SearchProvider } from './search-providers';
+import type { SearchSort, SearchTime } from './utils/search-utils';
 
 export interface IndexedPost {
   archived: 0 | 1;
@@ -46,8 +47,15 @@ export interface IndexerSearchOptions {
   self?: boolean;
   selftext?: string;
   site?: string;
+  /** Relevance when absent. */
+  sort?: SearchSort;
+  /** All time when absent. */
+  time?: SearchTime;
   url?: string;
 }
+
+/** The indexer names old.reddit's "comments" sort after what it counts, and ranks by relevance when none is sent. */
+const INDEXER_SORTS: Record<SearchSort, string | undefined> = { relevance: undefined, top: 'top', new: 'new', comments: 'replies' };
 
 export const SEARCH_PAGE_SIZE = 25;
 const REQUEST_TIMEOUT_MS = 15_000;
@@ -118,6 +126,9 @@ const getSearchUrl = (provider: SearchProvider, query: string, page: number, opt
   }
   // The indexer takes self as yes/no so that absent can mean "either".
   if (options.self !== undefined) url.searchParams.set('self', options.self ? 'yes' : 'no');
+  const sort = options.sort && INDEXER_SORTS[options.sort];
+  if (sort) url.searchParams.set('sort', sort);
+  if (options.time && options.time !== 'all') url.searchParams.set('time', options.time);
   // Always explicit: an indexer that does not know the parameter ignores it, and
   // one that does must not fall back to its own default.
   url.searchParams.set('nsfw', String(options.nsfw === true));

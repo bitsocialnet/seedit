@@ -443,5 +443,6 @@
   "search_communities": "közösségek keresése ebben a címtárban",
   "fivechan_quote": "idézése {{reference}}",
   "quoting_user": "u/{{author}} idézése",
-  "fivechan_quote_tooltip": "A(z) {{reference}} olyan idézési stílus, amelyet a Seedit nem használ, és az idézett hozzászólás nem található."
+  "fivechan_quote_tooltip": "A(z) {{reference}} olyan idézési stílus, amelyet a Seedit nem használ, és az idézett hozzászólás nem található.",
+  "relevance": "relevance"
 }

@@ -442,5 +442,6 @@
   "search_communities": "etsi yhteisöjä tästä hakemistosta",
   "fivechan_quote": "lainaa {{reference}}",
   "quoting_user": "lainaa käyttäjää u/{{author}}",
-  "fivechan_quote_tooltip": "{{reference}} on lainaustyyli, jota Seedit ei käytä, eikä lainattua kommenttia löytynyt."
+  "fivechan_quote_tooltip": "{{reference}} on lainaustyyli, jota Seedit ei käytä, eikä lainattua kommenttia löytynyt.",
+  "relevance": "relevance"
 }

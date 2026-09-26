@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { isHomeAboutView, isPostPageAboutView, isCommunityAboutView, isSearchView } from '../../lib/utils/view-utils';
-import { getSearchNsfw, getSearchPath, getSearchQuery, SEARCH_COMMUNITY_PARAM, SEARCH_NSFW_PARAM } from '../../lib/utils/search-utils';
+import { getSearchNsfw, getSearchOptions, getSearchPath, getSearchQuery, SEARCH_COMMUNITY_PARAM, SEARCH_NSFW_PARAM } from '../../lib/utils/search-utils';
 import { parseSearchQuery } from '../../lib/utils/search-query-utils';
 import useCommunityDisplayName from '../../hooks/use-community-display-name';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
@@ -12,9 +12,14 @@ import styles from './search-bar.module.css';
 interface SearchBarProps {
   isFocused?: boolean;
   onExpandoChange?: (expanded: boolean) => void;
+  /**
+   * `page` is the box old.reddit puts above its search results: titled, with a
+   * submit button and its options always shown instead of in a focus expando.
+   */
+  variant?: 'compact' | 'page';
 }
 
-const SearchBar = ({ isFocused = false, onExpandoChange }: SearchBarProps) => {
+const SearchBar = ({ isFocused = false, onExpandoChange, variant = 'compact' }: SearchBarProps) => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -38,6 +43,8 @@ const SearchBar = ({ isFocused = false, onExpandoChange }: SearchBarProps) => {
   const communityToRestrict = restrictedCommunity || currentCommunityAddress;
 
   const routeNsfw = typedFilters.nsfw ?? getSearchNsfw(searchParams.get(SEARCH_NSFW_PARAM));
+  // A new search keeps the results page's sort and time menus, the way old.reddit's form carries them.
+  const { sort: routeSort, time: routeTime } = isInSearchView ? getSearchOptions(searchParams) : {};
   // Inside a community the search is limited to it by default, the way the results page opens it.
   const routeLimitToCommunity = Boolean(restrictedCommunity) || (!isInSearchView && Boolean(currentCommunityAddress));
 
@@ -83,8 +90,61 @@ const SearchBar = ({ isFocused = false, onExpandoChange }: SearchBarProps) => {
     const searchInput = searchInputRef.current?.value.trim();
     if (!searchInput) return;
     setShowExpando(false);
-    navigate(getSearchPath(searchInput, { community: limitToCommunity && communityToRestrict ? communityToRestrict : undefined, nsfw }));
+    navigate(
+      getSearchPath(searchInput, { community: limitToCommunity && communityToRestrict ? communityToRestrict : undefined, nsfw, sort: routeSort, time: routeTime }),
+    );
   };
+
+  const limitToCommunityOption = communityToRestrict && (
+    <label>
+      <input type='checkbox' checked={limitToCommunity} onChange={(event) => setLimitToCommunity(event.target.checked)} />
+      {t('limit_my_search_to', { community: getCommunityDisplayName(communityToRestrict), interpolation: { escapeValue: false } })}
+    </label>
+  );
+
+  const nsfwOption = (
+    <label>
+      <input type='checkbox' checked={nsfw} onChange={(event) => setNsfw(event.target.checked)} />
+      {t('include_nsfw_results')}
+    </label>
+  );
+
+  const advancedSearch = showAdvanced ? (
+    <AdvancedSearchHelp onCollapse={() => setShowAdvanced(false)} />
+  ) : (
+    <button className={styles.advancedSearchLink} onClick={() => setShowAdvanced(true)} type='button'>
+      {t('advanced_search_link')}
+    </button>
+  );
+
+  if (variant === 'page') {
+    return (
+      <div className={styles.searchPane}>
+        <h4 className={styles.searchPaneTitle}>{t('search')}</h4>
+        <form className={styles.pageSearchForm} onSubmit={handleSearchSubmit} role='search'>
+          <div className={styles.pageSearchRow}>
+            <input
+              type='text'
+              autoCorrect='off'
+              autoComplete='off'
+              spellCheck='false'
+              autoCapitalize='off'
+              placeholder={t('search')}
+              ref={searchInputRef}
+              onChange={(event) => setInputValue(event.target.value)}
+              value={inputValue}
+            />
+            <button aria-label={t('search')} className={styles.pageSearchSubmit} type='submit'>
+              <span className={styles.pageSearchIcon} />
+            </button>
+          </div>
+          {limitToCommunityOption}
+          {nsfwOption}
+          <div className={styles.pageAdvancedSearch}>{advancedSearch}</div>
+        </form>
+      </div>
+    );
+  }
 
   return (
     <div ref={wrapperRef} className={`${styles.searchBarWrapper} ${isInHomeAboutView || isInCommunityAboutView || isInPostPageAboutView ? styles.mobileInfobar : ''}`}>
@@ -106,23 +166,9 @@ const SearchBar = ({ isFocused = false, onExpandoChange }: SearchBarProps) => {
       <div
         className={`${styles.infobar} ${showExpando ? styles.slideDown : styles.slideUp} ${!communityToRestrict ? styles.lessHeight : ''} ${showAdvanced ? styles.advancedOpen : ''}`}
       >
-        {communityToRestrict && (
-          <label>
-            <input type='checkbox' checked={limitToCommunity} onChange={(event) => setLimitToCommunity(event.target.checked)} />
-            {t('limit_my_search_to', { community: getCommunityDisplayName(communityToRestrict), interpolation: { escapeValue: false } })}
-          </label>
-        )}
-        <label>
-          <input type='checkbox' checked={nsfw} onChange={(event) => setNsfw(event.target.checked)} />
-          {t('include_nsfw_results')}
-        </label>
-        {showAdvanced ? (
-          <AdvancedSearchHelp onCollapse={() => setShowAdvanced(false)} />
-        ) : (
-          <button className={styles.advancedSearchLink} onClick={() => setShowAdvanced(true)} type='button'>
-            {t('advanced_search_link')}
-          </button>
-        )}
+        {limitToCommunityOption}
+        {nsfwOption}
+        {advancedSearch}
       </div>
     </div>
   );

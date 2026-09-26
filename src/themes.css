@@ -80,6 +80,10 @@
   --red-nsfw: rgb(255, 55, 89);
   --removed-reply-backgrouhd-color: rgb(27, 30, 32);
   --reply-child-border-left: 1px dotted rgb(57, 57, 66);
+  --search-result-group-border: #2e2e2e;
+  --search-result-link: rgb(125, 175, 216);
+  --search-result-meta: #808080;
+  --search-result-text: #a8a8a8;
   --spoiler-tooltip-text: #bfbfbf;
   --spoiler-tooltip-border-color: #3e3e3e;
   --submitter-color: rgb(67, 166, 255);
@@ -186,6 +190,11 @@
   --red-nsfw: #d10023;
   --removed-reply-backgrouhd-color: #f0f0f0;
   --reply-child-border-left: 1px dotted #DDF;
+  /* old.reddit's search listing colors (its search.less), not the feed's. */
+  --search-result-group-border: #e5e3da;
+  --search-result-link: #006aba;
+  --search-result-meta: #808080;
+  --search-result-text: #4f4f4f;
   --spoiler-tooltip-text: #333;
   --spoiler-tooltip-border-color: gray;
   --submitter-color: #0055df;

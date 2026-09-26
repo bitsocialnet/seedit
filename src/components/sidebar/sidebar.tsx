@@ -285,17 +285,24 @@ const Sidebar = ({ comment, communityAddress, directoryCode, directoryRevision, 
 
   return (
     <div className={`${isMobile ? styles.mobileSidebar : styles.sidebar}`}>
-      <div className={styles.searchBarWrapper}>
-        <SearchBar onExpandoChange={setShowExpando} />
-      </div>
+      {/* The results page has its own search box above the results, the way old.reddit moves it out of the sidebar there. */}
+      {!isInSearchView && (
+        <div className={styles.searchBarWrapper}>
+          <SearchBar onExpandoChange={setShowExpando} />
+        </div>
+      )}
       <div
         className={styles.contentWrapper}
-        style={{
-          transform: showExpando ? 'translateY(47px)' : 'translateY(0)',
-          transition: 'transform 0.3s linear',
-          willChange: 'transform',
-          marginTop: '-47px',
-        }}
+        style={
+          isInSearchView
+            ? undefined
+            : {
+                transform: showExpando ? 'translateY(47px)' : 'translateY(0)',
+                transition: 'transform 0.3s linear',
+                willChange: 'transform',
+                marginTop: '-47px',
+              }
+        }
       >
         {(isInPostPageView || isInPendingPostView) && <PostInfo comment={comment} />}
         {(isInCommunityView || isInHomeView || isInAllView || isInModView || isInDomainView || isInPendingPostView) && (

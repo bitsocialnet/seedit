@@ -443,5 +443,6 @@
   "search_communities": "tìm kiếm cộng đồng trong danh mục này",
   "fivechan_quote": "trích dẫn {{reference}}",
   "quoting_user": "trích dẫn u/{{author}}",
-  "fivechan_quote_tooltip": "{{reference}} là kiểu trích dẫn mà Seedit không sử dụng, và không tìm thấy bình luận được trích dẫn."
+  "fivechan_quote_tooltip": "{{reference}} là kiểu trích dẫn mà Seedit không sử dụng, và không tìm thấy bình luận được trích dẫn.",
+  "relevance": "relevance"
 }

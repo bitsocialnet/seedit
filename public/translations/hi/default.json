@@ -443,5 +443,6 @@
   "search_communities": "इस डायरेक्टरी में समुदाय खोजें",
   "fivechan_quote": "उद्धृत करते हुए {{reference}}",
   "quoting_user": "u/{{author}} को उद्धृत करते हुए",
-  "fivechan_quote_tooltip": "{{reference}} एक उद्धरण शैली है जिसका उपयोग Seedit नहीं करता, और उद्धृत टिप्पणी नहीं मिली।"
+  "fivechan_quote_tooltip": "{{reference}} एक उद्धरण शैली है जिसका उपयोग Seedit नहीं करता, और उद्धृत टिप्पणी नहीं मिली।",
+  "relevance": "relevance"
 }

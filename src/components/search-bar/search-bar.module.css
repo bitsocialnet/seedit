@@ -199,3 +199,92 @@
   word-break: break-word;
 }
 
+
+/* The page variant: old.reddit's .searchpane above its search results, with its
+   15px box, the blue magnifier button and the options listed under the box. */
+.searchPane {
+  color: var(--text);
+  font-size: 13px;
+  padding: 10px 10px 10px 30px;
+}
+
+.searchPaneTitle {
+  color: var(--search-result-meta);
+  font-size: 13px;
+  margin: 0 0 3px;
+}
+
+.pageSearchForm {
+  max-width: 810px;
+}
+
+.pageSearchRow {
+  align-items: center;
+  display: flex;
+}
+
+.pageSearchRow input[type='text'] {
+  background-color: var(--background);
+  border: 1px solid var(--search-result-meta);
+  border-radius: 2px;
+  box-sizing: border-box;
+  color: var(--text);
+  flex: 0 1 750px;
+  font-family: verdana, arial, helvetica, sans-serif;
+  font-size: 15px;
+  line-height: 22px;
+  min-width: 0;
+  padding: 5px 25px 5px 10px;
+}
+
+.pageSearchSubmit {
+  background-color: var(--button-background-color);
+  border: 1px solid transparent;
+  border-bottom: 2px solid var(--button-border-bottom);
+  border-radius: 3px;
+  box-sizing: border-box;
+  cursor: pointer;
+  flex: none;
+  line-height: 22px;
+  margin-left: 10px;
+  padding: 5px 15px;
+}
+
+.pageSearchSubmit:hover,
+.pageSearchSubmit:focus-visible {
+  background-color: var(--button-background-color-hover);
+}
+
+.pageSearchSubmit:active {
+  border-bottom-width: 1px;
+  margin-top: 1px;
+}
+
+.pageSearchIcon {
+  background: url('/assets/search/search-button-icon.png') center / 20px 20px no-repeat;
+  display: inline-block;
+  height: 20px;
+  transform: translateY(-1px);
+  vertical-align: middle;
+  width: 20px;
+}
+
+.pageSearchForm label {
+  display: block;
+  margin: 5px 0;
+}
+
+.pageSearchForm input[type='checkbox'] {
+  margin: 3px 3px 3px 0;
+  vertical-align: middle;
+}
+
+.pageAdvancedSearch {
+  margin: 5px 0;
+}
+
+@media (max-width: 639px) {
+  .searchPane {
+    padding-left: 10px;
+  }
+}
