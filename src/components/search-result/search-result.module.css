@@ -311,13 +311,6 @@
   cursor: default;
 }
 
-.info {
-  color: var(--search-result-meta);
-  font-size: 12px;
-  margin: 5px 0;
-  text-transform: lowercase;
-}
-
 /* Search terms are marked by weight, not by a highlight fill, so the rows stay
    as flat as the rest of the feed and matches never rely on color alone. */
 .result mark {
