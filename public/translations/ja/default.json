@@ -443,5 +443,6 @@
   "search_communities": "このディレクトリ内のコミュニティを検索",
   "fivechan_quote": "{{reference}}を引用",
   "quoting_user": "u/{{author}}を引用",
-  "fivechan_quote_tooltip": "{{reference}} は Seedit が使用しない引用形式で、引用されたコメントは見つかりませんでした。"
+  "fivechan_quote_tooltip": "{{reference}} は Seedit が使用しない引用形式で、引用されたコメントは見つかりませんでした。",
+  "relevance": "relevance"
 }

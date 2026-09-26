@@ -7,7 +7,8 @@ import { DEFAULT_SEARCH_QUERY, getSearchOptions, getSearchPath, getSearchQuery }
 import { parseSearchQuery } from '../../lib/utils/search-query-utils';
 import { getHighlightTerms } from '../../lib/utils/search-highlight-utils';
 import useCommunityDisplayName from '../../hooks/use-community-display-name';
-import { SearchResultCommunity, SearchResultGroup, SearchResultPost } from '../../components/search-result';
+import SearchBar from '../../components/search-bar';
+import { SearchResultCommunity, SearchResultGroup, SearchResultMenus, SearchResultPost } from '../../components/search-result';
 import Sidebar from '../../components/sidebar';
 import layoutStyles from '../../components/feed-layout';
 import styles from './search.module.css';
@@ -27,7 +28,8 @@ const Search = () => {
   // A typed prefix is deliberate, so it beats the equivalent checkbox.
   const restrictedCommunity = filters.community ?? checkboxOptions.community;
   const nsfw = filters.nsfw ?? checkboxOptions.nsfw ?? false;
-  const options = useMemo(() => ({ ...filters, community: restrictedCommunity, nsfw }), [filters, restrictedCommunity, nsfw]);
+  const { sort, time } = checkboxOptions;
+  const options = useMemo(() => ({ ...filters, community: restrictedCommunity, nsfw, sort, time }), [filters, restrictedCommunity, nsfw, sort, time]);
 
   // Only the words are searched for and highlighted; the prefixes are not terms.
   const terms = useMemo(() => getHighlightTerms(searchText), [searchText]);
@@ -66,6 +68,7 @@ const Search = () => {
           <Sidebar />
         </div>
         <div className={styles.listing}>
+          <SearchBar variant='page' />
           {/* An unlabelled group, the way the results page shows community matches; hidden when nothing matched. */}
           {!restrictedCommunity && shownCommunities.length > 0 && (
             <SearchResultGroup
@@ -81,6 +84,7 @@ const Search = () => {
 
           <SearchResultGroup
             hasMore={hasMore}
+            headingMenus={<SearchResultMenus options={checkboxOptions} query={rawQuery} />}
             heading={
               restrictedCommunity
                 ? t('search_results_in', { community: getCommunityDisplayName(restrictedCommunity), interpolation: { escapeValue: false } })
@@ -105,7 +109,7 @@ const Search = () => {
           </SearchResultGroup>
 
           {provider && total > 0 && (
-            <p className={styles.info}>
+            <p className={`${styles.info} ${styles.providedBy}`}>
               {t('results_provided_by')}{' '}
               <a href={provider.siteUrl} rel='noopener noreferrer' target='_blank'>
                 {provider.name}

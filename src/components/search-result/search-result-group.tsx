@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import EmptyFeedMessage from '../empty-feed-message';
 import styles from './search-result.module.css';
 
 interface SearchResultGroupProps {
@@ -34,7 +35,7 @@ const SearchResultGroup = ({ children, hasMore, heading, headingMenus, isEmpty, 
       )}
       <div className={styles.contents}>{children}</div>
       <footer>
-        {isEmpty && <p className={styles.info}>{t('nothing_found')}</p>}
+        {isEmpty && <EmptyFeedMessage />}
         {hasMore && (
           <div className={styles.loadMoreRow}>
             <button className={styles.loadMore} disabled={loadingMore} onClick={onLoadMore} type='button'>

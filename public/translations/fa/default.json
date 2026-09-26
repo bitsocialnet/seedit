@@ -443,5 +443,6 @@
   "search_communities": "جستجوی انجمن‌ها در این فهرست",
   "fivechan_quote": "نقل‌قول {{reference}}",
   "quoting_user": "نقل‌قول از u/{{author}}",
-  "fivechan_quote_tooltip": "{{reference}} یک شیوهٔ نقل‌قول است که Seedit از آن استفاده نمی‌کند و کامنت نقل‌شده پیدا نشد."
+  "fivechan_quote_tooltip": "{{reference}} یک شیوهٔ نقل‌قول است که Seedit از آن استفاده نمی‌کند و کامنت نقل‌شده پیدا نشد.",
+  "relevance": "relevance"
 }

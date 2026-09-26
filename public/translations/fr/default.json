@@ -443,5 +443,6 @@
   "search_communities": "rechercher des communautés dans cet annuaire",
   "fivechan_quote": "cite {{reference}}",
   "quoting_user": "cite u/{{author}}",
-  "fivechan_quote_tooltip": "{{reference}} est un style de citation que Seedit n'utilise pas, et le commentaire cité est introuvable."
+  "fivechan_quote_tooltip": "{{reference}} est un style de citation que Seedit n'utilise pas, et le commentaire cité est introuvable.",
+  "relevance": "relevance"
 }

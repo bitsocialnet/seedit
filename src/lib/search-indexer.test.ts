@@ -61,6 +61,19 @@ describe('fetchSearchPageFromChain', () => {
     expect(fetchMock).toHaveBeenCalledWith('https://api.seeditarchive.org/api/search?q=hello&page=1&limit=25&community=aww-posting.bso&nsfw=true', expect.anything());
   });
 
+  it('sends the sort and time menus in the indexer vocabulary, and leaves the defaults out', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(okJson(searchResponse([indexedPost()])));
+    vi.stubGlobal('fetch', fetchMock);
+
+    await fetchSearchPageFromChain([provider], 'hello', 1, { sort: 'comments', time: 'week' });
+    await fetchSearchPageFromChain([provider], 'hello', 1, { sort: 'relevance', time: 'all' });
+
+    expect(fetchMock.mock.calls.map(([url]) => url)).toEqual([
+      'https://api.seeditarchive.org/api/search?q=hello&page=1&limit=25&sort=replies&time=week&nsfw=false',
+      'https://api.seeditarchive.org/api/search?q=hello&page=1&limit=25&nsfw=false',
+    ]);
+  });
+
   it('rejects a response that does not match the search contract', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(okJson({ query: 'test', page: 1, limit: 25, total: 1, posts: [{ cid: 'only-a-cid' }] })));
     await expect(fetchSearchPageFromChain([provider], 'test', 1)).rejects.toThrow('Search provider returned an invalid response');

@@ -7,10 +7,10 @@ export interface SearchProvider {
 
 /**
  * VITE_SEEDITARCHIVE_API_URL points a dev build at a locally-run
- * bitsocial-indexer engine (e.g. one seeded with demo data). The canonical dev
- * origin https://seedit.localhost is CORS-allowlisted by the production API, so
- * normal development needs no override; branch-scoped *.seedit.localhost
- * worktree origins are not allowlisted and need a local engine.
+ * bitsocial-indexer engine (e.g. one seeded with demo data). The production API
+ * CORS-allowlists https://seedit.localhost and the branch-scoped
+ * *.seedit.localhost origins worktrees run on, so /search works in development
+ * against real archive data without an override or a local engine.
  */
 const DEFAULT_API_URL = import.meta.env.VITE_SEEDITARCHIVE_API_URL || 'https://api.seeditarchive.org';
 

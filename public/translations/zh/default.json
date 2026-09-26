@@ -443,5 +443,6 @@
   "search_communities": "搜索此目录中的社区",
   "fivechan_quote": "引用 {{reference}}",
   "quoting_user": "引用 u/{{author}}",
-  "fivechan_quote_tooltip": "{{reference}} 是 Seedit 不使用的引用格式，未能找到被引用的评论。"
+  "fivechan_quote_tooltip": "{{reference}} 是 Seedit 不使用的引用格式，未能找到被引用的评论。",
+  "relevance": "relevance"
 }

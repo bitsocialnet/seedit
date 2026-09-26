@@ -41,7 +41,11 @@ const SearchResultCommunity = ({ community, nsfw, query, terms }: SearchResultCo
         <span className={styles.subscribe}>
           <SubscribeButton address={community.address} />
         </span>
-        {community.nsfw && <span className={`${styles.stamp} ${styles.nsfwStamp}`}>{t('nsfw')}</span>}
+        {community.nsfw && (
+          <>
+            <span className={`${styles.stamp} ${styles.nsfwStamp}`}>{t('nsfw')}</span>{' '}
+          </>
+        )}
         <Link to={communityPath}>
           <HighlightedText terms={terms} text={communityLabel} />
         </Link>
@@ -53,6 +57,7 @@ const SearchResultCommunity = ({ community, nsfw, query, terms }: SearchResultCo
         </div>
       )}
       <div className={styles.footer}>
+        <span className={`${styles.icon} ${styles.searchWithinIcon}`} />
         <Link className={styles.footerLink} to={getSearchPath(query, { community: community.address, nsfw })}>
           {t('search_within_community', { community: communityLabel, interpolation: { escapeValue: false } })}
         </Link>

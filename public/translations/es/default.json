@@ -443,5 +443,6 @@
   "search_communities": "buscar comunidades en este directorio",
   "fivechan_quote": "citando {{reference}}",
   "quoting_user": "citando a u/{{author}}",
-  "fivechan_quote_tooltip": "{{reference}} es un estilo de cita que Seedit no usa, y no se encontró el comentario citado."
+  "fivechan_quote_tooltip": "{{reference}} es un estilo de cita que Seedit no usa, y no se encontró el comentario citado.",
+  "relevance": "relevance"
 }

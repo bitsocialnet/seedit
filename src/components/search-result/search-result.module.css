@@ -1,50 +1,122 @@
-/* The results page mirrors old.reddit's search layout: groups of dense rows,
-   each group with its own heading and its own "load more". */
+/* A port of old.reddit's search listing (its search.less, as served): groups
+   capped at 750px and indented from the content edge, rows whose title, meta
+   line, collapsed excerpt and url line keep reddit's own sizes, spacing and
+   colors. The colors are the --search-result-* theme tokens. */
 
-.group + .group {
-  margin-top: 10px;
+.group {
+  box-sizing: border-box;
+  max-width: 750px;
+  padding-left: 30px;
+  padding-right: 20px;
 }
 
 .groupHeader {
   align-items: baseline;
-  border-bottom: 1px solid var(--border-text);
+  border-bottom: 2px solid var(--search-result-group-border);
+  color: var(--search-result-meta);
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
   justify-content: space-between;
-  padding-bottom: 2px;
+  margin: 30px 0 20px;
 }
 
 .groupHeaderLabel {
-  color: var(--text);
   font-size: 14px;
   font-weight: bold;
+  line-height: 20px;
 }
 
 .groupHeaderMenus {
-  color: var(--text-info);
   display: flex;
   flex-wrap: wrap;
   font-size: 12px;
-  gap: 10px;
+  gap: 0 20px;
+  line-height: 20px;
+}
+
+/* old.reddit's light dropdown, built on <details> like the feed's time menu. */
+.dropdown {
+  display: inline;
+  position: relative;
+}
+
+.dropdown summary {
+  cursor: pointer;
+  display: inline;
+  list-style: none;
+}
+
+.dropdown summary::-webkit-details-marker {
+  display: none;
+}
+
+.selected {
+  background: url('/assets/buttons/droparrowgray.gif') no-repeat right center;
+  color: var(--search-result-meta);
+  font-weight: bold;
+  padding-right: 21px;
+  text-decoration: underline;
+}
+
+.dropChoices {
+  background-color: var(--background);
+  border: 1px solid var(--search-result-meta);
+  left: 0;
+  line-height: normal;
+  margin-top: 2px;
+  position: absolute;
+  top: 100%;
+  white-space: nowrap;
+  z-index: 100;
+}
+
+.dropChoices a {
+  color: var(--link-primary);
+  display: block;
+  padding: 2px 3px 1px;
+  text-decoration: none;
+}
+
+.dropChoices a:hover,
+.dropChoices a:focus-visible {
+  background-color: var(--button-link-background-hover);
 }
 
 .contents {
-  padding-top: 5px;
+  font-size: 12px;
 }
 
 .result {
-  font-size: 12px;
-  margin: 10px 0;
+  margin: 10px 0 25px;
+}
+
+/* A result with a thumbnail sets it in a 70px column beside the row. */
+.hasThumbnail {
+  display: flex;
+}
+
+.hasThumbnail > * {
+  flex: 1 1;
+  min-width: 0;
+}
+
+.hasThumbnail > .thumbnail {
+  flex: 0 0 70px;
+  margin-right: 10px;
+  width: 70px;
 }
 
 .resultHeader {
-  line-height: 1.2;
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.resultHeader > * {
+  vertical-align: top;
 }
 
 .title {
-  color: var(--link);
-  font-family: Arial, Verdana, Helvetica, sans-serif;
+  color: var(--search-result-link);
   font-size: 16px;
   margin-right: 5px;
   text-decoration: none;
@@ -60,39 +132,128 @@
 }
 
 .meta {
-  color: var(--text-info);
+  color: var(--search-result-meta);
   font-size: 10px;
-  margin-top: 2px;
+  line-height: 20px;
   word-break: break-word;
 }
 
+/* Keep unstyled children from adding to the meta line's own line-height. */
+.meta > * {
+  line-height: 1em;
+}
+
 .meta a {
-  color: var(--text-info);
-  font-weight: bold;
+  color: var(--search-result-link);
   text-decoration: none;
+}
+
+.meta a:visited {
+  color: var(--link-visited);
 }
 
 .meta a:hover {
   text-decoration: underline;
 }
 
-.body {
-  color: var(--text);
+/* The score reads at the body size and carries the bullet that separates it
+   from the comment count. */
+.score {
   font-size: 12px;
-  margin-top: 5px;
-  padding-right: 10px;
+}
+
+.score::after {
+  content: ' •';
+}
+
+.comments {
+  font-weight: bold;
+}
+
+.icon {
+  background-position: center;
+  background-repeat: no-repeat;
+  display: inline-block;
+  height: 15px;
+  vertical-align: middle;
+  width: 16px;
+}
+
+.meta .icon {
+  vertical-align: text-bottom;
+}
+
+.scoreIcon {
+  background-image: url('/assets/search/score-icon.png');
+  background-size: 10px 14px;
+}
+
+.externalLinkIcon {
+  background-image: url('/assets/search/external-link-icon.png');
+  background-size: 15px 7px;
+}
+
+.searchWithinIcon {
+  background-image: url('/assets/search/search-within-icon.png');
+  background-size: 11px 12px;
+}
+
+.body {
+  color: var(--search-result-text);
+  font-size: 12px;
+  line-height: 15px;
+  padding-right: 40px;
   word-break: break-word;
 }
 
+.expando {
+  overflow: hidden;
+}
+
+/* A clipped excerpt shows three lines, the last faded out, so a cut sentence
+   reads as cut. */
+.collapsedExpando {
+  mask-image: linear-gradient(to bottom, black 30px, transparent 45px);
+  max-height: 45px;
+  -webkit-mask-image: linear-gradient(to bottom, black 30px, transparent 45px);
+}
+
+.expandoButton {
+  background: none;
+  border: none;
+  color: var(--search-result-link);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  padding: 0;
+  text-transform: lowercase;
+}
+
+.expandoButton:hover {
+  text-decoration: underline;
+}
+
+/* The url line stays on one line; a long url is cut, never wrapped. */
 .footer {
-  margin-top: 2px;
+  font-size: 12px;
+  line-height: 20px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.footer > * {
+  line-height: 1em;
 }
 
 .footerLink {
-  color: var(--link-primary);
-  font-size: 12px;
+  color: var(--search-result-link);
+  margin-left: 5px;
   text-decoration: none;
-  word-break: break-all;
+}
+
+.footerLink:visited {
+  color: var(--link-visited);
 }
 
 .footerLink:hover {
@@ -113,55 +274,21 @@
 }
 
 .stamp {
-  border: 1px solid var(--red-nsfw);
-  color: var(--red-nsfw);
+  border: 1px solid;
+  border-radius: 3px;
+  display: inline-block;
   font-size: 10px;
-  font-weight: bold;
-  margin-right: 5px;
-  padding: 0 2px;
+  line-height: 14px;
+  padding: 0 4px;
   text-transform: uppercase;
 }
 
-.thumbnail {
-  background-color: var(--background-thumbnail);
-  border: 1px solid var(--gray-border);
-  float: left;
-  height: 50px;
-  margin-right: 10px;
-  object-fit: cover;
-  width: 50px;
-}
-
-.resultContent {
-  overflow: hidden;
-}
-
-.expandoButton {
-  background: none;
-  border: none;
-  color: var(--text-info);
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 12px;
-  margin-top: 2px;
-  padding: 0;
-  text-transform: lowercase;
-  width: fit-content;
-}
-
-.expandoButton:hover {
-  text-decoration: underline;
-}
-
-.collapsedBody {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
+.nsfwStamp {
+  color: var(--red-nsfw);
 }
 
 .loadMoreRow {
-  padding: 5px 0 10px;
+  margin: 10px 0 30px;
 }
 
 .loadMore {
@@ -184,17 +311,24 @@
   cursor: default;
 }
 
-.info {
-  color: var(--text-info);
-  font-size: 12px;
-  margin: 5px 0;
-  text-transform: lowercase;
-}
-
 /* Search terms are marked by weight, not by a highlight fill, so the rows stay
    as flat as the rest of the feed and matches never rely on color alone. */
 .result mark {
   background: none;
   color: inherit;
   font-weight: bold;
+  line-height: 1em;
+}
+
+/* reddit's 30px indent is content on a phone, so the rows keep the narrow
+   gutter the rest of seedit's mobile surfaces use. */
+@media (max-width: 639px) {
+  .group {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .body {
+    padding-right: 10px;
+  }
 }

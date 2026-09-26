@@ -453,5 +453,6 @@
   "search_communities": "search communities in this directory",
   "fivechan_quote": "quoting {{reference}}",
   "quoting_user": "quoting u/{{author}}",
-  "fivechan_quote_tooltip": "{{reference}} is a quote style Seedit does not use, and the quoted comment could not be found."
+  "fivechan_quote_tooltip": "{{reference}} is a quote style Seedit does not use, and the quoted comment could not be found.",
+  "relevance": "relevance"
 }

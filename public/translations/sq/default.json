@@ -443,5 +443,6 @@
   "search_communities": "kërko komunitete në këtë direktori",
   "fivechan_quote": "duke cituar {{reference}}",
   "quoting_user": "duke cituar u/{{author}}",
-  "fivechan_quote_tooltip": "{{reference}} është një stil citimi që Seedit nuk e përdor, dhe komenti i cituar nuk u gjet."
+  "fivechan_quote_tooltip": "{{reference}} është një stil citimi që Seedit nuk e përdor, dhe komenti i cituar nuk u gjet.",
+  "relevance": "relevance"
 }

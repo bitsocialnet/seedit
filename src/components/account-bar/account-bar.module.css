@@ -46,6 +46,15 @@
   z-index: 3;
 }
 
+/* A phone shortcut: below 640px the sidebar and its search box only open from
+   the "about" tab, which most pages do not have. Wider screens show the
+   sidebar beside the feed. */
+@media (min-width: 640px) {
+  .searchButton {
+    display: none;
+  }
+}
+
 .accountSelect {
   position: absolute;
   top: 25px;

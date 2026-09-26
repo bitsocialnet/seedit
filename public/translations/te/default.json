@@ -443,5 +443,6 @@
   "search_communities": "ఈ డైరెక్టరీలో కమ్యూనిటీలను శోధించండి",
   "fivechan_quote": "{{reference}}ను ఉటంకిస్తూ",
   "quoting_user": "u/{{author}}ను ఉటంకిస్తూ",
-  "fivechan_quote_tooltip": "{{reference}} అనేది Seedit ఉపయోగించని ఉటంకింపు శైలి, మరియు ఉటంకించిన వ్యాఖ్య కనుగొనబడలేదు."
+  "fivechan_quote_tooltip": "{{reference}} అనేది Seedit ఉపయోగించని ఉటంకింపు శైలి, మరియు ఉటంకించిన వ్యాఖ్య కనుగొనబడలేదు.",
+  "relevance": "relevance"
 }

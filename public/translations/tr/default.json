@@ -443,5 +443,6 @@
   "search_communities": "bu dizindeki toplulukları ara",
   "fivechan_quote": "{{reference}} alıntısı",
   "quoting_user": "u/{{author}} kullanıcısından alıntı",
-  "fivechan_quote_tooltip": "{{reference}}, Seedit'in kullanmadığı bir alıntı biçimidir ve alıntılanan yorum bulunamadı."
+  "fivechan_quote_tooltip": "{{reference}}, Seedit'in kullanmadığı bir alıntı biçimidir ve alıntılanan yorum bulunamadı.",
+  "relevance": "relevance"
 }
