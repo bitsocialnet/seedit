@@ -4005,9 +4005,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@libp2p/gossipsub@npm:16.0.4":
-  version: 16.0.4
-  resolution: "@libp2p/gossipsub@npm:16.0.4"
+"@libp2p/gossipsub@npm:16.0.5":
+  version: 16.0.5
+  resolution: "@libp2p/gossipsub@npm:16.0.5"
   dependencies:
     "@libp2p/crypto": "npm:^5.1.21"
     "@libp2p/interface": "npm:^3.2.5"
@@ -4023,7 +4023,7 @@ __metadata:
     protons-runtime: "npm:^7.0.0"
     uint8arraylist: "npm:^3.0.2"
     uint8arrays: "npm:^6.1.1"
-  checksum: 10c0/6b4ae2283b81107c7eb2133d559e8cc3a6558821e624d57a7ba0eb8ddeb86078022789912f83a3a892434fd507b225267664b8147c50dd3aa6108d8cb32b9524
+  checksum: 10c0/4b5ea3f4a2b84c769c9f20a97e0735a1f815f28145bf1bc967971f36f0339a4b3c14703d1c921f1f86f8bef5bfbe7e467912512be97a409ef747adb413d6d3b1
   languageName: node
   linkType: hard
 
