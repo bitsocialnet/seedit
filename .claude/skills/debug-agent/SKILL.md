@@ -22,3 +22,7 @@ description: Investigate a reported bug using source, tests, or runtime evidence
 - Use a task-specific log file and mark temporary code clearly. Never clear another session's logs.
 - Collect before/after evidence. If a hypothesis fails, remove its speculative fix and revise the investigation.
 - If user-only verification remains pending, state the limitation and retain only the instrumentation needed for that verification, unless the user requests cleanup.
+
+## Optional file discovery
+
+If ordinary search leaves a large but explicit source shortlist, [Jev file questions](../../../scripts/jev/ask-README.md) can help prioritize direct inspection. Supply task-specific bounded questions and only task-authorized files; live calls require explicit `--live` and a budget. Keep negative and uncertain results visible, inspect their source/dependencies when needed, and read source before editing. This is optional evidence selection, not a command runner or proof of a diagnosis. The initial pilot did not establish workflow savings; do not run it routinely or treat low API cost as justification. Prefer direct reading when it is cheaper.

@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "task": "Find the code that validates browser action plans before execution.",
+  "files": ["scripts/jev/browser-plan.mjs", "scripts/jev/client.mjs"],
+  "questions": {
+    "relevance": {
+      "type": "choice",
+      "instructions": "Does this file directly implement the behavior described in state.task? Judge source behavior, not incidental mentions.",
+      "criteria": {
+        "relevant": "The file implements the requested behavior or a directly necessary part of it.",
+        "unrelated": "The visible code serves a different purpose and does not implement that behavior.",
+        "uncertain": "The provided source cannot establish the relationship; inspect it and its dependencies directly."
+      }
+    }
+  },
+  "evidence": {
+    "question": "relevance",
+    "choice": "relevant"
+  }
+}
