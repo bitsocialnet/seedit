@@ -1,4 +1,4 @@
-import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCommunities, type Community as CommunityType } from '@bitsocial/bitsocial-react-hooks';
 import { SEEDIT_DIRECTORY_CODES, isDirectoryCode, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
@@ -202,8 +202,9 @@ const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirect
 export const DirectoryCandidates = () => {
   const { directoryCode } = useParams();
 
+  // Communities renders not found for an unknown code
   if (!isDirectoryCode(directoryCode)) {
-    return <Navigate to='/not-found' replace />;
+    return null;
   }
 
   return <DirectoryCandidateList directoryCode={directoryCode} />;

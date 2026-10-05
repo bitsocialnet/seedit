@@ -464,7 +464,8 @@ const Header = () => {
   const hasFewTabs = isInPostPageView || isInSubmitView || isInCommunitySubmitView || isInCommunitySettingsView || isInSettingsView || isInInboxView || isInSettingsView;
   const hasStickyHeader =
     isInHomeView ||
-    isInNotFoundView ||
+    // unknown directory codes render not found in the pages layout, which has no fixed sticky header to clear
+    (isInNotFoundView && !isInCommunitiesDirectoryView) ||
     (isInCommunityView &&
       !isInCommunitySubmitView &&
       !isInCommunitySettingsView &&

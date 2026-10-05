@@ -1,10 +1,10 @@
 import { memo, useEffect, useRef, useState, useMemo, useCallback, type ComponentProps } from 'react';
-import { Link, Navigate, useNavigate, useParams, useLocation } from 'react-router-dom';
+import { Link, Navigate, useParams, useLocation } from 'react-router-dom';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { useAccount, Comment } from '@bitsocial/bitsocial-react-hooks';
 import { Trans, useTranslation } from 'react-i18next';
 import { useAutoSubscribeStore } from '../../stores/use-auto-subscribe-store';
-import useTimeFilter, { isValidTimeFilterName, isValidTopTimeFilterName } from '../../hooks/use-time-filter';
+import useTimeFilter from '../../hooks/use-time-filter';
 import useRedirectToDefaultSort from '../../hooks/use-redirect-to-default-sort';
 import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
@@ -17,7 +17,7 @@ import StarterSubscriptionsNotice from '../../components/starter-subscriptions-n
 import DirectorySubscriptionUpdatesNotice from '../../components/directory-subscription-updates-notice';
 import DevelopmentFeedResetButton from '../../components/development-feed-reset-button';
 import TopTimeFilter from '../../components/top-time-filter';
-import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute, isValidRouteSortType } from '../../constants/sort-types';
+import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
 import { getHomeSubscriptionState } from './subscription-state';
 import styles from './home.module.css';
 import layoutStyles from '../../components/feed-layout';
@@ -55,20 +55,12 @@ const Home = () => {
   const isCheckingSubscriptions = starterListLoading || !accountAddress || isCheckingAccount(accountAddress);
 
   const params = useParams<{ sortType?: string; timeFilterName?: string }>();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const sortType = getRouteSortType(params.sortType);
   const feedSortType = getFeedSortType(sortType);
 
   useRedirectToDefaultSort();
-
-  useEffect(() => {
-    const hasInvalidTimeFilter = sortType === 'top' ? !isValidTopTimeFilterName(params.timeFilterName) : !isValidTimeFilterName(params.timeFilterName);
-    if (!isValidRouteSortType(params.sortType) || hasInvalidTimeFilter) {
-      navigate('/not-found', { replace: true });
-    }
-  }, [params?.sortType, params.timeFilterName, sortType, navigate]);
 
   const { timeFilterName, timeFilterSeconds, sessionKey, preferredTopTimeFilterPath } = useTimeFilter();
 

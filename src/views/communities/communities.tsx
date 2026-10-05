@@ -18,6 +18,7 @@ import { useDefaultSubscriptions } from '../../hooks/use-default-subscriptions';
 import { deriveCommunityNsfw } from '../../lib/utils/nsfw-utils';
 import useDisplayedSubscriptions from '../../hooks/use-displayed-subscriptions';
 import ErrorDisplay from '../../components/error-display';
+import NotFound from '../../components/not-found';
 import Sidebar from '../../components/sidebar';
 import startCase from 'lodash/startCase';
 import CommunityItem, { NoCommunitiesMessage } from './community-item';
@@ -376,7 +377,7 @@ const Communities = () => {
     let title = t('communities').charAt(0).toUpperCase() + t('communities').slice(1);
     if (isInCommunitiesDirectoryView) {
       title += ` - ${startCase(t('directories'))}`;
-      // an unknown code redirects to /not-found, so it must not title the page after a directory
+      // an unknown code renders not found, so it must not title the page after a directory
       if (isDirectoryCode(directoryCode)) {
         title += ` - s/${directoryCode}`;
       }
@@ -406,6 +407,10 @@ const Communities = () => {
   useEffect(() => {
     document.title = documentTitle;
   }, [documentTitle]);
+
+  if (isInCommunitiesDirectoryView && directoryCode && !isDirectoryCode(directoryCode)) {
+    return <NotFound />;
+  }
 
   return (
     <div className={styles.content}>
