@@ -26,6 +26,7 @@ import DirectorySubscriptionReconciler from './components/directory-subscription
 import ExactCommunityActionRoute from './components/exact-community-action-route';
 import StickyHeader from './components/sticky-header';
 import TopBar from './components/topbar';
+import ValidFeedRoute from './components/valid-feed-route';
 import { DIRECTORY_INDEX_PATH } from './lib/utils/community-route-utils';
 import styles from './app.module.css';
 
@@ -217,15 +218,50 @@ const App = () => {
           <Route element={feedLayout}>
             <Route path='/search' element={<Search />} />
 
-            <Route path='/:sortType?/:timeFilterName?' element={<Home />} />
+            <Route
+              path='/:sortType?/:timeFilterName?'
+              element={
+                <ValidFeedRoute>
+                  <Home />
+                </ValidFeedRoute>
+              }
+            />
 
-            <Route path='/s/all/:sortType?/:timeFilterName?' element={<All />} />
+            <Route
+              path='/s/all/:sortType?/:timeFilterName?'
+              element={
+                <ValidFeedRoute>
+                  <All />
+                </ValidFeedRoute>
+              }
+            />
 
-            <Route path='/s/mod/:sortType?/:timeFilterName?' element={<Mod />} />
+            <Route
+              path='/s/mod/:sortType?/:timeFilterName?'
+              element={
+                <ValidFeedRoute>
+                  <Mod />
+                </ValidFeedRoute>
+              }
+            />
 
-            <Route path='/s/:communityAddress/:sortType?/:timeFilterName?' element={<CommunityView />} />
+            <Route
+              path='/s/:communityAddress/:sortType?/:timeFilterName?'
+              element={
+                <ValidFeedRoute>
+                  <CommunityView />
+                </ValidFeedRoute>
+              }
+            />
 
-            <Route path='/domain/:domain/:sortType?/:timeFilterName?' element={<Domain />} />
+            <Route
+              path='/domain/:domain/:sortType?/:timeFilterName?'
+              element={
+                <ValidFeedRoute>
+                  <Domain />
+                </ValidFeedRoute>
+              }
+            />
 
             <Route path='/profile/:accountCommentIndex' element={<PostPage />} />
 

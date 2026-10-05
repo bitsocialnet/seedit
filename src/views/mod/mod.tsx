@@ -1,9 +1,9 @@
 import { memo, useEffect, useRef, useMemo, type ComponentProps } from 'react';
-import { Navigate, useParams, useNavigate, useLocation } from 'react-router-dom';
+import { Navigate, useParams, useLocation } from 'react-router-dom';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { useAccountCommunities, type Comment } from '@bitsocial/bitsocial-react-hooks';
 import { useTranslation } from 'react-i18next';
-import useTimeFilter, { isValidTimeFilterName, isValidTopTimeFilterName } from '../../hooks/use-time-filter';
+import useTimeFilter from '../../hooks/use-time-filter';
 import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
 import FeedFooter from '../../components/feed-footer';
 import DevelopmentFeedResetButton from '../../components/development-feed-reset-button';
@@ -11,7 +11,7 @@ import TopTimeFilter from '../../components/top-time-filter';
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
-import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute, isValidRouteSortType } from '../../constants/sort-types';
+import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
 import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 import layoutStyles from '../../components/feed-layout';
@@ -30,7 +30,6 @@ const Mod = () => {
   const { accountCommunities } = useAccountCommunities();
   const communityAddresses = useMemo(() => Object.keys(accountCommunities ?? {}), [accountCommunities]);
   const params = useParams<{ sortType?: string; timeFilterName?: string }>();
-  const navigate = useNavigate();
   const location = useLocation();
 
   const { timeFilterName, timeFilterSeconds, sessionKey, preferredTopTimeFilterPath } = useTimeFilter();
@@ -39,13 +38,6 @@ const Mod = () => {
   const feedSortType = getFeedSortType(sortType);
 
   const currentTimeFilterName = params.timeFilterName || timeFilterName || (sortType === 'top' ? 'all' : '24h');
-
-  useEffect(() => {
-    const hasInvalidTimeFilter = sortType === 'top' ? !isValidTopTimeFilterName(params.timeFilterName) : !isValidTimeFilterName(params.timeFilterName);
-    if (!isValidRouteSortType(params.sortType) || hasInvalidTimeFilter) {
-      navigate('/not-found', { replace: true });
-    }
-  }, [params?.sortType, params.timeFilterName, sortType, navigate]);
 
   const infiniteFeedEnabled = useInfiniteFeedEnabled();
   const { t } = useTranslation();

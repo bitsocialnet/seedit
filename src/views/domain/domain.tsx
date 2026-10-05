@@ -1,9 +1,9 @@
 import { memo, useEffect, useRef, useState, useMemo, useCallback, type ComponentProps } from 'react';
-import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { Comment, CommentsFilter } from '@bitsocial/bitsocial-react-hooks';
 import { useDefaultSubscriptionAddresses } from '../../hooks/use-default-subscriptions';
-import useTimeFilter, { isValidTimeFilterName, isValidTopTimeFilterName } from '../../hooks/use-time-filter';
+import useTimeFilter from '../../hooks/use-time-filter';
 import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
 import FeedFooter from '../../components/feed-footer';
 import TopTimeFilter from '../../components/top-time-filter';
@@ -11,7 +11,7 @@ import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
 import layoutStyles from '../../components/feed-layout';
-import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute, isValidRouteSortType } from '../../constants/sort-types';
+import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
 import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 
@@ -28,7 +28,6 @@ const renderPost = (index: number, post: Comment) => <Post index={index} post={p
 const Domain = () => {
   const communityAddresses = useDefaultSubscriptionAddresses();
   const params = useParams<{ domain?: string; sortType?: string; timeFilterName?: string }>();
-  const navigate = useNavigate();
   const location = useLocation();
   const domain = params?.domain;
   const sortType = getRouteSortType(params.sortType);
@@ -38,13 +37,6 @@ const Domain = () => {
 
   const infiniteFeedEnabled = useInfiniteFeedEnabled();
   const [showNoResults, setShowNoResults] = useState(false);
-
-  useEffect(() => {
-    const hasInvalidTimeFilter = sortType === 'top' ? !isValidTopTimeFilterName(params.timeFilterName) : !isValidTimeFilterName(params.timeFilterName);
-    if (!isValidRouteSortType(params.sortType) || hasInvalidTimeFilter) {
-      navigate('/not-found', { replace: true });
-    }
-  }, [params?.sortType, params.timeFilterName, sortType, navigate]);
 
   const matchesDomain = useCallback(
     (comment: Comment) => {
