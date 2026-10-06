@@ -140,3 +140,5 @@ For explicitly selected code and documentation changes, use [advisory semantic d
 For transport modes and an explicit paired measurement runner, see [browser transport measurement](browser-benchmark-README.md).
 
 For task-specific questions over a bounded source shortlist, see [file questions](ask-README.md). Ordinary text/symbol search remains the first step; reports are advisory and never execute commands.
+
+For image-based observations over an explicitly captured Playwright screenshot, see [optional screenshot checks](../visual-qa/README.md). This separate provider adapter uses OpenAI Decisions; Jev text helpers are unchanged.

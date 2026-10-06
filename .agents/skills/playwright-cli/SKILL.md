@@ -1,7 +1,7 @@
 ---
 name: playwright-cli
 description: Verify browser behavior or reproduce a web UI issue with the installed Playwright CLI.
-allowed-tools: Bash(playwright-cli:*), Bash(./scripts/pw-session.sh:*), Bash(node scripts/jev/browser.mjs:*), Bash(node scripts/jev/config.mjs:*)
+allowed-tools: Bash(playwright-cli:*), Bash(./scripts/pw-session.sh:*), Bash(node scripts/jev/browser.mjs:*), Bash(node scripts/jev/config.mjs:*), Bash(node scripts/visual-qa/check.mjs:*)
 ---
 
 # Browser verification
@@ -40,3 +40,7 @@ For performance evidence, use `profile-browsing`; ordinary UI verification does 
 See `scripts/jev/README.md` for the bounded browser helper. A task-owned plan lists permitted controls/actions and deterministic completion assertions; the helper observes a fresh snapshot before each choice and owns its isolated browser session. Use semantic checks for text meaning or qualitative requirements after ordinary assertions, and report uncertainty as unverified. Run offline plan validation first. Provider calls require explicit `--live`, a runtime-selected pinned model, credentials, and a budget. Prefer ordinary scripted checks for known fixed flows; do not add model calls to edit hooks or replace Bippy measurements.
 
 The helper automatically reads the private machine configuration documented there, shared across checkouts and worktrees; runtime environment overrides also work. Run `node scripts/jev/config.mjs --check` to verify readiness without an API call. Do not read/print the key yourself, copy it into a repo `.env`, or request it again when setup is ready. Use `--live` for the task's bounded, authorized Jev checks.
+
+## Optional screenshot checks
+
+For visible layout or screenshot-only criteria, use [optional screenshot checks](../../../scripts/visual-qa/README.md). Capture a task-approved PNG/JPEG with the existing named Playwright session, then validate the explicit manifest offline. An authorized `--live` run uploads that screenshot to OpenAI Decisions using private machine credentials and makes one bounded request. Results are advisory; uncertainty, refusal, or unavailable evidence requires inspection. Keep failed Playwright assertions and profiler measurements authoritative. The helper does not open browsers, choose actions, or change application code. Use it only when the visual question benefits from model interpretation.
