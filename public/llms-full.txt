@@ -189,6 +189,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 - Simplicity must preserve correctness, clarity, accessibility, validation, security, and useful tests.
 - For a bug, reproduce the reported behavior or establish the defect and correct fix from conclusive source/runtime evidence before editing. Do not guess when evidence is inconclusive; report what was checked and request the missing reproduction details when necessary.
 - For a bug tied to a file or line, inspect `git log`/`git blame`, then relevant `git show`, before fixing it. See [bug-investigation.md](docs/agent-playbooks/bug-investigation.md).
+- Never work around a `@bitsocial/bitsocial-react-hooks` bug in seedit. We maintain that library, so fix the root cause there, release it, and bump it here; without access to its repository, open an issue there with the evidence instead.
 - Use existing evidence or a focused test before adding instrumentation. Add runtime logging when it resolves uncertainty; remove task-owned instrumentation after verification.
 
 ## Task router
