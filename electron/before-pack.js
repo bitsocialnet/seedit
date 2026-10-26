@@ -3,10 +3,11 @@
 import fs from 'fs-extra';
 import ProgressBar from 'progress';
 import https from 'https';
-import extractZip from 'extract-zip';
 import * as tar from 'tar';
 import path from 'path';
+import { pipeline } from 'stream/promises';
 import { fileURLToPath } from 'url';
+import yauzl from 'yauzl';
 const ipfsClientsPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'bin');
 const ipfsClientWindowsPath = path.join(ipfsClientsPath, 'win');
 const ipfsClientMacPath = path.join(ipfsClientsPath, 'mac');
@@ -108,9 +109,34 @@ const downloadWithRetry = async (url, retries = 3) => {
   }
 };
 
-const extractArchive = async (archivePath, destinationPath) => {
+// unix file type bits, stored in the high 16 bits of a zip entry's external attributes
+const unixFileTypeMask = 0o170000;
+const unixRegularFile = 0o100000;
+
+// writes one regular-file entry to a path chosen here, so archive entry names never become
+// filesystem paths and symlink entries are never created
+export const extractZipEntry = async (archivePath, entryName, outputPath) => {
+  const zipfile = await yauzl.openPromise(archivePath);
+  // eachEntry closes the zip on every exit from the loop
+  for await (const entry of zipfile.eachEntry()) {
+    if (entry.fileName !== entryName) continue;
+    // archives made on Windows leave the unix type bits unset
+    const fileType = (entry.externalFileAttributes >>> 16) & unixFileTypeMask;
+    if (fileType !== 0 && fileType !== unixRegularFile) {
+      throw new Error(`${entryName} in ${archivePath} is not a regular file`);
+    }
+    await fs.ensureDir(path.dirname(outputPath));
+    await pipeline(await zipfile.openReadStreamPromise(entry), fs.createWriteStream(outputPath));
+    return;
+  }
+  throw new Error(`${entryName} not found in ${archivePath}`);
+};
+
+const extractArchive = async (archivePath, destinationPath, binName) => {
   if (archivePath.endsWith('.zip')) {
-    await extractZip(archivePath, { dir: destinationPath });
+    // the Windows build only ships kubo/<binName>, so extract nothing else
+    const entryName = `kubo/${binName}`;
+    await extractZipEntry(archivePath, entryName, path.join(destinationPath, entryName));
     return;
   }
 
@@ -147,7 +173,7 @@ const downloadAndExtract = async (url, destinationPath) => {
   console.log(`Extracting ${archivePath} to ${destinationPath}`);
   fs.removeSync(extractedPath);
   try {
-    await extractArchive(archivePath, destinationPath);
+    await extractArchive(archivePath, destinationPath, binName);
     console.log('Decompression complete');
   } catch (err) {
     console.error('Error during decompression:', err);

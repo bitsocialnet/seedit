@@ -115,7 +115,7 @@ Directory assignment only affects discovery. Even without it, anyone can reach y
 
 ### Prerequisites
 
-- Node.js 22.12.0, pinned in [`.nvmrc`](./.nvmrc)
+- Node.js 22.17.0, pinned in [`.nvmrc`](./.nvmrc)
 - Corepack enabled once per machine: `corepack enable`
 
 ### Contributor Setup
