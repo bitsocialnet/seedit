@@ -16,6 +16,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 
 /** Result of a WebView-based upload attempt. */
@@ -87,11 +88,17 @@ public class MediaUploadAutomationRunner {
     static final String STAGE_FILE_PAYLOAD_UNAVAILABLE = "file_payload_unavailable";
     static final String STAGE_UPLOAD_TIMED_OUT = "upload_timed_out";
 
+    /**
+     * Largest file injected through the page's DataTransfer, the plugin's bound for a generated upload
+     * too: the file is held in memory as bytes, base64 and a JS string at once.
+     */
+    static final int MAX_INJECTED_FILE_BYTES = 20 * 1024 * 1024;
+
     private final Context context;
     private final Uri fileUri;
     private final String fileName;
-    private byte[] fileBytes;
-    private String mimeType;
+    private final byte[] fileBytes;
+    private final String mimeType;
     private final String provider;
     private final MediaUploadCallback callback;
     /** When non-null (test fixtures), use instead of getUploadUrl(provider). */
@@ -111,43 +118,22 @@ public class MediaUploadAutomationRunner {
     private String lastMatchedSelector;
     /** Number of trigger or injection attempts so far (for diagnostics). */
     private int triggerAttemptCount;
+    /** DataTransfer injection script, built once off the main thread and reused by retries. */
+    private String injectionJs;
+    private boolean preparingInjection;
 
-    private static final class ResolvedFilePayload {
-        private final byte[] fileBytes;
-        private final String mimeType;
-
-        private ResolvedFilePayload(byte[] fileBytes, String mimeType) {
-            this.fileBytes = fileBytes;
-            this.mimeType = mimeType;
+    /**
+     * Reads the stream, stopping once it holds more than maxBytes: the result is then longer than
+     * maxBytes, which tells the caller the file is too large without reading all of it.
+     */
+    static byte[] readUpTo(InputStream input, int maxBytes) throws IOException {
+        ByteArrayOutputStream output = new ByteArrayOutputStream();
+        byte[] buffer = new byte[8192];
+        int read;
+        while (output.size() <= maxBytes && (read = input.read(buffer)) != -1) {
+            output.write(buffer, 0, read);
         }
-    }
-
-    private static ResolvedFilePayload resolveFilePayload(Context context, Uri uri) {
-        if (context == null || uri == null) {
-            return new ResolvedFilePayload(null, "application/octet-stream");
-        }
-        ContentResolver resolver = context.getContentResolver();
-        String resolvedMime = resolver.getType(uri);
-        String safeMime =
-                (resolvedMime == null || resolvedMime.isEmpty())
-                        ? "application/octet-stream"
-                        : resolvedMime;
-        try (InputStream input = resolver.openInputStream(uri);
-                ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            if (input == null) {
-                return new ResolvedFilePayload(null, safeMime);
-            }
-            byte[] buffer = new byte[8192];
-            int read;
-            while ((read = input.read(buffer)) != -1) {
-                output.write(buffer, 0, read);
-            }
-            byte[] bytes = output.toByteArray();
-            return new ResolvedFilePayload(bytes.length > 0 ? bytes : null, safeMime);
-        } catch (Exception e) {
-            Log.w(TAG, "Failed to resolve bytes from URI for DataTransfer injection", e);
-            return new ResolvedFilePayload(null, safeMime);
-        }
+        return output.toByteArray();
     }
 
     /**
@@ -228,17 +214,68 @@ public class MediaUploadAutomationRunner {
                 && !MediaUploadRecipes.PROVIDER_IMGBB.equals(provider);
     }
 
-    private boolean ensureFilePayload() {
-        if (fileBytes != null && fileBytes.length > 0) {
-            return true;
+    /**
+     * Reads (for a picked file) and base64-encodes the file into the injection script on a background
+     * thread, since a large file would block the main thread, then runs onReady on the main thread.
+     */
+    private void prepareInjection(Runnable onReady) {
+        if (injectionJs != null) {
+            onReady.run();
+            return;
         }
-        if (fileUri == null) {
-            return false;
-        }
-        ResolvedFilePayload payload = resolveFilePayload(context, fileUri);
-        fileBytes = payload.fileBytes;
-        mimeType = payload.mimeType;
-        return fileBytes != null && fileBytes.length > 0;
+        if (preparingInjection) return;
+        preparingInjection = true;
+        new Thread(
+                        () -> {
+                            String js = null;
+                            String error = null;
+                            String stage = STAGE_FILE_PAYLOAD_UNAVAILABLE;
+                            try {
+                                byte[] bytes = fileBytes;
+                                if (bytes == null && fileUri != null) {
+                                    try (InputStream input = context.getContentResolver().openInputStream(fileUri)) {
+                                        bytes = input != null ? readUpTo(input, MAX_INJECTED_FILE_BYTES) : null;
+                                    }
+                                }
+                                if (bytes == null || bytes.length == 0) {
+                                    error = "File payload unavailable for DataTransfer injection";
+                                } else if (bytes.length > MAX_INJECTED_FILE_BYTES) {
+                                    error =
+                                            "File is too large to upload to "
+                                                    + provider
+                                                    + " from the app (over "
+                                                    + MAX_INJECTED_FILE_BYTES / (1024 * 1024)
+                                                    + " MB)";
+                                } else {
+                                    String base64 = Base64.encodeToString(bytes, Base64.NO_WRAP);
+                                    js = MediaUploadRecipes.getFileInjectionJs(provider, base64, fileName, mimeType);
+                                    if (js == null) {
+                                        error = "No injection JS for " + provider;
+                                        stage = "no_recipe";
+                                    }
+                                }
+                            } catch (Throwable e) {
+                                // Throwable, not Exception: an OutOfMemoryError must still fail the
+                                // upload rather than crash the app.
+                                Log.w(TAG, "Could not prepare the file for DataTransfer injection", e);
+                                error = "File payload unavailable for DataTransfer injection: " + e.getMessage();
+                            }
+                            String readyJs = js;
+                            String readyError = error;
+                            String readyStage = stage;
+                            mainHandler.post(
+                                    () -> {
+                                        preparingInjection = false;
+                                        if (finished) return;
+                                        if (readyJs == null) {
+                                            finish(new MediaUploadResult(false, null, readyError, readyStage, elapsedMs(), null));
+                                            return;
+                                        }
+                                        injectionJs = readyJs;
+                                        onReady.run();
+                                    });
+                        })
+                .start();
     }
 
     private void handleOverallTimeout() {
@@ -305,20 +342,11 @@ public class MediaUploadAutomationRunner {
                                     MediaUploadRecipes.TRIGGER_INITIAL_DELAY_MS);
                             return;
                         }
-                        if (!ensureFilePayload()) {
-                            finish(
-                                    new MediaUploadResult(
-                                            false,
-                                            null,
-                                            "File payload unavailable for DataTransfer injection",
-                                            STAGE_FILE_PAYLOAD_UNAVAILABLE,
-                                            elapsedMs(),
-                                            null));
-                            return;
-                        }
-                        mainHandler.postDelayed(
-                                MediaUploadAutomationRunner.this::injectFileViaDataTransfer,
-                                MediaUploadRecipes.TRIGGER_INITIAL_DELAY_MS);
+                        prepareInjection(
+                                () ->
+                                        mainHandler.postDelayed(
+                                                MediaUploadAutomationRunner.this::injectFileViaDataTransfer,
+                                                MediaUploadRecipes.TRIGGER_INITIAL_DELAY_MS));
                     }
                 });
 
@@ -395,28 +423,13 @@ public class MediaUploadAutomationRunner {
 
     private void injectFileViaDataTransfer() {
         if (finished || fileInjected) return;
-        if (!ensureFilePayload()) {
-            finish(
-                    new MediaUploadResult(
-                            false,
-                            null,
-                            "File payload unavailable for DataTransfer injection",
-                            STAGE_FILE_PAYLOAD_UNAVAILABLE,
-                            elapsedMs(),
-                            null));
-            return;
-        }
-        String base64 = Base64.encodeToString(fileBytes, Base64.NO_WRAP);
-        String js = MediaUploadRecipes.getFileInjectionJs(provider, base64, fileName, mimeType);
-        if (js == null) {
-            finish(
-                    new MediaUploadResult(
-                            false, null, "No injection JS for " + provider, "no_recipe", elapsedMs(), null));
+        if (injectionJs == null) {
+            prepareInjection(this::injectFileViaDataTransfer);
             return;
         }
         triggerAttemptCount++;
         webView.evaluateJavascript(
-                js,
+                injectionJs,
                 value -> {
                     if (finished) return;
                     String raw = value == null ? "" : value.trim();

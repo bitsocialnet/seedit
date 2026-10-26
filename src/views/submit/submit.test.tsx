@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import type { FileRejection } from 'react-dropzone';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import SubmitPage from './submit';
 import useChallengesStore from '../../stores/use-challenges-store';
@@ -18,13 +19,14 @@ const testState = vi.hoisted(() => ({
   translate: vi.fn((key: string) => key),
   communityFieldRender: vi.fn(),
   uploadRender: vi.fn(),
-  dropzoneOptions: undefined as { onDrop: (files: File[]) => void; accept: Record<string, string[]> } | undefined,
+  dropzoneOptions: undefined as { onDrop: (files: File[], rejections?: FileRejection[]) => void; accept: Record<string, string[]> } | undefined,
   openPicker: vi.fn(),
   mediaUpload: {
     uploadPhase: null as 'uploading' | 'checking' | null,
     fileKinds: ['image', 'video'] as string[],
     accept: { 'image/png': ['.png'], 'video/mp4': ['.mp4'] } as Record<string, string[]>,
     pickAndroidMedia: vi.fn(),
+    rejectMedia: vi.fn(),
     uploadMedia: vi.fn(),
   },
   urlRender: vi.fn(),
@@ -58,7 +60,8 @@ vi.mock('../../hooks/use-media-upload', () => ({
 }));
 
 vi.mock('react-dropzone', () => ({
-  useDropzone: (options: { onDrop: (files: File[]) => void; accept: Record<string, string[]> }) => {
+  ErrorCode: { FileInvalidType: 'file-invalid-type', TooManyFiles: 'too-many-files' },
+  useDropzone: (options: { onDrop: (files: File[], rejections?: FileRejection[]) => void; accept: Record<string, string[]> }) => {
     testState.uploadRender();
     testState.dropzoneOptions = options;
     return { getInputProps: () => ({}), getRootProps: () => ({}), isDragActive: false, open: testState.openPicker };
@@ -299,6 +302,36 @@ describe('SubmitPage', () => {
 
     expect(testState.mediaUpload.uploadMedia).toHaveBeenCalledWith({ kind: 'file', file, name: 'photo.png', mimeType: 'image/png' });
     expect(usePublishPostStore.getState().link).toBe('https://forgeimg.net/abc/photo.png');
+  });
+
+  it('explains a dropped file no enabled provider takes instead of ignoring it', async () => {
+    const file = new File(['heic'], 'IMG_0001.HEIC', { type: 'image/heic' });
+    await act(async () => {
+      testState.dropzoneOptions?.onDrop([], [{ file, errors: [{ code: 'file-invalid-type', message: 'File type must be image/png' }] }]);
+    });
+
+    expect(testState.mediaUpload.rejectMedia).toHaveBeenCalledWith({ kind: 'file', file, name: 'IMG_0001.HEIC', mimeType: 'image/heic' });
+    expect(testState.mediaUpload.uploadMedia).not.toHaveBeenCalled();
+  });
+
+  it('uploads the first supported file of a multi-file drop', async () => {
+    testState.mediaUpload.uploadMedia.mockResolvedValue('https://forgeimg.net/abc/second.png');
+    const unsupported = new File(['heic'], 'first.heic', { type: 'image/heic' });
+    const first = new File(['png'], 'second.png', { type: 'image/png' });
+    const other = new File(['png'], 'third.png', { type: 'image/png' });
+    await act(async () => {
+      testState.dropzoneOptions?.onDrop(
+        [],
+        [
+          { file: unsupported, errors: [{ code: 'file-invalid-type', message: 'File type must be image/png' }] },
+          { file: first, errors: [{ code: 'too-many-files', message: 'Too many files' }] },
+          { file: other, errors: [{ code: 'too-many-files', message: 'Too many files' }] },
+        ],
+      );
+    });
+
+    expect(testState.mediaUpload.uploadMedia).toHaveBeenCalledExactlyOnceWith({ kind: 'file', file: first, name: 'second.png', mimeType: 'image/png' });
+    expect(testState.mediaUpload.rejectMedia).not.toHaveBeenCalled();
   });
 
   it('opens the file picker from choose file and leaves the link empty when an upload fails', async () => {

@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { ErrorCode, useDropzone, type FileRejection } from 'react-dropzone';
 import { Trans, useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { type Comment, useAccount, useCommunity } from '@bitsocial/bitsocial-react-hooks';
@@ -97,7 +97,7 @@ const UrlField = memo(function UrlField() {
 const UploadMediaForm = memo(function UploadMediaForm() {
   const { t } = useTranslation();
   const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
-  const { uploadPhase, fileKinds, accept, pickAndroidMedia, uploadMedia } = useMediaUpload();
+  const { uploadPhase, fileKinds, accept, pickAndroidMedia, rejectMedia, uploadMedia } = useMediaUpload();
   const [isChoosingFile, setIsChoosingFile] = useState(false);
 
   // Uploads to the media hosting provider set in the preferences (Forge Images by default) and fills in the link.
@@ -107,9 +107,16 @@ const UploadMediaForm = memo(function UploadMediaForm() {
   };
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
-    onDrop: (acceptedFiles: File[]) => {
-      const file = acceptedFiles[0];
-      if (file) void upload({ kind: 'file', file, name: file.name, mimeType: file.type });
+    onDrop: (acceptedFiles: File[], fileRejections: FileRejection[]) => {
+      // A drop of several files rejects them all as too many; the first supported one still uploads.
+      const file = acceptedFiles[0] ?? fileRejections.find(({ errors }) => errors.every((error) => error.code === ErrorCode.TooManyFiles))?.file;
+      if (file) {
+        void upload({ kind: 'file', file, name: file.name, mimeType: file.type });
+        return;
+      }
+      // A format no enabled provider takes: say so rather than ignore the drop.
+      const rejected = fileRejections[0]?.file;
+      if (rejected) rejectMedia({ kind: 'file', file: rejected, name: rejected.name, mimeType: rejected.type });
     },
     noClick: true,
     multiple: false,

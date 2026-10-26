@@ -196,6 +196,8 @@ interface UploadSettings {
   runtime: MediaHostingRuntime;
 }
 
+const cannotHostError = (providers: ProviderId[]) => new Error(`${providers.map(getProviderLabel).join(', ')} cannot host this type of file`);
+
 /** The providers to try for this file, in order. */
 async function getAvailableProviderOrder(media: AttachedMedia, { mode, preferredProvider, runtime }: UploadSettings): Promise<ProviderId[]> {
   if (mode === 'none') {
@@ -203,8 +205,7 @@ async function getAvailableProviderOrder(media: AttachedMedia, { mode, preferred
   }
   const supportedOrder = filterProvidersForFile(getProviderOrder({ mode, preferredProvider, runtime }), media.mimeType, media.name);
   if (supportedOrder.length === 0) {
-    const enabled = getEnabledProviders({ mode, preferredProvider, runtime });
-    throw new Error(`${enabled.map(getProviderLabel).join(', ')} cannot host this type of file`);
+    throw cannotHostError(getEnabledProviders({ mode, preferredProvider, runtime }));
   }
 
   // With one provider there is nothing to fall back to, and a probe that failed on a slow network
@@ -277,6 +278,9 @@ export function useMediaUpload() {
     }
   };
 
+  /** Explains why a file the pickers do not offer was not uploaded, without sending it anywhere. */
+  const rejectMedia = (media: AttachedMedia) => alertUploadError(cannotHostError(enabledProviders), media);
+
   /** Opens the Android picker, offering only the kinds the enabled providers host. Returns null when cancelled. */
   const pickAndroidMedia = async (): Promise<AttachedMedia | null> => {
     try {
@@ -305,5 +309,5 @@ export function useMediaUpload() {
     return uploaded.url;
   };
 
-  return { uploadPhase, fileKinds, accept, pickAndroidMedia, uploadMedia };
+  return { uploadPhase, fileKinds, accept, pickAndroidMedia, rejectMedia, uploadMedia };
 }

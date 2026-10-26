@@ -125,6 +125,16 @@ describe('useMediaUpload', () => {
     expect(alertMock).toHaveBeenCalledWith('upload_failed: Forge Images cannot host this type of file');
   });
 
+  it('explains a file the pickers do not offer without sending it anywhere', () => {
+    act(() => latestValue.rejectMedia(fileMedia('song.mp3', 'audio/mpeg')));
+    expect(alertMock).toHaveBeenCalledWith('upload_failed: Forge Images cannot host this type of file');
+
+    setRuntime('electron');
+    act(() => latestValue.rejectMedia(fileMedia('song.mp3', 'audio/mpeg')));
+    expect(alertMock).toHaveBeenLastCalledWith('upload_failed: Forge Images cannot host this type of file. upload_failed_preferred_guidance');
+    expect(orchestrateUpload).not.toHaveBeenCalled();
+  });
+
   it('suggests another provider only when one can host the file', async () => {
     setRuntime('android');
     act(() => useMediaHostingStore.setState({ preferredProvider: 'catbox' }));
