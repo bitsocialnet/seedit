@@ -77,7 +77,8 @@ const createFakeBrowserWindow = ({
         if (subframeLoadError) emitter.emit('did-fail-load', {}, -2, 'ERR_FAILED', 'https://ads.example/frame', false);
         emitter.emit('did-finish-load');
       });
-      return url;
+      // Like Electron, the returned promise rejects when the load fails.
+      return loadError ? Promise.reject(new Error(`ERR_FAILED (${loadError.code}) loading '${url}'`)) : Promise.resolve();
     }),
     destroy: vi.fn(() => {
       destroyed = true;

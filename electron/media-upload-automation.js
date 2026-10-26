@@ -106,7 +106,9 @@ export async function automateUploadMedia(options) {
       const timer = setTimeout(() => settle(reject, new Error(`Page load timed out after ${PAGE_LOAD_TIMEOUT_MS}ms for ${recipe.uploadUrl}`)), PAGE_LOAD_TIMEOUT_MS);
       win.webContents.once('did-finish-load', onLoad);
       win.webContents.on('did-fail-load', onFail);
-      win.loadURL(recipe.uploadUrl);
+      // Rejects on a failed load, and with ERR_ABORTED when the window is destroyed mid-load;
+      // did-fail-load and the timer already report both.
+      win.loadURL(recipe.uploadUrl).catch(() => {});
     });
 
     // Small delay for SPA/JS to settle
