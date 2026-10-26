@@ -196,7 +196,7 @@ export async function automateUploadMedia(options) {
       });
     };
 
-    await sendCommand('Input.enable');
+    // No Input.enable first: the Input domain has no such command, and Electron rejects it.
     await clickNode(submitNodeId);
 
     const extractUrl = async () => {

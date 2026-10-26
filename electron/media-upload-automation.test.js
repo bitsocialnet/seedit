@@ -40,11 +40,11 @@ const createFakeBrowserWindow = ({
   let attached = false;
   let destroyed = false;
 
+  // Only real CDP commands: like Electron, the fake rejects any other (there is no Input.enable).
   const sendCommand = vi.fn(async (method, params = {}) => {
     switch (method) {
       case 'DOM.enable':
       case 'Page.enable':
-      case 'Input.enable':
         return {};
       case 'DOM.getDocument':
         return { root: { nodeId: 1 } };
