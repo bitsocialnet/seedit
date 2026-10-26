@@ -38,6 +38,10 @@ public class FileUtils {
                     outputStream.write(buffer, 0, length);
                 }
                 outputStream.flush();
+            } catch (java.io.IOException e) {
+                // A partial copy (a full disk, a provider that stopped mid-read) is never used.
+                file.delete();
+                throw e;
             }
             return file;
         }
@@ -96,7 +100,7 @@ public class FileUtils {
      * Takes only the last path segment, removes/replaces unsafe chars, enforces max length,
      * and falls back to a UUID if the result is empty.
      */
-    private static String sanitizeFileName(String fileName) {
+    static String sanitizeFileName(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
             return UUID.randomUUID().toString();
         }

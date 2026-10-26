@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { type Comment, useAccount, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { Capacitor } from '@capacitor/core';
 import { getLinkMediaInfo } from '../../lib/utils/media-utils';
-import { getFileKindMimeTypes, type AttachedMedia } from '../../lib/media-hosting';
+import type { AttachedMedia } from '../../lib/media-hosting';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
 import { isValidURL } from '../../lib/utils/url-utils';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
@@ -97,7 +97,7 @@ const UrlField = memo(function UrlField() {
 const UploadMediaForm = memo(function UploadMediaForm() {
   const { t } = useTranslation();
   const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
-  const { uploadPhase, fileKinds, pickAndroidMedia, uploadMedia } = useMediaUpload();
+  const { uploadPhase, fileKinds, accept, pickAndroidMedia, uploadMedia } = useMediaUpload();
   const [isChoosingFile, setIsChoosingFile] = useState(false);
 
   // Uploads to the media hosting provider set in the preferences (Forge Images by default) and fills in the link.
@@ -114,8 +114,8 @@ const UploadMediaForm = memo(function UploadMediaForm() {
     noClick: true,
     multiple: false,
     disabled: uploadPhase !== null,
-    // Only the kinds of file the enabled providers host.
-    accept: Object.fromEntries(getFileKindMimeTypes(fileKinds).map((mimeType) => [mimeType, []])),
+    // Only the formats the enabled providers host.
+    accept,
   });
 
   const handleChooseFile = async () => {

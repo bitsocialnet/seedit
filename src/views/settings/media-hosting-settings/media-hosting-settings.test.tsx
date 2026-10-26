@@ -97,4 +97,15 @@ describe('MediaHostingSettings', () => {
     expect(radio('catbox')?.disabled).toBe(false);
     expect(container.textContent).toContain('media_hosting_provider_unavailable');
   });
+
+  it('keeps the only web provider selectable when its probe failed, so uploads can be turned back on', () => {
+    useMediaHostingStore.setState({ uploadMode: 'none', preferredProvider: 'forge' });
+    vi.mocked(getProviderAvailabilitySnapshot).mockReturnValue({ forge: 'unavailable' });
+    render();
+
+    expect(container.textContent).toContain('media_hosting_provider_unavailable');
+    expect(radio('forge')?.disabled).toBe(false);
+    act(() => radio('forge')?.click());
+    expect(useMediaHostingStore.getState()).toMatchObject({ uploadMode: 'preferred', preferredProvider: 'forge' });
+  });
 });

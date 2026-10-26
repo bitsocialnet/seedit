@@ -190,6 +190,12 @@ const vp8 = webpChunk('VP8 ', [0x30, 1, 0, 0x9d, 0x01, 0x2a, 1, 0, 1, 0]);
 const webpWithMetadata = riffWebp([vp8x, iccp, webpExif, webpXmp, vp8]);
 const webpStripped = riffWebp([vp8xCleared, iccp, vp8]);
 
+// flags: ALPHA (0x10) | EXIF (0x08), for a stripped file that keeps its orientation
+const vp8xExifOnly = webpChunk('VP8X', [0x18, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+// A WebP EXIF payload is a bare TIFF block: the APP1 fixtures minus marker, length and "Exif\0\0".
+const exifTiffWithOrientation = (orientation: number, littleEndian = true) => exifApp1WithOrientation(orientation, littleEndian).slice(10);
+const orientationWebpExif = (orientation: number) => webpChunk('EXIF', orientationApp1(orientation).slice(10));
+
 describe('stripMediaMetadata', () => {
   describe('jpeg', () => {
     it('removes APP1 (Exif and XMP), APP13, and COM while keeping APP0, APP2, and coding segments', async () => {
@@ -314,6 +320,24 @@ describe('stripMediaMetadata', () => {
 
       expect(result).not.toBe(file);
       expect(await bytesOf(result)).toEqual(webpStripped);
+    });
+
+    it('keeps only the Exif Orientation tag, as a minimal EXIF chunk, so images keep their rotation', async () => {
+      const file = makeFile(riffWebp([vp8x, iccp, vp8, webpChunk('EXIF', exifTiffWithOrientation(6)), webpXmp]), 'portrait.webp', 'image/webp');
+
+      expect(await bytesOf(await stripMediaMetadata(file))).toEqual(riffWebp([vp8xExifOnly, iccp, vp8, orientationWebpExif(6)]));
+    });
+
+    it('reads the orientation from big-endian EXIF that carries the JPEG Exif header', async () => {
+      const file = makeFile(riffWebp([vp8x, vp8, webpChunk('EXIF', [...ascii('Exif'), 0, 0, ...exifTiffWithOrientation(8, false)])]), 'prefixed.webp', 'image/webp');
+
+      expect(await bytesOf(await stripMediaMetadata(file))).toEqual(riffWebp([vp8xExifOnly, vp8, orientationWebpExif(8)]));
+    });
+
+    it('does not re-emit the default orientation 1', async () => {
+      const file = makeFile(riffWebp([vp8x, vp8, webpChunk('EXIF', exifTiffWithOrientation(1))]), 'upright.webp', 'image/webp');
+
+      expect(await bytesOf(await stripMediaMetadata(file))).toEqual(riffWebp([vp8xCleared, vp8]));
     });
 
     it('clears VP8X metadata flags even when no EXIF or XMP chunk is present', async () => {

@@ -12,9 +12,9 @@ import java.util.Set;
  * byte-level implementations in sync). Removes privacy-sensitive metadata
  * (EXIF/GPS, XMP, IPTC, comments) from JPEG/PNG/WebP before any upload
  * provider sees the bytes. Containers are rewritten losslessly; pixel data is
- * never re-encoded, so the JPEG Exif Orientation tag (rotation lives in
- * metadata, not pixels) is re-emitted as a minimal APP1 to keep photos from
- * rendering sideways. GIF, video, and unknown formats are not handled, and any
+ * never re-encoded, so the Exif Orientation tag (rotation lives in metadata,
+ * not pixels) is re-emitted, as a minimal JPEG APP1 or WebP EXIF chunk, to
+ * keep photos from rendering sideways. GIF, video, and unknown formats are not handled, and any
  * parse anomaly returns null so callers upload the original unchanged and an
  * upload is never blocked.
  *
@@ -40,6 +40,8 @@ final class MediaMetadataStripper {
 
     /** VP8X header flag bits announcing EXIF (0x08) and XMP (0x04) chunks. */
     private static final int WEBP_VP8X_METADATA_FLAGS = 0x0c;
+
+    private static final int WEBP_VP8X_EXIF_FLAG = 0x08;
 
     /** "Exif\0\0" — the payload prefix distinguishing an Exif APP1 from XMP. */
     private static final int[] EXIF_APP1_HEADER = {0x45, 0x78, 0x69, 0x66, 0x00, 0x00};
@@ -216,16 +218,37 @@ final class MediaMetadataStripper {
                         | u8(bytes, pos + 3);
     }
 
-    /** Minimal little-endian Exif APP1 whose IFD0 holds only the Orientation tag. */
-    private static byte[] buildOrientationApp1(int orientation) {
+    /** Minimal little-endian Exif TIFF block (26 bytes) whose IFD0 holds only the Orientation tag. */
+    private static byte[] buildOrientationTiff(int orientation) {
         return new byte[] {
-            (byte) 0xff, (byte) 0xe1, 0x00, 0x22, // APP1, length 34
-            0x45, 0x78, 0x69, 0x66, 0x00, 0x00, // "Exif\0\0"
             0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, // "II", 42, IFD0 at offset 8
             0x01, 0x00, // one IFD entry
             0x12, 0x01, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, (byte) orientation, 0x00, 0x00, 0x00, // Orientation, SHORT x1
             0x00, 0x00, 0x00, 0x00, // no next IFD
         };
+    }
+
+    /** Minimal Exif APP1 whose IFD0 holds only the Orientation tag. */
+    private static byte[] buildOrientationApp1(int orientation) {
+        byte[] header = {(byte) 0xff, (byte) 0xe1, 0x00, 0x22, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00}; // APP1, length 34, "Exif\0\0"
+        return withPrefix(header, buildOrientationTiff(orientation));
+    }
+
+    /** Minimal WebP EXIF chunk whose IFD0 holds only the Orientation tag; its even size needs no padding. */
+    private static byte[] buildOrientationWebpChunk(int orientation) {
+        byte[] header = {0x45, 0x58, 0x49, 0x46, 0x1a, 0x00, 0x00, 0x00}; // "EXIF", size 26
+        return withPrefix(header, buildOrientationTiff(orientation));
+    }
+
+    private static byte[] withPrefix(byte[] prefix, byte[] body) {
+        byte[] out = Arrays.copyOf(prefix, prefix.length + body.length);
+        System.arraycopy(body, 0, out, prefix.length, body.length);
+        return out;
+    }
+
+    /** Orientation from a WebP EXIF payload: a TIFF block, which some writers prefix with JPEG's "Exif\0\0". */
+    private static int readWebpExifOrientation(byte[] bytes, int start, int end) {
+        return readExifOrientation(bytes, isExifApp1Payload(bytes, start, end) ? start + EXIF_APP1_HEADER.length : start, end);
     }
 
     private static byte[] stripPng(byte[] bytes) {
@@ -274,6 +297,7 @@ final class MediaMetadataStripper {
         int removedBytes = 0;
         int vp8xFlagsOffset = -1;
         boolean vp8xHasMetadataFlags = false;
+        boolean keptOrientation = false;
         int pos = 12;
 
         while (pos < riffEnd) {
@@ -285,6 +309,18 @@ final class MediaMetadataStripper {
 
             if ("EXIF".equals(fourCc) || "XMP ".equals(fourCc)) {
                 removedBytes += (int) end - pos;
+                // Rotation lives in metadata, not pixels: put the Orientation tag (and nothing else) back in the
+                // EXIF chunk's place. Only the extended format, which starts with VP8X, can carry EXIF.
+                int orientation =
+                        "EXIF".equals(fourCc) && vp8xFlagsOffset >= 0 && !keptOrientation
+                                ? readWebpExifOrientation(bytes, pos + 8, (int) (pos + 8 + chunkSize))
+                                : 0;
+                if (orientation >= 2 && orientation <= 8) {
+                    byte[] chunk = buildOrientationWebpChunk(orientation);
+                    kept.write(chunk, 0, chunk.length);
+                    outLength += chunk.length;
+                    keptOrientation = true;
+                }
             } else {
                 if ("VP8X".equals(fourCc)) {
                     if (chunkSize < 10) return null;
@@ -302,7 +338,10 @@ final class MediaMetadataStripper {
         if (riffEnd < len) kept.write(bytes, (int) riffEnd, len - (int) riffEnd); // keep appended trailing data
         byte[] out = kept.toByteArray();
         writeU32le(out, 4, outLength - 8);
-        if (vp8xFlagsOffset >= 0) out[vp8xFlagsOffset] &= (byte) ~WEBP_VP8X_METADATA_FLAGS;
+        if (vp8xFlagsOffset >= 0) {
+            int flags = (u8(out, vp8xFlagsOffset) & ~WEBP_VP8X_METADATA_FLAGS) | (keptOrientation ? WEBP_VP8X_EXIF_FLAG : 0);
+            out[vp8xFlagsOffset] = (byte) flags;
+        }
         return out;
     }
 

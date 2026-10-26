@@ -4,15 +4,14 @@ import FileUploader from '../plugins/file-uploader';
 import {
   MEDIA_HOSTING_PROVIDERS,
   ensureProviderAvailability,
-  filterProvidersForFileKind,
+  filterProvidersForFile,
   formatAggregatedError,
   formatPreferredModeError,
   getEnabledProviders,
-  getFileKindMimeTypes,
-  getMediaFileKind,
   getMediaHostingRuntime,
   getProviderLabel,
   getProviderOrder,
+  getProvidersAccept,
   getProvidersFileKinds,
   getRuntimeProviders,
   orchestrateUpload,
@@ -202,8 +201,7 @@ async function getAvailableProviderOrder(media: AttachedMedia, { mode, preferred
   if (mode === 'none') {
     throw new Error('Uploads are turned off in the media hosting settings');
   }
-  const fileKind = getMediaFileKind(media.mimeType, media.name);
-  const supportedOrder = filterProvidersForFileKind(getProviderOrder({ mode, preferredProvider, runtime }), fileKind);
+  const supportedOrder = filterProvidersForFile(getProviderOrder({ mode, preferredProvider, runtime }), media.mimeType, media.name);
   if (supportedOrder.length === 0) {
     const enabled = getEnabledProviders({ mode, preferredProvider, runtime });
     throw new Error(`${enabled.map(getProviderLabel).join(', ')} cannot host this type of file`);
@@ -213,7 +211,7 @@ async function getAvailableProviderOrder(media: AttachedMedia, { mode, preferred
   // would block uploads until its result expires, so just try it.
   if (supportedOrder.length === 1) return supportedOrder;
   const availability = await ensureProviderAvailability(runtime);
-  const order = filterProvidersForFileKind(getProviderOrder({ mode, preferredProvider, runtime, availability }), fileKind);
+  const order = filterProvidersForFile(getProviderOrder({ mode, preferredProvider, runtime, availability }), media.mimeType, media.name);
   // Probes are a hint for skipping unreachable providers; when none passed, try them all anyway.
   return order.length > 0 ? order : supportedOrder;
 }
@@ -236,8 +234,8 @@ async function uploadThroughProviders(media: AttachedMedia, settings: UploadSett
 
 /**
  * Uploads a chosen file through the media hosting providers set in the preferences
- * (Forge Images by default). `fileKinds` are the kinds of file those providers host,
- * which the pickers and drop zone should offer.
+ * (Forge Images by default). `fileKinds` are the kinds of file those providers host, and
+ * `accept` the formats (MIME type to extensions) the pickers and drop zone should offer.
  */
 export function useMediaUpload() {
   const { t } = useTranslation();
@@ -246,7 +244,9 @@ export function useMediaUpload() {
   /** Null while no upload runs. */
   const [uploadPhase, setUploadPhase] = useState<UploadPhase | null>(null);
   const runtime = getMediaHostingRuntime();
-  const fileKinds = getProvidersFileKinds(getEnabledProviders({ mode: uploadMode, preferredProvider, runtime }));
+  const enabledProviders = getEnabledProviders({ mode: uploadMode, preferredProvider, runtime });
+  const fileKinds = getProvidersFileKinds(enabledProviders);
+  const accept = getProvidersAccept(enabledProviders);
   // An upload can outlive its form (the post was published, the user left, or typed a link instead),
   // so its late result and alerts are dropped rather than written into the next draft.
   const mountedRef = useRef(false);
@@ -270,7 +270,7 @@ export function useMediaUpload() {
     const otherProviders = getRuntimeProviders(runtime)
       .map((provider) => provider.id)
       .filter((provider) => !enabled.includes(provider));
-    if (uploadMode === 'preferred' && filterProvidersForFileKind(otherProviders, getMediaFileKind(media.mimeType, media.name)).length > 0) {
+    if (uploadMode === 'preferred' && filterProvidersForFile(otherProviders, media.mimeType, media.name).length > 0) {
       window.alert(formatPreferredModeError(errorMessage, t));
     } else {
       window.alert(`${t('upload_failed')}: ${errorMessage}`);
@@ -280,7 +280,7 @@ export function useMediaUpload() {
   /** Opens the Android picker, offering only the kinds the enabled providers host. Returns null when cancelled. */
   const pickAndroidMedia = async (): Promise<AttachedMedia | null> => {
     try {
-      const picked = await FileUploader.pickMedia({ mimeTypes: getFileKindMimeTypes(fileKinds) });
+      const picked = await FileUploader.pickMedia({ mimeTypes: Object.keys(accept) });
       return { kind: 'picked', id: picked.id, name: picked.fileName, mimeType: picked.mimeType, webPath: picked.webPath };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -305,5 +305,5 @@ export function useMediaUpload() {
     return uploaded.url;
   };
 
-  return { uploadPhase, fileKinds, pickAndroidMedia, uploadMedia };
+  return { uploadPhase, fileKinds, accept, pickAndroidMedia, uploadMedia };
 }

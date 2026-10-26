@@ -5,9 +5,9 @@
  * keep the two byte-level implementations in sync). Removes privacy-sensitive
  * metadata (EXIF/GPS, XMP, IPTC, comments) from JPEG/PNG/WebP before any
  * upload provider sees the bytes. Containers are rewritten losslessly; pixel
- * data is never re-encoded, so the JPEG Exif Orientation tag (rotation lives
- * in metadata, not pixels) is re-emitted as a minimal APP1 to keep photos
- * from rendering sideways. GIF, video, and unknown formats pass through
+ * data is never re-encoded, so the Exif Orientation tag (rotation lives in
+ * metadata, not pixels) is re-emitted, as a minimal JPEG APP1 or WebP EXIF
+ * chunk, to keep photos from rendering sideways. GIF, video, and unknown formats pass through
  * untouched, and on any anomaly the original file is used unchanged so an
  * upload is never blocked.
  */
@@ -35,6 +35,7 @@ const PNG_KEPT_ANCILLARY_CHUNKS = new Set(['tRNS', 'gAMA', 'cHRM', 'sRGB', 'iCCP
 
 /** VP8X header flag bits announcing EXIF (0x08) and XMP (0x04) chunks. */
 const WEBP_VP8X_METADATA_FLAGS = 0x0c;
+const WEBP_VP8X_EXIF_FLAG = 0x08;
 
 /**
  * Prepares the file for upload automation: when it is a JPEG/PNG/WebP with
@@ -171,17 +172,30 @@ function readExifOrientation(bytes, tiffStart, end) {
   return 0;
 }
 
-/** Minimal little-endian Exif APP1 whose IFD0 holds only the Orientation tag. */
-function buildOrientationApp1(orientation) {
+/** Minimal little-endian Exif TIFF block (26 bytes) whose IFD0 holds only the Orientation tag. */
+function buildOrientationTiff(orientation) {
   // prettier-ignore
-  return new Uint8Array([
-    0xff, 0xe1, 0x00, 0x22, // APP1, length 34
-    0x45, 0x78, 0x69, 0x66, 0x00, 0x00, // "Exif\0\0"
+  return [
     0x49, 0x49, 0x2a, 0x00, 0x08, 0x00, 0x00, 0x00, // "II", 42, IFD0 at offset 8
     0x01, 0x00, // one IFD entry
     0x12, 0x01, 0x03, 0x00, 0x01, 0x00, 0x00, 0x00, orientation, 0x00, 0x00, 0x00, // Orientation, SHORT x1
     0x00, 0x00, 0x00, 0x00, // no next IFD
-  ]);
+  ];
+}
+
+/** Minimal Exif APP1 whose IFD0 holds only the Orientation tag. */
+function buildOrientationApp1(orientation) {
+  return new Uint8Array([0xff, 0xe1, 0x00, 0x22, ...EXIF_APP1_HEADER, ...buildOrientationTiff(orientation)]); // APP1, length 34
+}
+
+/** Minimal WebP EXIF chunk whose IFD0 holds only the Orientation tag; its even size needs no padding. */
+function buildOrientationWebpChunk(orientation) {
+  return new Uint8Array([0x45, 0x58, 0x49, 0x46, 0x1a, 0x00, 0x00, 0x00, ...buildOrientationTiff(orientation)]); // "EXIF", size 26
+}
+
+/** Orientation from a WebP EXIF payload: a TIFF block, which some writers prefix with JPEG's "Exif\0\0". */
+function readWebpExifOrientation(bytes, start, end) {
+  return readExifOrientation(bytes, isExifApp1Payload(bytes, start, end) ? start + EXIF_APP1_HEADER.length : start, end);
 }
 
 function stripPng(bytes) {
@@ -228,6 +242,7 @@ function stripWebp(bytes) {
   let removedBytes = 0;
   let vp8xFlagsOffset = -1;
   let vp8xHasMetadataFlags = false;
+  let keptOrientation = false;
   let pos = 12;
 
   while (pos < riffEnd) {
@@ -239,6 +254,15 @@ function stripWebp(bytes) {
 
     if (fourCc === 'EXIF' || fourCc === 'XMP ') {
       removedBytes += end - pos;
+      // Rotation lives in metadata, not pixels: put the Orientation tag (and nothing else) back in the
+      // EXIF chunk's place. Only the extended format, which starts with VP8X, can carry EXIF.
+      const orientation = fourCc === 'EXIF' && vp8xFlagsOffset >= 0 && !keptOrientation ? readWebpExifOrientation(bytes, pos + 8, pos + 8 + chunkSize) : 0;
+      if (orientation >= 2 && orientation <= 8) {
+        const chunk = buildOrientationWebpChunk(orientation);
+        kept.push(chunk);
+        outLength += chunk.length;
+        keptOrientation = true;
+      }
     } else {
       if (fourCc === 'VP8X') {
         if (chunkSize < 10) return null;
@@ -256,7 +280,7 @@ function stripWebp(bytes) {
   if (riffEnd < len) kept.push(bytes.subarray(riffEnd, len)); // keep appended trailing data
   const out = concat(kept);
   writeU32le(out, 4, outLength - 8);
-  if (vp8xFlagsOffset >= 0) out[vp8xFlagsOffset] &= ~WEBP_VP8X_METADATA_FLAGS;
+  if (vp8xFlagsOffset >= 0) out[vp8xFlagsOffset] = (out[vp8xFlagsOffset] & ~WEBP_VP8X_METADATA_FLAGS) | (keptOrientation ? WEBP_VP8X_EXIF_FLAG : 0);
   return out;
 }
 

@@ -31,9 +31,10 @@ final class CatboxUploader {
      * @param callTimeoutSec longest whole upload, long enough for a large video or PDF on a slow uplink
      */
     static MediaUploadResult upload(Context context, Uri fileUri, long idleTimeoutSec, long callTimeoutSec) {
+        File file = null;
         try {
             Log.d(TAG, "Resolving file for catbox upload");
-            File file = FileUtils.getFileFromUri(context, fileUri);
+            file = FileUtils.getFileFromUri(context, fileUri);
             if (file == null) {
                 return new MediaUploadResult(false, null, "Could not resolve file");
             }
@@ -62,6 +63,11 @@ final class CatboxUploader {
         } catch (Exception e) {
             Log.e(TAG, "Catbox upload failed", e);
             return new MediaUploadResult(false, null, e.getMessage());
+        } finally {
+            // getFileFromUri copies a picked content:// file into the cache to upload it; the copy is ours to remove.
+            if (file != null && !"file".equals(fileUri.getScheme()) && file.exists() && !file.delete()) {
+                Log.w(TAG, "Could not delete catbox upload cache copy: " + file.getAbsolutePath());
+            }
         }
     }
 

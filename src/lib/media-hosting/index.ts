@@ -1,10 +1,10 @@
 export type { AttachedMedia, MediaFileKind, MediaHostingRuntime, ProviderAttempt, ProviderId, UploadAttemptStage, UploadMode, UploadPhase } from './types';
 export {
   MEDIA_HOSTING_PROVIDERS,
-  filterProvidersForFileKind,
-  getFileKindMimeTypes,
+  filterProvidersForFile,
   getMediaFileKind,
   getProviderLabel,
+  getProvidersAccept,
   getProvidersFileKinds,
   getRuntimeProviders,
 } from './providers';

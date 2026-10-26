@@ -7,14 +7,32 @@
  * for debugging. Poll interval 500ms, timeout per recipe matches Android where
  * providers overlap (imgur: 45s).
  */
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, session } from 'electron';
 import { MEDIA_UPLOAD_RECIPES } from './media-upload-recipes.js';
+
+/** In-memory session for provider pages, apart from the app's default session. */
+const PARTITION = 'media-upload-automation';
 
 /** Poll interval (ms) – parity with Android MediaUploadRecipes.POLL_INTERVAL_MS */
 const POLL_INTERVAL_MS = 500;
 
 /** File extensions that denote direct media URLs (mirrors src/lib/media-hosting/direct-url.ts) */
 const DIRECT_MEDIA_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.webm', '.mp4', '.mov', '.avi', '.mkv', '.gifv', '.swf'];
+
+let automationSession = null;
+
+/**
+ * Provider pages are untrusted remote code. The default session strips Origin and adds wildcard
+ * CORS headers to every top-level XHR for the app's own window (electron/main.js), which would let
+ * them read cross-origin responses, local services included, so they run in a session of their own.
+ */
+function getAutomationSession() {
+  if (automationSession) return automationSession;
+  const ses = session.fromPartition(PARTITION);
+  ses.setPermissionRequestHandler((_webContents, _permission, callback) => callback(false));
+  automationSession = ses;
+  return ses;
+}
 
 /** Returns true if the URL appears to point to a direct media file. Exported for tests. */
 export function isDirectMediaUrl(url) {
@@ -46,12 +64,14 @@ export async function automateUploadMedia(options) {
     win = new BrowserWindow({
       show: false,
       webPreferences: {
+        session: getAutomationSession(),
         webSecurity: true,
         nodeIntegration: false,
         contextIsolation: true,
         sandbox: true,
       },
     });
+    win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
 
     await new Promise((resolve, reject) => {
       try {
@@ -79,10 +99,13 @@ export async function automateUploadMedia(options) {
         fn(arg);
       };
       const onLoad = () => settle(resolve);
-      const onFail = (_, code, desc) => settle(reject, new Error(`Page load failed: ${code} ${desc}`));
+      // An ad, analytics or challenge iframe that fails to load does not fail the upload page.
+      const onFail = (_, code, desc, _url, isMainFrame) => {
+        if (isMainFrame) settle(reject, new Error(`Page load failed: ${code} ${desc}`));
+      };
       const timer = setTimeout(() => settle(reject, new Error(`Page load timed out after ${PAGE_LOAD_TIMEOUT_MS}ms for ${recipe.uploadUrl}`)), PAGE_LOAD_TIMEOUT_MS);
       win.webContents.once('did-finish-load', onLoad);
-      win.webContents.once('did-fail-load', onFail);
+      win.webContents.on('did-fail-load', onFail);
       win.loadURL(recipe.uploadUrl);
     });
 
@@ -202,20 +225,20 @@ export async function automateUploadMedia(options) {
             if (normalized.startsWith('http')) return normalized;
             return '';
           }
+          function readValues(el) {
+            const preferred = attr === 'text' ? el.textContent : attr === 'value' ? el.value || el.getAttribute('value') : el.getAttribute(attr) || el[attr];
+            // A recipe's fallback selectors match different elements (an input, a link, an img), which
+            // hold the URL in their own attribute rather than the recipe's.
+            return [preferred, el.value, el.getAttribute('href'), el.getAttribute('src'), el.getAttribute('data-link'), el.textContent];
+          }
           for (const sel of selectors) {
             try {
               const el = document.querySelector(sel);
               if (!el) continue;
-              let url = '';
-              if (attr === 'text') {
-                url = (el.textContent || '').trim();
-              } else if (attr === 'value') {
-                url = (el.value || el.getAttribute('value') || '').trim();
-              } else {
-                url = (el.getAttribute(attr) || el[attr] || '').trim();
+              for (const value of readValues(el)) {
+                const directUrl = pickDirectMediaUrl(String(value || '').trim());
+                if (directUrl && hasMediaExtension(directUrl)) return directUrl;
               }
-              const directUrl = pickDirectMediaUrl(url);
-              if (directUrl) return directUrl;
             } catch (e) {}
           }
           return null;

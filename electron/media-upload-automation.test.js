@@ -3,10 +3,12 @@
  * Covers direct URL detection plus BrowserWindow/CDP automation flows.
  */
 import { EventEmitter } from 'node:events';
+import { JSDOM } from 'jsdom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const electronState = vi.hoisted(() => ({
   createWindow: null,
+  session: { setPermissionRequestHandler: () => {} },
 }));
 
 vi.mock('electron', () => ({
@@ -16,12 +18,24 @@ vi.mock('electron', () => ({
     }
     return electronState.createWindow(options);
   }),
+  session: { fromPartition: vi.fn(() => electronState.session) },
 }));
+
+import { BrowserWindow } from 'electron';
 
 import { automateUploadMedia, isDirectMediaUrl } from './media-upload-automation.js';
 import { MEDIA_UPLOAD_RECIPES } from './media-upload-recipes.js';
 
-const createFakeBrowserWindow = ({ attachError = null, loadError = null, getNodeId = () => 0, runtimeValues = [], missingBoxModel = false } = {}) => {
+/** `page` runs Runtime.evaluate expressions in a DOM; without it they return `runtimeValues` in order. */
+const createFakeBrowserWindow = ({
+  attachError = null,
+  loadError = null,
+  subframeLoadError = false,
+  getNodeId = () => 0,
+  runtimeValues = [],
+  page = null,
+  missingBoxModel = false,
+} = {}) => {
   const emitter = new EventEmitter();
   let attached = false;
   let destroyed = false;
@@ -44,6 +58,7 @@ const createFakeBrowserWindow = ({ attachError = null, loadError = null, getNode
         }
         return { model: { content: [0, 0, 20, 0, 20, 20, 0, 20] } };
       case 'Runtime.evaluate':
+        if (page) return { result: { value: page.window.eval(params.expression) } };
         return { result: { value: runtimeValues.length > 0 ? runtimeValues.shift() : null } };
       case 'Input.dispatchMouseEvent':
         return {};
@@ -56,9 +71,10 @@ const createFakeBrowserWindow = ({ attachError = null, loadError = null, getNode
     loadURL: vi.fn((url) => {
       queueMicrotask(() => {
         if (loadError) {
-          emitter.emit('did-fail-load', {}, loadError.code ?? -1, loadError.description ?? 'load failed');
+          emitter.emit('did-fail-load', {}, loadError.code ?? -1, loadError.description ?? 'load failed', url, true);
           return;
         }
+        if (subframeLoadError) emitter.emit('did-fail-load', {}, -2, 'ERR_FAILED', 'https://ads.example/frame', false);
         emitter.emit('did-finish-load');
       });
       return url;
@@ -68,6 +84,7 @@ const createFakeBrowserWindow = ({ attachError = null, loadError = null, getNode
     }),
     isDestroyed: vi.fn(() => destroyed),
     webContents: Object.assign(emitter, {
+      setWindowOpenHandler: vi.fn(),
       debugger: {
         attach: vi.fn(() => {
           if (attachError) {
@@ -158,6 +175,50 @@ describe('media-upload-automation', () => {
       expect(fakeWindow.webContents.debugger.sendCommand.mock.calls.filter(([method]) => method === 'Input.dispatchMouseEvent')).toHaveLength(2);
       expect(fakeWindow.webContents.debugger.detach).toHaveBeenCalledOnce();
       expect(fakeWindow.destroy).toHaveBeenCalledOnce();
+    });
+
+    it('runs the provider page in its own session, away from the CORS rewriting of the default one', async () => {
+      const recipe = MEDIA_UPLOAD_RECIPES.imgur;
+      const fakeWindow = createFakeBrowserWindow({
+        getNodeId: (selector) => (selector === recipe.fileInputSelectorCandidates[0] ? 10 : selector === recipe.submitSelectorCandidates[0] ? 20 : 0),
+        runtimeValues: ['https://i.imgur.com/uploaded.png'],
+      });
+      electronState.createWindow = () => fakeWindow;
+
+      await automateUploadMedia({ provider: 'imgur', filePath: '/tmp/upload.png' });
+
+      // The session from session.fromPartition, created once and reused across uploads.
+      expect(vi.mocked(BrowserWindow).mock.calls[0][0].webPreferences.session).toBe(electronState.session);
+      expect(fakeWindow.webContents.setWindowOpenHandler).toHaveBeenCalled();
+    });
+
+    it('ignores a failed iframe load when the upload page itself loads', async () => {
+      const recipe = MEDIA_UPLOAD_RECIPES.imgur;
+      const fakeWindow = createFakeBrowserWindow({
+        subframeLoadError: true,
+        getNodeId: (selector) => (selector === recipe.fileInputSelectorCandidates[0] ? 10 : selector === recipe.submitSelectorCandidates[0] ? 20 : 0),
+        runtimeValues: ['https://i.imgur.com/uploaded.png'],
+      });
+      electronState.createWindow = () => fakeWindow;
+
+      await expect(automateUploadMedia({ provider: 'imgur', filePath: '/tmp/upload.png' })).resolves.toEqual({
+        url: 'https://i.imgur.com/uploaded.png',
+        provider: 'imgur',
+      });
+    });
+
+    it.each([
+      ['imgbb', '<img src="https://i.ibb.co/abc/uploaded.png">', 'https://i.ibb.co/abc/uploaded.png'],
+      ['imgur', '<input value="https://i.imgur.com/uploaded.png">', 'https://i.imgur.com/uploaded.png'],
+    ])('reads the %s result from a fallback element that holds it in another attribute', async (provider, resultHtml, expectedUrl) => {
+      const recipe = MEDIA_UPLOAD_RECIPES[provider];
+      const fakeWindow = createFakeBrowserWindow({
+        getNodeId: (selector) => (selector === recipe.fileInputSelectorCandidates[0] ? 10 : selector === recipe.submitSelectorCandidates[0] ? 20 : 0),
+        page: new JSDOM(`<body>${resultHtml}</body>`, { runScripts: 'outside-only' }),
+      });
+      electronState.createWindow = () => fakeWindow;
+
+      await expect(automateUploadMedia({ provider, filePath: '/tmp/upload.png' })).resolves.toEqual({ url: expectedUrl, provider });
     });
 
     it('uploads to ImgBB through the hidden BrowserWindow recipe', async () => {

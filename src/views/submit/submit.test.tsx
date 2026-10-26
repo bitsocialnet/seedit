@@ -23,6 +23,7 @@ const testState = vi.hoisted(() => ({
   mediaUpload: {
     uploadPhase: null as 'uploading' | 'checking' | null,
     fileKinds: ['image', 'video'] as string[],
+    accept: { 'image/png': ['.png'], 'video/mp4': ['.mp4'] } as Record<string, string[]>,
     pickAndroidMedia: vi.fn(),
     uploadMedia: vi.fn(),
   },
@@ -289,7 +290,7 @@ describe('SubmitPage', () => {
   it('uploads a dropped file through the media hosting providers and fills in the link', async () => {
     testState.mediaUpload.uploadMedia.mockResolvedValue('https://forgeimg.net/abc/photo.png');
     expect(container.textContent).toContain('image/video');
-    expect(testState.dropzoneOptions?.accept).toEqual({ 'image/*': [], 'video/*': [] });
+    expect(testState.dropzoneOptions?.accept).toEqual({ 'image/png': ['.png'], 'video/mp4': ['.mp4'] });
 
     const file = new File(['png'], 'photo.png', { type: 'image/png' });
     await act(async () => {

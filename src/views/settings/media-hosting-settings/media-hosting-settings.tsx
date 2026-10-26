@@ -38,7 +38,9 @@ const MediaHostingSettings = () => {
                 name={RADIO_NAME}
                 value={provider.id}
                 checked={mode === 'preferred' && preferredProvider === provider.id}
-                disabled={unavailable}
+                // A lone provider stays selectable: a probe that failed on a slow network or behind a blocker
+                // would otherwise leave no way back from None, and uploads try it regardless.
+                disabled={unavailable && providers.length > 1}
                 onChange={() => {
                   setPreferredProvider(provider.id);
                   setUploadMode('preferred');

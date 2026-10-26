@@ -276,7 +276,7 @@ public class FileUploaderPlugin extends Plugin {
         }
     }
 
-    /** Display name from the content provider; unlike getFileName below, it does not copy the file to read it. */
+    /** Display name from the content provider as the user sees it; getFileName below makes it safe for the cache and provider pages. */
     private String getDisplayName(Uri uri) {
         try {
             return FileUtils.getFileName(getContext(), uri);
@@ -468,10 +468,10 @@ public class FileUploaderPlugin extends Plugin {
         call.resolve(ret);
     }
 
+    /** The file's name made safe for the cache and provider pages, read without copying the file into the cache. */
     private String getFileName(Uri uri) {
         try {
-            File f = FileUtils.getFileFromUri(getContext(), uri);
-            return f != null ? f.getName() : "unknown";
+            return FileUtils.sanitizeFileName(FileUtils.getFileName(getContext(), uri));
         } catch (Exception e) {
             return "unknown";
         }

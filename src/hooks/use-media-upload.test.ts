@@ -119,6 +119,12 @@ describe('useMediaUpload', () => {
     expect(alertMock).toHaveBeenCalledWith('upload_failed: Forge Images cannot host this type of file. upload_failed_preferred_guidance');
   });
 
+  it('never sends Forge a format its API rejects', async () => {
+    await expect(upload(fileMedia('IMG_0001.HEIC', 'image/heic'))).resolves.toBeNull();
+    expect(orchestrateUpload).not.toHaveBeenCalled();
+    expect(alertMock).toHaveBeenCalledWith('upload_failed: Forge Images cannot host this type of file');
+  });
+
   it('suggests another provider only when one can host the file', async () => {
     setRuntime('android');
     act(() => useMediaHostingStore.setState({ preferredProvider: 'catbox' }));
@@ -238,7 +244,7 @@ describe('useMediaUpload', () => {
       await act(async () => {
         picked = await latestValue.pickAndroidMedia();
       });
-      expect(FileUploader.pickMedia).toHaveBeenCalledWith({ mimeTypes: ['image/*', 'video/*'] });
+      expect(FileUploader.pickMedia).toHaveBeenCalledWith({ mimeTypes: ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'video/mp4', 'video/webm'] });
       expect(picked).toEqual(pickedMedia);
 
       vi.mocked(FileUploader.pickMedia).mockRejectedValueOnce(new Error('File selection cancelled'));

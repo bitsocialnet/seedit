@@ -174,6 +174,20 @@ public class MediaMetadataStripperTest {
     private static final byte[] WEBP_WITH_METADATA = riffWebp(VP8X, ICCP, WEBP_EXIF, WEBP_XMP, VP8);
     private static final byte[] WEBP_STRIPPED = riffWebp(VP8X_CLEARED, ICCP, VP8);
 
+    // flags: ALPHA (0x10) | EXIF (0x08), for a stripped file that keeps its orientation
+    private static final byte[] VP8X_EXIF_ONLY = webpChunk("VP8X", bytes(0x18, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+
+    /** A WebP EXIF payload is a bare TIFF block: the APP1 fixtures minus marker, length and "Exif\0\0". */
+    private static byte[] exifTiffWithOrientation(int orientation, boolean littleEndian) {
+        byte[] app1 = exifApp1WithOrientation(orientation, littleEndian);
+        return Arrays.copyOfRange(app1, 10, app1.length);
+    }
+
+    private static byte[] orientationWebpExif(int orientation) {
+        byte[] app1 = orientationApp1(orientation);
+        return webpChunk("EXIF", Arrays.copyOfRange(app1, 10, app1.length));
+    }
+
     private static final byte[] GIF_WITH_COMMENT =
             concat(ascii("GIF89a"), bytes(1, 0, 1, 0, 0x91, 0, 0, 0x21, 0xfe, 4), ascii("gps!"), bytes(0, 0x3b));
 
@@ -277,6 +291,24 @@ public class MediaMetadataStripperTest {
     @Test
     public void webp_removesExifAndXmpChunks_clearsVp8xFlags_fixesRiffSize() {
         assertArrayEquals(WEBP_STRIPPED, MediaMetadataStripper.stripBytes(WEBP_WITH_METADATA));
+    }
+
+    @Test
+    public void webp_keepsOnlyTheOrientationTagAsMinimalExifChunk() {
+        byte[] input = riffWebp(VP8X, ICCP, VP8, webpChunk("EXIF", exifTiffWithOrientation(6, true)), WEBP_XMP);
+        assertArrayEquals(riffWebp(VP8X_EXIF_ONLY, ICCP, VP8, orientationWebpExif(6)), MediaMetadataStripper.stripBytes(input));
+    }
+
+    @Test
+    public void webp_readsOrientationFromBigEndianExifWithJpegExifHeader() {
+        byte[] input = riffWebp(VP8X, VP8, webpChunk("EXIF", concat(ascii("Exif"), bytes(0, 0), exifTiffWithOrientation(8, false))));
+        assertArrayEquals(riffWebp(VP8X_EXIF_ONLY, VP8, orientationWebpExif(8)), MediaMetadataStripper.stripBytes(input));
+    }
+
+    @Test
+    public void webp_doesNotReEmitDefaultOrientation() {
+        byte[] input = riffWebp(VP8X, VP8, webpChunk("EXIF", exifTiffWithOrientation(1, true)));
+        assertArrayEquals(riffWebp(VP8X_CLEARED, VP8), MediaMetadataStripper.stripBytes(input));
     }
 
     @Test
