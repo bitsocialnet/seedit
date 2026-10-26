@@ -18,6 +18,14 @@ const testState = vi.hoisted(() => ({
   translate: vi.fn((key: string) => key),
   communityFieldRender: vi.fn(),
   uploadRender: vi.fn(),
+  dropzoneOptions: undefined as { onDrop: (files: File[]) => void; accept: Record<string, string[]> } | undefined,
+  openPicker: vi.fn(),
+  mediaUpload: {
+    uploadPhase: null as 'uploading' | 'checking' | null,
+    fileKinds: ['image', 'video'] as string[],
+    pickAndroidMedia: vi.fn(),
+    uploadMedia: vi.fn(),
+  },
   urlRender: vi.fn(),
   previewRender: vi.fn(),
   crosspostRender: vi.fn(),
@@ -44,14 +52,15 @@ vi.mock('@capacitor/core', () => ({
   registerPlugin: vi.fn(),
 }));
 
-vi.mock('../../plugins/file-uploader', () => ({
-  default: { pickMedia: vi.fn(), uploadMedia: vi.fn() },
+vi.mock('../../hooks/use-media-upload', () => ({
+  useMediaUpload: () => testState.mediaUpload,
 }));
 
 vi.mock('react-dropzone', () => ({
-  useDropzone: () => {
+  useDropzone: (options: { onDrop: (files: File[]) => void; accept: Record<string, string[]> }) => {
     testState.uploadRender();
-    return { getInputProps: () => ({}), getRootProps: () => ({}), isDragActive: false };
+    testState.dropzoneOptions = options;
+    return { getInputProps: () => ({}), getRootProps: () => ({}), isDragActive: false, open: testState.openPicker };
   },
 }));
 
@@ -102,6 +111,8 @@ describe('SubmitPage', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     testState.lastOptions = undefined;
+    testState.mediaUpload.fileKinds = ['image', 'video'];
+    testState.mediaUpload.uploadPhase = null;
     useChallengesStore.setState({ challenges: [] });
     usePublishPostStore.getState().resetPublishPostStore();
     vi.stubGlobal('scrollTo', vi.fn());
@@ -274,5 +285,41 @@ describe('SubmitPage', () => {
     expect(testState.lastOptions?.crosspost).toBeUndefined();
     expect(container.querySelector('textarea')?.value).toBe('New title');
     expect(container.querySelectorAll('input[type="text"]')).toHaveLength(2);
+  });
+  it('uploads a dropped file through the media hosting providers and fills in the link', async () => {
+    testState.mediaUpload.uploadMedia.mockResolvedValue('https://forgeimg.net/abc/photo.png');
+    expect(container.textContent).toContain('image/video');
+    expect(testState.dropzoneOptions?.accept).toEqual({ 'image/*': [], 'video/*': [] });
+
+    const file = new File(['png'], 'photo.png', { type: 'image/png' });
+    await act(async () => {
+      testState.dropzoneOptions?.onDrop([file]);
+    });
+
+    expect(testState.mediaUpload.uploadMedia).toHaveBeenCalledWith({ kind: 'file', file, name: 'photo.png', mimeType: 'image/png' });
+    expect(usePublishPostStore.getState().link).toBe('https://forgeimg.net/abc/photo.png');
+  });
+
+  it('opens the file picker from choose file and leaves the link empty when an upload fails', async () => {
+    testState.mediaUpload.uploadMedia.mockResolvedValue(null);
+    const chooseFile = Array.from(container.querySelectorAll('label')).find((label) => label.textContent === 'choose_file');
+    await act(async () => chooseFile?.click());
+    expect(testState.openPicker).toHaveBeenCalledOnce();
+
+    await act(async () => {
+      testState.dropzoneOptions?.onDrop([new File(['png'], 'photo.png', { type: 'image/png' })]);
+    });
+    expect(usePublishPostStore.getState().link).toBeUndefined();
+  });
+
+  it('hides the upload box when uploads are turned off', async () => {
+    testState.mediaUpload.fileKinds = [];
+    act(() => root.unmount());
+    root = createRoot(container);
+    await act(async () => {
+      root.render(createElement(SubmitPage));
+    });
+
+    expect(container.textContent).not.toContain('choose_file');
   });
 });

@@ -295,7 +295,6 @@
   "media": "מדיה",
   "hide_communities_tagged_as_nsfw": "הסתר קהילות שסומנו כ-NSFW/18+",
   "drop_here_or": "הנח כאן או",
-  "upload_button_warning": "העלאה אוטומטית חסומה על ידי מדיניות ה-CORS של הדפדפן שלך, אך היא זמינה באפליקציית Seedit לאנדרואיד ובאפליקציית הדסקטופ (Win/Mac/Linux).\n\nעבור לדף קישורי ההורדה ב-GitHub?",
   "create_community_warning": "יצירת קהילה דורשת הפעלת צומת מלא. אפליקציית שולחן העבודה של Seedit (Win/Mac/Linux) מפעילה צומת מלא באופן אוטומטי.\n\nעבור לדף קישורי ההורדה ב-GitHub?",
   "filtering_by_nsfw": "סינון לפי קהילות NSFW",
   "notifications": "הודעות",
@@ -445,5 +444,16 @@
   "quoting_user": "מצטט את u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} הוא סגנון ציטוט ש-Seedit אינו משתמש בו, והתגובה המצוטטת לא נמצאה.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "דפדפנים לא יכולים לטעון את הקהילה הזו כי המחשב הזה לא נגיש מהאינטרנט. כדי לתקן זאת, יש להפנות את פורט 4001 (TCP ו-UDP) בראוטר אל המחשב הזה, או להפעיל UPnP בראוטר. אם ספק האינטרנט שלך לא מאפשר זאת, יש לארח את הקהילה בשרת במקום זאת."
+  "community_unreachable_from_browsers": "דפדפנים לא יכולים לטעון את הקהילה הזו כי המחשב הזה לא נגיש מהאינטרנט. כדי לתקן זאת, יש להפנות את פורט 4001 (TCP ו-UDP) בראוטר אל המחשב הזה, או להפעיל UPnP בראוטר. אם ספק האינטרנט שלך לא מאפשר זאת, יש לארח את הקהילה בשרת במקום זאת.",
+  "media_hosting_more_providers_in_apps": "אפליקציות שולחן העבודה ואנדרואיד מציעות ספקים נוספים.",
+  "media_hosting_none": "ללא",
+  "media_hosting_none_tip": "מסתיר את תיבת ההעלאה בדף השליחה",
+  "media_hosting_provider_unavailable": "לא זמין מהרשת הזו. נסו רשת אחרת או VPN.",
+  "media_hosting_providers": "ספקי אירוח מדיה",
+  "media_hosting_random": "אקראי",
+  "running_automated_checks": "מריץ בדיקות אוטומטיות",
+  "upload_awaiting_review": "הקובץ הועלה, אבל המארח צריך לבדוק אותו לפני שאפשר יהיה לצפות בו. הקישור יתחיל לעבוד לאחר שיאושר, וזה עשוי להימשך כמה שעות. אפשר לפרסם אותו עכשיו.",
+  "upload_failed": "ההעלאה נכשלה",
+  "upload_failed_all_providers": "כל הספקים נכשלו",
+  "upload_failed_preferred_guidance": "בחר ספק אחר או הגדר לאקראי."
 }

@@ -4,8 +4,8 @@ import { Trans, useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { type Comment, useAccount, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { Capacitor } from '@capacitor/core';
-import FileUploader from '../../plugins/file-uploader';
 import { getLinkMediaInfo } from '../../lib/utils/media-utils';
+import { getFileKindMimeTypes, type AttachedMedia } from '../../lib/media-hosting';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
 import { isValidURL } from '../../lib/utils/url-utils';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
@@ -13,6 +13,7 @@ import usePublishPostStore from '../../stores/use-publish-post-store';
 import { useDefaultSubscriptionAddresses } from '../../hooks/use-default-subscriptions';
 import useIsCommunityOffline from '../../hooks/use-is-community-offline';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
+import { useMediaUpload } from '../../hooks/use-media-upload';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import usePublishCommentWithChallengeAbandon from '../../hooks/use-publish-comment-with-challenge-abandon';
 import LoadingEllipsis from '../../components/loading-ellipsis';
@@ -24,7 +25,6 @@ import InfoTooltip from '../../components/info-tooltip';
 import CrosspostPreview from '../../components/crosspost-preview';
 
 const isAndroid = Capacitor.getPlatform() === 'android';
-const isElectron = window.electronApi?.isElectron === true;
 
 const UrlField = memo(function UrlField() {
   const { t } = useTranslation();
@@ -97,138 +97,57 @@ const UrlField = memo(function UrlField() {
 const UploadMediaForm = memo(function UploadMediaForm() {
   const { t } = useTranslation();
   const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
-
-  // on android or electron, auto upload file to image hosting sites with open api
-  const [isUploading, setIsUploading] = useState(false);
+  const { uploadPhase, fileKinds, pickAndroidMedia, uploadMedia } = useMediaUpload();
   const [isChoosingFile, setIsChoosingFile] = useState(false);
 
-  const onDrop = useCallback(
-    async (acceptedFiles: File[]) => {
-      if (!(isAndroid || isElectron)) {
-        if (window.confirm(t('upload_button_warning'))) {
-          const link = document.createElement('a');
-          link.href = 'https://github.com/bitsocialnet/seedit/releases/latest';
-          link.target = '_blank';
-          link.rel = 'noopener noreferrer';
-          link.click();
-        }
-        return;
-      }
+  // Uploads to the media hosting provider set in the preferences (Forge Images by default) and fills in the link.
+  const upload = async (media: AttachedMedia) => {
+    const url = await uploadMedia(media);
+    if (url) setPublishPostStore({ link: url });
+  };
 
-      if (acceptedFiles.length > 0) {
-        try {
-          setIsChoosingFile(false);
-          setIsUploading(true);
-
-          // for Electron, we need to convert the File to a format that can be sent via IPC
-          if (isElectron) {
-            const file = acceptedFiles[0];
-            const reader = new FileReader();
-
-            const fileData = await new Promise((resolve, reject) => {
-              reader.onload = () => {
-                const base64data = reader.result?.toString().split(',')[1];
-                resolve({
-                  fileData: base64data,
-                  fileName: file.name,
-                });
-              };
-              reader.onerror = reject;
-              reader.readAsDataURL(file);
-            });
-
-            const result = await FileUploader.uploadMedia(fileData as { fileData?: string; fileName: string });
-            if (result.url) {
-              setPublishPostStore({ link: result.url || undefined });
-            }
-          } else if (isAndroid) {
-            // android can handle File objects directly
-            const result = await FileUploader.uploadMedia(acceptedFiles[0]);
-            if (result.url) {
-              setPublishPostStore({ link: result.url || undefined });
-            }
-          }
-        } catch (error) {
-          console.error('Upload failed:', error);
-          if (error instanceof Error && !error.message.includes('File selection cancelled')) {
-            alert(`${t('upload_failed')}: ${error.message}`);
-          }
-        } finally {
-          setIsUploading(false);
-        }
-      }
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
+    onDrop: (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+      if (file) void upload({ kind: 'file', file, name: file.name, mimeType: file.type });
     },
-    [setPublishPostStore, t],
-  );
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
     noClick: true,
-    accept: {
-      'image/*': [],
-      'video/*': [],
-      'audio/*': [],
-      'application/pdf': [],
-    },
+    multiple: false,
+    disabled: uploadPhase !== null,
+    // Only the kinds of file the enabled providers host.
+    accept: Object.fromEntries(getFileKindMimeTypes(fileKinds).map((mimeType) => [mimeType, []])),
   });
 
-  const handleUpload = async () => {
-    if (!(isAndroid || isElectron)) {
-      if (window.confirm(t('upload_button_warning'))) {
-        const link = document.createElement('a');
-        link.href = 'https://github.com/bitsocialnet/seedit/releases/latest';
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        link.click();
-      }
+  const handleChooseFile = async () => {
+    if (uploadPhase || isChoosingFile) return;
+    if (!isAndroid) {
+      open();
       return;
     }
-
-    try {
-      setIsChoosingFile(true);
-
-      const pickedFile = await FileUploader.pickMedia(); // base64 data
-      setIsChoosingFile(false);
-
-      setIsUploading(true);
-
-      const uploadResult = await FileUploader.uploadMedia({
-        fileData: pickedFile.data,
-        fileName: pickedFile.fileName,
-      });
-
-      if (uploadResult?.url) {
-        setPublishPostStore({ link: uploadResult.url });
-      } else {
-        throw new Error('No URL returned from upload');
-      }
-    } catch (error) {
-      console.error('Process failed:', error);
-      if (error instanceof Error && !error.message.includes('File selection cancelled')) {
-        alert(`${t('upload_failed')}: ${error.message}`);
-      } else if (typeof error === 'string' && !error.includes('File selection cancelled')) {
-        alert(`${t('upload_failed')}: ${error}`);
-      }
-    } finally {
-      setIsChoosingFile(false);
-      setIsUploading(false);
-    }
+    // The native picker keeps the file native-side, so a video never crosses the bridge as base64.
+    setIsChoosingFile(true);
+    const media = await pickAndroidMedia();
+    setIsChoosingFile(false);
+    if (media) await upload(media);
   };
+
+  // Uploads are turned off in the preferences.
+  if (fileKinds.length === 0) return null;
 
   return (
     <div className={styles.box}>
-      <span className={styles.boxTitleOptional}>image/video/audio/pdf</span>
+      <span className={styles.boxTitleOptional}>{fileKinds.join('/')}</span>
       <div className={styles.boxContent}>
-        {isUploading ? (
+        {uploadPhase ? (
           <div className={styles.uploading}>
-            <LoadingEllipsis string={t('uploading')} />
+            <LoadingEllipsis string={uploadPhase === 'checking' ? t('running_automated_checks') : t('uploading')} />
           </div>
         ) : (
           <div {...getRootProps()} className={`${styles.uploadBox} ${isDragActive ? styles.dragging : ''}`}>
             <input {...getInputProps()} />
             <div className={styles.cameraIcon} />
             <div className={styles.dropText}>{t('drop_here_or')}</div>
-            <label onClick={() => (isUploading || isChoosingFile ? null : handleUpload())}>
+            <label onClick={handleChooseFile}>
               <div className={styles.fileUploadIcon} />
               {t('choose_file')}
             </label>

@@ -8,17 +8,7 @@ declare global {
       invoke: (channel: string, ...args: any[]) => Promise<any>;
       sendNotification?: (notification: Omit<LocalNotification, 'id'>) => void;
     };
-    // The new electronApi for cleaner separation
-    electronApi?: {
-      // Allow direct invoke as exposed in preload
-      invoke: (channel: string, ...args: any[]) => Promise<any>;
-      isElectron: boolean;
-      getNotificationStatus: () => Promise<'granted' | 'denied' | 'not-determined' | 'not-supported'>;
-      getPlatform: () => Promise<NodeJS.Platform>;
-      getNodeReachability?: () => Promise<'public' | 'private' | 'unknown'>;
-      testNotification: () => Promise<{ success: boolean; reason?: string }>;
-      showNotification: (notification: Omit<LocalNotification, 'id'>) => void;
-    };
+    // window.electronApi is declared in src/globals.d.ts
     // Remove seeditIpc if no longer needed elsewhere
     // seeditIpc?: {
     //   send: (channel: string, ...args: any[]) => void;

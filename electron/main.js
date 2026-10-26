@@ -9,8 +9,10 @@ import { getPkcDataPath } from './pkc-paths.js';
 import { getNodeReachability } from './node-reachability.js';
 import { URL, fileURLToPath } from 'node:url';
 import contextMenu from 'electron-context-menu';
-import FormData from 'form-data';
-import fetch from 'node-fetch';
+import { automateUploadMedia } from './media-upload-automation.js';
+import { MEDIA_UPLOAD_RECIPES } from './media-upload-recipes.js';
+import { getForgeTurnstileToken } from './forge-turnstile.js';
+import { prepareStrippedUploadFile } from './strip-media-metadata.js';
 
 // Linux startup hardening: default to X11 ozone and sanitize env to avoid GTK mixups
 const isLinux = process.platform === 'linux';
@@ -460,72 +462,79 @@ app.on('window-all-closed', () => {
   }
 });
 
-// FileUploader plugin handlers
-ipcMain.handle('plugin:file-uploader:pickAndUploadMedia', async (event) => {
-  try {
-    const mainWindow = BrowserWindow.fromWebContents(event.sender);
-    const result = await dialog.showOpenDialog(mainWindow, {
-      properties: ['openFile'],
-      filters: [{ name: 'Images & Videos', extensions: ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm'] }],
-    });
-    if (result.canceled || result.filePaths.length === 0) throw new Error('File selection cancelled');
-    const filePath = result.filePaths[0];
-    const fileName = path.basename(filePath);
-    const formData = new FormData();
-    formData.append('reqtype', 'fileupload');
-    formData.append('fileToUpload', fs.createReadStream(filePath));
-    const response = await fetch('https://catbox.moe/user/api.php', { method: 'POST', body: formData });
-    if (!response.ok) throw new Error(`Upload failed with status ${response.status}`);
-    return { url: await response.text(), fileName };
-  } catch (error) {
-    console.error('FileUploader error:', error);
-    throw error;
-  }
-});
+const MAX_GENERATED_UPLOAD_BYTES = 20 * 1024 * 1024;
+const SAFE_GENERATED_UPLOAD_NAME_RE = /[^a-zA-Z0-9._-]/g;
 
-ipcMain.handle('plugin:file-uploader:uploadMedia', async (event, fileData) => {
+const sanitizeGeneratedUploadFileName = (fileName) => {
+  const basename = path.basename(typeof fileName === 'string' && fileName ? fileName : 'upload').replace(/\.\./g, '');
+  const sanitized = basename.replace(SAFE_GENERATED_UPLOAD_NAME_RE, '_').trim();
+  return sanitized && sanitized.length <= 255 ? sanitized : 'upload';
+};
+
+const writeGeneratedUploadFile = async ({ fileName, bytes }) => {
+  if (!Array.isArray(bytes) || bytes.length === 0) {
+    throw new Error('Generated upload bytes are required');
+  }
+  if (bytes.length > MAX_GENERATED_UPLOAD_BYTES) {
+    throw new Error('Generated upload is too large');
+  }
+  if (!bytes.every((byte) => Number.isInteger(byte) && byte >= 0 && byte <= 255)) {
+    throw new Error('Generated upload bytes are invalid');
+  }
+  const safeFileName = sanitizeGeneratedUploadFileName(fileName);
+  const tempDir = await fs.promises.mkdtemp(path.join(app.getPath('temp'), 'seedit-upload-'));
+  const filePath = path.join(tempDir, safeFileName);
+  await fs.promises.writeFile(filePath, Buffer.from(bytes));
+  return { tempDir, filePath };
+};
+
+// Handle automated media upload (hidden BrowserWindow + CDP). Strict cleanup enforced in automation module.
+ipcMain.handle('automate-upload-media', async (event, options) => {
+  const { provider, filePath } = options || {};
+  if (typeof provider !== 'string' || !Object.hasOwn(MEDIA_UPLOAD_RECIPES, provider) || typeof filePath !== 'string' || !path.isAbsolute(filePath)) {
+    throw new Error('automate-upload-media requires { provider, filePath }');
+  }
+  // Only regular files: a device such as /dev/zero would be read without end.
+  if (!(await fs.promises.stat(filePath)).isFile()) {
+    throw new Error('automate-upload-media can only upload a regular file');
+  }
+
+  // Automate against a metadata-stripped temp copy when the file is a
+  // strippable image; the user's original file on disk is never modified.
+  const prepared = await prepareStrippedUploadFile(filePath);
   try {
-    console.log('uploadMedia handler called with data:', typeof fileData);
-    const formData = new FormData();
-    formData.append('reqtype', 'fileupload');
-    if (fileData.fileData && fileData.fileName) {
-      const buffer = Buffer.from(fileData.fileData, 'base64');
-      formData.append('fileToUpload', buffer, fileData.fileName);
-    } else {
-      throw new Error('Invalid file data');
+    return await automateUploadMedia({ provider, filePath: prepared.filePath });
+  } finally {
+    if (prepared.tempDir) {
+      // Best-effort cleanup: a failed rm must not reject a successful upload.
+      await fs.promises.rm(prepared.tempDir, { force: true, recursive: true }).catch(() => {});
     }
-    const response = await fetch('https://catbox.moe/user/api.php', { method: 'POST', body: formData });
-    if (!response.ok) throw new Error(`Upload failed with status ${response.status}`);
-    return { url: await response.text(), fileName: fileData.fileName || 'uploaded-file' };
-  } catch (error) {
-    console.error('FileUploader uploadMedia error:', error);
-    throw error;
   }
 });
 
-ipcMain.handle('plugin:file-uploader:pickMedia', async (event) => {
+// For a file the renderer has no disk path for, such as one dragged in from a web page.
+ipcMain.handle('automate-upload-generated-media', async (event, options) => {
+  const { provider, fileName, bytes } = options || {};
+  if (typeof provider !== 'string' || !Object.hasOwn(MEDIA_UPLOAD_RECIPES, provider)) {
+    throw new Error('automate-upload-generated-media requires a provider');
+  }
+
+  const { tempDir, filePath } = await writeGeneratedUploadFile({ fileName, bytes });
   try {
-    const mainWindow = BrowserWindow.fromWebContents(event.sender);
-    const result = await dialog.showOpenDialog(mainWindow, {
-      properties: ['openFile'],
-      filters: [{ name: 'Images & Videos', extensions: ['jpg', 'jpeg', 'png', 'gif', 'mp4', 'webm'] }],
-    });
-    if (result.canceled || result.filePaths.length === 0) throw new Error('File selection cancelled');
-    const filePath = result.filePaths[0];
-    const fileName = path.basename(filePath);
-    const fileBuffer = fs.readFileSync(filePath);
-    const base64Data = fileBuffer.toString('base64');
-    const ext = path.extname(fileName).toLowerCase();
-    let mimeType = 'application/octet-stream';
-    if (ext === '.jpg' || ext === '.jpeg') mimeType = 'image/jpeg';
-    else if (ext === '.png') mimeType = 'image/png';
-    else if (ext === '.gif') mimeType = 'image/gif';
-    else if (ext === '.mp4') mimeType = 'video/mp4';
-    else if (ext === '.webm') mimeType = 'video/webm';
-    return { data: base64Data, fileName, mimeType };
+    return await automateUploadMedia({ provider, filePath });
+  } finally {
+    // Best-effort cleanup: a failed rm must not reject a successful upload.
+    await fs.promises.rm(tempDir, { force: true, recursive: true }).catch(() => {});
+  }
+});
+
+// Forge Images uploads need a Turnstile token, which Cloudflare will not issue to the file:// renderer.
+// Failures resolve as { error }: a rejection reaches the renderer wrapped in Electron's IPC prefix.
+ipcMain.handle('get-forge-turnstile-token', async (event, sitekey) => {
+  try {
+    return { token: await getForgeTurnstileToken({ sitekey, parent: BrowserWindow.fromWebContents(event.sender) }) };
   } catch (error) {
-    console.error('FileUploader pickMedia error:', error);
-    throw error;
+    return { error: error instanceof Error ? error.message : String(error) };
   }
 });
 

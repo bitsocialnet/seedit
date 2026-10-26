@@ -295,7 +295,6 @@
   "media": "미디어",
   "hide_communities_tagged_as_nsfw": "NSFW/18+로 태그된 커뮤니티 숨기기",
   "drop_here_or": "여기에 드롭 또는",
-  "upload_button_warning": "자동 업로드는 브라우저의 CORS 정책에 의해 차단되었지만 Seedit Android 앱과 데스크탑 앱(Win/Mac/Linux)에서 사용할 수 있습니다.\n\nGitHub의 다운로드 링크 페이지로 이동하시겠습니까?",
   "create_community_warning": "커뮤니티를 만들려면 전체 노드를 실행해야 합니다. Seedit 데스크탑 앱 (Win/Mac/Linux)은 자동으로 전체 노드를 실행합니다.\n\nGitHub의 다운로드 링크 페이지로 이동하시겠습니까?",
   "filtering_by_nsfw": "NSFW 커뮤니티별 필터링",
   "notifications": "알림",
@@ -445,5 +444,16 @@
   "quoting_user": "u/{{author}} 인용",
   "fivechan_quote_tooltip": "{{reference}}은(는) Seedit에서 사용하지 않는 인용 형식이며, 인용된 댓글을 찾을 수 없습니다.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "인터넷에서 이 컴퓨터에 접속할 수 없어 브라우저에서 이 커뮤니티를 불러올 수 없습니다. 해결하려면 공유기에서 포트 4001(TCP 및 UDP)을 이 컴퓨터로 포트포워딩하거나 공유기에서 UPnP를 켜세요. 인터넷 통신사에서 이를 허용하지 않으면 대신 서버에서 커뮤니티를 호스팅하세요."
+  "community_unreachable_from_browsers": "인터넷에서 이 컴퓨터에 접속할 수 없어 브라우저에서 이 커뮤니티를 불러올 수 없습니다. 해결하려면 공유기에서 포트 4001(TCP 및 UDP)을 이 컴퓨터로 포트포워딩하거나 공유기에서 UPnP를 켜세요. 인터넷 통신사에서 이를 허용하지 않으면 대신 서버에서 커뮤니티를 호스팅하세요.",
+  "media_hosting_more_providers_in_apps": "데스크톱 및 Android 앱에서는 더 많은 제공업체를 사용할 수 있습니다.",
+  "media_hosting_none": "없음",
+  "media_hosting_none_tip": "제출 페이지에서 업로드 상자를 숨깁니다",
+  "media_hosting_provider_unavailable": "이 네트워크에서는 사용할 수 없습니다. 다른 네트워크나 VPN을 시도해 보세요.",
+  "media_hosting_providers": "미디어 호스팅 제공업체",
+  "media_hosting_random": "무작위",
+  "running_automated_checks": "자동 검사 실행 중",
+  "upload_awaiting_review": "업로드되었지만 표시되기 전에 호스트가 이 파일을 검토해야 합니다. 승인되면 링크가 작동하기 시작하며, 몇 시간이 걸릴 수 있습니다. 지금 바로 게시할 수 있습니다.",
+  "upload_failed": "업로드 실패",
+  "upload_failed_all_providers": "모든 제공업체가 실패했습니다",
+  "upload_failed_preferred_guidance": "다른 제공업체를 선택하거나 무작위로 설정하세요."
 }

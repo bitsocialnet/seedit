@@ -295,7 +295,6 @@
   "media": "medya",
   "hide_communities_tagged_as_nsfw": "NSFW/18+ olarak etiketlenmiş toplulukları gizle",
   "drop_here_or": "Burası veya bırak",
-  "upload_button_warning": "Otomatik yükleme, tarayıcınızın CORS politikası nedeniyle engelleniyor, ancak Seedit Android uygulaması ve masaüstü uygulamasında (Win/Mac/Linux) mevcuttur.\n\nGitHub'daki indirme bağlantıları sayfasına gidin?",
   "create_community_warning": "Bir topluluk oluşturmak, tam bir düğüm çalıştırmayı gerektirir. Seedit masaüstü uygulaması (Win/Mac/Linux) otomatik olarak tam bir düğüm çalıştırır.\n\nGitHub'daki indirme bağlantıları sayfasına gidin?",
   "filtering_by_nsfw": "NSFW topluluklarına göre filtreleme",
   "notifications": "Bildirimler",
@@ -445,5 +444,16 @@
   "quoting_user": "u/{{author}} kullanıcısından alıntı",
   "fivechan_quote_tooltip": "{{reference}}, Seedit'in kullanmadığı bir alıntı biçimidir ve alıntılanan yorum bulunamadı.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Bu bilgisayara internetten erişilemediği için tarayıcılar bu topluluğu yükleyemiyor. Sorunu çözmek için modeminizde 4001 numaralı portu (TCP ve UDP) bu bilgisayara yönlendirin veya modeminizde UPnP'yi etkinleştirin. İnternet sağlayıcınız buna izin vermiyorsa topluluğu bunun yerine bir sunucuda barındırın."
+  "community_unreachable_from_browsers": "Bu bilgisayara internetten erişilemediği için tarayıcılar bu topluluğu yükleyemiyor. Sorunu çözmek için modeminizde 4001 numaralı portu (TCP ve UDP) bu bilgisayara yönlendirin veya modeminizde UPnP'yi etkinleştirin. İnternet sağlayıcınız buna izin vermiyorsa topluluğu bunun yerine bir sunucuda barındırın.",
+  "media_hosting_more_providers_in_apps": "Masaüstü ve Android uygulamaları daha fazla sağlayıcı sunar.",
+  "media_hosting_none": "Yok",
+  "media_hosting_none_tip": "Gönderme sayfasındaki yükleme kutusunu gizler",
+  "media_hosting_provider_unavailable": "Bu ağdan kullanılamıyor. Başka bir ağ veya VPN deneyin.",
+  "media_hosting_providers": "Ortam Barındırma Sağlayıcıları",
+  "media_hosting_random": "Rastgele",
+  "running_automated_checks": "Otomatik kontroller yapılıyor",
+  "upload_awaiting_review": "Yüklendi, ancak görüntülenebilmesi için barındırıcının bu dosyayı incelemesi gerekiyor. Bağlantı onaylandığında çalışmaya başlayacak; bu birkaç saat sürebilir. Şimdi gönderebilirsin.",
+  "upload_failed": "Yükleme başarısız",
+  "upload_failed_all_providers": "Tüm sağlayıcılar başarısız oldu",
+  "upload_failed_preferred_guidance": "Farklı bir sağlayıcı seçin veya rastgeleye ayarlayın."
 }

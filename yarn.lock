@@ -20313,7 +20313,6 @@ __metadata:
     env-paths: "npm:3.0.0"
     esbuild: "npm:0.28.2"
     extract-zip: "npm:2.0.1"
-    form-data: "npm:4.0.6"
     fs-extra: "npm:11.3.0"
     gifuct-js: "npm:2.1.2"
     http-proxy: "npm:1.18.1"

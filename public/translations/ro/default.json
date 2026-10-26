@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Ascunde comunitățile etichetate ca NSFW/18+",
   "drop_here_or": "Aruncați aici sau",
-  "upload_button_warning": "Încărcarea automată este blocată de politica CORS a browser-ului tău, dar este disponibilă în aplicația Seedit pentru Android și aplicațiile desktop (Win/Mac/Linux).\n\nMergi la pagina cu linkuri de descărcare pe GitHub?",
   "create_community_warning": "Crearea unei comunități necesită rularea unui nod complet. Aplicația Seedit pentru desktop (Win/Mac/Linux) rulează automat un nod complet.\n\nMergi la pagina cu linkuri de descărcare pe GitHub?",
   "filtering_by_nsfw": "Filtrare după comunități NSFW",
   "notifications": "Notificări",
@@ -445,5 +444,16 @@
   "quoting_user": "citând u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} este un stil de citare pe care Seedit nu îl folosește, iar comentariul citat nu a fost găsit.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Browserele nu pot încărca această comunitate, deoarece acest calculator nu poate fi accesat de pe internet. Ca să rezolvi asta, redirecționează portul 4001 (TCP și UDP) din routerul tău către acest calculator sau activează UPnP pe router. Dacă furnizorul tău de internet nu permite asta, găzduiește în schimb comunitatea pe un server."
+  "community_unreachable_from_browsers": "Browserele nu pot încărca această comunitate, deoarece acest calculator nu poate fi accesat de pe internet. Ca să rezolvi asta, redirecționează portul 4001 (TCP și UDP) din routerul tău către acest calculator sau activează UPnP pe router. Dacă furnizorul tău de internet nu permite asta, găzduiește în schimb comunitatea pe un server.",
+  "media_hosting_more_providers_in_apps": "Aplicațiile pentru desktop și Android oferă mai mulți furnizori.",
+  "media_hosting_none": "Niciunul",
+  "media_hosting_none_tip": "Ascunde caseta de încărcare de pe pagina de trimitere",
+  "media_hosting_provider_unavailable": "Indisponibil din această rețea. Încearcă altă rețea sau un VPN.",
+  "media_hosting_providers": "Furnizori de Găzduire Media",
+  "media_hosting_random": "Aleatoriu",
+  "running_automated_checks": "Se rulează verificări automate",
+  "upload_awaiting_review": "Încărcat, dar gazda trebuie să verifice acest fișier înainte să poată fi vizualizat. Linkul va începe să funcționeze după aprobare, ceea ce poate dura câteva ore. Îl poți publica acum.",
+  "upload_failed": "Încărcarea a eșuat",
+  "upload_failed_all_providers": "Toți furnizorii au eșuat",
+  "upload_failed_preferred_guidance": "Alegeți un furnizor diferit sau setați la aleatoriu."
 }

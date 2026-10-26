@@ -295,7 +295,6 @@
   "media": "medios",
   "hide_communities_tagged_as_nsfw": "Ocultar comunidades etiquetadas como NSFW/18+",
   "drop_here_or": "Suelta aquí o",
-  "upload_button_warning": "La carga automática está bloqueada por la política CORS de su navegador, pero está disponible en la aplicación Seedit para Android y en la aplicación de escritorio (Win/Mac/Linux).\n\n¿Vaya a la página de enlaces de descarga en GitHub?",
   "create_community_warning": "Crear una comunidad requiere ejecutar un nodo completo. La aplicación de escritorio Seedit (Win/Mac/Linux) ejecuta automáticamente un nodo completo.\n\n¿Vaya a la página de enlaces de descarga en GitHub?",
   "filtering_by_nsfw": "Filtrando por comunidades NSFW",
   "notifications": "Notificaciones",
@@ -445,5 +444,16 @@
   "quoting_user": "citando a u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} es un estilo de cita que Seedit no usa, y no se encontró el comentario citado.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Los navegadores no pueden cargar esta comunidad porque este equipo no es accesible desde internet. Para solucionarlo, redirige el puerto 4001 (TCP y UDP) de tu router a este equipo, o activa UPnP en tu router. Si tu proveedor de internet no lo permite, aloja la comunidad en un servidor."
+  "community_unreachable_from_browsers": "Los navegadores no pueden cargar esta comunidad porque este equipo no es accesible desde internet. Para solucionarlo, redirige el puerto 4001 (TCP y UDP) de tu router a este equipo, o activa UPnP en tu router. Si tu proveedor de internet no lo permite, aloja la comunidad en un servidor.",
+  "media_hosting_more_providers_in_apps": "Las aplicaciones de escritorio y Android ofrecen más proveedores.",
+  "media_hosting_none": "Ninguno",
+  "media_hosting_none_tip": "Oculta el cuadro de subida en la página de envío",
+  "media_hosting_provider_unavailable": "No disponible desde esta red. Prueba con otra red o una VPN.",
+  "media_hosting_providers": "Proveedores de Alojamiento de Medios",
+  "media_hosting_random": "Aleatorio",
+  "running_automated_checks": "Ejecutando comprobaciones automáticas",
+  "upload_awaiting_review": "Subido, pero el alojamiento debe revisar este archivo antes de que pueda verse. El enlace empezará a funcionar cuando se apruebe, lo que puede tardar unas horas. Puedes publicarlo ahora.",
+  "upload_failed": "Error al subir",
+  "upload_failed_all_providers": "Todos los proveedores fallaron",
+  "upload_failed_preferred_guidance": "Elige un proveedor diferente o configura en aleatorio."
 }

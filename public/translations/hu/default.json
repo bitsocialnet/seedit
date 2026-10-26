@@ -295,7 +295,6 @@
   "media": "médiák",
   "hide_communities_tagged_as_nsfw": "Rejtse el a NSFW/18+ címkézett közösségeket",
   "drop_here_or": "Húzza ide, vagy",
-  "upload_button_warning": "Az automatikus feltöltés a böngészője CORS irányelvei által blokkolva van, de elérhető a Seedit Android alkalmazásban és asztali alkalmazásban (Win/Mac/Linux).\n\nMenjen a letöltési linkek oldalára a GitHub-on?",
   "create_community_warning": "Közösség létrehozása teljes csomópont futtatását igényli. A Seedit asztali alkalmazás (Win/Mac/Linux) automatikusan futtat egy teljes csomópontot.\n\nMenjen a letöltési linkek oldalára a GitHub-on?",
   "filtering_by_nsfw": "Szűrés NSFW közösségek szerint",
   "notifications": "Értesítések",
@@ -445,5 +444,16 @@
   "quoting_user": "u/{{author}} idézése",
   "fivechan_quote_tooltip": "A(z) {{reference}} olyan idézési stílus, amelyet a Seedit nem használ, és az idézett hozzászólás nem található.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "A böngészők nem tudják betölteni ezt a közösséget, mert ez a számítógép nem érhető el az internetről. A javításhoz irányítsd át a routereden a 4001-es portot (TCP és UDP) erre a számítógépre, vagy kapcsold be az UPnP-t a routereden. Ha az internetszolgáltatód ezt nem engedi, inkább egy szerveren üzemeltesd a közösséget."
+  "community_unreachable_from_browsers": "A böngészők nem tudják betölteni ezt a közösséget, mert ez a számítógép nem érhető el az internetről. A javításhoz irányítsd át a routereden a 4001-es portot (TCP és UDP) erre a számítógépre, vagy kapcsold be az UPnP-t a routereden. Ha az internetszolgáltatód ezt nem engedi, inkább egy szerveren üzemeltesd a közösséget.",
+  "media_hosting_more_providers_in_apps": "Az asztali és az Android alkalmazás több szolgáltatót kínál.",
+  "media_hosting_none": "Nincs",
+  "media_hosting_none_tip": "Elrejti a feltöltési mezőt a beküldési oldalon",
+  "media_hosting_provider_unavailable": "Erről a hálózatról nem érhető el. Próbálj ki egy másik hálózatot vagy VPN-t.",
+  "media_hosting_providers": "Médiahosting-szolgáltatók",
+  "media_hosting_random": "Véletlenszerű",
+  "running_automated_checks": "Automatikus ellenőrzések futnak",
+  "upload_awaiting_review": "Feltöltve, de a tárhelynek ellenőriznie kell ezt a fájlt, mielőtt megtekinthető lesz. A link a jóváhagyás után kezd működni, ami néhány órát is igénybe vehet. Már most közzéteheted.",
+  "upload_failed": "A feltöltés sikertelen",
+  "upload_failed_all_providers": "Minden szolgáltató sikertelen volt",
+  "upload_failed_preferred_guidance": "Válasszon másik szolgáltatót vagy állítsa véletlenszerűre."
 }

@@ -295,7 +295,6 @@
   "media": "Medien",
   "hide_communities_tagged_as_nsfw": "Verstecke Communities, die als NSFW/18+ gekennzeichnet sind",
   "drop_here_or": "Hier ablegen oder",
-  "upload_button_warning": "Auto-Upload wird durch die CORS-Richtlinie Ihres Browsers blockiert, ist jedoch in der Seedit Android-App und Desktop-App (Win/Mac/Linux) verfügbar.\n\nGehen Sie zur Download-Link-Seite auf GitHub?",
   "create_community_warning": "Das Erstellen einer Community erfordert das Ausführen eines vollständigen Knotens. Die Seedit-Desktop-App (Win/Mac/Linux) führt automatisch einen vollständigen Knoten aus.\n\nGehen Sie zur Download-Link-Seite auf GitHub?",
   "filtering_by_nsfw": "Filtern nach NSFW-Communities",
   "notifications": "Benachrichtigungen",
@@ -445,5 +444,16 @@
   "quoting_user": "zitiert u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} ist ein Zitatstil, den Seedit nicht verwendet, und der zitierte Kommentar wurde nicht gefunden.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Browser können diese Community nicht laden, weil dieser Computer aus dem Internet nicht erreichbar ist. Um das zu beheben, leite Port 4001 (TCP und UDP) in deinem Router an diesen Computer weiter oder aktiviere UPnP in deinem Router. Wenn dein Internetanbieter das nicht zulässt, hoste die Community stattdessen auf einem Server."
+  "community_unreachable_from_browsers": "Browser können diese Community nicht laden, weil dieser Computer aus dem Internet nicht erreichbar ist. Um das zu beheben, leite Port 4001 (TCP und UDP) in deinem Router an diesen Computer weiter oder aktiviere UPnP in deinem Router. Wenn dein Internetanbieter das nicht zulässt, hoste die Community stattdessen auf einem Server.",
+  "media_hosting_more_providers_in_apps": "Die Desktop- und Android-Apps bieten weitere Anbieter.",
+  "media_hosting_none": "Keine",
+  "media_hosting_none_tip": "Blendet das Upload-Feld auf der Einreichungsseite aus",
+  "media_hosting_provider_unavailable": "Von diesem Netzwerk aus nicht verfügbar. Versuche ein anderes Netzwerk oder ein VPN.",
+  "media_hosting_providers": "Medienhosting-Anbieter",
+  "media_hosting_random": "Zufällig",
+  "running_automated_checks": "Automatische Prüfungen laufen",
+  "upload_awaiting_review": "Hochgeladen, aber der Host muss diese Datei prüfen, bevor sie angezeigt werden kann. Der Link funktioniert, sobald sie freigegeben ist, was einige Stunden dauern kann. Du kannst sie jetzt schon posten.",
+  "upload_failed": "Upload fehlgeschlagen",
+  "upload_failed_all_providers": "Alle Anbieter sind fehlgeschlagen",
+  "upload_failed_preferred_guidance": "Wählen Sie einen anderen Anbieter oder setzen Sie auf Zufall."
 }

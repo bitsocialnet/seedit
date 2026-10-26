@@ -295,7 +295,6 @@
   "media": "phương tiện truyền thông",
   "hide_communities_tagged_as_nsfw": "Ẩn cộng đồng được gắn thẻ là NSFW/18+",
   "drop_here_or": "Thả ở đây hoặc",
-  "upload_button_warning": "Tải lên tự động bị chặn bởi chính sách CORS của trình duyệt của bạn, nhưng có sẵn trên ứng dụng Seedit Android và ứng dụng desktop (Win/Mac/Linux).\n\nĐi đến trang liên kết tải xuống trên GitHub?",
   "create_community_warning": "Tạo cộng đồng yêu cầu chạy một node đầy đủ. Ứng dụng Seedit desktop (Win/Mac/Linux) tự động chạy một node đầy đủ.\n\nĐi đến trang liên kết tải xuống trên GitHub?",
   "filtering_by_nsfw": "Lọc theo cộng đồng NSFW",
   "notifications": "Thông báo",
@@ -445,5 +444,16 @@
   "quoting_user": "trích dẫn u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} là kiểu trích dẫn mà Seedit không sử dụng, và không tìm thấy bình luận được trích dẫn.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Trình duyệt không thể tải cộng đồng này vì không thể truy cập máy tính này từ internet. Để khắc phục, hãy chuyển tiếp cổng 4001 (TCP và UDP) trên router của bạn đến máy tính này, hoặc bật UPnP trên router của bạn. Nếu nhà mạng của bạn không cho phép, thay vào đó hãy lưu trữ cộng đồng trên một máy chủ."
+  "community_unreachable_from_browsers": "Trình duyệt không thể tải cộng đồng này vì không thể truy cập máy tính này từ internet. Để khắc phục, hãy chuyển tiếp cổng 4001 (TCP và UDP) trên router của bạn đến máy tính này, hoặc bật UPnP trên router của bạn. Nếu nhà mạng của bạn không cho phép, thay vào đó hãy lưu trữ cộng đồng trên một máy chủ.",
+  "media_hosting_more_providers_in_apps": "Ứng dụng máy tính và Android có thêm nhiều nhà cung cấp.",
+  "media_hosting_none": "Không có",
+  "media_hosting_none_tip": "Ẩn ô tải lên trên trang gửi bài",
+  "media_hosting_provider_unavailable": "Không khả dụng từ mạng này. Hãy thử mạng khác hoặc VPN.",
+  "media_hosting_providers": "Nhà cung cấp Lưu trữ Phương tiện",
+  "media_hosting_random": "Ngẫu nhiên",
+  "running_automated_checks": "Đang chạy kiểm tra tự động",
+  "upload_awaiting_review": "Đã tải lên, nhưng máy chủ lưu trữ phải xem xét tệp này trước khi có thể xem được. Liên kết sẽ hoạt động sau khi được phê duyệt, việc này có thể mất vài giờ. Bạn có thể đăng ngay bây giờ.",
+  "upload_failed": "Tải lên thất bại",
+  "upload_failed_all_providers": "Tất cả nhà cung cấp đều thất bại",
+  "upload_failed_preferred_guidance": "Chọn nhà cung cấp khác hoặc đặt thành ngẫu nhiên."
 }

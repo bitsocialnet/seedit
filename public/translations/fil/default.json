@@ -295,7 +295,6 @@
   "media": "midya",
   "hide_communities_tagged_as_nsfw": "Itago ang mga komunidad na may label na NSFW/18+",
   "drop_here_or": "I-drag dito o",
-  "upload_button_warning": "Ang awtomatikong pag-upload ay naharang ng CORS policy ng iyong browser, ngunit ito ay magagamit sa Seedit Android app at desktop app (Win/Mac/Linux).\n\nPumunta sa page ng download links sa GitHub?",
   "create_community_warning": "Ang paggawa ng komunidad ay nangangailangan ng pagpapatakbo ng isang buong node. Ang Seedit desktop app (Win/Mac/Linux) ay awtomatikong nagpapatakbo ng isang buong node.\n\nPumunta sa page ng download links sa GitHub?",
   "filtering_by_nsfw": "Pag-filter ayon sa mga komunidad ng NSFW",
   "notifications": "Mga Notipikasyon",
@@ -445,5 +444,16 @@
   "quoting_user": "sinisipi si u/{{author}}",
   "fivechan_quote_tooltip": "Ang {{reference}} ay isang istilo ng pagsipi na hindi ginagamit ng Seedit, at hindi nahanap ang sinipi na komento.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Hindi ma-load ng mga browser ang komunidad na ito dahil hindi maabot ang computer na ito mula sa internet. Para maayos ito, i-forward ang port 4001 (TCP at UDP) sa iyong router papunta sa computer na ito, o i-enable ang UPnP sa iyong router. Kung hindi ito pinapayagan ng iyong internet provider, i-host na lang ang komunidad sa isang server."
+  "community_unreachable_from_browsers": "Hindi ma-load ng mga browser ang komunidad na ito dahil hindi maabot ang computer na ito mula sa internet. Para maayos ito, i-forward ang port 4001 (TCP at UDP) sa iyong router papunta sa computer na ito, o i-enable ang UPnP sa iyong router. Kung hindi ito pinapayagan ng iyong internet provider, i-host na lang ang komunidad sa isang server.",
+  "media_hosting_more_providers_in_apps": "Mas maraming provider ang inaalok ng desktop at Android na app.",
+  "media_hosting_none": "Wala",
+  "media_hosting_none_tip": "Itinatago ang upload box sa pahina ng pag-submit",
+  "media_hosting_provider_unavailable": "Hindi available mula sa network na ito. Subukan ang ibang network o VPN.",
+  "media_hosting_providers": "Mga Provider ng Media Hosting",
+  "media_hosting_random": "Random",
+  "running_automated_checks": "Nagpapatakbo ng mga awtomatikong pagsusuri",
+  "upload_awaiting_review": "Na-upload na, pero kailangang suriin muna ng host ang file na ito bago ito matingnan. Gagana ang link kapag naaprubahan na ito, na maaaring tumagal nang ilang oras. Puwede mo na itong i-post ngayon.",
+  "upload_failed": "Nabigo ang pag-upload",
+  "upload_failed_all_providers": "Lahat ng mga provider ay nabigo",
+  "upload_failed_preferred_guidance": "Pumili ng ibang provider o itakda sa random."
 }

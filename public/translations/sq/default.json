@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Fsheh komunitetet e etiketuar si NSFW/18+",
   "drop_here_or": "Hidh këtu ose",
-  "upload_button_warning": "Ngarkohet automatikisht është bllokuar nga politika CORS e shfletuesit tuaj, por është në dispozicion në aplikacionin Seedit për Android dhe aplikacionin desktop (Win/Mac/Linux).\n\nShkoni te faqja e lidhjeve për shkarkimin në GitHub?",
   "create_community_warning": "Krijimi i një komuniteti kërkon ekzekutimin e një nyjeje të plotë. Aplikacioni Seedit për desktop (Win/Mac/Linux) ekzekuton automatikisht një nyje të plotë.\n\nShkoni te faqja e lidhjeve për shkarkimin në GitHub?",
   "filtering_by_nsfw": "Filtrimi sipas grupeve NSFW",
   "notifications": "Njoftimet",
@@ -445,5 +444,16 @@
   "quoting_user": "duke cituar u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} është një stil citimi që Seedit nuk e përdor, dhe komenti i cituar nuk u gjet.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Shfletuesit nuk mund ta ngarkojnë këtë komunitet, sepse ky kompjuter nuk është i arritshëm nga interneti. Për ta rregulluar, ridrejtoni portën 4001 (TCP dhe UDP) në routerin tuaj te ky kompjuter, ose aktivizoni UPnP në routerin tuaj. Nëse ofruesi juaj i internetit nuk e lejon këtë, strehoni komunitetin në një server në vend të kësaj."
+  "community_unreachable_from_browsers": "Shfletuesit nuk mund ta ngarkojnë këtë komunitet, sepse ky kompjuter nuk është i arritshëm nga interneti. Për ta rregulluar, ridrejtoni portën 4001 (TCP dhe UDP) në routerin tuaj te ky kompjuter, ose aktivizoni UPnP në routerin tuaj. Nëse ofruesi juaj i internetit nuk e lejon këtë, strehoni komunitetin në një server në vend të kësaj.",
+  "media_hosting_more_providers_in_apps": "Aplikacionet për desktop dhe Android ofrojnë më shumë ofrues.",
+  "media_hosting_none": "Asnjë",
+  "media_hosting_none_tip": "Fsheh kutinë e ngarkimit në faqen e dërgimit",
+  "media_hosting_provider_unavailable": "Nuk disponohet nga ky rrjet. Provoni një rrjet tjetër ose një VPN.",
+  "media_hosting_providers": "Ofruesit e Hostimit të Mediave",
+  "media_hosting_random": "Rastësishëm",
+  "running_automated_checks": "Duke kryer kontrolle automatike",
+  "upload_awaiting_review": "U ngarkua, por hosti duhet ta shqyrtojë këtë skedar para se të mund të shihet. Lidhja do të fillojë të funksionojë sapo të miratohet, gjë që mund të zgjasë disa orë. Mund ta postoni tani.",
+  "upload_failed": "Ngarkimi dështoi",
+  "upload_failed_all_providers": "Të gjithë ofruesit dështuan",
+  "upload_failed_preferred_guidance": "Zgjidhni një ofrues tjetër ose vendosni në rastësishëm."
 }

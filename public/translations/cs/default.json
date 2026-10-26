@@ -295,7 +295,6 @@
   "media": "mediální",
   "hide_communities_tagged_as_nsfw": "Skrýt komunity označené jako NSFW/18+",
   "drop_here_or": "Přetáhněte sem nebo",
-  "upload_button_warning": "Automatické nahrávání je blokováno politikou CORS vašeho prohlížeče, ale je k dispozici v aplikaci Seedit pro Android a desktopovou aplikaci (Win/Mac/Linux).\n\nPřejděte na stránku odkazů ke stažení na GitHubu?",
   "create_community_warning": "Vytvoření komunity vyžaduje spuštění plného uzlu. Aplikace Seedit pro desktop (Win/Mac/Linux) automaticky spouští plný uzel.\n\nPřejděte na stránku odkazů ke stažení na GitHubu?",
   "filtering_by_nsfw": "Filtrování podle komunit NSFW",
   "notifications": "Notifikace",
@@ -445,5 +444,16 @@
   "quoting_user": "cituje u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} je styl citace, který Seedit nepoužívá, a citovaný komentář se nepodařilo najít.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Prohlížeče nemohou tuto komunitu načíst, protože tento počítač není dostupný z internetu. Chcete-li to opravit, přesměrujte na routeru port 4001 (TCP i UDP) na tento počítač, nebo na routeru zapněte UPnP. Pokud to váš poskytovatel internetu neumožňuje, provozujte komunitu místo toho na serveru."
+  "community_unreachable_from_browsers": "Prohlížeče nemohou tuto komunitu načíst, protože tento počítač není dostupný z internetu. Chcete-li to opravit, přesměrujte na routeru port 4001 (TCP i UDP) na tento počítač, nebo na routeru zapněte UPnP. Pokud to váš poskytovatel internetu neumožňuje, provozujte komunitu místo toho na serveru.",
+  "media_hosting_more_providers_in_apps": "Aplikace pro počítač a Android nabízejí více poskytovatelů.",
+  "media_hosting_none": "Žádné",
+  "media_hosting_none_tip": "Skryje pole pro nahrávání na stránce odeslání",
+  "media_hosting_provider_unavailable": "Z této sítě není k dispozici. Zkuste jinou síť nebo VPN.",
+  "media_hosting_providers": "Poskytovatelé hostování médií",
+  "media_hosting_random": "Náhodné",
+  "running_automated_checks": "Probíhají automatické kontroly",
+  "upload_awaiting_review": "Nahráno, ale hostitel musí tento soubor před zobrazením zkontrolovat. Odkaz začne fungovat po schválení, což může trvat několik hodin. Můžete ho zveřejnit už teď.",
+  "upload_failed": "Nahrávání se nezdařilo",
+  "upload_failed_all_providers": "Všichni poskytovatelé selhali",
+  "upload_failed_preferred_guidance": "Zvolte jiného poskytovatele nebo nastavte náhodné."
 }

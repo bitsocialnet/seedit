@@ -1,0 +1,33 @@
+.mediaHostingSettings input[type='radio'] {
+  margin: 2px 0.5em 0 0;
+}
+
+.mediaHostingSettings > div + div {
+  margin-top: 5px;
+}
+
+.mediaHostingSettings label input:disabled + .providerLabel {
+  color: var(--text-info);
+}
+
+.providerLink {
+  font-size: 10px;
+  color: var(--link-primary);
+  margin-left: 5px;
+}
+
+.providerLink:hover {
+  text-decoration: underline;
+}
+
+.info {
+  font-size: 10px;
+  color: var(--text-info);
+  margin-left: 5px;
+}
+
+.tip {
+  font-size: 10px;
+  color: var(--text-info);
+  padding-top: 5px;
+}

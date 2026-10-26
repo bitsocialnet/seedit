@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Dölj gemenskaper märkta som NSFW/18+",
   "drop_here_or": "Dra hit eller",
-  "upload_button_warning": "Auto-uppladdning blockeras av din webbläsares CORS-policy, men det är tillgängligt i Seedit Android-app och skrivbordsapp (Win/Mac/Linux).\n\nGå till sidan för nedladdningslänkar på GitHub?",
   "create_community_warning": "Att skapa ett community kräver att du kör en full node. Seedit desktop-appen (Win/Mac/Linux) kör automatiskt en full node.\n\nGå till sidan för nedladdningslänkar på GitHub?",
   "filtering_by_nsfw": "Filtrering efter NSFW-gemenskaper",
   "notifications": "Aviseringar",
@@ -445,5 +444,16 @@
   "quoting_user": "citerar u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} är en citatstil som Seedit inte använder, och den citerade kommentaren kunde inte hittas.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Webbläsare kan inte läsa in den här gemenskapen eftersom den här datorn inte går att nå från internet. Åtgärda det genom att vidarebefordra port 4001 (TCP och UDP) i din router till den här datorn, eller genom att slå på UPnP i din router. Om din internetleverantör inte tillåter det kan du i stället hosta gemenskapen på en server."
+  "community_unreachable_from_browsers": "Webbläsare kan inte läsa in den här gemenskapen eftersom den här datorn inte går att nå från internet. Åtgärda det genom att vidarebefordra port 4001 (TCP och UDP) i din router till den här datorn, eller genom att slå på UPnP i din router. Om din internetleverantör inte tillåter det kan du i stället hosta gemenskapen på en server.",
+  "media_hosting_more_providers_in_apps": "Dator- och Android-apparna erbjuder fler leverantörer.",
+  "media_hosting_none": "Ingen",
+  "media_hosting_none_tip": "Döljer uppladdningsrutan på inskickningssidan",
+  "media_hosting_provider_unavailable": "Inte tillgängligt från det här nätverket. Prova ett annat nätverk eller en VPN.",
+  "media_hosting_providers": "Mediahostingleverantörer",
+  "media_hosting_random": "Slumpmässig",
+  "running_automated_checks": "Kör automatiska kontroller",
+  "upload_awaiting_review": "Uppladdad, men värden måste granska filen innan den kan visas. Länken börjar fungera när den har godkänts, vilket kan ta några timmar. Du kan posta den nu.",
+  "upload_failed": "Uppladdning misslyckades",
+  "upload_failed_all_providers": "Alla leverantörer misslyckades",
+  "upload_failed_preferred_guidance": "Välj en annan leverantör eller sätt till slumpmässig."
 }

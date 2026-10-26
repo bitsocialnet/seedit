@@ -15,6 +15,7 @@ import P2pStats from './p2p-stats';
 import ContentOptions from './content-options';
 import WalletSettings from './wallet-settings';
 import NotificationsSettings from './notifications-settings';
+import MediaHostingSettings from './media-hosting-settings';
 import styles from './settings.module.css';
 import { version as packageVersion } from '../../../package.json';
 import startCase from 'lodash/startCase';
@@ -216,6 +217,12 @@ const GeneralSettings = () => {
         <span className={styles.categoryTitle}>{t('notifications')}</span>
         <span className={styles.categorySettings}>
           <NotificationsSettings />
+        </span>
+      </div>
+      <div className={`${styles.category} ${location.hash === '#mediaHosting' ? styles.highlightedSetting : ''}`} id='mediaHosting'>
+        <span className={styles.categoryTitle}>{t('media_hosting_providers')}</span>
+        <span className={styles.categorySettings}>
+          <MediaHostingSettings />
         </span>
       </div>
       <div className={`${styles.category} ${location.hash === '#exportAccount' ? styles.highlightedSetting : ''}`} id='exportBackup'>

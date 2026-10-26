@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Nascondi comunità taggate come NSFW/18+",
   "drop_here_or": "Trascina qui o",
-  "upload_button_warning": "Il caricamento automatico è bloccato dalla politica CORS del tuo browser, ma è disponibile nell'app Seedit per Android e nell'app desktop (Win/Mac/Linux).\n\nVai alla pagina dei link per il download su GitHub?",
   "create_community_warning": "Creare una comunità richiede l'esecuzione di un nodo completo. L'app Seedit per desktop (Win/Mac/Linux) esegue automaticamente un nodo completo.\n\nVai alla pagina dei link per il download su GitHub?",
   "filtering_by_nsfw": "Filtraggio per comunità NSFW",
   "notifications": "Notifiche",
@@ -445,5 +444,16 @@
   "quoting_user": "citando u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} è uno stile di citazione che Seedit non usa, e il commento citato non è stato trovato.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "I browser non riescono a caricare questa comunità perché questo computer non è raggiungibile da internet. Per risolvere, inoltra la porta 4001 (TCP e UDP) dal tuo router a questo computer, oppure attiva UPnP sul tuo router. Se il tuo operatore internet non lo consente, ospita invece la comunità su un server."
+  "community_unreachable_from_browsers": "I browser non riescono a caricare questa comunità perché questo computer non è raggiungibile da internet. Per risolvere, inoltra la porta 4001 (TCP e UDP) dal tuo router a questo computer, oppure attiva UPnP sul tuo router. Se il tuo operatore internet non lo consente, ospita invece la comunità su un server.",
+  "media_hosting_more_providers_in_apps": "Le app desktop e Android offrono più provider.",
+  "media_hosting_none": "Nessuno",
+  "media_hosting_none_tip": "Nasconde il riquadro di caricamento nella pagina di invio",
+  "media_hosting_provider_unavailable": "Non disponibile da questa rete. Prova un'altra rete o una VPN.",
+  "media_hosting_providers": "Provider di Hosting Media",
+  "media_hosting_random": "Casuale",
+  "running_automated_checks": "Controlli automatici in corso",
+  "upload_awaiting_review": "Caricato, ma l'host deve esaminare questo file prima che possa essere visualizzato. Il link inizierà a funzionare una volta approvato, il che può richiedere qualche ora. Puoi pubblicarlo subito.",
+  "upload_failed": "Caricamento fallito",
+  "upload_failed_all_providers": "Tutti i provider sono falliti",
+  "upload_failed_preferred_guidance": "Scegli un provider diverso o imposta su casuale."
 }

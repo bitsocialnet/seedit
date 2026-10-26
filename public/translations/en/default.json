@@ -334,7 +334,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Hide communities tagged as NSFW/18+",
   "drop_here_or": "Drop here or",
-  "upload_button_warning": "Auto-uploading is blocked by your browser's CORS policy, but it is available on the Seedit Android app and desktop app (Win/Mac/Linux).\n\nGo to the download links page on GitHub?",
   "create_community_warning": "Creating a community requires running a full node. The Seedit desktop app (Win/Mac/Linux) runs a full node automatically.\n\nGo to the download links page on GitHub?",
   "filtering_by_nsfw": "Filtering by NSFW communities",
   "notifications": "Notifications",
@@ -455,5 +454,16 @@
   "quoting_user": "quoting u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} is a quote style Seedit does not use, and the quoted comment could not be found.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Browsers can't load this community because this computer isn't reachable from the internet. To fix it, forward port 4001 (TCP and UDP) on your router to this computer, or enable UPnP on your router. If your internet provider doesn't allow that, host the community on a server instead."
+  "community_unreachable_from_browsers": "Browsers can't load this community because this computer isn't reachable from the internet. To fix it, forward port 4001 (TCP and UDP) on your router to this computer, or enable UPnP on your router. If your internet provider doesn't allow that, host the community on a server instead.",
+  "media_hosting_more_providers_in_apps": "The desktop and Android apps offer more providers.",
+  "media_hosting_none": "None",
+  "media_hosting_none_tip": "Hides the upload box on the submit page",
+  "media_hosting_provider_unavailable": "Unavailable from this network. Try another network or a VPN.",
+  "media_hosting_providers": "Media hosting providers",
+  "media_hosting_random": "Random",
+  "running_automated_checks": "Running automated checks",
+  "upload_awaiting_review": "Uploaded, but the host must review this file before it can be viewed. The link will start working once it is approved, which can take a few hours. You can post it now.",
+  "upload_failed": "Upload failed",
+  "upload_failed_all_providers": "All providers failed",
+  "upload_failed_preferred_guidance": "Choose a different provider or set to random."
 }

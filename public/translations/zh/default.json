@@ -295,7 +295,6 @@
   "media": "媒体",
   "hide_communities_tagged_as_nsfw": "隐藏标记为 NSFW/18+ 的社区",
   "drop_here_or": "拖放到此处或",
-  "upload_button_warning": "自动上传被浏览器的CORS政策阻止，但可以在Seedit Android应用程序和桌面应用程序（Win/Mac/Linux）上使用。\n\n前往GitHub上的下载链接页面？",
   "create_community_warning": "创建社区需要运行一个完整的节点。Seedit桌面应用程序（Win/Mac/Linux）会自动运行一个完整的节点。\n\n前往GitHub上的下载链接页面？",
   "filtering_by_nsfw": "根据NSFW社区进行过滤",
   "notifications": "通知",
@@ -445,5 +444,16 @@
   "quoting_user": "引用 u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} 是 Seedit 不使用的引用格式，未能找到被引用的评论。",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "由于无法从互联网访问这台电脑，浏览器无法加载此社区。要解决此问题，请在您的路由器上将端口 4001（TCP 和 UDP）转发到这台电脑，或在路由器上启用 UPnP。如果您的宽带运营商不允许这样做，请改为将社区托管在服务器上。"
+  "community_unreachable_from_browsers": "由于无法从互联网访问这台电脑，浏览器无法加载此社区。要解决此问题，请在您的路由器上将端口 4001（TCP 和 UDP）转发到这台电脑，或在路由器上启用 UPnP。如果您的宽带运营商不允许这样做，请改为将社区托管在服务器上。",
+  "media_hosting_more_providers_in_apps": "桌面版和 Android 应用提供更多服务商。",
+  "media_hosting_none": "无",
+  "media_hosting_none_tip": "在提交页面隐藏上传框",
+  "media_hosting_provider_unavailable": "此网络无法使用。请尝试其他网络或 VPN。",
+  "media_hosting_providers": "媒体托管提供商",
+  "media_hosting_random": "随机",
+  "running_automated_checks": "正在运行自动检查",
+  "upload_awaiting_review": "已上传，但托管方需要先审核此文件才能查看。审核通过后链接即可使用，这可能需要几个小时。你现在就可以发布。",
+  "upload_failed": "上传失败",
+  "upload_failed_all_providers": "所有提供商均失败",
+  "upload_failed_preferred_guidance": "选择其他提供商或设置为随机。"
 }

@@ -295,7 +295,6 @@
   "media": "medier",
   "hide_communities_tagged_as_nsfw": "Skjul fællesskaber mærket som NSFW/18+",
   "drop_here_or": "Drop her eller",
-  "upload_button_warning": "Auto-uploading er blokeret af din browsers CORS-politik, men det er tilgængeligt på Seedit Android-appen og desktopappen (Win/Mac/Linux).\n\nGå til downloadlinks-siden på GitHub?",
   "create_community_warning": "Oprettelse af et fællesskab kræver, at du kører en fuld node. Seedit desktop-appen (Win/Mac/Linux) kører automatisk en fuld node.\n\nGå til downloadlinks-siden på GitHub?",
   "filtering_by_nsfw": "Filtrering efter NSFW-fællesskaber",
   "notifications": "Notifikationer",
@@ -445,5 +444,16 @@
   "quoting_user": "citerer u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} er en citatstil, som Seedit ikke bruger, og den citerede kommentar kunne ikke findes.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Browsere kan ikke indlæse dette fællesskab, fordi denne computer ikke kan nås fra internettet. Løs det ved at videresende port 4001 (TCP og UDP) på din router til denne computer eller ved at slå UPnP til på din router. Hvis din internetudbyder ikke tillader det, kan du i stedet hoste fællesskabet på en server."
+  "community_unreachable_from_browsers": "Browsere kan ikke indlæse dette fællesskab, fordi denne computer ikke kan nås fra internettet. Løs det ved at videresende port 4001 (TCP og UDP) på din router til denne computer eller ved at slå UPnP til på din router. Hvis din internetudbyder ikke tillader det, kan du i stedet hoste fællesskabet på en server.",
+  "media_hosting_more_providers_in_apps": "Desktop- og Android-apps tilbyder flere udbydere.",
+  "media_hosting_none": "Ingen",
+  "media_hosting_none_tip": "Skjuler upload-feltet på indsendelsessiden",
+  "media_hosting_provider_unavailable": "Ikke tilgængelig fra dette netværk. Prøv et andet netværk eller en VPN.",
+  "media_hosting_providers": "Mediahostingudbydere",
+  "media_hosting_random": "Tilfældig",
+  "running_automated_checks": "Kører automatiske kontroller",
+  "upload_awaiting_review": "Uploadet, men værten skal gennemgå denne fil, før den kan vises. Linket begynder at virke, når den er godkendt, hvilket kan tage et par timer. Du kan poste den nu.",
+  "upload_failed": "Upload mislykkedes",
+  "upload_failed_all_providers": "Alle udbydere mislykkedes",
+  "upload_failed_preferred_guidance": "Vælg en anden udbyder eller sæt til tilfældig."
 }

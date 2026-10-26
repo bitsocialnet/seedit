@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Piilota yhteisöt, jotka on merkitty NSFW/18+",
   "drop_here_or": "Pudota tänne tai",
-  "upload_button_warning": "Automaattinen lataus on estetty selaimesi CORS-politiikalla, mutta se on saatavilla Seedit Android -sovelluksessa ja työpöytäsovelluksessa (Win/Mac/Linux).\n\nMene GitHubin latauslinkkisivulle?",
   "create_community_warning": "Yhteisön luominen vaatii täyden solmun ajamisen. Seeditin työpöytäsovellus (Win/Mac/Linux) ajaa automaattisesti täyden solmun.\n\nMene GitHubin latauslinkkisivulle?",
   "filtering_by_nsfw": "Suodatus NSFW-yhteisöjen mukaan",
   "notifications": "Ilmoitukset",
@@ -444,5 +443,16 @@
   "quoting_user": "lainaa käyttäjää u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} on lainaustyyli, jota Seedit ei käytä, eikä lainattua kommenttia löytynyt.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Selaimet eivät pysty lataamaan tätä yhteisöä, koska tähän tietokoneeseen ei saada yhteyttä internetistä. Korjaa tämä ohjaamalla portti 4001 (TCP ja UDP) reitittimessäsi tähän tietokoneeseen tai ottamalla UPnP käyttöön reitittimessäsi. Jos operaattorisi ei salli sitä, ylläpidä yhteisöä sen sijaan palvelimella."
+  "community_unreachable_from_browsers": "Selaimet eivät pysty lataamaan tätä yhteisöä, koska tähän tietokoneeseen ei saada yhteyttä internetistä. Korjaa tämä ohjaamalla portti 4001 (TCP ja UDP) reitittimessäsi tähän tietokoneeseen tai ottamalla UPnP käyttöön reitittimessäsi. Jos operaattorisi ei salli sitä, ylläpidä yhteisöä sen sijaan palvelimella.",
+  "media_hosting_more_providers_in_apps": "Työpöytä- ja Android-sovelluksissa on enemmän palveluntarjoajia.",
+  "media_hosting_none": "Ei mikään",
+  "media_hosting_none_tip": "Piilottaa latausruudun lähetyssivulta",
+  "media_hosting_provider_unavailable": "Ei saatavilla tästä verkosta. Kokeile toista verkkoa tai VPN:ää.",
+  "media_hosting_providers": "Mediahostingin palveluntarjoajat",
+  "media_hosting_random": "Satunnainen",
+  "running_automated_checks": "Suoritetaan automaattisia tarkistuksia",
+  "upload_awaiting_review": "Ladattu, mutta palvelun on tarkistettava tämä tiedosto ennen kuin sitä voi katsoa. Linkki alkaa toimia, kun tiedosto on hyväksytty, mikä voi kestää muutaman tunnin. Voit julkaista sen nyt.",
+  "upload_failed": "Lataus epäonnistui",
+  "upload_failed_all_providers": "Kaikki palveluntarjoajat epäonnistuivat",
+  "upload_failed_preferred_guidance": "Valitse toinen palveluntarjoaja tai aseta satunnaiseksi."
 }

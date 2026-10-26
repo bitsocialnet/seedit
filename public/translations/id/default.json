@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Sembunyikan komunitas yang ditandai sebagai NSFW/18+",
   "drop_here_or": "Seretkan di sini atau",
-  "upload_button_warning": "Pengunggahan otomatis diblokir oleh kebijakan CORS browser Anda, tetapi tersedia di aplikasi Seedit Android dan aplikasi desktop (Win/Mac/Linux).\n\nPergi ke halaman tautan unduhan di GitHub?",
   "create_community_warning": "Membuat komunitas memerlukan menjalankan node penuh. Aplikasi desktop Seedit (Win/Mac/Linux) secara otomatis menjalankan node penuh.\n\nPergi ke halaman tautan unduhan di GitHub?",
   "filtering_by_nsfw": "Penyaringan berdasarkan komunitas NSFW",
   "notifications": "Notifikasi",
@@ -445,5 +444,16 @@
   "quoting_user": "mengutip u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} adalah gaya kutipan yang tidak digunakan Seedit, dan komentar yang dikutip tidak ditemukan.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Browser tidak dapat memuat komunitas ini karena komputer ini tidak dapat dijangkau dari internet. Untuk memperbaikinya, teruskan port 4001 (TCP dan UDP) di router Anda ke komputer ini, atau aktifkan UPnP di router Anda. Jika penyedia internet Anda tidak mengizinkannya, jalankan komunitas ini di sebuah server sebagai gantinya."
+  "community_unreachable_from_browsers": "Browser tidak dapat memuat komunitas ini karena komputer ini tidak dapat dijangkau dari internet. Untuk memperbaikinya, teruskan port 4001 (TCP dan UDP) di router Anda ke komputer ini, atau aktifkan UPnP di router Anda. Jika penyedia internet Anda tidak mengizinkannya, jalankan komunitas ini di sebuah server sebagai gantinya.",
+  "media_hosting_more_providers_in_apps": "Aplikasi desktop dan Android menyediakan lebih banyak penyedia.",
+  "media_hosting_none": "Tidak ada",
+  "media_hosting_none_tip": "Menyembunyikan kotak unggah di halaman kirim",
+  "media_hosting_provider_unavailable": "Tidak tersedia dari jaringan ini. Coba jaringan lain atau VPN.",
+  "media_hosting_providers": "Penyedia Hosting Media",
+  "media_hosting_random": "Acak",
+  "running_automated_checks": "Menjalankan pemeriksaan otomatis",
+  "upload_awaiting_review": "Berhasil diunggah, tetapi host harus meninjau file ini sebelum dapat dilihat. Tautan akan berfungsi setelah disetujui, yang bisa memakan waktu beberapa jam. Anda bisa mempostingnya sekarang.",
+  "upload_failed": "Unggahan gagal",
+  "upload_failed_all_providers": "Semua penyedia gagal",
+  "upload_failed_preferred_guidance": "Pilih penyedia lain atau atur ke acak."
 }

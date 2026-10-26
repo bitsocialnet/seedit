@@ -295,7 +295,6 @@
   "media": "mídia",
   "hide_communities_tagged_as_nsfw": "Ocultar comunidades marcadas como NSFW/18+",
   "drop_here_or": "Solte aqui ou",
-  "upload_button_warning": "O upload automático está bloqueado pela política CORS do seu navegador, mas está disponível no aplicativo Seedit para Android e no aplicativo desktop (Win/Mac/Linux).\n\nVá para a página de links de download no GitHub?",
   "create_community_warning": "Criar uma comunidade exige a execução de um nó completo. O aplicativo Seedit para desktop (Win/Mac/Linux) executa automaticamente um nó completo.\n\nVá para a página de links de download no GitHub?",
   "filtering_by_nsfw": "Filtragem por comunidades NSFW",
   "notifications": "Notificações",
@@ -445,5 +444,16 @@
   "quoting_user": "citando u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} é um estilo de citação que o Seedit não usa, e o comentário citado não foi encontrado.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Os navegadores não conseguem carregar esta comunidade porque este computador não pode ser acessado pela internet. Para resolver, redirecione a porta 4001 (TCP e UDP) do seu roteador para este computador ou ative o UPnP no seu roteador. Se o seu provedor de internet não permitir isso, hospede a comunidade em um servidor."
+  "community_unreachable_from_browsers": "Os navegadores não conseguem carregar esta comunidade porque este computador não pode ser acessado pela internet. Para resolver, redirecione a porta 4001 (TCP e UDP) do seu roteador para este computador ou ative o UPnP no seu roteador. Se o seu provedor de internet não permitir isso, hospede a comunidade em um servidor.",
+  "media_hosting_more_providers_in_apps": "Os aplicativos para desktop e Android oferecem mais provedores.",
+  "media_hosting_none": "Nenhum",
+  "media_hosting_none_tip": "Oculta a caixa de envio na página de publicação",
+  "media_hosting_provider_unavailable": "Indisponível nesta rede. Tente outra rede ou uma VPN.",
+  "media_hosting_providers": "Provedores de Hospedagem de Mídia",
+  "media_hosting_random": "Aleatório",
+  "running_automated_checks": "Executando verificações automáticas",
+  "upload_awaiting_review": "Enviado, mas o host precisa revisar este arquivo antes que ele possa ser visualizado. O link começará a funcionar assim que for aprovado, o que pode levar algumas horas. Você já pode publicá-lo.",
+  "upload_failed": "Falha no envio",
+  "upload_failed_all_providers": "Todos os provedores falharam",
+  "upload_failed_preferred_guidance": "Escolha um provedor diferente ou defina como aleatório."
 }

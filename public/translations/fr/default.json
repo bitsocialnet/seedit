@@ -295,7 +295,6 @@
   "media": "média",
   "hide_communities_tagged_as_nsfw": "Cacher les communautés étiquetées comme NSFW/18+",
   "drop_here_or": "Déposez ici ou",
-  "upload_button_warning": "Le téléchargement automatique est bloqué par la politique CORS de votre navigateur, mais il est disponible sur l'application Seedit Android et l'application de bureau (Win/Mac/Linux).\n\nAllez à la page des liens de téléchargement sur GitHub?",
   "create_community_warning": "Créer une communauté nécessite l'exécution d'un nœud complet. L'application Seedit pour bureau (Win/Mac/Linux) exécute automatiquement un nœud complet.\n\nAllez à la page des liens de téléchargement sur GitHub?",
   "filtering_by_nsfw": "Filtrage par communautés NSFW",
   "notifications": "Notifications",
@@ -445,5 +444,16 @@
   "quoting_user": "cite u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} est un style de citation que Seedit n'utilise pas, et le commentaire cité est introuvable.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Les navigateurs ne peuvent pas charger cette communauté, car cet ordinateur n'est pas joignable depuis Internet. Pour corriger cela, redirigez le port 4001 (TCP et UDP) de votre routeur vers cet ordinateur, ou activez l'UPnP sur votre routeur. Si votre fournisseur d'accès à Internet ne le permet pas, hébergez plutôt la communauté sur un serveur."
+  "community_unreachable_from_browsers": "Les navigateurs ne peuvent pas charger cette communauté, car cet ordinateur n'est pas joignable depuis Internet. Pour corriger cela, redirigez le port 4001 (TCP et UDP) de votre routeur vers cet ordinateur, ou activez l'UPnP sur votre routeur. Si votre fournisseur d'accès à Internet ne le permet pas, hébergez plutôt la communauté sur un serveur.",
+  "media_hosting_more_providers_in_apps": "Les applications de bureau et Android proposent davantage de fournisseurs.",
+  "media_hosting_none": "Aucun",
+  "media_hosting_none_tip": "Masque la zone d'envoi de fichier sur la page de soumission",
+  "media_hosting_provider_unavailable": "Indisponible depuis ce réseau. Essayez un autre réseau ou un VPN.",
+  "media_hosting_providers": "Fournisseurs d'Hébergement Multimédia",
+  "media_hosting_random": "Aléatoire",
+  "running_automated_checks": "Vérifications automatiques en cours",
+  "upload_awaiting_review": "Envoyé, mais l'hébergeur doit vérifier ce fichier avant qu'il puisse être affiché. Le lien fonctionnera une fois le fichier approuvé, ce qui peut prendre quelques heures. Vous pouvez le publier dès maintenant.",
+  "upload_failed": "Échec du téléchargement",
+  "upload_failed_all_providers": "Tous les fournisseurs ont échoué",
+  "upload_failed_preferred_guidance": "Choisissez un autre fournisseur ou réglez sur aléatoire."
 }

@@ -1,43 +1,46 @@
 import { registerPlugin } from '@capacitor/core';
-import { Capacitor } from '@capacitor/core';
+import type { ProviderAttempt, ProviderId } from '../lib/media-hosting';
 
-export interface FileUploaderPlugin {
-  pickAndUploadMedia(): Promise<{ url: string; fileName: string }>;
-  uploadMedia(fileData: { fileData?: string; fileName: string } | File): Promise<{ url: string; fileName: string }>;
-  pickMedia(): Promise<{ data: string; fileName: string; mimeType: string }>;
+interface PickMediaOptions {
+  /** MIME type patterns the picker offers, e.g. image/*. */
+  mimeTypes: string[];
 }
 
-const FileUploader = Capacitor.isNativePlatform()
-  ? registerPlugin<FileUploaderPlugin>('FileUploader')
-  : {
-      pickAndUploadMedia: async () => {
-        // For Electron, we'll use IPC
-        if (window.electron) {
-          return window.electron.invoke('plugin:file-uploader:pickAndUploadMedia');
-        }
-        throw new Error('FileUploader is not supported on this platform');
-      },
-      uploadMedia: async (fileData: { fileData?: string; fileName: string } | File) => {
-        if (window.electron) {
-          return window.electron.invoke('plugin:file-uploader:uploadMedia', fileData);
-        }
-        throw new Error('FileUploader is not supported on this platform');
-      },
-      pickMedia: async () => {
-        console.log('Calling pickMedia');
-        if (window.electron) {
-          console.log('window.electron exists, invoking IPC');
-          try {
-            const result = await window.electron.invoke('plugin:file-uploader:pickMedia');
-            console.log('IPC result:', result);
-            return result;
-          } catch (error) {
-            console.error('IPC error:', error);
-            throw error;
-          }
-        }
-        throw new Error('FileUploader is not supported on this platform');
-      },
-    };
+interface PickedMedia {
+  /** Opaque handle the plugin uploads the picked file by, so the web layer cannot make it upload an arbitrary native file. */
+  id: string;
+  fileName: string;
+  mimeType: string;
+  /** WebView-local URL that streams the picked file, for uploads made from the web layer (Forge Images). */
+  webPath: string;
+}
+
+interface UploadPickedMediaOptions {
+  id: string;
+  providerOrder: ProviderId[];
+}
+
+interface UploadGeneratedMediaOptions {
+  providerOrder: ProviderId[];
+  fileName: string;
+  mimeType: string;
+  base64: string;
+}
+
+interface UploadMediaResult {
+  url: string;
+  fileName: string;
+  provider: ProviderId;
+  attempts?: ProviderAttempt[];
+}
+
+/** Android-only native uploader; desktop and web upload from the renderer and the Electron main process. */
+interface FileUploaderPlugin {
+  pickMedia(options: PickMediaOptions): Promise<PickedMedia>;
+  uploadPickedMedia(options: UploadPickedMediaOptions): Promise<UploadMediaResult>;
+  uploadGeneratedMedia(options: UploadGeneratedMediaOptions): Promise<UploadMediaResult>;
+}
+
+const FileUploader = registerPlugin<FileUploaderPlugin>('FileUploader');
 
 export default FileUploader;

@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Verberg gemeenschappen gemarkeerd als NSFW/18+",
   "drop_here_or": "Sleep hierheen of",
-  "upload_button_warning": "Auto-upload wordt geblokkeerd door het CORS-beleid van uw browser, maar het is beschikbaar op de Seedit Android-app en desktopapp (Win/Mac/Linux).\n\nGa naar de downloadlinks-pagina op GitHub?",
   "create_community_warning": "Een gemeenschap creëren vereist het uitvoeren van een volledige node. De Seedit desktop-app (Win/Mac/Linux) voert automatisch een volledige node uit.\n\nGa naar de downloadlinks-pagina op GitHub?",
   "filtering_by_nsfw": "Filteren op NSFW-gemeenschappen",
   "notifications": "Meldingen",
@@ -445,5 +444,16 @@
   "quoting_user": "citeert u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} is een citaatstijl die Seedit niet gebruikt en de geciteerde reactie is niet gevonden.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Browsers kunnen deze community niet laden, omdat deze computer niet bereikbaar is vanaf internet. Los dit op door poort 4001 (TCP en UDP) op je router door te sturen naar deze computer, of door UPnP aan te zetten op je router. Als je internetprovider dat niet toestaat, host de community dan op een server."
+  "community_unreachable_from_browsers": "Browsers kunnen deze community niet laden, omdat deze computer niet bereikbaar is vanaf internet. Los dit op door poort 4001 (TCP en UDP) op je router door te sturen naar deze computer, of door UPnP aan te zetten op je router. Als je internetprovider dat niet toestaat, host de community dan op een server.",
+  "media_hosting_more_providers_in_apps": "De desktop- en Android-apps bieden meer providers.",
+  "media_hosting_none": "Geen",
+  "media_hosting_none_tip": "Verbergt het uploadvak op de pagina voor inzenden",
+  "media_hosting_provider_unavailable": "Niet beschikbaar via dit netwerk. Probeer een ander netwerk of een VPN.",
+  "media_hosting_providers": "Mediahostingproviders",
+  "media_hosting_random": "Willekeurig",
+  "running_automated_checks": "Automatische controles uitvoeren",
+  "upload_awaiting_review": "Geüpload, maar de host moet dit bestand controleren voordat het bekeken kan worden. De link werkt zodra het is goedgekeurd, wat een paar uur kan duren. Je kunt het nu al posten.",
+  "upload_failed": "Upload mislukt",
+  "upload_failed_all_providers": "Alle providers zijn mislukt",
+  "upload_failed_preferred_guidance": "Kies een andere provider of zet op willekeurig."
 }

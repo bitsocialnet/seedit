@@ -295,7 +295,6 @@
   "media": "メディア",
   "hide_communities_tagged_as_nsfw": "NSFW/18+としてタグ付けされたコミュニティを非表示にする",
   "drop_here_or": "ここにドロップまたは",
-  "upload_button_warning": "自動アップロードはブラウザのCORSポリシーでブロックされていますが、SeeditのAndroidアプリおよびデスクトップアプリ（Win/Mac/Linux）では利用可能です。\n\nGitHubのダウンロードリンクページに移動しますか？",
   "create_community_warning": "コミュニティを作成するには、フルノードを実行する必要があります。Seeditのデスクトップアプリ（Win/Mac/Linux）は自動的にフルノードを実行します。\n\nGitHubのダウンロードリンクページに移動しますか？",
   "filtering_by_nsfw": "NSFW コミュニティによるフィルタリング",
   "notifications": "通知",
@@ -445,5 +444,16 @@
   "quoting_user": "u/{{author}}を引用",
   "fivechan_quote_tooltip": "{{reference}} は Seedit が使用しない引用形式で、引用されたコメントは見つかりませんでした。",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "インターネットからこのコンピューターに接続できないため、ブラウザーではこのコミュニティを読み込めません。解決するには、ルーターでポート 4001（TCP と UDP）をこのコンピューターに転送するか、ルーターで UPnP を有効にしてください。プロバイダーがこれを許可していない場合は、代わりにサーバーでコミュニティをホストしてください。"
+  "community_unreachable_from_browsers": "インターネットからこのコンピューターに接続できないため、ブラウザーではこのコミュニティを読み込めません。解決するには、ルーターでポート 4001（TCP と UDP）をこのコンピューターに転送するか、ルーターで UPnP を有効にしてください。プロバイダーがこれを許可していない場合は、代わりにサーバーでコミュニティをホストしてください。",
+  "media_hosting_more_providers_in_apps": "デスクトップ版とAndroid版のアプリでは、より多くのプロバイダーを利用できます。",
+  "media_hosting_none": "なし",
+  "media_hosting_none_tip": "投稿ページのアップロード欄を非表示にします",
+  "media_hosting_provider_unavailable": "このネットワークからは利用できません。別のネットワークかVPNをお試しください。",
+  "media_hosting_providers": "メディアホスティングプロバイダー",
+  "media_hosting_random": "ランダム",
+  "running_automated_checks": "自動チェックを実行中",
+  "upload_awaiting_review": "アップロードしましたが、表示できるようになる前にホストによるこのファイルの審査が必要です。承認されるとリンクが機能し始めます。数時間かかる場合があります。今すぐ投稿することもできます。",
+  "upload_failed": "アップロードに失敗しました",
+  "upload_failed_all_providers": "すべてのプロバイダーが失敗しました",
+  "upload_failed_preferred_guidance": "別のプロバイダーを選択するか、ランダムに設定してください。"
 }

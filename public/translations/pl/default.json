@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Ukryj społeczności oznaczone jako NSFW/18+",
   "drop_here_or": "Upuść tutaj lub",
-  "upload_button_warning": "Automatyczne przesyłanie jest blokowane przez politykę CORS w twojej przeglądarce, ale jest dostępne w aplikacji Seedit na Androida oraz w aplikacji desktopowej (Win/Mac/Linux).\n\nPrzejdź do strony linków do pobrania na GitHubie?",
   "create_community_warning": "Tworzenie społeczności wymaga uruchomienia pełnego węzła. Aplikacja Seedit desktop (Win/Mac/Linux) automatycznie uruchamia pełny węzeł.\n\nPrzejdź do strony linków do pobrania na GitHubie?",
   "filtering_by_nsfw": "Filtrowanie według społeczności NSFW",
   "notifications": "Powiadomienia",
@@ -445,5 +444,16 @@
   "quoting_user": "cytuje u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} to styl cytowania, którego Seedit nie używa, a cytowanego komentarza nie znaleziono.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Przeglądarki nie mogą załadować tej społeczności, ponieważ ten komputer nie jest dostępny z internetu. Aby to naprawić, przekieruj na swoim routerze port 4001 (TCP i UDP) na ten komputer albo włącz UPnP na routerze. Jeśli dostawca internetu na to nie pozwala, zamiast tego hostuj społeczność na serwerze."
+  "community_unreachable_from_browsers": "Przeglądarki nie mogą załadować tej społeczności, ponieważ ten komputer nie jest dostępny z internetu. Aby to naprawić, przekieruj na swoim routerze port 4001 (TCP i UDP) na ten komputer albo włącz UPnP na routerze. Jeśli dostawca internetu na to nie pozwala, zamiast tego hostuj społeczność na serwerze.",
+  "media_hosting_more_providers_in_apps": "Aplikacje na komputer i Androida oferują więcej dostawców.",
+  "media_hosting_none": "Brak",
+  "media_hosting_none_tip": "Ukrywa pole przesyłania na stronie dodawania wpisu",
+  "media_hosting_provider_unavailable": "Niedostępne z tej sieci. Spróbuj użyć innej sieci lub VPN.",
+  "media_hosting_providers": "Dostawcy hostingu mediów",
+  "media_hosting_random": "Losowy",
+  "running_automated_checks": "Trwają automatyczne kontrole",
+  "upload_awaiting_review": "Przesłano, ale host musi sprawdzić ten plik, zanim będzie można go wyświetlić. Link zacznie działać po zatwierdzeniu, co może potrwać kilka godzin. Możesz opublikować go już teraz.",
+  "upload_failed": "Przesyłanie nie powiodło się",
+  "upload_failed_all_providers": "Wszyscy dostawcy zawiedli",
+  "upload_failed_preferred_guidance": "Wybierz innego dostawcę lub ustaw na losowy."
 }

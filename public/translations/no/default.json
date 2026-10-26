@@ -295,7 +295,6 @@
   "media": "media",
   "hide_communities_tagged_as_nsfw": "Skjul samfunn merket som NSFW/18+",
   "drop_here_or": "Slipp her eller",
-  "upload_button_warning": "Auto-opplasting er blokkert av CORS-policyen til nettleseren din, men det er tilgjengelig på Seedit Android-app og desktopapp (Win/Mac/Linux).\n\nGå til nedlastingslenkesiden på GitHub?",
   "create_community_warning": "Opprettelse av et fellesskap krever at du kjører en full node. Seedit desktop-appen (Win/Mac/Linux) kjører automatisk en full node.\n\nGå til nedlastingslenkesiden på GitHub?",
   "filtering_by_nsfw": "Filtrering etter NSFW-fellesskap",
   "notifications": "Varsler",
@@ -445,5 +444,16 @@
   "quoting_user": "siterer u/{{author}}",
   "fivechan_quote_tooltip": "{{reference}} er en sitatstil som Seedit ikke bruker, og den siterte kommentaren ble ikke funnet.",
   "relevance": "relevance",
-  "community_unreachable_from_browsers": "Nettlesere kan ikke laste inn dette fellesskapet fordi denne datamaskinen ikke kan nås fra internett. Løs det ved å videresende port 4001 (TCP og UDP) på ruteren din til denne datamaskinen, eller ved å slå på UPnP på ruteren din. Hvis internettleverandøren din ikke tillater det, kan du heller hoste fellesskapet på en server."
+  "community_unreachable_from_browsers": "Nettlesere kan ikke laste inn dette fellesskapet fordi denne datamaskinen ikke kan nås fra internett. Løs det ved å videresende port 4001 (TCP og UDP) på ruteren din til denne datamaskinen, eller ved å slå på UPnP på ruteren din. Hvis internettleverandøren din ikke tillater det, kan du heller hoste fellesskapet på en server.",
+  "media_hosting_more_providers_in_apps": "Skrivebords- og Android-appene tilbyr flere leverandører.",
+  "media_hosting_none": "Ingen",
+  "media_hosting_none_tip": "Skjuler opplastingsfeltet på innsendingssiden",
+  "media_hosting_provider_unavailable": "Ikke tilgjengelig fra dette nettverket. Prøv et annet nettverk eller en VPN.",
+  "media_hosting_providers": "Mediahostingleverandører",
+  "media_hosting_random": "Tilfeldig",
+  "running_automated_checks": "Kjører automatiske kontroller",
+  "upload_awaiting_review": "Lastet opp, men verten må gå gjennom denne filen før den kan vises. Lenken begynner å virke når den er godkjent, noe som kan ta noen timer. Du kan poste den nå.",
+  "upload_failed": "Opplasting mislyktes",
+  "upload_failed_all_providers": "Alle leverandører mislyktes",
+  "upload_failed_preferred_guidance": "Velg en annen leverandør eller sett til tilfeldig."
 }
