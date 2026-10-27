@@ -8,7 +8,7 @@
   "private": true,
   "packageManager": "yarn@4.17.1",
   "dependencies": {
-    "@bitsocial/bitsocial-react-hooks": "0.1.57",
+    "@bitsocial/bitsocial-react-hooks": "0.1.59",
     "@bitsocial/bso-resolver": "0.0.10",
     "@capacitor/app": "7.0.1",
     "@capacitor/filesystem": "7.1.4",
