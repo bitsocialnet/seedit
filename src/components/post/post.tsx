@@ -20,7 +20,7 @@ import useWindowWidth from '../../hooks/use-window-width';
 import CommentEditForm from '../comment-edit-form';
 import ExpandButton from '../expand-button';
 import Expando from '../expando';
-import Flair from '../flair';
+import Flair, { type FlairData } from '../flair';
 import CommentTools from '../comment-tools';
 import Thumbnail from '../thumbnail';
 import CrosspostPreview from '../crosspost-preview';
@@ -37,6 +37,7 @@ interface PostAuthorProps {
   authorRole: string;
   cid: string;
   displayName: string;
+  flairs?: FlairData[];
   index?: number;
   pinned?: boolean;
   shortAddress: string;
@@ -44,7 +45,7 @@ interface PostAuthorProps {
   authorAddressChanged: boolean;
 }
 
-const PostAuthor = ({ authorAddress, authorRole, cid, displayName, index, pinned, shortAddress, shortAuthorAddress, authorAddressChanged }: PostAuthorProps) => {
+const PostAuthor = ({ authorAddress, authorRole, cid, displayName, flairs, index, pinned, shortAddress, shortAuthorAddress, authorAddressChanged }: PostAuthorProps) => {
   // TODO: implement comment.highlightRole once implemented in API
   const isAuthorOwner = authorRole === 'owner';
   const isAuthorAdmin = authorRole === 'admin';
@@ -68,6 +69,12 @@ const PostAuthor = ({ authorAddress, authorRole, cid, displayName, index, pinned
           <span className={`${styles.authorAddressVisible} ${authorAddressChanged && styles.authorAddressChanged}`}>u/{getDisplayAddress(shortAuthorAddress || '')}</span>
         </span>
       </Link>
+      {flairs?.map((flair, index) => (
+        <React.Fragment key={index}>
+          {' '}
+          <Flair flair={flair} author />
+        </React.Fragment>
+      ))}
       {/* TODO: implement comment.highlightRole once implemented in API */}
       {authorRole && pinned && (
         <span>
@@ -314,6 +321,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                     authorRole={authorRole}
                     cid={cid}
                     displayName={displayName}
+                    flairs={author?.flairs}
                     index={post?.index}
                     pinned={pinned}
                     shortAddress={shortAddress}

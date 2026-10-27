@@ -10,6 +10,7 @@ import Reply from './reply';
 const act = (React as { act?: (callback: () => void | Promise<void>) => void | Promise<void> }).act as (callback: () => void | Promise<void>) => void | Promise<void>;
 
 const testState = vi.hoisted(() => ({
+  pathname: '/s/example.bso/comments/post-cid',
   repliesByCid: {} as Record<string, Record<string, any>[]>,
 }));
 
@@ -24,7 +25,7 @@ vi.mock('@bitsocial/bitsocial-react-hooks/dist/lib/utils/index.js', () => ({ fla
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 vi.mock('react-router-dom', () => ({
   Link: ({ children }: { children: React.ReactNode }) => createElement('a', null, children),
-  useLocation: () => ({ pathname: '/s/example.bso/comments/post-cid', search: '' }),
+  useLocation: () => ({ pathname: testState.pathname, search: '' }),
   useParams: () => ({ communityAddress: 'example.bso', commentCid: 'post-cid' }),
 }));
 vi.mock('../../hooks/use-account-comment', () => ({ default: () => undefined }));
@@ -40,7 +41,9 @@ vi.mock('../loading-ellipsis', () => ({ default: () => null }));
 vi.mock('../markdown', () => ({ default: ({ content }: { content: string }) => createElement('p', null, content) }));
 vi.mock('../expand-button', () => ({ default: () => null }));
 vi.mock('../expando', () => ({ default: () => null }));
-vi.mock('../flair', () => ({ default: () => null }));
+vi.mock('../flair', () => ({
+  default: ({ flair, author }: { flair: { text: string }; author?: boolean }) => (author ? createElement('span', { 'data-author-flair': '' }, flair.text) : null),
+}));
 vi.mock('../label', () => ({ default: () => null }));
 vi.mock('../thumbnail', () => ({ default: () => null }));
 vi.mock('../comment-tools', () => ({
@@ -61,6 +64,7 @@ const replyOrder = () => Array.from(container.querySelectorAll('[data-reply-butt
 
 describe('Nested Reply identity', () => {
   beforeEach(() => {
+    testState.pathname = '/s/example.bso/comments/post-cid';
     testState.repliesByCid = { parent: [child('first'), child('second')], first: [child('grandchild')] };
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -117,5 +121,27 @@ describe('Nested Reply identity', () => {
     expect(container.textContent).toContain('Pending two');
     expect(container.querySelectorAll('button')).toHaveLength(3);
     expect(consoleError.mock.calls.flat().join(' ')).not.toMatch(/same key/);
+  });
+
+  it('renders author flairs next to the author and hides them when collapsed', async () => {
+    testState.repliesByCid = {};
+    const flairedReply = { ...parent, author: { address: 'askwise.bso', flairs: [{ text: 'bot' }, { text: 'helper' }] } };
+    await act(async () => root.render(createElement(Reply, { reply: flairedReply as any })));
+
+    const authorFlairs = () => Array.from(container.querySelectorAll('[data-author-flair]')).map((element) => element.textContent);
+    expect(authorFlairs()).toEqual(['bot', 'helper']);
+
+    const collapseButton = Array.from(container.querySelectorAll('span')).find((element) => element.textContent === '[–]') as HTMLSpanElement;
+    await act(async () => collapseButton.click());
+    expect(authorFlairs()).toEqual([]);
+  });
+
+  it('renders author flairs in the inbox byline', async () => {
+    testState.pathname = '/inbox';
+    testState.repliesByCid = {};
+    const flairedReply = { ...parent, author: { address: 'askwise.bso', flairs: [{ text: 'bot' }] } };
+    await act(async () => root.render(createElement(Reply, { reply: flairedReply as any, isNotification: true })));
+
+    expect(Array.from(container.querySelectorAll('[data-author-flair]')).map((element) => element.textContent)).toEqual(['bot']);
   });
 });

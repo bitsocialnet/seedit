@@ -16,3 +16,13 @@
 .wrapper {
   padding: 0 4px;
 }
+
+.authorFlair {
+  display: inline-block;
+  padding: 0 2px;
+  background: var(--flair-blank-background);
+  color: var(--flair-blank-color);
+  border: 1px solid var(--flair-blank-border);
+  border-radius: 2px;
+  unicode-bidi: isolate;
+}

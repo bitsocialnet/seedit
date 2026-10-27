@@ -23,7 +23,7 @@ import Markdown from '../markdown';
 import CommentTools from '../comment-tools';
 import ExpandButton from '../expand-button';
 import Expando from '../expando';
-import Flair from '../flair';
+import Flair, { type FlairData } from '../flair';
 import Label from '../label';
 import Thumbnail from '../thumbnail';
 import ReplyForm from '../reply-form';
@@ -37,6 +37,7 @@ interface ReplyAuthorProps {
   cid: string;
   deleted: boolean;
   displayName: string;
+  flairs?: FlairData[];
   removed: boolean;
   shortAuthorAddress: string | undefined;
   submitterAddress: string;
@@ -51,6 +52,7 @@ const ReplyAuthor = ({
   cid,
   deleted,
   displayName,
+  flairs,
   pinned,
   removed,
   shortAuthorAddress,
@@ -89,6 +91,12 @@ const ReplyAuthor = ({
           >
             {displayName ? `u/${getDisplayAddress(shortAuthorAddress || '')}` : getDisplayAddress(shortAuthorAddress || '')}
           </Link>
+          {flairs?.map((flair, index) => (
+            <Fragment key={index}>
+              {' '}
+              <Flair flair={flair} author />
+            </Fragment>
+          ))}
           {/* TODO: implement comment.highlightRole once implemented in API */}
           {(authorRole || isAuthorSubmitter) && pinned && (
             <span className={styles.moderatorBrackets}>
@@ -198,6 +206,7 @@ type ParentLinkProps = {
   commentCid?: string;
   /** Indexer-served copy of the parent post, shown while (or if never) the live fetch answers. */
   fallbackParent?: Comment;
+  flairs?: FlairData[];
   markedAsRead?: boolean;
   parentCid?: string;
   postCid?: string;
@@ -282,7 +291,7 @@ const InboxShowParentButton = ({ parentCid }: { parentCid: string | undefined })
   );
 };
 
-const InboxParentInfo = ({ address, cid, markedAsRead, parentCid, postCid, shortAddress, communityAddress, timestamp }: ParentLinkProps) => {
+const InboxParentInfo = ({ address, cid, flairs, markedAsRead, parentCid, postCid, shortAddress, communityAddress, timestamp }: ParentLinkProps) => {
   const { t } = useTranslation();
   const shortCommunityAddress = communityAddress ? getShortDisplayAddress(communityAddress) : '';
 
@@ -293,6 +302,11 @@ const InboxParentInfo = ({ address, cid, markedAsRead, parentCid, postCid, short
         <Link to={`/u/${address}/comments/${cid}`} className={styles.inboxParentAuthor}>
           u/{getDisplayAddress(shortAddress || '')}{' '}
         </Link>
+        {flairs?.map((flair, index) => (
+          <Fragment key={index}>
+            <Flair flair={flair} author />{' '}
+          </Fragment>
+        ))}
         {t('via')}{' '}
         <Link to={communityAddress ? getCommunityPath(communityAddress) : ''} className={styles.parentCommunity}>
           s/{shortCommunityAddress}{' '}
@@ -468,6 +482,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                   cid={cid}
                   deleted={deleted}
                   displayName={author?.displayName}
+                  flairs={collapsed ? undefined : author?.flairs}
                   removed={removed}
                   shortAuthorAddress={shortAuthorAddress}
                   submitterAddress={post?.author?.address}
@@ -502,6 +517,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
               <InboxParentInfo
                 address={author?.address}
                 cid={cid}
+                flairs={author?.flairs}
                 markedAsRead={markedAsRead}
                 parentCid={parentCid}
                 postCid={postCid}
