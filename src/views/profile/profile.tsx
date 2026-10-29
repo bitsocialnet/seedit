@@ -142,15 +142,7 @@ const Overview = () => {
   const { t } = useTranslation();
   const [sortType, setSortType] = useState('new');
   const { error, accountComments } = useAccountComments({ order: getAccountHistoryOrder(sortType) });
-  const [shouldShowErrorToUserOverview, setShouldShowErrorToUserOverview] = useState(false);
-
-  useEffect(() => {
-    if (error?.message && accountComments.length === 0) {
-      setShouldShowErrorToUserOverview(true);
-    } else if (accountComments.length > 0) {
-      setShouldShowErrorToUserOverview(false);
-    }
-  }, [error, accountComments]);
+  const shouldShowErrorToUserOverview = Boolean(error?.message && accountComments.length === 0);
 
   const prevErrorMessageRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -178,15 +170,7 @@ const Comments = () => {
   const [sortType, setSortType] = useState('new');
   const repliesFilter = useCallback<AccountPublicationsFilter>((publication) => ('parentCid' in publication ? Boolean(publication.parentCid) : false), []);
   const { error, accountComments } = useAccountComments({ filter: repliesFilter, order: getAccountHistoryOrder(sortType) });
-  const [shouldShowErrorToUserComments, setShouldShowErrorToUserComments] = useState(false);
-
-  useEffect(() => {
-    if (error?.message && accountComments.length === 0) {
-      setShouldShowErrorToUserComments(true);
-    } else if (accountComments.length > 0) {
-      setShouldShowErrorToUserComments(false);
-    }
-  }, [error, accountComments]);
+  const shouldShowErrorToUserComments = Boolean(error?.message && accountComments.length === 0);
 
   const prevErrorMessageRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -214,15 +198,7 @@ const Submitted = () => {
   const [sortType, setSortType] = useState('new');
   const submittedFilter = useCallback<AccountPublicationsFilter>((publication) => ('parentCid' in publication ? !publication.parentCid : false), []);
   const { error, accountComments } = useAccountComments({ filter: submittedFilter, order: getAccountHistoryOrder(sortType) });
-  const [shouldShowErrorToUserSubmitted, setShouldShowErrorToUserSubmitted] = useState(false);
-
-  useEffect(() => {
-    if (error?.message && accountComments.length === 0) {
-      setShouldShowErrorToUserSubmitted(true);
-    } else if (accountComments.length > 0) {
-      setShouldShowErrorToUserSubmitted(false);
-    }
-  }, [error, accountComments]);
+  const shouldShowErrorToUserSubmitted = Boolean(error?.message && accountComments.length === 0);
 
   const prevErrorMessageRef = useRef<string | undefined>(undefined);
   useEffect(() => {
@@ -249,7 +225,6 @@ const VotedComments = ({ voteType }: { voteType: 1 | -1 }) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
   const [sortType, setSortType] = useState('new');
-  const [shouldShowErrorToUserVoted, setShouldShowErrorToUserVoted] = useState(false);
   const order = getAccountHistoryOrder(sortType);
   const page = getAccountHistoryPage(currentPage);
   const { error, accountVotes } = useAccountVotes({ vote: voteType, order, page, pageSize });
@@ -257,13 +232,7 @@ const VotedComments = ({ voteType }: { voteType: 1 | -1 }) => {
   const paginatedCids = useMemo(() => accountVotes.map((vote) => vote.commentCid).filter((cid): cid is string => Boolean(cid)), [accountVotes]);
   const hasMore = nextPageVotes.length > 0;
 
-  useEffect(() => {
-    if (error?.message && paginatedCids.length === 0 && hasMore) {
-      setShouldShowErrorToUserVoted(true);
-    } else if (paginatedCids.length > 0) {
-      setShouldShowErrorToUserVoted(false);
-    }
-  }, [error, paginatedCids, hasMore]);
+  const shouldShowErrorToUserVoted = Boolean(error?.message && paginatedCids.length === 0 && hasMore);
 
   const prevErrorMessageRef = useRef<string | undefined>(undefined);
   useEffect(() => {

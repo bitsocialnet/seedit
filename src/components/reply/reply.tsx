@@ -409,12 +409,14 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
   const childrenString = childrenCount === 1 ? t('child', { childrenCount }) : t('children', { childrenCount });
 
   const { blocked, unblock } = useBlock({ cid });
-  const [collapsed, setCollapsed] = useState(blocked);
-  useEffect(() => {
-    if (blocked || (isInPostPageView && (deleted || removed) && childrenCount === 0)) {
-      setCollapsed(true);
-    }
-  }, [blocked, isInPostPageView, deleted, removed, childrenCount]);
+  const shouldAutoCollapse = Boolean(blocked || (isInPostPageView && (deleted || removed) && childrenCount === 0));
+  const [collapsed, setCollapsed] = useState(shouldAutoCollapse);
+  // collapse again whenever the reply becomes blocked, or deleted/removed with no children
+  const [prevShouldAutoCollapse, setPrevShouldAutoCollapse] = useState(shouldAutoCollapse);
+  if (shouldAutoCollapse !== prevShouldAutoCollapse) {
+    setPrevShouldAutoCollapse(shouldAutoCollapse);
+    if (shouldAutoCollapse) setCollapsed(true);
+  }
   const handleCollapseButton = () => {
     if (blocked) {
       unblock();

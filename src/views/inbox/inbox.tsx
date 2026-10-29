@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { StateSnapshot, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { useAccount, useNotifications } from '@bitsocial/bitsocial-react-hooks';
@@ -45,7 +45,6 @@ const Inbox = () => {
   const account = useAccount();
   const { unreadNotificationCount } = account || {};
   const { error, notifications, markAsRead } = useNotifications();
-  const [shouldShowErrorToUser, setShouldShowErrorToUser] = useState(false);
 
   const location = useLocation();
   const isInInboxCommentRepliesView = isInboxCommentRepliesView(location.pathname);
@@ -99,13 +98,7 @@ const Inbox = () => {
     document.title = documentTitle;
   }, [documentTitle]);
 
-  useEffect(() => {
-    if (error?.message && comments.length === 0) {
-      setShouldShowErrorToUser(true);
-    } else if (comments.length > 0) {
-      setShouldShowErrorToUser(false);
-    }
-  }, [error, comments]);
+  const shouldShowErrorToUser = Boolean(error?.message && comments.length === 0);
 
   return (
     <div className={styles.content}>

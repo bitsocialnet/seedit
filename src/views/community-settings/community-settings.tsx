@@ -353,13 +353,16 @@ const CommunitySettings = () => {
   const { error: createCommunityError, createdCommunity, createCommunity } = useCreateCommunity(publishCommunityEditOptions);
 
   const [showSaving, setShowSaving] = useState(false);
-  const [currentError, setCurrentError] = useState<Error | undefined>(undefined);
+  const [currentError, setCurrentError] = useState<Error | undefined>(publishCommunityEditError || createCommunityError);
 
-  useEffect(() => {
+  // show each new publish/create error; the save handlers can still clear or replace it
+  const [prevHookErrors, setPrevHookErrors] = useState({ publishCommunityEditError, createCommunityError });
+  if (prevHookErrors.publishCommunityEditError !== publishCommunityEditError || prevHookErrors.createCommunityError !== createCommunityError) {
+    setPrevHookErrors({ publishCommunityEditError, createCommunityError });
     if (publishCommunityEditError || createCommunityError) {
       setCurrentError(publishCommunityEditError || createCommunityError);
     }
-  }, [publishCommunityEditError, createCommunityError]);
+  }
 
   const saveCommunity = async () => {
     try {
