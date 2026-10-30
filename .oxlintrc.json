@@ -8,8 +8,27 @@
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/rules-of-hooks": "error",
-    "react/exhaustive-deps": "warn"
+    "react/exhaustive-deps": "warn",
+    // Effects that only mirror derived state or reset state belong in render, handlers, or keys.
+    "react/set-state-in-effect": "warn",
+    // React Compiler optimizability diagnostics flag intentional patterns (latest-ref idiom,
+    // Date.now in render) rather than bugs; same policy as 5chan.
+    "react/refs": "off",
+    "react/preserve-manual-memoization": "off",
+    "react/immutability": "off",
+    "react/purity": "off"
   },
+  "overrides": [
+    {
+      "files": [
+        "**/__tests__/**",
+        "**/*.test.*"
+      ],
+      "rules": {
+        "react/globals": "off"
+      }
+    }
+  ],
   "ignorePatterns": [
     "android/**",
     "build/**",

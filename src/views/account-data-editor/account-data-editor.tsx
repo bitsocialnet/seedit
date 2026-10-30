@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { setAccount, useAccount } from '@bitsocial/bitsocial-react-hooks';
@@ -12,15 +12,15 @@ const AccountDataEditor = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const account = useAccount();
-  const [text, setText] = useState('');
   const [showEditor, setShowEditor] = useState(false);
   const [currentError, setCurrentError] = useState<Error | undefined>(undefined);
 
   const accountJson = stringify({ account: getEditableAccountData(account) });
 
-  useEffect(() => {
-    setText(accountJson);
-  }, [accountJson]);
+  // edits belong to the account JSON they started from; a changed account JSON replaces them
+  const [draft, setDraft] = useState<{ accountJson: string; text: string }>();
+  const text = draft?.accountJson === accountJson ? draft.text : accountJson;
+  const setText = (value: string) => setDraft({ accountJson, text: value });
 
   const saveAccount = async () => {
     try {

@@ -77,6 +77,7 @@ const NotificationsSettings = () => {
     };
 
     loadPlatform();
+    // oxlint-disable-next-line react/set-state-in-effect -- checkPermissionStatus sets state only after awaiting the Electron permission API
     void checkPermissionStatus();
 
     return () => {

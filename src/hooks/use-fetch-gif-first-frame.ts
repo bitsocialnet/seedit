@@ -256,27 +256,26 @@ export const createStaticImageFromGif = async (url: string): Promise<string> => 
 };
 
 const useFetchGifFirstFrame = (url: string | undefined) => {
-  const [frameUrl, setFrameUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  // keyed by url so a result from a previous url is never shown as the current one
+  const [frameResult, setFrameResult] = useState<{ url: string; frameUrl: string | null } | null>(null);
+  // every url change starts a new extraction, so a url that comes back loads again instead of reusing its old result
+  const [prevUrl, setPrevUrl] = useState(url);
+  if (url !== prevUrl) {
+    setPrevUrl(url);
+    setFrameResult(null);
+  }
+  // Skip frame extraction on Chromium browsers due to strict CORS policies
+  const shouldExtract = Boolean(url) && !isChromium();
 
   useEffect(() => {
-    if (!url) {
-      setFrameUrl(null);
-      setIsLoading(false);
-      return;
-    }
+    if (!url) return;
 
-    // Skip frame extraction on Chromium browsers due to strict CORS policies
-    if (isChromium()) {
+    if (!shouldExtract) {
       console.log('Skipping GIF frame extraction on Chromium browser due to CORS restrictions');
-      setFrameUrl(null);
-      setIsLoading(false);
       return;
     }
 
     let isActive = true;
-    setIsLoading(true);
-    setFrameUrl(null);
 
     const fetchFrame = async () => {
       try {
@@ -285,9 +284,8 @@ const useFetchGifFirstFrame = (url: string | undefined) => {
         if (cachedFrame && isActive) {
           try {
             const response = await fetch(cachedFrame);
-            if (response.ok) {
-              setFrameUrl(cachedFrame);
-              setIsLoading(false);
+            if (response.ok && isActive) {
+              setFrameResult({ url, frameUrl: cachedFrame });
               return;
             }
           } catch {
@@ -302,8 +300,7 @@ const useFetchGifFirstFrame = (url: string | undefined) => {
             const objectUrl = await createStaticImageFromGif(url);
 
             if (isActive) {
-              setFrameUrl(objectUrl);
-              setIsLoading(false);
+              setFrameResult({ url, frameUrl: objectUrl });
               await setCachedGifFrame(url, objectUrl);
             }
             return; // Success with simple approach
@@ -318,8 +315,7 @@ const useFetchGifFirstFrame = (url: string | undefined) => {
         const objectUrl = URL.createObjectURL(blob);
 
         if (isActive) {
-          setFrameUrl(objectUrl);
-          setIsLoading(false);
+          setFrameResult({ url, frameUrl: objectUrl });
           await setCachedGifFrame(url, objectUrl);
         }
       } catch (error) {
@@ -334,8 +330,7 @@ const useFetchGifFirstFrame = (url: string | undefined) => {
             const objectUrl = URL.createObjectURL(blob);
 
             if (isActive) {
-              setFrameUrl(objectUrl);
-              setIsLoading(false);
+              setFrameResult({ url, frameUrl: objectUrl });
               await setCachedGifFrame(url, objectUrl);
             }
             return; // Success with fallback
@@ -345,8 +340,7 @@ const useFetchGifFirstFrame = (url: string | undefined) => {
         }
 
         if (isActive) {
-          setFrameUrl(null);
-          setIsLoading(false);
+          setFrameResult({ url, frameUrl: null });
         }
       }
     };
@@ -356,9 +350,10 @@ const useFetchGifFirstFrame = (url: string | undefined) => {
     return () => {
       isActive = false;
     };
-  }, [url]);
+  }, [url, shouldExtract]);
 
-  return { frameUrl, isLoading };
+  const currentResult = shouldExtract && frameResult?.url === url ? frameResult : null;
+  return { frameUrl: currentResult?.frameUrl ?? null, isLoading: shouldExtract && !currentResult };
 };
 
 export default useFetchGifFirstFrame;
