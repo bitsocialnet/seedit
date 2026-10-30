@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { isDirectoryCode, SEEDIT_DIRECTORY_CODES } from './directory-codes';
 
 describe('Seedit directory codes', () => {
-  it('contains the ten reserved lowercase route slugs', () => {
-    expect(SEEDIT_DIRECTORY_CODES).toEqual(['askseedit', 'memes', 'news', 'pics', 'todayilearned', 'interestingasfuck', 'gaming', 'videos', 'funny', 'aww']);
+  it('contains the reserved lowercase route slugs', () => {
+    expect(SEEDIT_DIRECTORY_CODES).toEqual(['askseedit', 'memes', 'news', 'pics', 'todayilearned', 'interestingasfuck', 'gaming', 'videos', 'funny', 'aww', 'cats']);
   });
 
   it('recognizes only exact directory slugs', () => {

@@ -120,7 +120,7 @@ describe('directory vote views', () => {
     const directoryList = container.querySelector('ul[role="list"]');
     const rows = directoryList?.querySelectorAll('li');
 
-    expect(rows).toHaveLength(10);
+    expect(rows).toHaveLength(11);
     expect(rows?.[0].textContent).toContain('s/askseedit: AskSeedit');
     expect(rows?.[0].textContent).toContain('Ask the Seedit community anything');
     expect(rows?.[0].textContent).toContain('current winner:');
@@ -143,8 +143,9 @@ describe('directory vote views', () => {
     await act(async () => animalsTag?.click());
 
     const rows = container.querySelectorAll('ul[role="list"] > li');
-    expect(rows).toHaveLength(1);
+    expect(rows).toHaveLength(2);
     expect(rows[0].textContent).toContain('s/aww: Aww');
+    expect(rows[1].textContent).toContain('s/cats: Cats');
     expect(container.querySelector<HTMLInputElement>('input[type="search"]')?.value).toBe('animals');
   });
 

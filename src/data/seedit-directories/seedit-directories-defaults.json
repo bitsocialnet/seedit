@@ -4,7 +4,7 @@
   "title": "Seedit Directory Defaults",
   "description": "Display metadata for Seedit's contested short routes. These routes recommend exact communities but are never stored as subscriptions or used in post permalinks.",
   "createdAt": 1783123200,
-  "updatedAt": 1788286365,
+  "updatedAt": 1793199415,
   "directories": {
     "askseedit": {
       "directoryCode": "askseedit",
@@ -109,6 +109,16 @@
         "cute",
         "pets",
         "wholesome"
+      ]
+    },
+    "cats": {
+      "directoryCode": "cats",
+      "title": "Cats",
+      "description": "Pictures of cats. That's it. Big cats count.",
+      "tags": [
+        "cats",
+        "animals",
+        "pets"
       ]
     }
   }
