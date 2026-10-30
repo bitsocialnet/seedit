@@ -230,5 +230,12 @@ describe('Domain feed updates', () => {
     await renderDomain();
     expect(container.textContent).not.toContain('No posts found from');
     expect(container.querySelector('button')?.textContent).toBe('load_more');
+
+    // an emptied feed waits the full delay again instead of reusing the finished one
+    testState.feed = [];
+    await renderDomain();
+    expect(container.textContent).not.toContain('No posts found from');
+    await act(async () => vi.advanceTimersByTime(2000));
+    expect(container.textContent).toContain('No posts found from example.com');
   });
 });

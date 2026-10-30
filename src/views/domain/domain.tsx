@@ -83,6 +83,8 @@ const Domain = () => {
     return () => clearTimeout(timer);
   }, [isFeedEmpty, requestKey]);
   const showNoResults = isFeedEmpty && noResultsRequestKey === requestKey;
+  // forget a finished delay once its request is replaced or its feed fills, so the next empty feed waits again
+  if (noResultsRequestKey !== undefined && !showNoResults) setNoResultsRequestKey(undefined);
 
   const documentTitle = domain + ' - Seedit';
   useEffect(() => {

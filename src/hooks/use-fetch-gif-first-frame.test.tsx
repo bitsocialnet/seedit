@@ -66,6 +66,42 @@ describe('useFetchGifFirstFrame', () => {
     }
   });
 
+  it('keeps the current url frame when a previous url cache check finishes late', async () => {
+    testState.cachedFrames['https://example.com/b.gif'] = 'blob:b-frame';
+    let finishStaleCheck: (response: { ok: boolean }) => void = () => undefined;
+    vi.stubGlobal(
+      'fetch',
+      vi.fn((input: string) =>
+        input === 'blob:a-frame'
+          ? new Promise((resolve) => {
+              finishStaleCheck = resolve;
+            })
+          : Promise.resolve({ ok: true }),
+      ),
+    );
+
+    await render('https://example.com/a.gif');
+    await render('https://example.com/b.gif');
+    expect(renders.at(-1)?.result).toEqual({ frameUrl: 'blob:b-frame', isLoading: false });
+
+    await act(async () => finishStaleCheck({ ok: true }));
+    expect(renders.at(-1)?.result).toEqual({ frameUrl: 'blob:b-frame', isLoading: false });
+  });
+
+  it('loads again when a url comes back instead of reusing its earlier result', async () => {
+    await render('https://example.com/a.gif');
+    expect(renders.at(-1)?.result).toEqual({ frameUrl: 'blob:a-frame', isLoading: false });
+
+    await render(undefined);
+    // the cached frame check never settles, so the returning url stays loading
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => new Promise(() => undefined)),
+    );
+    await render('https://example.com/a.gif');
+    expect(renders.at(-1)?.result).toEqual({ frameUrl: null, isLoading: true });
+  });
+
   it('returns no frame and no loading state without a url', async () => {
     await render(undefined);
     expect(renders.every(({ result }) => result.frameUrl === null && !result.isLoading)).toBe(true);

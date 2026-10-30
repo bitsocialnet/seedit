@@ -258,6 +258,12 @@ export const createStaticImageFromGif = async (url: string): Promise<string> => 
 const useFetchGifFirstFrame = (url: string | undefined) => {
   // keyed by url so a result from a previous url is never shown as the current one
   const [frameResult, setFrameResult] = useState<{ url: string; frameUrl: string | null } | null>(null);
+  // every url change starts a new extraction, so a url that comes back loads again instead of reusing its old result
+  const [prevUrl, setPrevUrl] = useState(url);
+  if (url !== prevUrl) {
+    setPrevUrl(url);
+    setFrameResult(null);
+  }
   // Skip frame extraction on Chromium browsers due to strict CORS policies
   const shouldExtract = Boolean(url) && !isChromium();
 
@@ -278,7 +284,7 @@ const useFetchGifFirstFrame = (url: string | undefined) => {
         if (cachedFrame && isActive) {
           try {
             const response = await fetch(cachedFrame);
-            if (response.ok) {
+            if (response.ok && isActive) {
               setFrameResult({ url, frameUrl: cachedFrame });
               return;
             }

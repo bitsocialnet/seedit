@@ -411,10 +411,11 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
   const { blocked, unblock } = useBlock({ cid });
   const shouldAutoCollapse = Boolean(blocked || (isInPostPageView && (deleted || removed) && childrenCount === 0));
   const [collapsed, setCollapsed] = useState(shouldAutoCollapse);
-  // collapse again whenever the reply becomes blocked, or deleted/removed with no children
-  const [prevShouldAutoCollapse, setPrevShouldAutoCollapse] = useState(shouldAutoCollapse);
-  if (shouldAutoCollapse !== prevShouldAutoCollapse) {
-    setPrevShouldAutoCollapse(shouldAutoCollapse);
+  // re-check whenever an input changes, so blocking an expanded removed reply still collapses it
+  const autoCollapseInputs = [blocked, isInPostPageView, deleted, removed, childrenCount];
+  const [prevAutoCollapseInputs, setPrevAutoCollapseInputs] = useState(autoCollapseInputs);
+  if (autoCollapseInputs.some((value, index) => !Object.is(value, prevAutoCollapseInputs[index]))) {
+    setPrevAutoCollapseInputs(autoCollapseInputs);
     if (shouldAutoCollapse) setCollapsed(true);
   }
   const handleCollapseButton = () => {
