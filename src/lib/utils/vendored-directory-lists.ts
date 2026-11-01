@@ -1,5 +1,6 @@
 import askseeditDirectory from '../../data/seedit-directories/seedit-askseedit-directory.json';
 import awwDirectory from '../../data/seedit-directories/seedit-aww-directory.json';
+import catsDirectory from '../../data/seedit-directories/seedit-cats-directory.json';
 import directoryDefaults from '../../data/seedit-directories/seedit-directories-defaults.json';
 import funnyDirectory from '../../data/seedit-directories/seedit-funny-directory.json';
 import gamingDirectory from '../../data/seedit-directories/seedit-gaming-directory.json';
@@ -23,6 +24,7 @@ const rawDirectoryLists = {
   videos: videosDirectory,
   funny: funnyDirectory,
   aww: awwDirectory,
+  cats: catsDirectory,
 } satisfies Record<SeeditDirectoryCode, unknown>;
 
 export const vendoredDirectoryDefaults = normalizeDirectoryDefaultsData(directoryDefaults);

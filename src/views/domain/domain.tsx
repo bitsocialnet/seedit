@@ -36,7 +36,7 @@ const Domain = () => {
   const currentTimeFilterName = params.timeFilterName || timeFilterName || 'all';
 
   const infiniteFeedEnabled = useInfiniteFeedEnabled();
-  const [showNoResults, setShowNoResults] = useState(false);
+  const [noResultsRequestKey, setNoResultsRequestKey] = useState<string>();
 
   const matchesDomain = useCallback(
     (comment: Comment) => {
@@ -75,21 +75,16 @@ const Domain = () => {
 
   const { feed, hasMore, loadMore, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
+  // show "no posts found" once this feed request has stayed empty for 2 seconds
+  const isFeedEmpty = Boolean(domain) && feed?.length === 0;
   useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
-
-    if (domain && feed?.length === 0 && !showNoResults) {
-      timer = setTimeout(() => {
-        setShowNoResults(true);
-      }, 2000);
-    } else if (!domain || feed?.length > 0) {
-      setShowNoResults(false);
-    }
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [domain, feed?.length, showNoResults]);
+    if (!isFeedEmpty) return;
+    const timer = setTimeout(() => setNoResultsRequestKey(requestKey), 2000);
+    return () => clearTimeout(timer);
+  }, [isFeedEmpty, requestKey]);
+  const showNoResults = isFeedEmpty && noResultsRequestKey === requestKey;
+  // forget a finished delay once its request is replaced or its feed fills, so the next empty feed waits again
+  if (noResultsRequestKey !== undefined && !showNoResults) setNoResultsRequestKey(undefined);
 
   const documentTitle = domain + ' - Seedit';
   useEffect(() => {

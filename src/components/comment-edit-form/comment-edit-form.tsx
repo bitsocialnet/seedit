@@ -52,7 +52,6 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
   };
 
   const [publishCommentEditOptions, setPublishCommentEditOptions] = useState(defaultPublishOptions);
-  const { publishCommentEdit } = usePublishCommentEdit(publishCommentEditOptions);
 
   // the user might manually type "edit: <reason>" in the content field
   // we want to extract the reason and remove it from the content
@@ -71,15 +70,10 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
     return { content, reason: publishCommentEditOptions.reason };
   };
 
-  const [shouldPublish, setShouldPublish] = useState(false);
-
-  useEffect(() => {
-    if (shouldPublish) {
-      publishCommentEdit();
-      if (hideCommentEditForm) hideCommentEditForm();
-      setShouldPublish(false);
-    }
-  }, [shouldPublish, publishCommentEdit, hideCommentEditForm]);
+  // usePublishCommentEdit publishes the options of the render it was called in, so they must
+  // already have the edit reason parsed out for the save handler to publish directly
+  const parsedEditContent = typeof publishCommentEditOptions.content === 'string' ? parseEditContent(publishCommentEditOptions.content) : {};
+  const { publishCommentEdit } = usePublishCommentEdit({ ...publishCommentEditOptions, ...parsedEditContent });
 
   useEffect(() => {
     if (textRef.current) {
@@ -155,13 +149,9 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
         <button
           className={formStyles.save}
           onClick={() => {
-            const { content, reason } = parseEditContent(publishCommentEditOptions.content);
-            setPublishCommentEditOptions((state) => ({
-              ...state,
-              content,
-              reason,
-            }));
-            setShouldPublish(true);
+            setPublishCommentEditOptions((state) => ({ ...state, ...parsedEditContent }));
+            publishCommentEdit();
+            if (hideCommentEditForm) hideCommentEditForm();
           }}
         >
           {t('save')}

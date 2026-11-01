@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CommentMediaInfo } from '../../lib/utils/media-utils';
@@ -46,14 +46,15 @@ const Expando = ({
 }: ExpandoProps) => {
   const { t } = useTranslation();
   const { blurNsfwThumbnails, setBlurNsfwThumbnails, autoplayVideosOnComments, muteVideosOnComments } = useContentOptionsStore();
-  const [hideContent, setHideContent] = useState(blurNsfwThumbnails);
+  const [hideContent, setHideContent] = useState(!expanded || blurNsfwThumbnails);
   const [alwaysShowNsfw, setAlwaysShowNsfw] = useState(false);
 
-  useEffect(() => {
-    if (!expanded) {
-      setHideContent(true);
-    }
-  }, [expanded]);
+  // cover nsfw/spoiler media again whenever the expando collapses
+  const [prevExpanded, setPrevExpanded] = useState(expanded);
+  if (expanded !== prevExpanded) {
+    setPrevExpanded(expanded);
+    if (!expanded) setHideContent(true);
+  }
 
   const handleAlwaysShowNsfw = () => {
     setBlurNsfwThumbnails(false);

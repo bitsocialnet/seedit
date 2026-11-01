@@ -10,13 +10,14 @@ import Reply from './reply';
 const act = (React as { act?: (callback: () => void | Promise<void>) => void | Promise<void> }).act as (callback: () => void | Promise<void>) => void | Promise<void>;
 
 const testState = vi.hoisted(() => ({
+  blocked: false,
   pathname: '/s/example.bso/comments/post-cid',
   repliesByCid: {} as Record<string, Record<string, any>[]>,
 }));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAuthorAddress: ({ comment }: { comment: Record<string, any> }) => ({ shortAuthorAddress: comment.author?.address }),
-  useBlock: () => ({ blocked: false, unblock: vi.fn() }),
+  useBlock: () => ({ blocked: testState.blocked, unblock: vi.fn() }),
   useComment: () => ({}),
   useEditedComment: () => ({}),
   useCommunity: () => ({}),
@@ -64,6 +65,7 @@ const replyOrder = () => Array.from(container.querySelectorAll('[data-reply-butt
 
 describe('Nested Reply identity', () => {
   beforeEach(() => {
+    testState.blocked = false;
     testState.pathname = '/s/example.bso/comments/post-cid';
     testState.repliesByCid = { parent: [child('first'), child('second')], first: [child('grandchild')] };
     container = document.createElement('div');
@@ -134,6 +136,23 @@ describe('Nested Reply identity', () => {
     const collapseButton = Array.from(container.querySelectorAll('span')).find((element) => element.textContent === '[–]') as HTMLSpanElement;
     await act(async () => collapseButton.click());
     expect(authorFlairs()).toEqual([]);
+  });
+
+  it('collapses an expanded removed reply again when it gets blocked', async () => {
+    testState.repliesByCid = {};
+    const removedReply = { ...parent, removed: true };
+    const renderRemovedReply = () => act(async () => root.render(createElement(Reply, { reply: removedReply as any })));
+    const collapseToggle = (text: string) =>
+      Array.from(container.querySelectorAll('span')).find((element) => element.textContent === text) as HTMLSpanElement | undefined;
+
+    await renderRemovedReply();
+    expect(collapseToggle('[+]')).toBeDefined();
+    await act(async () => collapseToggle('[+]')?.click());
+    expect(collapseToggle('[–]')).toBeDefined();
+
+    testState.blocked = true;
+    await renderRemovedReply();
+    expect(collapseToggle('[+]')).toBeDefined();
   });
 
   it('renders author flairs in the inbox byline', async () => {

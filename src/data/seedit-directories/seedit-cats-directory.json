@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "revision": 1,
+  "directoryCode": "cats",
+  "description": "Communities competing for Seedit's /s/cats route. The highest-rated finalized candidate resolves the route. Subscriptions and post links continue to use exact community addresses.\n\nhttps://github.com/bitsocialnet/lists/blob/master/seedit-directories/seedit-cats-directory.json",
+  "tags": [
+    "cats",
+    "animals",
+    "pets"
+  ],
+  "rules": [
+    "Every post must show a real cat; big cats count.",
+    "No drawings, cartoons, AI-generated images, sculptures, or plush toys.",
+    "No animal cruelty, gore, or jokes about harming cats.",
+    "NSFW content is not allowed.",
+    "No bots, repetitive comments, flooding, spam, or self-promotion."
+  ],
+  "createdAt": 1793199415,
+  "updatedAt": 1793199415,
+  "communities": [
+    {
+      "address": "12D3KooWSbU6p2epQ1AQrfMztyCJAMJKtfDC4NEKonFULnkqEBvU",
+      "addedAt": 1793199415,
+      "publicKey": "12D3KooWSbU6p2epQ1AQrfMztyCJAMJKtfDC4NEKonFULnkqEBvU"
+    }
+  ]
+}

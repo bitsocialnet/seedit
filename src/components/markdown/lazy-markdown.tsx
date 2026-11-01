@@ -7,6 +7,7 @@ type MarkdownProps = ComponentProps<typeof Markdown>;
 const LoadedMarkdown = (props: MarkdownProps) => {
   const Component = getLoadedMarkdown() ?? use(loadMarkdown());
   // If the chunk could not load, show the text unformatted rather than failing the page.
+  // oxlint-disable-next-line react/static-components -- Component is the module-level Markdown export resolved from a cached chunk import, not created per render
   return Component ? <Component {...props} /> : <p style={{ whiteSpace: 'pre-wrap' }}>{props.content}</p>;
 };
 

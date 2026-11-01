@@ -117,13 +117,14 @@ const Home = () => {
     [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
+  // wait 800ms after each subscription check settles before showing "no subscriptions"
   const [safeToShowNoSubscriptions, setSafeToShowNoSubscriptions] = useState(false);
+  if (isCheckingSubscriptions && safeToShowNoSubscriptions) {
+    setSafeToShowNoSubscriptions(false);
+  }
 
   useEffect(() => {
-    if (isCheckingSubscriptions) {
-      setSafeToShowNoSubscriptions(false);
-      return;
-    }
+    if (isCheckingSubscriptions) return;
 
     const timeout = setTimeout(() => setSafeToShowNoSubscriptions(true), 800);
     return () => clearTimeout(timeout);

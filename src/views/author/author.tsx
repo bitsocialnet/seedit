@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useAuthorComments, useAuthor, type Comment } from '@bitsocial/bitsocial-react-hooks';
@@ -100,14 +100,7 @@ const Author = () => {
   }, [t, profileTitle]);
 
   // only show backend errors if the user gets no data
-  const [shouldShowErrorToUser, setShouldShowErrorToUser] = useState(false);
-  useEffect(() => {
-    if (error?.message && virtuosoData?.length === 0) {
-      setShouldShowErrorToUser(true);
-    } else if (virtuosoData?.length > 0) {
-      setShouldShowErrorToUser(false);
-    }
-  }, [error, virtuosoData]);
+  const shouldShowErrorToUser = Boolean(error?.message && virtuosoData?.length === 0);
 
   return (
     <div className={styles.content}>
