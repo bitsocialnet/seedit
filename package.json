@@ -1,6 +1,6 @@
 {
   "name": "seedit",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A peer-to-peer Reddit alternative",
   "author": "Bitsocial Forge",
   "type": "module",

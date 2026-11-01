@@ -1042,6 +1042,60 @@ The lock coordinates invocations of this command. Other heavyweight work, such a
 Source: https://github.com/bitsocialnet/seedit/blob/master/CHANGELOG.md
 
 ```markdown
+## [0.6.1](https://github.com/bitsocialnet/seedit/compare/v0.6.0...v0.6.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **account-bar:** show the search shortcut only on phones ([2a43f16](https://github.com/bitsocialnet/seedit/commit/2a43f16c4be6ea58701270d42eeb1b16c86154b0))
+* **build:** keep the profiling react-dom alias out of the static-shell render ([2ea1d2c](https://github.com/bitsocialnet/seedit/commit/2ea1d2c2e70284981926681870d3e1e0a46ad493))
+* **ci:** package the Linux test build on ubuntu-24.04 ([f24d052](https://github.com/bitsocialnet/seedit/commit/f24d05214590ae609225f713c6789685a742b611))
+* **deps:** bump undici, serialize-javascript and zod past open Dependabot advisories ([0f4ef75](https://github.com/bitsocialnet/seedit/commit/0f4ef7511082da6eb568616084815724b70d5ab4))
+* **deps:** give node-gyp the glob 8 API it calls ([83aceed](https://github.com/bitsocialnet/seedit/commit/83aceedb6e96139f089a84ee0fcb4c77e124961d))
+* **deps:** upgrade electron to 44 and capacitor to 7.6.9 [skip ci] [skip github-alerts] ([725cab0](https://github.com/bitsocialnet/seedit/commit/725cab01fda468183bb7892dbfb927c50390e6f8))
+* **dev:** prebundle the PWA registration dependency ([72504c3](https://github.com/bitsocialnet/seedit/commit/72504c3622904025906d69d938215c1773b9ab50))
+* **devtools:** keep Agentation failures from blocking startup ([1dae6f5](https://github.com/bitsocialnet/seedit/commit/1dae6f514102a956884d23e092b363f7db720eea))
+* **electron:** download kubo from GitHub releases, drop the kubo npm package ([#849](https://github.com/bitsocialnet/seedit/issues/849)) ([38ece23](https://github.com/bitsocialnet/seedit/commit/38ece230337bab5df18b9d02430eeb1d5d433dae))
+* **electron:** exclude the local codegraph index from packaging ([5f37d25](https://github.com/bitsocialnet/seedit/commit/5f37d25827516cd891b4169c9ea331e456d4b308))
+* **electron:** keep dev-only files and env files out of packaged apps ([26ab7f1](https://github.com/bitsocialnet/seedit/commit/26ab7f1e44d44f904e62fbd6980d9f2e875c8dae))
+* **electron:** re-enable asar so Squirrel packs hundreds of files instead of 36k ([49cd5b7](https://github.com/bitsocialnet/seedit/commit/49cd5b7834b97ba31d0909f97d0a2c57df01f2b4))
+* **footer:** point bitsocial.net app links at /projects ([4e5fe14](https://github.com/bitsocialnet/seedit/commit/4e5fe14f5bb6b212be8a74732d07aabf7f8c561a))
+* **i18n:** make quote reference copy client-neutral ([808e3b3](https://github.com/bitsocialnet/seedit/commit/808e3b3b6bff8b5ebe9f68983c429e525cd1d228))
+* **markdown:** drop 5chan quotes that only point at the rendered parent ([e61a138](https://github.com/bitsocialnet/seedit/commit/e61a138a23a0166d43ceddbb7a11e8c34d7e1cc8))
+* **markdown:** explain unresolved 5chan quotes with a tooltip only ([2524326](https://github.com/bitsocialnet/seedit/commit/25243264ee7b78fdb7d8cfcd337890b922507623))
+* **pwa:** install with the real app icon ([e271d6c](https://github.com/bitsocialnet/seedit/commit/e271d6cf328dbb32eebdccd5d92af00ac320facf))
+* **release:** build Linux better-sqlite3 for Electron 44 without raising the glibc floor ([8d03eb1](https://github.com/bitsocialnet/seedit/commit/8d03eb13a04729200eb0a5c628642d3bf1704e7c))
+* **release:** publish native desktop and Android downloads ([#851](https://github.com/bitsocialnet/seedit/issues/851)) ([944d218](https://github.com/bitsocialnet/seedit/commit/944d218596b1fd7fba73e5b3dbd4f93485142c22))
+* **routing:** show not found at invalid URLs instead of redirecting ([#846](https://github.com/bitsocialnet/seedit/issues/846)) ([a714671](https://github.com/bitsocialnet/seedit/commit/a714671491a42cfbf2d1b2fbcede574466017cd6))
+* **search:** show an empty result group in red like other pages ([cb2df94](https://github.com/bitsocialnet/seedit/commit/cb2df94698bd3afecaebd629ce33f08364c7b553))
+* **thumbnail:** show animated gifs in reply thumbnails ([fb713c7](https://github.com/bitsocialnet/seedit/commit/fb713c74ffb102f7efcff52cf62f11c3be17c537))
+
+
+### Features
+
+* **desktop:** warn when browsers can't reach a community this computer hosts ([#850](https://github.com/bitsocialnet/seedit/issues/850)) ([ac4a687](https://github.com/bitsocialnet/seedit/commit/ac4a687dafcffc46d6d2a237aee7d4453540af78))
+* **directories:** add /s/cats directory route ([#860](https://github.com/bitsocialnet/seedit/issues/860)) ([6e9c359](https://github.com/bitsocialnet/seedit/commit/6e9c359c7eb701959599b1c6445b334456de142d))
+* **flair:** show author flairs next to author names ([#855](https://github.com/bitsocialnet/seedit/issues/855)) ([1b3e245](https://github.com/bitsocialnet/seedit/commit/1b3e2450cdee0afea3d2da732c3cb931b3ab7e0e)), closes [#854](https://github.com/bitsocialnet/seedit/issues/854)
+* **jev:** add blind translation review workflow ([b68ee67](https://github.com/bitsocialnet/seedit/commit/b68ee6741a160a37f91e21e0a66814fbc818fb65))
+* **jev:** add contrastive translation evaluation ([76788c3](https://github.com/bitsocialnet/seedit/commit/76788c3659b9f733a7f0705675c636431ac1d57f))
+* **jev:** add opt-in file questions and pilot evaluation ([a4ed379](https://github.com/bitsocialnet/seedit/commit/a4ed379ee7b6bbd4ce60250a653847044e38fbc0))
+* **jev:** reuse private machine credentials across worktrees ([#843](https://github.com/bitsocialnet/seedit/issues/843)) ([dd263a0](https://github.com/bitsocialnet/seedit/commit/dd263a0c24bf8f6a0f25c5993f56fc51c2e276c6))
+* **markdown:** support 5chan quote references ([6d6ee9f](https://github.com/bitsocialnet/seedit/commit/6d6ee9f94e937b2895abba07d8e3ad1b43f60c74))
+* **media:** upload to Forge Images by default with a media hosting setting ([#856](https://github.com/bitsocialnet/seedit/issues/856)) ([e1374ae](https://github.com/bitsocialnet/seedit/commit/e1374ae0c399584fd529d99762adda80b8ab782a))
+* **search:** match old.reddit's results page layout ([e8e7fd9](https://github.com/bitsocialnet/seedit/commit/e8e7fd94becf5d9dc9f4382ff9b4f7ffacfc82ee)), closes [#006](https://github.com/bitsocialnet/seedit/issues/006)
+* **testing:** add optional Jev browser and translation checks ([#841](https://github.com/bitsocialnet/seedit/issues/841)) ([8be74c4](https://github.com/bitsocialnet/seedit/commit/8be74c494253281138cc9c33b6fa744c2e1d92ef))
+* **testing:** expand Jev evaluation and browser tooling ([60c968e](https://github.com/bitsocialnet/seedit/commit/60c968e96259d17beb067b15937bcd2b58f7d7a5))
+* **visual-qa:** add optional Decisions screenshot checks and Jev comparison ([eaed0a6](https://github.com/bitsocialnet/seedit/commit/eaed0a6d7676b70089873e6707b5e7959031b4f2))
+
+
+### Performance Improvements
+
+* **build:** run the React Compiler through @rolldown/plugin-babel ([95c6583](https://github.com/bitsocialnet/seedit/commit/95c6583c50919782da5be1e1a31fa4b3a3815655))
+* **ci:** cache dependencies and parallelize performance checks ([cdca56b](https://github.com/bitsocialnet/seedit/commit/cdca56b39686fd0d92c843aebdf0cc9545b4516b))
+* **startup:** paint the home page immediately and load less before first render ([#845](https://github.com/bitsocialnet/seedit/issues/845)) ([a243333](https://github.com/bitsocialnet/seedit/commit/a243333a46a0c31094f1192e7a3110eb233957df))
+
+
+
 # [0.6.0](https://github.com/bitsocialnet/seedit/compare/v0.5.10...v0.6.0) (2026-09-16)
 
 
