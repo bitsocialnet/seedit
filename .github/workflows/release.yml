@@ -296,6 +296,15 @@ jobs:
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_REF_NAME: ${{ github.ref_name }}
         run: node scripts/release-body > release-body.txt
+      # fail before publishing, so a release never ships without its seedit.app deploy
+      - name: Check Vercel deployment token
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "${VERCEL_TOKEN:-}" ]; then
+            echo "::error::VERCEL_TOKEN is required to deploy the release HTML archive to Vercel Production."
+            exit 1
+          fi
       # immutableCreate creates a new release as a draft and publishes it only after the uploads;
       # artifactErrorsFailBuild makes a failed upload fail the job, leaving the draft unpublished
       - name: Create GitHub release
@@ -308,3 +317,24 @@ jobs:
           artifactErrorsFailBuild: true
           immutableCreate: true
           bodyFile: "release-body.txt"
+      # production is release-artifact only (the Vercel project skips Git builds from master),
+      # so seedit.app gets the exact published seedit-html archive
+      - name: Deploy web release to Vercel Production
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_drHWHjDIQypSvbjZ1F468uLm
+          VERCEL_PROJECT_ID: prj_7InczAG5KXtc22pcjaWew6TCCwf7
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          RELEASE_ASSET="dist/seedit-html-${VERSION}.zip"
+          STAGED_DIR=$(node scripts/prepare-vercel-release-deploy.mjs --tag "$GITHUB_REF_NAME" --asset "$RELEASE_ASSET" --out-dir vercel-release-deploy)
+          corepack yarn dlx vercel@50.23.2 deploy "$STAGED_DIR" \
+            --prebuilt \
+            --prod \
+            --yes \
+            --force \
+            --archive=tgz \
+            --token "$VERCEL_TOKEN" \
+            --meta source=github-release \
+            --meta releaseTag="$GITHUB_REF_NAME" \
+            --meta releaseAsset="seedit-html-${VERSION}.zip"
