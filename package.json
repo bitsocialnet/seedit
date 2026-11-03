@@ -1,7 +1,7 @@
 {
   "name": "seedit",
   "version": "0.6.1",
-  "description": "A peer-to-peer Reddit alternative",
+  "description": "A decentralized Reddit alternative",
   "author": "Bitsocial Forge",
   "type": "module",
   "license": "GPL-3.0-or-later",
