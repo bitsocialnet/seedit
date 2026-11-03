@@ -145,7 +145,7 @@ The dev server runs at https://seedit.localhost via [Portless](https://github.co
 - **Tests**: `yarn test`
 - **Lint and module boundaries**: `yarn lint`
 - **Types**: `yarn type-check`
-- **Build, lint, types, React diagnostics, and runtime performance scenarios**: `yarn agent:verify` (uses system Chrome; install it with `yarn perf:install` if needed)
+- **Build, lint, types, React diagnostics, and runtime performance scenarios**: `yarn agent:verify` (uses system Chrome, which `yarn perf:install` checks for)
 
 Module layering is enforced: `src/views` composes pages, `src/components` holds reusable UI, and `src/hooks`, `src/stores`, `src/lib`, and `src/data` sit below them, with imports flowing one way. `yarn boundaries` (part of `yarn lint`) fails on a violation. See [src/AGENTS.md](src/AGENTS.md) for the rules and [AGENTS.md](AGENTS.md) for the wider contributor workflow.
 
@@ -276,7 +276,7 @@ Load details on demand: [hooks](docs/agent-playbooks/hooks-setup.md), [verificat
 
 ## React diagnostics and runtime performance
 
-`yarn agent:verify` and Linux CI run advisory task-diff source diagnostics with `yarn doctor:check` and deterministic runtime scenarios with `yarn perf:check`. The runtime command includes collector compatibility fixtures; use `yarn perf:test` to run those alone after React/Bippy/collector upgrades. Run affected scenarios after React state/effect/subscription/rendering changes. Profiling uses sandboxed system Chrome by default; `yarn perf:install` installs it if needed; per-edit hooks still only format files.
+`yarn agent:verify` and Linux CI run advisory task-diff source diagnostics with `yarn doctor:check` and deterministic runtime scenarios with `yarn perf:check`. The runtime command includes collector compatibility fixtures; use `yarn perf:test` to run those alone after React/Bippy/collector upgrades. Run affected scenarios after React state/effect/subscription/rendering changes. Profiling uses sandboxed system Chrome by default. Run `yarn perf:install` to check that it is installed. Per-edit hooks only format files.
 
 Development builds initialize the bounded Bippy collector before ReactDOM and expose `window.__REACT_PERF__.reset()` / `.snapshot()`. It counts committed component work by instance; root React Profiler callbacks supply measured subtree render duration. Missing instrumentation, dropped evidence, and exceeded scenario budgets fail checks. Counts do not identify waste or count aborted work. `yarn perf:record --scenario <name>` saves JSON and native Chrome traces under `.react-perf/`; use `profile-browsing` for interpretation and coverage.
 
@@ -970,7 +970,7 @@ Record commands, outcomes, and limits in the task report. Use the [long-running 
 
 ## Automated React performance evidence
 
-`yarn perf:check` validates collector compatibility and runs three samples of deterministic app scenarios at 4x CPU. Local `agent:verify` and Linux CI invoke it alongside `yarn doctor:check`. Use `--scenario <name>` for a focused rerun after relevant React changes. Use an up-to-date system Chrome for local and CI profiling. Run `yarn perf:install` if Chrome is missing; `yarn perf:test` runs only compatibility fixtures. Keep these heavy checks out of per-edit hooks.
+`yarn perf:check` validates collector compatibility and runs three samples of deterministic app scenarios at 4x CPU. Local `agent:verify` and Linux CI invoke it alongside `yarn doctor:check`. Use `--scenario <name>` for a focused rerun after relevant React changes. Use an up-to-date system Chrome for local and CI profiling. Run `yarn perf:install` to check for Chrome and get installation instructions. `yarn perf:test` runs only compatibility fixtures. Keep these heavy checks out of per-edit hooks.
 
 `yarn perf:record` retains JSON and native traces under `.react-perf/`. Use `--url <origin>` to reuse a compatible instrumented server; the runner owns its browser and any server it starts. The profile-browsing measurement reference documents the instance/commit/timing contract and scenario coverage. Current scenarios cover local settings and populated mock-feed expansion/scrolling, not live peer latency or every route.
 

@@ -109,7 +109,7 @@ Load details on demand: [hooks](docs/agent-playbooks/hooks-setup.md), [verificat
 
 ## React diagnostics and runtime performance
 
-`yarn agent:verify` and Linux CI run advisory task-diff source diagnostics with `yarn doctor:check` and deterministic runtime scenarios with `yarn perf:check`. The runtime command includes collector compatibility fixtures; use `yarn perf:test` to run those alone after React/Bippy/collector upgrades. Run affected scenarios after React state/effect/subscription/rendering changes. Profiling uses sandboxed system Chrome by default; `yarn perf:install` installs it if needed; per-edit hooks still only format files.
+`yarn agent:verify` and Linux CI run advisory task-diff source diagnostics with `yarn doctor:check` and deterministic runtime scenarios with `yarn perf:check`. The runtime command includes collector compatibility fixtures; use `yarn perf:test` to run those alone after React/Bippy/collector upgrades. Run affected scenarios after React state/effect/subscription/rendering changes. Profiling uses sandboxed system Chrome by default. Run `yarn perf:install` to check that it is installed. Per-edit hooks only format files.
 
 Development builds initialize the bounded Bippy collector before ReactDOM and expose `window.__REACT_PERF__.reset()` / `.snapshot()`. It counts committed component work by instance; root React Profiler callbacks supply measured subtree render duration. Missing instrumentation, dropped evidence, and exceeded scenario budgets fail checks. Counts do not identify waste or count aborted work. `yarn perf:record --scenario <name>` saves JSON and native Chrome traces under `.react-perf/`; use `profile-browsing` for interpretation and coverage.
 

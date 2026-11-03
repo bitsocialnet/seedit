@@ -51,7 +51,7 @@ corepack yarn perf:record --scenario populated-feed --cpu 4 --samples 3
 corepack yarn doctor:check --base HEAD
 ```
 
-The runner owns its temporary browser/server lifecycle through the shared browser resource lock. Defer on contention and preserve preexisting sessions and servers. The runner uses sandboxed system Chrome locally and in CI. `yarn perf:install` installs the selected channel; CI refreshes Chrome stable on its disposable runner with `--force --with-deps`. For repeatable measurements against controlled fixtures, set `REACT_PERF_BROWSER_CHANNEL=chromium` for both installation and capture. `yarn perf:test` runs compatibility fixtures alone, including missing-instrumentation and deliberate-regression cases.
+The runner owns its temporary browser/server lifecycle through the shared browser resource lock. Defer on contention and preserve preexisting sessions and servers. The runner uses sandboxed system Chrome locally and in CI. `yarn perf:install` checks for Chrome and prints manual installation instructions when it is missing. CI refreshes Chrome stable on its disposable runner with `--force --with-deps`. For repeatable measurements against controlled fixtures, set `REACT_PERF_BROWSER_CHANNEL=chromium` for both installation and capture. `yarn perf:test` runs compatibility fixtures alone, including missing-instrumentation and deliberate-regression cases.
 
 ### Collector and timing semantics
 
