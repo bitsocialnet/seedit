@@ -113,7 +113,7 @@ The dev server runs at https://seedit.localhost via [Portless](https://github.co
 - **Tests**: `yarn test`
 - **Lint and module boundaries**: `yarn lint`
 - **Types**: `yarn type-check`
-- **Build, lint, types, React diagnostics, and runtime performance scenarios**: `yarn agent:verify` (run `yarn perf:install` once first)
+- **Build, lint, types, React diagnostics, and runtime performance scenarios**: `yarn agent:verify` (uses system Chrome; install it with `yarn perf:install` if needed)
 
 Module layering is enforced: `src/views` composes pages, `src/components` holds reusable UI, and `src/hooks`, `src/stores`, `src/lib`, and `src/data` sit below them, with imports flowing one way. `yarn boundaries` (part of `yarn lint`) fails on a violation. See [src/AGENTS.md](src/AGENTS.md) for the rules and [AGENTS.md](AGENTS.md) for the wider contributor workflow.
 

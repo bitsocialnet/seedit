@@ -121,7 +121,7 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
       directory = await mkdtemp(path.join(tmpdir(), 'bitsocial-jev-browser-'));
       await chmod(directory, 0o700);
       const config = path.join(directory, 'config.json');
-      await writeFile(config, JSON.stringify({ browser: { isolated: true, contextOptions: { serviceWorkers: 'block' } }, outputDir: directory }), { mode: 0o600 });
+      await writeFile(config, JSON.stringify({ browser: { isolated: true, launchOptions: { chromiumSandbox: true }, contextOptions: { serviceWorkers: 'block' } }, outputDir: directory }), { mode: 0o600 });
       opening = true;
       // Start blank so navigation guards exist before the plan URL is visited.
       await command(['open', session, 'about:blank', '--browser=chrome', `--config=${config}`], true);
