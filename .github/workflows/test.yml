@@ -154,8 +154,8 @@ jobs:
             [ "$i" = "3" ] && exit 1
           done
 
-      - name: Install performance browser
-        run: yarn perf:install --with-deps
+      - name: Install current stable Chrome
+        run: yarn perf:install --force --with-deps
 
       - name: Check React collector and runtime scenarios
         run: yarn perf:check --output .react-perf/ci
@@ -210,8 +210,8 @@ jobs:
         env:
           CI: ''
 
-      - name: Install performance browser
-        run: yarn perf:install --with-deps
+      - name: Install current stable Chrome
+        run: yarn perf:install --force --with-deps
 
       - name: Check cold-load layout stability and static shell handoff
         run: yarn perf:load --check --profile cpu4 --samples 2 --output .react-perf/ci-load

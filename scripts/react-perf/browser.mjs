@@ -27,6 +27,8 @@ export async function bounded(promise, label, timeoutMs = 5000) {
   }
 }
 
+export const browserChannel = process.env.REACT_PERF_BROWSER_CHANNEL || 'chrome';
+
 export function browserDriver() {
   // Use the driver pinned by the CLI that owns this browser, rather than a
   // different Playwright version used by an application's existing tests.
@@ -58,8 +60,6 @@ export async function withBrowser(packageRoot, headed, run) {
   if (!existsSync(wrapper)) throw new Error(`Browser ownership wrapper missing: ${wrapper}`);
   const session = `perf-${process.pid}-${Date.now().toString(36)}`;
   const port = await freePort();
-  const channel = process.env.REACT_PERF_BROWSER_CHANNEL;
-  if (!channel && !existsSync(driver.chromium.executablePath())) throw new Error('Profiling browser is missing. Run perf:install first.');
   const scratch = await mkdtemp(path.join(tmpdir(), 'react-perf-'));
   const config = path.join(scratch, 'browser.json');
   await writeFile(
@@ -68,7 +68,8 @@ export async function withBrowser(packageRoot, headed, run) {
       browser: {
         browserName: 'chromium',
         launchOptions: {
-          ...(channel ? { channel } : { executablePath: driver.chromium.executablePath() }),
+          channel: browserChannel,
+          chromiumSandbox: true,
           headless: !headed,
           args: [`--remote-debugging-port=${port}`],
         },
