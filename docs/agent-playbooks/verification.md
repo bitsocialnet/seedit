@@ -44,7 +44,7 @@ Record commands, outcomes, and limits in the task report. Use the [long-running 
 
 ## Automated React performance evidence
 
-`yarn perf:check` validates collector compatibility and runs three samples of deterministic app scenarios at 4x CPU. Local `agent:verify` and Linux CI invoke it alongside `yarn doctor:check`. Use `--scenario <name>` for a focused rerun after relevant React changes. Install the pinned browser once with `yarn perf:install`; `yarn perf:test` runs only compatibility fixtures. Keep these heavy checks out of per-edit hooks.
+`yarn perf:check` validates collector compatibility and runs three samples of deterministic app scenarios at 4x CPU. Local `agent:verify` and Linux CI invoke it alongside `yarn doctor:check`. Use `--scenario <name>` for a focused rerun after relevant React changes. Use an up-to-date system Chrome for local and CI profiling. Run `yarn perf:install` to check for Chrome and get installation instructions. `yarn perf:test` runs only compatibility fixtures. Keep these heavy checks out of per-edit hooks.
 
 `yarn perf:record` retains JSON and native traces under `.react-perf/`. Use `--url <origin>` to reuse a compatible instrumented server; the runner owns its browser and any server it starts. The profile-browsing measurement reference documents the instance/commit/timing contract and scenario coverage. Current scenarios cover local settings and populated mock-feed expansion/scrolling, not live peer latency or every route.
 
