@@ -1,3 +1,15 @@
+## [0.6.2](https://github.com/bitsocialnet/seedit/compare/v0.6.1...v0.6.2) (2026-11-04)
+
+
+### Bug Fixes
+
+* **browser:** keep the local Chrome check non-interactive ([d7c3318](https://github.com/bitsocialnet/seedit/commit/d7c33189e90595e8016faea1e77b234a5a9bbd31))
+* **release:** restore the Windows portable download as a zip ([#864](https://github.com/bitsocialnet/seedit/issues/864)) ([3ef4b16](https://github.com/bitsocialnet/seedit/commit/3ef4b16e738878174f70961449593c2b5d68bd28))
+* **security:** update Electron and sandbox browser automation ([#863](https://github.com/bitsocialnet/seedit/issues/863)) ([ebf2f1e](https://github.com/bitsocialnet/seedit/commit/ebf2f1ee1d3dcbf3e957e267ba21ff62493a4f12))
+* **security:** update Electron and use sandboxed Chrome for browser automation ([6bee4df](https://github.com/bitsocialnet/seedit/commit/6bee4dfb6314bbefa55071a2eeb414c89a9d0b49))
+
+
+
 ## [0.6.1](https://github.com/bitsocialnet/seedit/compare/v0.6.0...v0.6.1) (2026-11-01)
 
 

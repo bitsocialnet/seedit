@@ -117,7 +117,7 @@ const htmlSection = section('Static HTML build', [htmlZip && `- seedit-html (zip
 
 const downloads = [macSection, winSection, linuxSection, androidSection, htmlSection].filter(Boolean).join('\n\n');
 
-const releaseBody = `This release shows communities' custom hot feeds in the order they publish, uploads media to Forge Images by default with a media hosting setting, shows author flairs next to author names, renders 5chan quote references, warns desktop users when browsers can't reach a community their computer hosts, and paints the home page sooner on startup.
+const releaseBody = `This release restores the Windows portable download, now a zip you extract to run seedit.exe without installing, and updates Electron to 44.10.1 for security fixes.
 
 - Web app: https://seedit.app
 - Decentralized web app via IPFS/IPNS gateways (works on any browser): [seedit.eth.limo](https://seedit.eth.limo), [seedit.eth.link](https://seedit.eth.link), [dweb.link/ipfs.io](https://dweb.link/ipns/seedit.eth)
