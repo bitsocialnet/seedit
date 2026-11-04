@@ -190,8 +190,11 @@ jobs:
           VERSION=$(node -e "console.log(require('./package.json').version)")
           SETUP_EXE_PATH=$(find out/make -iname '*setup*.exe' | head -n 1)
           [ -n "$SETUP_EXE_PATH" ] || { echo "::error::No Squirrel Setup.exe in out/make"; exit 1; }
+          PORTABLE_ZIP_PATH=$(find out/make/zip/win32 -iname '*.zip' | head -n 1)
+          [ -n "$PORTABLE_ZIP_PATH" ] || { echo "::error::No portable zip in out/make/zip/win32"; exit 1; }
           mkdir -p dist
           cp "$SETUP_EXE_PATH" "dist/seedit.Setup.${VERSION}.exe"
+          cp "$PORTABLE_ZIP_PATH" "dist/seedit.Portable.${VERSION}.zip"
       - name: List dist directory
         shell: bash
         run: ls -la dist

@@ -95,8 +95,9 @@ const config = {
       },
     },
     {
+      // on win32 this zip is the portable build: extract it and run seedit.exe, no installer needed
       name: '@electron-forge/maker-zip',
-      platforms: ['darwin'],
+      platforms: ['darwin', 'win32'],
     },
     // Windows
     {

@@ -84,7 +84,7 @@ const macArm = mac.find(isArm);
 const macX64 = mac.find(isX64);
 
 const winSetupX64 = win.find((f) => has(f, 'setup') && isX64(f));
-const winPortableX64 = win.find((f) => has(f, 'portable') && isX64(f));
+const winPortableX64 = files.find((f) => has(f, 'portable') && f.toLowerCase().endsWith('.zip') && isX64(f));
 
 // small section builder without push()
 const section = (title, lines) => {
@@ -101,7 +101,7 @@ const macSection = section('macOS', [
 
 const winSection = section('Windows', [
   winSetupX64 && `- Installer (x64): [Download EXE](${linkTo(winSetupX64)})`,
-  winPortableX64 && `- Portable (x64): [Download EXE](${linkTo(winPortableX64)})`,
+  winPortableX64 && `- Portable (x64): [Download ZIP](${linkTo(winPortableX64)}), extract it and run seedit.exe`,
   win.length > 0 &&
     `- If Windows shows "Windows protected your PC" (SmartScreen), click "More info" then "Run anyway". To permanently allow, right-click the .exe → Properties → check "Unblock", or run in PowerShell: \`Unblock-File -Path .\\path\\to\\file.exe\`.`,
 ]);
