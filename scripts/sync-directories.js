@@ -24,6 +24,8 @@ const MIRRORS = [
   {
     folder: '5chan-directories',
     files: ['5chan-b-directory.json', '5chan-qst-directory.json', '5chan-s5s-directory.json', '5chan-tg-directory.json'],
+    // src/lib/utils/fivechan-post-options.ts reads every list's `boards` while posts render.
+    isValidFile: (json) => isRecord(json) && Array.isArray(json.boards) && json.boards.every(isRecord),
   },
 ];
 
@@ -134,11 +136,13 @@ const sync = async () => {
       const missing = mirror.files?.filter((fileName) => !fileNames.includes(fileName));
       if (missing?.length) throw new Error(`Missing ${mirror.folder} files: ${missing.join(', ')}`);
       for (const [fileName, text] of Object.entries(files)) {
+        let json;
         try {
-          JSON.parse(text);
+          json = JSON.parse(text);
         } catch {
           throw new Error(`Invalid JSON for ${mirror.folder}/${fileName}`);
         }
+        if (mirror.isValidFile && !mirror.isValidFile(json)) throw new Error(`Unexpected format for ${mirror.folder}/${fileName}`);
       }
     });
 
