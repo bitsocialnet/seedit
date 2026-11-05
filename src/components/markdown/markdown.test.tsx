@@ -212,6 +212,36 @@ describe('Markdown', () => {
     expect(container.querySelector('[data-tooltip]')).toBeNull();
   });
 
+  it("shows 5chan's dice roll before the comment and its fortune after it, in the fortune's color, without the markers", async () => {
+    const cid = 'QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG';
+    const renderPostOptions = (directoryCode: string) =>
+      act(() =>
+        root.render(
+          createElement(
+            HashRouter,
+            null,
+            createElement(Markdown, { content: '[dice=3d20+2]body[fortune]', postOptions: { cid, directoryCode, isEdited: false, timestamp: 1_800_000_000 } }),
+          ),
+        ),
+      );
+
+    await renderPostOptions('b');
+    let paragraphs = [...container.querySelectorAll('p')];
+    expect(paragraphs.map((paragraph) => paragraph.textContent)).toEqual(['[dice=3d20+2]body', 'Your fortune: ｷﾀ━━━━━━(ﾟ∀ﾟ)━━━━━━ !!!!']);
+    expect(paragraphs[1].style.color).toBe('rgb(0, 203, 176)');
+
+    await renderPostOptions('tg');
+    paragraphs = [...container.querySelectorAll('p')];
+    expect(paragraphs.map((paragraph) => paragraph.textContent)).toEqual(['Rolled 18, 15, 19 + 2 = 54 (3d20 + 2)', 'body[fortune]']);
+    expect(paragraphs[0].querySelector('strong')).not.toBeNull();
+  });
+
+  it('leaves fortune and dice markers as text without a 5chan post options context', async () => {
+    await act(() => root.render(createElement(HashRouter, null, createElement(Markdown, { content: '[dice=1d6]body[fortune]' }))));
+
+    expect(container.textContent).toBe('[dice=1d6]body[fortune]');
+  });
+
   it('does not reinterpret 5chan-shaped text without the numbered-comment signal', async () => {
     await act(() => root.render(createElement(HashRouter, null, createElement(Markdown, { content: '>>42\n\n[ordinary link](/__seedit-fivechan-quote/42)' }))));
 

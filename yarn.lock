@@ -4996,21 +4996,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:2.0.1, @noble/curves@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@noble/curves@npm:2.0.1"
+  dependencies:
+    "@noble/hashes": "npm:2.0.1"
+  checksum: 10c0/e0b329eb9229e862d3b7203e0444bd479e9ecf2d5990181908dad416aab69106717ca696fc7b12ad0eb19d710f58c454646b27ce517a4298ab9abc89a9bdb6ee
+  languageName: node
+  linkType: hard
+
 "@noble/curves@npm:2.2.0":
   version: 2.2.0
   resolution: "@noble/curves@npm:2.2.0"
   dependencies:
     "@noble/hashes": "npm:2.2.0"
   checksum: 10c0/e545d3bb03ebedd5c04c2cab81342d64f5ce8a4c1019cfe207f3dc69174bc0ad7cfb50effc31bfa8616b8340900f445dd053da7454190428857c4eedd3b51413
-  languageName: node
-  linkType: hard
-
-"@noble/curves@npm:^2.0.1":
-  version: 2.0.1
-  resolution: "@noble/curves@npm:2.0.1"
-  dependencies:
-    "@noble/hashes": "npm:2.0.1"
-  checksum: 10c0/e0b329eb9229e862d3b7203e0444bd479e9ecf2d5990181908dad416aab69106717ca696fc7b12ad0eb19d710f58c454646b27ce517a4298ab9abc89a9bdb6ee
   languageName: node
   linkType: hard
 
@@ -19675,6 +19675,8 @@ __metadata:
     "@electron-forge/maker-zip": "npm:8.0.1"
     "@electron/rebuild": "npm:3.7.2"
     "@floating-ui/react": "npm:0.26.1"
+    "@noble/curves": "npm:2.0.1"
+    "@noble/hashes": "npm:2.0.1"
     "@pkcprotocol/pkc-js": "npm:0.0.132"
     "@playwright/cli": "npm:0.1.19"
     "@reforged/maker-appimage": "npm:6.0.0"

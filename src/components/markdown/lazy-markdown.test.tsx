@@ -28,6 +28,16 @@ describe('LazyMarkdown', () => {
       root.render(createElement(LazyMarkdown, { content: 'next render' }));
     });
     expect(container.textContent).toBe('next render');
+    // The plain text still hides the 5chan markers the post's board reads; their results need the chunk.
+    await act(async () => {
+      root.render(
+        createElement(LazyMarkdown, {
+          content: '[dice=1d6]body[fortune]',
+          postOptions: { cid: 'QmPost', directoryCode: 'b', isEdited: false, timestamp: 1_800_000_000 },
+        }),
+      );
+    });
+    expect(container.textContent).toBe('[dice=1d6]body');
     act(() => root.unmount());
   });
 });

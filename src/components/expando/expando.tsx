@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { CommentMediaInfo } from '../../lib/utils/media-utils';
+import type { PostOptionResultsInput } from '../../lib/utils/post-option-results';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
 import Markdown from '../markdown';
@@ -20,6 +21,7 @@ interface ExpandoProps {
   modEditReason?: string;
   nsfw?: boolean;
   number?: number;
+  postOptions?: PostOptionResultsInput;
   quotedCids?: string[];
   removed?: boolean;
   showContent: boolean;
@@ -38,6 +40,7 @@ const Expando = ({
   modEditReason,
   nsfw,
   number,
+  postOptions,
   quotedCids,
   removed,
   showContent,
@@ -126,7 +129,7 @@ const Expando = ({
       {content && showContent && (
         <div className={styles.usertext}>
           <div className={styles.markdown}>
-            <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} quotedCids={quotedCids} />
+            <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} postOptions={postOptions} quotedCids={quotedCids} />
             {modEditReason && (
               <p className={styles.modReason}>
                 {lowerCase(t('mod_edit_reason'))}: {modEditReason}

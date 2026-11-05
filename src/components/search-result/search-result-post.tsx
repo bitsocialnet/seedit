@@ -5,6 +5,8 @@ import type { Comment } from '@bitsocial/bitsocial-react-hooks';
 import { getCommunityPostPath, getCommunityPath } from '../../lib/utils/community-route-utils';
 import { getCommentMediaInfo, getHasThumbnail } from '../../lib/utils/media-utils';
 import { getShortDisplayAddress } from '../../lib/utils/address-utils';
+import { stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
+import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import { getFormattedTimeAgo } from '../../lib/utils/time-utils';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import Flair from '../flair';
@@ -64,9 +66,10 @@ const SearchResultPost = ({ comment, terms }: SearchResultPostProps) => {
   const { t } = useTranslation();
   const { thumbnailDisplayOption } = useContentOptionsStore();
 
-  const { cid, communityAddress, content, downvoteCount, flair, link, linkHeight, linkWidth, nsfw, replyCount, spoiler, timestamp, title, upvoteCount } = comment;
+  const { cid, communityAddress, downvoteCount, flair, link, linkHeight, linkWidth, nsfw, replyCount, spoiler, timestamp, title, upvoteCount } = comment;
+  const content = stripCommentPostOptionMarkers(comment.content, comment, communityAddress);
   const authorAddress = comment.author?.address;
-  const authorName = comment.author?.displayName || comment.author?.shortAddress || authorAddress;
+  const authorName = stripTripcodeProof(comment.author?.displayName) || comment.author?.shortAddress || authorAddress;
   const threadCid = comment.postCid || cid;
   const postPath = communityAddress && threadCid ? getCommunityPostPath(communityAddress, threadCid) : undefined;
   // The indexer always serves both counts, so a result never has an unknown score.

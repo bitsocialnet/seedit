@@ -163,4 +163,35 @@ describe('Nested Reply identity', () => {
 
     expect(Array.from(container.querySelectorAll('[data-author-flair]')).map((element) => element.textContent)).toEqual(['bot']);
   });
+
+  it('shows a 5chan name without its tripcode proof, and the trip only while the proof verifies', async () => {
+    testState.repliesByCid = {};
+    // Signed by 5chan's createTripcodeDisplayName with the password `hunter2`: an empty name, a normal and a secure trip.
+    const displayName =
+      '#tc1:nWUoKS0wOjBFohS9iJPuFvBMPKqrTX4TRxUVM5zBf6KoyP2zRr8kc0GvjJJH9PrkHnXkMi0lPM9ojnyqbvUjsuhdqpX2FplLMiO_bSi73Bzs14-ZIFbMRHe4-BWA_cFDDA:sUBZ6FIfRBk9GanPXPt8D-6weFl9iiNbwl3Ej3cOVr2MDuhTfXw6IMp8NHSp_LW1dE-0ElP0BiZLTjbAf3SB0SpE4UwLxIrlmOOmMKvaIOVosqUvtBDn1-dDCm-oSq_5Cg';
+    const signed = {
+      author: { address: 'anon.bso', displayName },
+      communityPublicKey: '12D3KooWJkJYkuVbJQhapcVGpo8oNmsXsKmFRrFqc1SHezZW9fX8',
+      content: 'hello >>123',
+      parentCid: 'QmParent',
+      postCid: 'QmPost',
+      timestamp: 1_800_000_100,
+    };
+    const tripReply = { ...signed, cid: 'QmReply', communityAddress: 'random-nsfw.bso', raw: { comment: signed } };
+    const authorLinks = () => Array.from(container.querySelectorAll('a')).map((element) => element.textContent?.trim());
+
+    await act(async () => root.render(createElement(Reply, { reply: tripReply as any })));
+    // The verifier loads on demand, and the trip shows once it has.
+    await vi.waitFor(() => expect(authorLinks()).toEqual(['!j9z.SNnenn!!cqU1snALHK', 'u/anon.bso']));
+
+    // An edited reply loses its trip, and never shows the proof.
+    await act(async () => root.render(createElement(Reply, { reply: { ...tripReply, content: 'edited text' } as any })));
+    expect(authorLinks()).toEqual(['anon.bso']);
+    expect(container.textContent).not.toContain('#tc1');
+
+    // The proof does not cover a crosspost, and 5chan never publishes one, so a copy that adds one shows no trip.
+    const crosspost = { cid: 'QmOther', communityAddress: 'example.bso' };
+    await act(async () => root.render(createElement(Reply, { reply: { ...tripReply, crosspost, raw: { comment: { ...signed, crosspost } } } as any })));
+    expect(authorLinks()).toEqual(['anon.bso']);
+  });
 });

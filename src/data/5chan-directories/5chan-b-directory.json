@@ -1,0 +1,13 @@
+{
+  "description": "Boards competing to host the /b/ directory on 5chan. The highest-scoring board resolves the directory code; if it goes offline, 5chan rotates to the next-highest. Anyone can open a PR on this file to add their board.\n\nhttps://github.com/bitsocialnet/lists/blob/master/5chan-directories/5chan-b-directory.json",
+  "createdAt": 1779182014,
+  "updatedAt": 1779182014,
+  "boards": [
+    {
+      "address": "random-nsfw.bso",
+      "publicKey": "12D3KooWJkJYkuVbJQhapcVGpo8oNmsXsKmFRrFqc1SHezZW9fX8",
+      "addedAt": 1779182014,
+      "owner": "bitsocialist.bso"
+    }
+  ]
+}

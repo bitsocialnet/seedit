@@ -8,6 +8,7 @@ import styles from './markdown.module.css';
 import rehypeRaw from 'rehype-raw';
 import SpoilerTooltip from '../spoiler-tooltip';
 import { isSeeditLink, transformSeeditLinkToInternal, preprocessSeeditPatterns } from '../../lib/utils/url-utils';
+import { getPostOptionResults, type PostOptionResultsInput } from '../../lib/utils/post-option-results';
 import FivechanQuote from './fivechan-quote';
 import { parseFivechanQuoteHref, preprocessFivechanQuoteLines } from './fivechan-quote-utils';
 
@@ -17,6 +18,9 @@ interface MarkdownProps {
   // 5chan number of the comment this content replies to. Pass it only when that parent is rendered right above the
   // content, so a 5chan quote that merely points at the parent can be dropped (see preprocessFivechanQuoteLines).
   parentNumber?: number;
+  // The comment's 5chan fortune and dice context (getCommentPostOptions). Its markers are hidden and its results
+  // shown as 5chan shows them: the dice roll before the comment, the fortune after it in the fortune's color.
+  postOptions?: PostOptionResultsInput;
   quotedCids?: string[];
 }
 
@@ -113,11 +117,21 @@ const renderAnchorLink = (children: React.ReactNode, href: string, enableFivecha
   );
 };
 
-const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, quotedCids = EMPTY_QUOTED_CIDS }: MarkdownProps) => {
+const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, postOptions, quotedCids = EMPTY_QUOTED_CIDS }: MarkdownProps) => {
+  const { cid, directoryCode, isEdited = false, timestamp } = postOptions ?? {};
+  const {
+    content: visibleContent,
+    diceText,
+    fortune,
+  } = useMemo(
+    () => (directoryCode ? getPostOptionResults({ content, cid, directoryCode, isEdited, timestamp }) : { content, diceText: undefined, fortune: undefined }),
+    [content, cid, directoryCode, isEdited, timestamp],
+  );
+
   // Preprocess content to convert plain text seedit patterns to markdown links
   const preprocessedContent = useMemo(
-    () => preprocessSeeditPatterns(enableFivechanQuotes ? preprocessFivechanQuoteLines(content, parentNumber) : content),
-    [content, enableFivechanQuotes, parentNumber],
+    () => preprocessSeeditPatterns(enableFivechanQuotes ? preprocessFivechanQuoteLines(visibleContent, parentNumber) : visibleContent),
+    [visibleContent, enableFivechanQuotes, parentNumber],
   );
 
   const remarkPlugins: any[] = [[supersub]];
@@ -143,6 +157,11 @@ const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, quotedC
 
   return (
     <span className={styles.markdown}>
+      {diceText && (
+        <p>
+          <strong>{diceText}</strong>
+        </p>
+      )}
       <ReactMarkdown
         remarkPlugins={remarkPlugins}
         rehypePlugins={[[rehypeRaw as any], [rehypeSanitize as any, customSchema]]}
@@ -169,6 +188,11 @@ const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, quotedC
       >
         {preprocessedContent}
       </ReactMarkdown>
+      {fortune && (
+        <p style={{ color: fortune.color }}>
+          <strong>Your fortune: {fortune.text}</strong>
+        </p>
+      )}
     </span>
   );
 };

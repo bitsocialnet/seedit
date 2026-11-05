@@ -17,6 +17,8 @@
     "@capacitor/status-bar": "7.0.1",
     "@capawesome/capacitor-android-edge-to-edge-support": "7.2.2",
     "@floating-ui/react": "0.26.1",
+    "@noble/curves": "2.0.1",
+    "@noble/hashes": "2.0.1",
     "@pkcprotocol/pkc-js": "0.0.132",
     "@vercel/analytics": "1.6.1",
     "ace-builds": "1.45.2",

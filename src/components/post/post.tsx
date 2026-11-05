@@ -14,6 +14,9 @@ import useDownvote from '../../hooks/use-downvote';
 import useIsMobile from '../../hooks/use-is-mobile';
 import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
+import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
+import useCommentTripcode from '../../hooks/use-comment-tripcode';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import useUpvote from '../../hooks/use-upvote';
 import useWindowWidth from '../../hooks/use-window-width';
@@ -43,9 +46,23 @@ interface PostAuthorProps {
   shortAddress: string;
   shortAuthorAddress: string | undefined;
   authorAddressChanged: boolean;
+  /** The verified 5chan tripcode (`!trip`), shown after the name as on 5chan. */
+  trip?: string;
 }
 
-const PostAuthor = ({ authorAddress, authorRole, cid, displayName, flairs, index, pinned, shortAddress, shortAuthorAddress, authorAddressChanged }: PostAuthorProps) => {
+const PostAuthor = ({
+  authorAddress,
+  authorRole,
+  cid,
+  displayName,
+  flairs,
+  index,
+  pinned,
+  shortAddress,
+  shortAuthorAddress,
+  authorAddressChanged,
+  trip,
+}: PostAuthorProps) => {
   // TODO: implement comment.highlightRole once implemented in API
   const isAuthorOwner = authorRole === 'owner';
   const isAuthorAdmin = authorRole === 'admin';
@@ -62,6 +79,12 @@ const PostAuthor = ({ authorAddress, authorRole, cid, displayName, flairs, index
           <>
             {' '}
             <span className={`${styles.displayName} ${pinned && moderatorClass}`}>{shortDisplayName}</span>
+          </>
+        )}
+        {trip && (
+          <>
+            {' '}
+            <span className={`${styles.displayName} ${pinned && moderatorClass}`}>{trip}</span>
           </>
         )}{' '}
         <span className={`${styles.authorAddressWrapper} ${pinned && moderatorClass}`}>
@@ -139,7 +162,9 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   const isNsfwCommunity = useIsNsfwCommunity(communityAddress || '');
   const nsfw = post?.nsfw || isNsfwCommunity;
 
-  const { displayName, shortAddress } = author || {};
+  const shortAddress = author?.shortAddress;
+  const displayName = stripTripcodeProof(author?.displayName);
+  const trip = useCommentTripcode(post);
   const { shortAuthorAddress, authorAddressChanged } = useAuthorAddress({ comment: post });
 
   const { t, i18n } = useTranslation();
@@ -183,9 +208,11 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   const [upvoted, upvote] = useUpvote(post);
   const [downvoted, downvote] = useDownvote(post);
   const postScore = getPostScore(upvoteCount, downvoteCount, state);
+  const titleContent = stripCommentPostOptionMarkers(content, post, communityAddress);
+  const postOptions = removed || deleted ? undefined : getCommentPostOptions(post, communityAddress);
   const postTitle =
     (title?.length > 300 ? title?.slice(0, 300) + '...' : title) ||
-    (content?.length > 300 ? content?.slice(0, 300) + '...' : content)?.replace('&nbsp;', ' ')?.replace('>', '')?.replace('<', '')?.trim();
+    (titleContent?.length > 300 ? titleContent?.slice(0, 300) + '...' : titleContent)?.replace('&nbsp;', ' ')?.replace('>', '')?.replace('<', '')?.trim();
 
   // Ensure we have a meaningful title - if it's only whitespace/newlines, treat as empty
   const cleanedTitle = postTitle?.trim();
@@ -327,6 +354,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                     shortAddress={shortAddress}
                     shortAuthorAddress={shortAuthorAddress}
                     authorAddressChanged={authorAddressChanged}
+                    trip={trip}
                   />
                   {!isInCommunityView && (
                     <>
@@ -386,6 +414,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                       modEditReason={reason}
                       nsfw={nsfw}
                       number={number}
+                      postOptions={postOptions}
                       quotedCids={quotedCids}
                       deleted={deleted}
                       removed={removed}
@@ -411,6 +440,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                   modEditReason={reason}
                   nsfw={nsfw}
                   number={number}
+                  postOptions={postOptions}
                   quotedCids={quotedCids}
                   deleted={deleted}
                   removed={removed}

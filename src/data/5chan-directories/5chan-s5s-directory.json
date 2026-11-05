@@ -1,0 +1,13 @@
+{
+  "description": "Boards competing to host the /s5s/ directory on 5chan. The highest-scoring board resolves the directory code; if it goes offline, 5chan rotates to the next-highest. Anyone can open a PR on this file to add their board.\n\nhttps://github.com/bitsocialnet/lists/blob/master/5chan-directories/5chan-s5s-directory.json",
+  "createdAt": 1779517639,
+  "updatedAt": 1779517639,
+  "boards": [
+    {
+      "address": "shit-5chan-says.bso",
+      "publicKey": "12D3KooWR4vHjSsTHs3MU436avk4eW1XRqY9zKfVcvvZXkLdzJo6",
+      "addedAt": 1779517639,
+      "owner": "bitsocialist.bso"
+    }
+  ]
+}
