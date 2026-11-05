@@ -81,12 +81,16 @@ describe('hasLoadingFeedCommunities', () => {
     expect(hasLoadingFeedCommunities([community({ pages: ['hot'] }), { updatingState: 'fetching-ipns' } as Community])).toBe(true);
   });
 
-  it.each(['waiting-retry', 'failed', 'stopped', 'succeeded'])('does not wait for a %s community without a record', (updatingState) => {
+  it.each(['waiting-retry', 'failed', 'succeeded'])('does not wait for a %s community without a record', (updatingState) => {
     expect(hasLoadingFeedCommunities([{ updatingState } as Community])).toBe(false);
   });
 
-  it('does not wait for a community with a record and no posts while it updates again', () => {
-    expect(hasLoadingFeedCommunities([{ updatedAt: 1, updatingState: 'fetching-ipns' } as Community])).toBe(false);
+  it('keeps a feed loading while a new community has not started its first update beside a loaded one', () => {
+    expect(hasLoadingFeedCommunities([community({ pages: ['hot'] }), { updatingState: 'stopped' } as Community])).toBe(true);
+  });
+
+  it.each(['fetching-ipns', 'stopped'])('does not wait for a %s community with a record and no posts', (updatingState) => {
+    expect(hasLoadingFeedCommunities([{ updatedAt: 1, updatingState } as Community])).toBe(false);
   });
 });
 
