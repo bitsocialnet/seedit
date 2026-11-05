@@ -15,6 +15,7 @@ const testState = vi.hoisted(() => ({
   accountId: 'account-a',
   baseFeedLength: 0,
   baseHasMore: false,
+  baseLoadingCommunities: false,
   probeLengths: new Map<number | undefined, number>(),
   enabledWindows: [] as (number | undefined)[],
   expandTimeWindow: vi.fn(async (_newerThan?: number) => {}),
@@ -26,7 +27,7 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({ useAccount: () => ({ id: te
 const posts = (count: number): Comment[] => Array.from({ length: count }, (_, index) => ({ cid: `post-${index}` }) as Comment);
 
 vi.mock('./use-feed-with-compatible-sort', () => ({
-  default: (options: UseFeedOptions): UseFeedResult => {
+  default: (options: UseFeedOptions): UseFeedResult & { isLoadingCommunities: boolean } => {
     const isDisabled = options.communities?.length === 0;
     if (!isDisabled) testState.enabledWindows.push(options.newerThan);
     const isBaseFeed = options.newerThan === day;
@@ -39,6 +40,7 @@ vi.mock('./use-feed-with-compatible-sort', () => ({
       reset: vi.fn(async () => {}),
       communityKeysWithNewerPosts: [],
       communityKeysWithMore: [],
+      isLoadingCommunities: isBaseFeed ? testState.baseLoadingCommunities : false,
       state: 'succeeded',
       error: undefined,
       errors: [],
@@ -66,6 +68,7 @@ describe('useProgressiveFeed', () => {
     testState.accountId = 'account-a';
     testState.baseFeedLength = 0;
     testState.baseHasMore = false;
+    testState.baseLoadingCommunities = false;
     testState.probeLengths = new Map();
     testState.enabledWindows = [];
     testState.expandTimeWindow.mockClear();
@@ -93,6 +96,40 @@ describe('useProgressiveFeed', () => {
 
     expect(testState.expandTimeWindow).not.toHaveBeenCalled();
     expect(hookResult.feed).toHaveLength(25);
+  });
+
+  it('widens a window that is still empty with pages left once a wider window is full', async () => {
+    testState.baseHasMore = true;
+    testState.probeLengths = new Map([[undefined, 25]]);
+
+    await act(() => root.render(createElement(HookHarness)));
+
+    expect(hookResult.feed).toHaveLength(25);
+  });
+
+  it('does not probe wider windows while the communities are still loading', async () => {
+    testState.baseHasMore = true;
+    testState.baseLoadingCommunities = true;
+    testState.probeLengths = new Map([[undefined, 25]]);
+
+    await act(() => root.render(createElement(HookHarness)));
+
+    expect(testState.enabledWindows.every((newerThan) => newerThan === day)).toBe(true);
+    expect(hookResult.feed).toHaveLength(0);
+  });
+
+  it('keeps a window with some posts until its pages run out', async () => {
+    testState.baseHasMore = true;
+    testState.baseFeedLength = 4;
+    testState.probeLengths = new Map([
+      [7 * day, 25],
+      [undefined, 80],
+    ]);
+
+    await act(() => root.render(createElement(HookHarness)));
+
+    expect(testState.enabledWindows.every((newerThan) => newerThan === day)).toBe(true);
+    expect(hookResult.feed).toHaveLength(4);
   });
 
   it('uses a broader ready probe when manual loading exhausts the current window', async () => {

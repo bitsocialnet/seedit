@@ -2,12 +2,17 @@ import { useCallback, useMemo } from 'react';
 import { useCommunities, useFeed, type UseFeedOptions, type UseFeedResult } from '@bitsocial/bitsocial-react-hooks';
 import { getFeedCommunityGroups, hasUnresolvedPostSortMetadata, mergeAndSortFeeds } from '../lib/utils/feed-sort-utils';
 
+export type UseFeedWithCompatibleSortResult = UseFeedResult & {
+  /** The feed's communities, or the post sorts they publish, have not loaded yet. */
+  isLoadingCommunities: boolean;
+};
+
 /**
  * PKC only publishes its preloaded `hot` page when every post fits in that page. The page is a complete data set,
  * so Seedit can reuse it for built-in client sorts instead of treating the absent page key as an empty community.
  * Paginated communities continue to use the requested protocol page.
  */
-const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedResult => {
+const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCompatibleSortResult => {
   const communityIdentifiers = useMemo(() => options.communities || [], [options.communities]);
   const {
     communities,
@@ -89,6 +94,7 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedResult 
     reset,
     communityKeysWithNewerPosts,
     communityKeysWithMore,
+    isLoadingCommunities: hasUnresolvedCommunities || hasUnresolvedSortMetadata,
     state: communitiesState === 'failed' ? 'failed' : hasMore ? 'fetching-ipns' : 'succeeded',
     error: communitiesError || requestedSortFeed.error || preloadedSortFeed.error,
     errors: [...communitiesErrors, ...requestedSortFeed.errors, ...preloadedSortFeed.errors],
