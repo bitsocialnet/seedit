@@ -84,7 +84,7 @@ const PostAuthor = ({
         {trip && (
           <>
             {' '}
-            <span className={`${styles.displayName} ${pinned && moderatorClass}`}>{trip}</span>
+            <span className={`${styles.displayName} ${styles.trip} ${pinned && moderatorClass}`}>{trip}</span>
           </>
         )}{' '}
         <span className={`${styles.authorAddressWrapper} ${pinned && moderatorClass}`}>
