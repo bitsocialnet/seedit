@@ -24,8 +24,9 @@ const MIRRORS = [
   {
     folder: '5chan-directories',
     files: ['5chan-b-directory.json', '5chan-qst-directory.json', '5chan-s5s-directory.json', '5chan-tg-directory.json'],
-    // src/lib/utils/fivechan-post-options.ts reads every list's `boards` while posts render.
-    isValidFile: (json) => isRecord(json) && Array.isArray(json.boards) && json.boards.every(isRecord),
+    // src/lib/utils/fivechan-post-options.ts reads every list's `boards` while posts render, and normalizes each address.
+    isValidFile: (json) =>
+      isRecord(json) && Array.isArray(json.boards) && json.boards.every((board) => isRecord(board) && (board.address === undefined || typeof board.address === 'string')),
   },
 ];
 
