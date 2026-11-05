@@ -42,7 +42,12 @@ const useProgressiveFeed = ({ enabled, feedOptions }: UseProgressiveFeedOptions)
     [currentNewerThan, feedOptions],
   );
   const baseFeed = useFeedWithCompatibleSort(currentFeedOptions);
-  const shouldProbe = enabled && currentNewerThan !== undefined && baseFeed.state !== 'fetching-ipns' && !baseFeed.hasMore;
+  const isBaseFeedSettled = baseFeed.state !== 'fetching-ipns' && !baseFeed.hasMore;
+  // A window only settles once every page of its communities is fetched, which can take long, so a window that is
+  // still empty once its communities have loaded probes the wider windows right away and widens to one that has posts.
+  // A window with some posts keeps waiting for its last page before it widens.
+  const isBaseFeedEmptyBeforeSettling = !isBaseFeedSettled && !baseFeed.isLoadingCommunities && baseFeed.feed.length === 0;
+  const shouldProbe = enabled && currentNewerThan !== undefined && (isBaseFeedSettled || isBaseFeedEmptyBeforeSettling);
   const widerWindows = useMemo(() => getWiderProgressiveTimeWindows(currentNewerThan), [currentNewerThan]);
   const shouldProbeWindow = (name: ProgressiveTimeWindow['name']) => shouldProbe && widerWindows.some((window) => window.name === name);
   const suggestionTargetLength = Math.max(FEED_POSTS_PER_PAGE, baseFeed.feed.length + 1);

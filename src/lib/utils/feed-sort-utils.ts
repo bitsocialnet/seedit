@@ -21,6 +21,20 @@ export const hasUnresolvedPostSortMetadata = (communities: Array<Community | und
   return resolvedCommunities.some((community) => !nonBlockingPostSortMetadataStates.has(community.updatingState || ''));
 };
 
+const hasCommunityRecord = (community: Community): boolean => community.updatedAt !== undefined || getAvailablePostSortTypes(community).length > 0;
+
+// pkc-js creates a community `stopped` and the store keeps that entry until its first update starts, so a community
+// without a record has only finished its first fetch once it failed, succeeded or waits to retry
+const firstFetchEndedStates = new Set(['failed', 'succeeded', 'waiting-retry']);
+
+/**
+ * Whether any of a feed's communities is still loading its first record. Unlike hasUnresolvedPostSortMetadata, a loaded
+ * community does not hide a peer that is still loading. A community with no entry counts as loading even after a failed
+ * lookup, because useCommunities does not report errors per community; one that failed or waits to retry does not.
+ */
+export const hasLoadingFeedCommunities = (communities: Array<Community | undefined>): boolean =>
+  communities.some((community) => !community || (!hasCommunityRecord(community) && !firstFetchEndedStates.has(community.updatingState || '')));
+
 const hasCompletePreloadedPostPage = (community: Community): boolean => {
   const preloadedSorts = Object.keys(community.posts?.pages || {});
   const paginatedSorts = Object.keys(community.posts?.pageCids || {});
