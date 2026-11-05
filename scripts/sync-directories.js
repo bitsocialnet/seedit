@@ -3,10 +3,11 @@
 // still select the published snapshot's deterministic winner without local failover.
 // The 5chan copy holds only the directories whose boards' posts carry 5chan fortune and dice
 // markers (see src/lib/utils/fivechan-post-options.ts).
-// Set DIRECTORIES_SOURCE_PATH to a local lists checkout for an offline, byte-for-byte sync.
+// Set DIRECTORIES_SOURCE_PATH to a local lists checkout (or its seedit-directories folder) for an offline,
+// byte-for-byte sync.
 
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'fs';
-import { dirname, isAbsolute, join, resolve } from 'path';
+import { basename, dirname, isAbsolute, join, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -86,15 +87,27 @@ const loadFromGitHub = async (snapshotRef, mirror) => {
   return files;
 };
 
-const loadSourceFiles = async () => {
-  if (DIRECTORIES_SOURCE_PATH) {
-    const checkoutPath = getLocalSourcePath();
-    console.log(`Mirroring directories from local lists checkout: ${checkoutPath}`);
-    return MIRRORS.map((mirror) => loadFromLocalCheckout(checkoutPath, mirror));
+// DIRECTORIES_SOURCE_PATH may name the lists checkout or, as before the 5chan mirror, one of its mirrored folders.
+const getLocalCheckoutRoot = () => {
+  const sourcePath = getLocalSourcePath();
+  return MIRRORS.some((mirror) => basename(sourcePath) === mirror.folder) ? dirname(sourcePath) : sourcePath;
+};
+
+// Each mirror must be a complete, well-formed snapshot before it replaces its fallback.
+const validateMirror = (mirror, files) => {
+  const fileNames = Object.keys(files);
+  if (fileNames.length === 0) throw new Error(`No ${mirror.folder} files found in source`);
+  const missing = mirror.files?.filter((fileName) => !fileNames.includes(fileName));
+  if (missing?.length) throw new Error(`Missing ${mirror.folder} files: ${missing.join(', ')}`);
+  for (const [fileName, text] of Object.entries(files)) {
+    let json;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      throw new Error(`Invalid JSON for ${mirror.folder}/${fileName}`);
+    }
+    if (mirror.isValidFile && !mirror.isValidFile(json)) throw new Error(`Unexpected format for ${mirror.folder}/${fileName}`);
   }
-  const snapshotRef = await getGitHubSnapshotRef();
-  console.log(`Mirroring directories from GitHub commit: ${snapshotRef}`);
-  return Promise.all(MIRRORS.map((mirror) => loadFromGitHub(snapshotRef, mirror)));
 };
 
 const writeMirror = (mirror, files) => {
@@ -126,31 +139,35 @@ const writeMirror = (mirror, files) => {
 };
 
 const sync = async () => {
+  let loadMirror;
   try {
-    const snapshots = await loadSourceFiles();
-
-    // Validate every complete snapshot before touching the existing fallbacks.
-    MIRRORS.forEach((mirror, index) => {
-      const files = snapshots[index];
-      const fileNames = Object.keys(files);
-      if (fileNames.length === 0) throw new Error(`No ${mirror.folder} files found in source`);
-      const missing = mirror.files?.filter((fileName) => !fileNames.includes(fileName));
-      if (missing?.length) throw new Error(`Missing ${mirror.folder} files: ${missing.join(', ')}`);
-      for (const [fileName, text] of Object.entries(files)) {
-        let json;
-        try {
-          json = JSON.parse(text);
-        } catch {
-          throw new Error(`Invalid JSON for ${mirror.folder}/${fileName}`);
-        }
-        if (mirror.isValidFile && !mirror.isValidFile(json)) throw new Error(`Unexpected format for ${mirror.folder}/${fileName}`);
-      }
-    });
-
-    MIRRORS.forEach((mirror, index) => writeMirror(mirror, snapshots[index]));
+    if (DIRECTORIES_SOURCE_PATH) {
+      const checkoutRoot = getLocalCheckoutRoot();
+      console.log(`Mirroring directories from local lists checkout: ${checkoutRoot}`);
+      loadMirror = async (mirror) => loadFromLocalCheckout(checkoutRoot, mirror);
+    } else {
+      // One commit for every mirror, so they come from the same snapshot.
+      const snapshotRef = await getGitHubSnapshotRef();
+      console.log(`Mirroring directories from GitHub commit: ${snapshotRef}`);
+      loadMirror = (mirror) => loadFromGitHub(snapshotRef, mirror);
+    }
   } catch (error) {
     console.warn(`Could not mirror directories from ${getSourceLabel()} (keeping existing files): ${getErrorMessage(error)}`);
+    return;
   }
+
+  // The mirrors are unrelated, so one that fails to load or validate keeps only its own fallback.
+  await Promise.all(
+    MIRRORS.map(async (mirror) => {
+      try {
+        const files = await loadMirror(mirror);
+        validateMirror(mirror, files);
+        writeMirror(mirror, files);
+      } catch (error) {
+        console.warn(`Could not mirror ${mirror.folder} from ${getSourceLabel()} (keeping its existing files): ${getErrorMessage(error)}`);
+      }
+    }),
+  );
 };
 
 void sync();
