@@ -70,10 +70,14 @@ const DICE_MARKER_PATTERN = '\\[dice=(\\d+)d(\\d+)(?:([+-])(\\d+))?\\]';
 const STORED_POST_OPTION_RESULTS_BEFORE_TIMESTAMP = 1793901000;
 
 export const usesStoredResults = (timestamp: number | undefined): boolean => typeof timestamp === 'number' && timestamp < STORED_POST_OPTION_RESULTS_BEFORE_TIMESTAMP;
-const LEGACY_FORTUNE_BBCODE_PATTERN = '\\[fortune color=(#[0-9a-fA-F]{6})\\]([^\\r\\n]*?)\\[\\/fortune\\]';
+// 5chan matches the legacy BBCode as `\[fortune color=(#…)\]([^\r\n]*?)\[\/fortune\]`. Seedit matches only its opener
+// with the regex and finds the closer in findFortuneMarkers, with the same result: the regex would rescan the rest
+// of the line for every unclosed opener, so a post of many openers would freeze each reader for seconds.
+const LEGACY_FORTUNE_BBCODE_OPENER_PATTERN = '\\[fortune color=(#[0-9a-fA-F]{6})\\]';
+const LEGACY_FORTUNE_BBCODE_CLOSER = '[/fortune]';
 const LEGACY_FORTUNE_HTML_PATTERN = '<span class="fortune" style="color:(#[0-9a-fA-F]{6})"><br><br><b>Your fortune: ([^<]+)<\\/b><\\/span>';
 const LEGACY_DICE_PATTERN = '<b>(Rolled \\d+(?:, \\d+)*(?: [+-] \\d+)?(?: = -?\\d+)? \\((\\d+)d(\\d+)(?: ([+-]) (\\d+))?\\))<br><br><\\/b>';
-const FORTUNE_MARKERS_PATTERN = `\\[fortune\\]|${LEGACY_FORTUNE_BBCODE_PATTERN}|${LEGACY_FORTUNE_HTML_PATTERN}`;
+const FORTUNE_MARKERS_PATTERN = `\\[fortune\\]|${LEGACY_FORTUNE_BBCODE_OPENER_PATTERN}|${LEGACY_FORTUNE_HTML_PATTERN}`;
 const DICE_MARKERS_PATTERN = `${DICE_MARKER_PATTERN}|${LEGACY_DICE_PATTERN}`;
 
 const getMatchingFortuneEntry = (color: string, text: string): FortuneEntry | undefined =>
@@ -92,17 +96,45 @@ interface DiceMarker {
   storedText?: string;
 }
 
-// Legacy fortune markup only counts when it names a real fortune, as old clients generated it.
-const findFortuneMarkers = (content: string): FortuneMarker[] =>
-  [...content.matchAll(new RegExp(FORTUNE_MARKERS_PATTERN, 'g'))].flatMap((match) => {
-    const color = match[1] ?? match[3];
-    const text = match[2] ?? match[4];
+// Legacy fortune markup only counts when it names a real fortune, as old clients generated it, but a match that
+// names none still hides the text it spans from the other markers, as in 5chan.
+const findFortuneMarkers = (content: string): FortuneMarker[] => {
+  const markers: FortuneMarker[] = [];
+  const pattern = new RegExp(FORTUNE_MARKERS_PATTERN, 'g');
+  const lineBreakPattern = /[\r\n]/g;
+  // The first closer and line break at or after the last opener's end; openers come in order, so each only moves forward.
+  let closerIndex: number | undefined;
+  let lineBreakIndex: number | undefined;
+  for (let match = pattern.exec(content); match; match = pattern.exec(content)) {
+    let length = match[0].length;
+    let color = match[2];
+    let text = match[3];
+    if (match[1] !== undefined) {
+      const bodyStart = match.index + length;
+      if (closerIndex === undefined || (closerIndex !== -1 && closerIndex < bodyStart)) {
+        closerIndex = content.indexOf(LEGACY_FORTUNE_BBCODE_CLOSER, bodyStart);
+      }
+      if (lineBreakIndex === undefined || (lineBreakIndex !== -1 && lineBreakIndex < bodyStart)) {
+        lineBreakPattern.lastIndex = bodyStart;
+        lineBreakIndex = lineBreakPattern.exec(content)?.index ?? -1;
+      }
+      // An opener without a closer on its line matches nothing. No other marker can start inside the opener, so the
+      // search goes on after it.
+      if (closerIndex === -1 || (lineBreakIndex !== -1 && lineBreakIndex < closerIndex)) continue;
+      length = closerIndex + LEGACY_FORTUNE_BBCODE_CLOSER.length - match.index;
+      color = match[1];
+      text = content.slice(bodyStart, closerIndex);
+      pattern.lastIndex = match.index + length;
+    }
     if (!color) {
-      return [{ index: match.index, length: match[0].length }];
+      markers.push({ index: match.index, length });
+      continue;
     }
     const storedFortune = getMatchingFortuneEntry(color, text);
-    return storedFortune ? [{ index: match.index, length: match[0].length, storedFortune }] : [];
-  });
+    if (storedFortune) markers.push({ index: match.index, length, storedFortune });
+  }
+  return markers;
+};
 
 const findDiceMarkers = (content: string): DiceMarker[] =>
   [...content.matchAll(new RegExp(DICE_MARKERS_PATTERN, 'g'))].map((match) =>
@@ -145,10 +177,16 @@ const stripMarkers = (content: string, markerTypes: MarkerTypes): string => {
   return removeMarkers(content, [...diceMarkers, ...fortuneMarkers]);
 };
 
-// Removing `[fortune]` from `[fort[fortune]une]` leaves a new marker, so strip until nothing changes.
+// Removing `[fortune]` from `[fort[fortune]une]` leaves a new marker, so strip until nothing changes. Each pass
+// rescans the whole post, so a post nested thousands deep would freeze each reader; past this many passes its
+// leftover markers stay as text. No real post nests that deep, and results come from the first scan only.
+const MAX_STRIP_PASSES = 16;
+
 export const stripMarkersUntilStable = (content: string, markerTypes: MarkerTypes): string => {
   let result = content;
-  for (let stripped = stripMarkers(result, markerTypes); stripped !== result; stripped = stripMarkers(result, markerTypes)) {
+  for (let pass = 0; pass < MAX_STRIP_PASSES; pass += 1) {
+    const stripped = stripMarkers(result, markerTypes);
+    if (stripped === result) break;
     result = stripped;
   }
   return result;

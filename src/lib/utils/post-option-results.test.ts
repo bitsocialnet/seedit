@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import { FORTUNE_ENTRIES, stripPostOptionMarkers } from './post-option-markers';
+import { FORTUNE_ENTRIES, findMarkers, stripPostOptionMarkers } from './post-option-markers';
 import { getPostOptionResults } from './post-option-results';
 
 const CID = 'QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG';
@@ -57,6 +57,56 @@ describe('5chan fortune and dice results', () => {
   it('strips markers until none is left, so a nested marker cannot survive', () => {
     expect(getPostOptionResults({ content: '[fort[fortune]une]hi', cid: CID, timestamp: AFTER_CUTOFF, directoryCode: 'b', isEdited: false }).content).toBe('hi');
     expect(stripPostOptionMarkers('[fort[fortune]une]hi', { directoryCode: 's5s', timestamp: AFTER_CUTOFF })).toBe('hi');
+  });
+
+  it("finds the fortune markers 5chan's regex finds", () => {
+    // 5chan's scan, whose lazy BBCode body rescans the rest of the line for every unclosed opener.
+    const fivechanPattern =
+      '\\[fortune\\]|\\[fortune color=(#[0-9a-fA-F]{6})\\]([^\\r\\n]*?)\\[\\/fortune\\]|<span class="fortune" style="color:(#[0-9a-fA-F]{6})"><br><br><b>Your fortune: ([^<]+)<\\/b><\\/span>';
+    const findAs5chan = (content: string) =>
+      [...content.matchAll(new RegExp(fivechanPattern, 'g'))].flatMap((match) => {
+        const color = match[1] ?? match[3];
+        const text = match[2] ?? match[4];
+        if (!color) return [{ index: match.index, length: match[0].length }];
+        const storedFortune = FORTUNE_ENTRIES.find((entry) => entry.color.toLowerCase() === color.toLowerCase() && entry.text === text);
+        return storedFortune ? [{ index: match.index, length: match[0].length, storedFortune }] : [];
+      });
+    const [entry, otherEntry] = FORTUNE_ENTRIES;
+    const fragments = [
+      '[fortune]',
+      `[fortune color=${entry.color}]`,
+      `[fortune color=${otherEntry.color.toUpperCase()}]`,
+      '[/fortune]',
+      entry.text,
+      otherEntry.text,
+      `<span class="fortune" style="color:${entry.color}"><br><br><b>Your fortune: `,
+      '</b></span>',
+      '[fort',
+      'une]',
+      '\n',
+      '\r',
+      ' x',
+      '<',
+    ];
+    // A fixed seed, so a failure names the same posts on every run.
+    let seed = 866;
+    const random = () => {
+      seed = (seed * 48271) % 2147483647;
+      return seed / 2147483647;
+    };
+    for (let post = 0; post < 2000; post += 1) {
+      const content = Array.from({ length: 1 + Math.floor(random() * 12) }, () => fragments[Math.floor(random() * fragments.length)]).join('');
+      expect(findMarkers(content, { dice: false, fortune: true, storedOnly: false }).fortuneMarkers, content).toEqual(findAs5chan(content));
+    }
+  });
+
+  it('strips a hostile post of nested markers and unclosed legacy openers without freezing the reader', () => {
+    // About 40 KB; the full regex rescan took over 6 s on a fast desktop.
+    const hostile = `${'[fort'.repeat(400)}[fortune]${'une]'.repeat(400)}${'[fortune color=#000000]'.repeat(1300)}`;
+    const start = performance.now();
+    stripPostOptionMarkers(hostile, { directoryCode: 'b', timestamp: AFTER_CUTOFF });
+    getPostOptionResults({ content: hostile, cid: CID, timestamp: AFTER_CUTOFF, directoryCode: 'b', isEdited: false });
+    expect(performance.now() - start).toBeLessThan(1000);
   });
 
   it('shows the stored result of a post from before the CID derivation, and keeps its typed markers as text', () => {
