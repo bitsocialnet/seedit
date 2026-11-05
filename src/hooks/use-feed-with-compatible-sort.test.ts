@@ -2,7 +2,7 @@
 
 import { describe, expect, it } from 'vitest';
 import type { Comment, Community, CommunityIdentifier } from '@bitsocial/bitsocial-react-hooks';
-import { getFeedCommunityGroups, hasUnresolvedPostSortMetadata, mergeAndSortFeeds } from '../lib/utils/feed-sort-utils';
+import { getFeedCommunityGroups, hasLoadingFeedCommunities, hasUnresolvedPostSortMetadata, mergeAndSortFeeds } from '../lib/utils/feed-sort-utils';
 
 const identifier = (name: string): CommunityIdentifier => ({ name });
 const community = ({ pages, pageCids = {} }: { pages: string[]; pageCids?: Record<string, string> }) =>
@@ -69,6 +69,24 @@ describe('hasUnresolvedPostSortMetadata', () => {
 
   it('does not keep an explicitly unavailable sort pending after page metadata is published', () => {
     expect(hasUnresolvedPostSortMetadata([community({ pages: ['hot'] })], 'custom')).toBe(false);
+  });
+});
+
+describe('hasLoadingFeedCommunities', () => {
+  it('keeps a feed loading while one of its communities has no entry', () => {
+    expect(hasLoadingFeedCommunities([community({ pages: ['hot'] }), undefined])).toBe(true);
+  });
+
+  it('keeps a feed loading while a community without a record fetches beside a loaded one', () => {
+    expect(hasLoadingFeedCommunities([community({ pages: ['hot'] }), { updatingState: 'fetching-ipns' } as Community])).toBe(true);
+  });
+
+  it.each(['waiting-retry', 'failed', 'stopped', 'succeeded'])('does not wait for a %s community without a record', (updatingState) => {
+    expect(hasLoadingFeedCommunities([{ updatingState } as Community])).toBe(false);
+  });
+
+  it('does not wait for a community with a record and no posts while it updates again', () => {
+    expect(hasLoadingFeedCommunities([{ updatedAt: 1, updatingState: 'fetching-ipns' } as Community])).toBe(false);
   });
 });
 

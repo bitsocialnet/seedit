@@ -66,6 +66,12 @@ describe('useIsCommunityOffline', () => {
     expect(hookResult.isOffline).toBe(false);
   });
 
+  it('shows a community offline when its record was already stale at the fetch before it stopped', async () => {
+    testState.syncInfo = { syncState: 'stopped', lastSuccessfulFetchAt: NOW_SECONDS - THREE_HOURS };
+    await renderPastInitialLoad({ address: 'stale-stopped.bso', updatedAt: NOW_SECONDS - 6 * 60 * 60 } as Community);
+    expect(hookResult.isOffline).toBe(true);
+  });
+
   it('judges a community by its record age now once its restarted update fails', async () => {
     testState.syncInfo = { syncState: 'loading', lastSuccessfulFetchAt: NOW_SECONDS - THREE_HOURS, lastRetriableError: new Error('timeout') };
     await renderPastInitialLoad(pausedCommunity('failing.bso'));

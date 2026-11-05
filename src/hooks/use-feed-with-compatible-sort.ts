@@ -1,9 +1,9 @@
 import { useCallback, useMemo } from 'react';
 import { useCommunities, useFeed, type UseFeedOptions, type UseFeedResult } from '@bitsocial/bitsocial-react-hooks';
-import { getFeedCommunityGroups, hasUnresolvedPostSortMetadata, mergeAndSortFeeds } from '../lib/utils/feed-sort-utils';
+import { getFeedCommunityGroups, hasLoadingFeedCommunities, hasUnresolvedPostSortMetadata, mergeAndSortFeeds } from '../lib/utils/feed-sort-utils';
 
 export type UseFeedWithCompatibleSortResult = UseFeedResult & {
-  /** The feed's communities, or the post sorts they publish, have not loaded yet. */
+  /** Some of the feed's communities have not loaded their first record yet. */
   isLoadingCommunities: boolean;
 };
 
@@ -94,7 +94,7 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCom
     reset,
     communityKeysWithNewerPosts,
     communityKeysWithMore,
-    isLoadingCommunities: hasUnresolvedCommunities || hasUnresolvedSortMetadata,
+    isLoadingCommunities: hasLoadingFeedCommunities(communities),
     state: communitiesState === 'failed' ? 'failed' : hasMore ? 'fetching-ipns' : 'succeeded',
     error: communitiesError || requestedSortFeed.error || preloadedSortFeed.error,
     errors: [...communitiesErrors, ...requestedSortFeed.errors, ...preloadedSortFeed.errors],
