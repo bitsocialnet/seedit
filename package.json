@@ -49,7 +49,6 @@
     "zustand": "4.5.7"
   },
   "scripts": {
-    "postinstall": "node scripts/patch-capacitor-cli-tar.cjs",
     "start": "node scripts/start-dev.js",
     "start:preview": "node scripts/start-preview.js",
     "ai-workflow:check": "node scripts/validate-ai-workflow.mjs",
