@@ -12,6 +12,7 @@ import { isInboxView } from '../../lib/utils/view-utils';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import { copyShareLinkToClipboard } from '../../lib/utils/url-utils';
 import { getCommunityPostPath } from '../../lib/utils/community-route-utils';
+import { stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import usePublishPostStore from '../../stores/use-publish-post-store';
 import usePrefetchIntent from '../../hooks/use-prefetch-intent';
 
@@ -147,7 +148,7 @@ const PostTools = ({
   const handleCrosspost = () => {
     if (!comment?.raw?.comment) return;
 
-    const sourceTitle = comment.title?.trim() || comment.content?.trim().slice(0, 300) || t('crosspost');
+    const sourceTitle = comment.title?.trim() || stripCommentPostOptionMarkers(comment.content, comment, communityAddress)?.trim().slice(0, 300) || t('crosspost');
     const { resetPublishPostStore, setPublishPostStore } = usePublishPostStore.getState();
     resetPublishPostStore();
     setPublishPostStore({

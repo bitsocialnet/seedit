@@ -1,0 +1,13 @@
+{
+  "description": "Boards competing to host the /tg/ directory on 5chan. The highest-scoring board resolves the directory code; if it goes offline, 5chan rotates to the next-highest. Anyone can open a PR on this file to add their board.\n\nhttps://github.com/bitsocialnet/lists/blob/master/5chan-directories/5chan-tg-directory.json",
+  "createdAt": 1779182014,
+  "updatedAt": 1779182014,
+  "boards": [
+    {
+      "address": "traditional-games.bso",
+      "publicKey": "12D3KooWK6G3EHUCkfcgX6kPDihXJAdpucrZvn4WjPwf7fF484nt",
+      "addedAt": 1779182014,
+      "owner": "bitsocialist.bso"
+    }
+  ]
+}

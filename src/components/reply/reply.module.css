@@ -91,6 +91,11 @@
   text-decoration: none;
 }
 
+/* A 5chan tripcode keeps the name's color without its bold, as on 4chan and 5chan. */
+.trip {
+  font-weight: normal;
+}
+
 .score {
   margin-left: 0.5em;
   color: var(--text-info);

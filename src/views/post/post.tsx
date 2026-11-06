@@ -25,6 +25,7 @@ import Sidebar from '../../components/sidebar';
 import styles from './post.module.css';
 import lowerCase from 'lodash/lowerCase';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
+import { stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 
 type SortDropdownProps = {
   sortBy: string;
@@ -326,7 +327,7 @@ const PostPage = () => {
     }
   }, [post?.error]);
 
-  const postTitle = post.title?.slice(0, 40) || post?.content?.slice(0, 40);
+  const postTitle = post.title?.slice(0, 40) || stripCommentPostOptionMarkers(post?.content, post, communityAddress)?.slice(0, 40);
   const communityTitle = community?.title || getDisplayAddress(community?.shortAddress || '');
   useEffect(() => {
     document.title = `${postTitle || ''}${postTitle && communityTitle ? ' - ' : ''}${communityTitle || ''}${postTitle || communityTitle ? ' - Seedit' : 'Seedit'}`;

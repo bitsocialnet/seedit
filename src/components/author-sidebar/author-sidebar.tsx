@@ -21,6 +21,7 @@ import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { useTranslation } from 'react-i18next';
 import { useDefaultSubscriptionAddresses } from '../../hooks/use-default-subscriptions';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
+import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 
 interface AuthorModeratingListProps {
   accountCommunities: Record<string, AccountCommunity & Partial<Community>>;
@@ -88,7 +89,7 @@ const AuthorSidebar = () => {
   const { postScore, replyScore } = karma || { postScore: 0, replyScore: 0 };
 
   const oldestCommentTimestamp = isInAuthorView ? authorOldestCommentTimestamp : isInProfileView ? profileOldestAccountTimestamp : Date.now();
-  const displayName = isInAuthorView ? authorAccount?.author?.displayName : isInProfileView ? userAccount?.author?.displayName : '';
+  const displayName = stripTripcodeProof(isInAuthorView ? authorAccount?.author?.displayName : isInProfileView ? userAccount?.author?.displayName : '');
 
   const blockConfirm = () => {
     setShowBlockConfirm(true);

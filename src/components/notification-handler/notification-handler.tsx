@@ -6,6 +6,7 @@ import useContentOptionsStore from '../../stores/use-content-options-store';
 import { showLocalNotification } from '../../lib/push';
 import { getCommunityPostPath } from '../../lib/utils/community-route-utils';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
+import { stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 
 // Create LRU storage instance for tracking sent notifications
 const sentNotificationsDb = localForageLru.createInstance({ name: 'seeditSentNotifications', size: 1000 });
@@ -52,13 +53,14 @@ const NotificationHandler = () => {
       }
 
       // useNotifications only supports replies at the moment
+      const content = stripCommentPostOptionMarkers(notification.content, notification, notification.communityAddress);
       const payload = {
         id: notification.timestamp,
         icon: '/icon.png',
         title: `You received a reply`,
         body: `u/${getDisplayAddress(notification.author.shortAddress)} replied to your post in s/${getDisplayAddress(notification.shortCommunityAddress)}${
-          notification.content
-            ? `: ${notification.content.length > 100 ? notification.content.slice(0, 100).trim() + '...' : notification.content.trim()}`
+          content
+            ? `: ${content.length > 100 ? content.slice(0, 100).trim() + '...' : content.trim()}`
             : notification.link
               ? `: ${notification.link.length > 100 ? notification.link.slice(0, 100).trim() + '...' : notification.link.trim()}`
               : ''

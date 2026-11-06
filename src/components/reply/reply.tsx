@@ -5,6 +5,9 @@ import { Comment, useAuthorAddress, useBlock, useComment, useEditedComment, useC
 import { isInboxView, isPostContextView, isPostPageView } from '../../lib/utils/view-utils';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
+import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
+import useCommentTripcode from '../../hooks/use-comment-tripcode';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import useOptionalAccountComment from '../../hooks/use-account-comment';
 import { getHostname } from '../../lib/utils/url-utils';
@@ -44,6 +47,8 @@ interface ReplyAuthorProps {
   communityAddress: string;
   postCid: string;
   pinned: boolean;
+  /** The verified 5chan tripcode (`!trip`), shown after the name as on 5chan. */
+  trip?: string;
 }
 
 const ReplyAuthor = ({
@@ -59,6 +64,7 @@ const ReplyAuthor = ({
   submitterAddress,
   communityAddress,
   postCid,
+  trip,
 }: ReplyAuthorProps) => {
   const { t } = useTranslation();
   // TODO: implement comment.highlightRole once implemented in API
@@ -77,19 +83,25 @@ const ReplyAuthor = ({
         <span className={styles.removedUsername}>[{removed ? t('removed') : deleted ? t('deleted') : ''}]</span>
       ) : (
         <>
-          {displayName && (
+          {(displayName || trip) && (
             <Link
               to={`/u/${address}/comments/${cid}`}
               className={`${styles.author} ${pinned && moderatorClass} ${!moderatorClass && isAuthorSubmitter ? styles.submitter : ''}`}
             >
-              {shortDisplayName}{' '}
+              {shortDisplayName}
+              {trip && (
+                <>
+                  {displayName && ' '}
+                  <span className={styles.trip}>{trip}</span>
+                </>
+              )}{' '}
             </Link>
           )}
           <Link
             to={`/u/${address}/comments/${cid}`}
             className={`${styles.author} ${pinned && moderatorClass} ${!moderatorClass && isAuthorSubmitter ? styles.submitter : ''}`}
           >
-            {displayName ? `u/${getDisplayAddress(shortAuthorAddress || '')}` : getDisplayAddress(shortAuthorAddress || '')}
+            {displayName || trip ? `u/${getDisplayAddress(shortAuthorAddress || '')}` : getDisplayAddress(shortAuthorAddress || '')}
           </Link>
           {flairs?.map((flair, index) => (
             <Fragment key={index}>
@@ -219,8 +231,9 @@ const ParentLink = ({ postCid, fallbackParent }: ParentLinkProps) => {
   const fetchedParent = useComment({ commentCid: postCid });
   // an archived thread can be gone from the live network, so an indexer-served copy fills in until the fetch answers
   const parentComment = fetchedParent?.timestamp ? fetchedParent : (fallbackParent ?? fetchedParent);
-  const { author, cid, content, title } = parentComment || {};
+  const { author, cid, title } = parentComment || {};
   const communityAddress = getCommentCommunityAddress(parentComment);
+  const content = stripCommentPostOptionMarkers(parentComment?.content, parentComment, communityAddress);
   const { t } = useTranslation();
   const postTitle = (title?.length > 300 ? title?.slice(0, 300) + '...' : title) || (content?.length > 300 ? content?.slice(0, 300) + '...' : content);
 
@@ -246,8 +259,9 @@ const InboxParentLink = ({ commentCid }: ParentLinkProps) => {
   const inboxComment = useComment({ commentCid, onlyIfCached: true });
   const { postCid, parentCid } = inboxComment || {};
   const parent = useComment({ commentCid: inboxComment?.postCid, onlyIfCached: true });
-  const { cid, content, title } = parent || {};
+  const { cid, title } = parent || {};
   const communityAddress = getCommentCommunityAddress(parent);
+  const content = stripCommentPostOptionMarkers(parent?.content, parent, communityAddress);
   const postTitle = (title?.length > 300 ? title?.slice(0, 300) + '...' : title) || (content?.length > 300 ? content?.slice(0, 300) + '...' : content);
 
   const isInboxCommentReply = postCid !== parentCid;
@@ -270,7 +284,14 @@ const InboxParentComment = ({ parentCid }: { parentCid: string | undefined }) =>
   const communityAddress = getCommentCommunityAddress(parentComment);
   return (
     <>
-      <Expando content={content} expanded={true} number={number} quotedCids={quotedCids} showContent={true} />
+      <Expando
+        content={content}
+        expanded={true}
+        number={number}
+        postOptions={getCommentPostOptions(parentComment, communityAddress)}
+        quotedCids={quotedCids}
+        showContent={true}
+      />
       <Link className={styles.viewParentComment} to={communityAddress && parentCid ? getCommunityPostPath(communityAddress, parentCid) : ''}>
         {t('view_parent_comment')}
       </Link>
@@ -377,6 +398,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
 
   const authorRole = community?.roles?.[author?.address]?.role;
   const { shortAuthorAddress } = useAuthorAddress({ comment: reply });
+  const trip = useCommentTripcode(reply);
   const replies = useReplies(reply);
 
   const [expanded, setExpanded] = useState(false);
@@ -484,7 +506,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                   authorRole={authorRole}
                   cid={cid}
                   deleted={deleted}
-                  displayName={author?.displayName}
+                  displayName={stripTripcodeProof(author?.displayName)}
                   flairs={collapsed ? undefined : author?.flairs}
                   removed={removed}
                   shortAuthorAddress={shortAuthorAddress}
@@ -492,6 +514,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                   communityAddress={communityAddress || ''}
                   pinned={pinned}
                   postCid={postCid}
+                  trip={trip}
                 />
                 <span className={styles.score}>{scoreString}</span>{' '}
                 <span className={styles.time}>
@@ -562,7 +585,13 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                       ) : deleted ? (
                         <span className={styles.deletedContent}>[{t('deleted')}]</span>
                       ) : (
-                        <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} parentNumber={renderedParentNumber} quotedCids={quotedCids} />
+                        <Markdown
+                          content={content}
+                          enableFivechanQuotes={typeof number === 'number'}
+                          parentNumber={renderedParentNumber}
+                          postOptions={getCommentPostOptions(reply, communityAddress)}
+                          quotedCids={quotedCids}
+                        />
                       ))}
                     {reason && (
                       <p className={styles.modReason}>

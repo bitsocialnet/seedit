@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
+import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import { getCommunityPath, getCommunityPostPath } from '../../lib/utils/community-route-utils';
 import { getCommentMediaInfo } from '../../lib/utils/media-utils';
 import { formatScore, getPostScore } from '../../lib/utils/post-utils';
@@ -23,10 +25,11 @@ const CrosspostPreview = ({ crosspost }: CrosspostPreviewProps) => {
   const communityAddress = isCommunityVerified ? getCommentCommunityAddress(source) : undefined;
   const sourcePath = communityAddress && cid ? getCommunityPostPath(communityAddress, cid) : undefined;
   const authorAddress = author?.address;
-  const authorLabel = author?.displayName || getDisplayAddress(author?.shortAddress || getShortDisplayAddress(authorAddress) || authorAddress);
+  const authorLabel = stripTripcodeProof(author?.displayName) || getDisplayAddress(author?.shortAddress || getShortDisplayAddress(authorAddress) || authorAddress);
   const communityLabel = communityAddress ? getDisplayAddress(getShortDisplayAddress(communityAddress)) : undefined;
   const trimmedContent = content?.trim();
-  const excerpt = trimmedContent && trimmedContent.length > 280 ? `${trimmedContent.slice(0, 280).trim()}…` : trimmedContent;
+  const titleContent = stripCommentPostOptionMarkers(trimmedContent, source, communityAddress)?.trim();
+  const excerpt = titleContent && titleContent.length > 280 ? `${titleContent.slice(0, 280).trim()}…` : titleContent;
   const displayTitle = title?.trim() || excerpt || getShortDisplayAddress(cid || crosspost.cid) || cid || crosspost.cid;
   const mediaInfo = getCommentMediaInfo(source);
   const [failedMediaUrl, setFailedMediaUrl] = useState<string>();
@@ -115,7 +118,12 @@ const CrosspostPreview = ({ crosspost }: CrosspostPreviewProps) => {
             <>
               <hr className={styles.selfDivider} />
               <div className={styles.usertext}>
-                <Markdown content={trimmedContent} enableFivechanQuotes={typeof number === 'number'} quotedCids={quotedCids} />
+                <Markdown
+                  content={trimmedContent}
+                  enableFivechanQuotes={typeof number === 'number'}
+                  postOptions={getCommentPostOptions(source, communityAddress)}
+                  quotedCids={quotedCids}
+                />
               </div>
             </>
           )}

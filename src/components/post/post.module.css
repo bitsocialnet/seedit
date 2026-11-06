@@ -198,6 +198,12 @@
   color: var(--text-primary);
 }
 
+/* A verified 5chan trip must look unlike a name, which can contain any text such as `Anon !trip`. The tagline
+   name is not bold, so the trip is; replies, whose names are bold, keep the trip at normal weight as 5chan does. */
+.trip {
+  font-weight: bold;
+}
+
 .hidden {
   display: none;
 }
