@@ -28,6 +28,8 @@ describe('Seedit directory codes', () => {
     expect(isWellFormedDirectoryCode('all')).toBe(false);
     expect(isWellFormedDirectoryCode('mod')).toBe(false);
     expect(isWellFormedDirectoryCode('about')).toBe(false);
+    // inherited by every plain object keyed by directory code
+    expect(isWellFormedDirectoryCode('constructor')).toBe(false);
     expect(isWellFormedDirectoryCode('')).toBe(false);
   });
 

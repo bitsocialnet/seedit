@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAccount } from '@bitsocial/bitsocial-react-hooks';
 import { useTranslation } from 'react-i18next';
-import type { SeeditDirectoryCode } from '../../lib/utils/directory-codes';
+import { isWellFormedDirectoryCode, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
 import { observeDirectoryWinnerChanges, type AuthoritativeDirectoryWinnerSnapshot } from '../../lib/utils/directory-subscriptions';
 import { pickDirectoryWinner } from '../../lib/utils/directory-list-utils';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
@@ -99,13 +99,17 @@ const AutomaticDirectoryChangeNotice = ({ directoryCode }: { directoryCode: Seed
 const DirectorySubscriptionUpdatesNotice = () => {
   const account = useAccount() as StarterAccount | undefined;
   const { codes } = useDirectoryRegistry();
-  const activeCodes = codes.filter(
-    (directoryCode) => account?.seeditDirectoryPreferences?.slots?.[directoryCode] || account?.seeditDirectoryPreferences?.automaticChangeNotices?.[directoryCode],
-  );
+  const preferences = account?.seeditDirectoryPreferences;
+  const knownCodes = new Set(codes);
+  // An automatic switch is stored on the account, so its notice stays dismissible and undoable even after the
+  // directory stops being published. A pending winner change needs the directory's current list.
+  const noticeCodes = [
+    ...new Set([...codes.filter((directoryCode) => preferences?.slots?.[directoryCode]), ...Object.keys(preferences?.automaticChangeNotices ?? {})]),
+  ].filter((directoryCode) => isWellFormedDirectoryCode(directoryCode));
 
-  return activeCodes.flatMap((directoryCode) => [
+  return noticeCodes.flatMap((directoryCode) => [
     <AutomaticDirectoryChangeNotice key={`${directoryCode}-automatic`} directoryCode={directoryCode} />,
-    <ManualDirectoryChangeNotice key={`${directoryCode}-manual`} directoryCode={directoryCode} />,
+    ...(knownCodes.has(directoryCode) ? [<ManualDirectoryChangeNotice key={`${directoryCode}-manual`} directoryCode={directoryCode} />] : []),
   ]);
 };
 

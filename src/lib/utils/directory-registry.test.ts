@@ -143,6 +143,10 @@ describe('directory registry', () => {
         all: { directoryCode: 'all' },
         'dogs.bso': { directoryCode: 'dogs.bso' },
         birds: { directoryCode: 'parrots' },
+        // the normalizer would fill these codes from their keys
+        cows: {},
+        pigs: null,
+        constructor: { directoryCode: 'constructor' },
       }),
     );
 

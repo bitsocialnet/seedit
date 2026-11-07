@@ -16,6 +16,8 @@ export type SeeditDirectoryCode = string;
 const DIRECTORY_CODE_PATTERN = /^[a-z0-9]{1,24}$/;
 // Segments the router already owns under /s/ and /communities/directories/.
 const ROUTER_OWNED_SEGMENTS: ReadonlySet<string> = new Set(['all', 'mod', 'about']);
+// Directory-keyed plain objects (account preferences, defaults, lists) would read inherited members for these, e.g. `constructor`.
+const OBJECT_PROTOTYPE_KEYS: ReadonlySet<string> = new Set(Object.getOwnPropertyNames(Object.prototype));
 const VENDORED_DIRECTORY_CODES_SET: ReadonlySet<string> = new Set(VENDORED_DIRECTORY_CODES);
 
 // The code checks return plain booleans rather than type guards: every code is a string, so a guard
@@ -23,7 +25,7 @@ const VENDORED_DIRECTORY_CODES_SET: ReadonlySet<string> = new Set(VENDORED_DIREC
 
 /** Whether a value could name a directory, independent of which directories this client knows yet. */
 export const isWellFormedDirectoryCode = (value: unknown): boolean =>
-  typeof value === 'string' && DIRECTORY_CODE_PATTERN.test(value) && !ROUTER_OWNED_SEGMENTS.has(value);
+  typeof value === 'string' && DIRECTORY_CODE_PATTERN.test(value) && !ROUTER_OWNED_SEGMENTS.has(value) && !OBJECT_PROTOTYPE_KEYS.has(value);
 
 export const isVendoredDirectoryCode = (value: unknown): value is VendoredDirectoryCode => typeof value === 'string' && VENDORED_DIRECTORY_CODES_SET.has(value);
 

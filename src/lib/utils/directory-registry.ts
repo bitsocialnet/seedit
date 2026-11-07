@@ -19,11 +19,20 @@ export interface DirectoryRegistrySnapshot {
   settled: boolean;
 }
 
-/** Keep only entries whose key names a usable directory and matches the entry's own code. */
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
+
+/**
+ * Keep only entries whose key names a usable directory and whose raw entry states that same code. The normalizer
+ * fills a missing code from the key, so the raw entry is checked rather than the normalized one.
+ */
 export const normalizePublishedDirectoryDefaults = (raw: unknown): DirectoryDefaultsData | null => {
+  const rawDirectories = isRecord(raw) && isRecord(raw.directories) ? raw.directories : {};
   const normalized = normalizeDirectoryDefaultsData(raw);
   const directories = Object.fromEntries(
-    Object.entries(normalized.directories).filter(([code, entry]) => isWellFormedDirectoryCode(code) && entry.directoryCode === code),
+    Object.entries(normalized.directories).filter(([code]) => {
+      const rawEntry = isWellFormedDirectoryCode(code) ? rawDirectories[code] : undefined;
+      return isRecord(rawEntry) && rawEntry.directoryCode === code;
+    }),
   );
   return Object.keys(directories).length > 0 ? { ...normalized, directories } : null;
 };
