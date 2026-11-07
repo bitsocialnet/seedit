@@ -79,7 +79,7 @@ The search box matches communities from the lists Seedit ships, from your own su
 
 ## Downloads
 
-- **Web version**: https://seedit.app — or, using Brave/IPFS Companion: https://seedit.eth
+- **Web version**: https://seedit.app — or, using [Freedom Browser](https://freedom.baby/) or Brave/IPFS Companion: https://seedit.eth
 - **Desktop version** (full P2P bitsocial node, seeds automatically): available for Mac/Windows/Linux, [download from the release page](https://github.com/bitsocialnet/seedit/releases/latest)
 - **Mobile version**: available for Android, [download from the release page](https://github.com/bitsocialnet/seedit/releases/latest)
 

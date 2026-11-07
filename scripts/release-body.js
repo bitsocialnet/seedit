@@ -121,7 +121,7 @@ const releaseBody = `This release restores the Windows portable download, now a 
 
 - Web app: https://seedit.app
 - Decentralized web app via IPFS/IPNS gateways (works on any browser): [seedit.eth.limo](https://seedit.eth.limo), [seedit.eth.link](https://seedit.eth.link), [dweb.link/ipfs.io](https://dweb.link/ipns/seedit.eth)
-- Decentralized web app via IPFS node you run: https://seedit.eth (works on [Brave Browser](https://brave.com/) or use [IPFS Companion](https://docs.ipfs.tech/install/ipfs-companion/#prerequisites))
+- Decentralized web app via IPFS node you run: https://seedit.eth (works on [Freedom Browser](https://freedom.baby/) or [Brave Browser](https://brave.com/), or use [IPFS Companion](https://docs.ipfs.tech/install/ipfs-companion/#prerequisites))
 
 ## Downloads
 
