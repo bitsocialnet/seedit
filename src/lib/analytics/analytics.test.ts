@@ -262,6 +262,8 @@ describe('analytics initialization', () => {
     trackPageView(`/s/${memes.address}`, { replace: true });
     trackPageView('/s/memes/submit');
     trackPageView(`/s/${memes.address}/submit`, { replace: true });
+    // The community a directory redirects to may be unlisted, or listed under another directory.
+    trackPageView('/s/unlisted-winner.bso/submit', { replace: true });
     // A replacing navigation to another page is a view of that page.
     trackPageView('/not-found', { replace: true });
     await settle();

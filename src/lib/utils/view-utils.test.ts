@@ -77,4 +77,9 @@ describe('isPendingPostPath', () => {
       expect(isPendingPostPath(pathname)).toBe(false);
     }
   });
+
+  it('ignores case, as the router does', () => {
+    expect(isPendingPostPath('/PROFILE/7')).toBe(true);
+    expect(isPendingPostPath('/Profile/ABOUT')).toBe(false);
+  });
 });

@@ -185,8 +185,9 @@ export const trackPageView = (pathname: string, { replace = false, directoryList
   if (directoryLists) runtimeDirectoryLists = directoryLists;
   const path = getAnalyticsPath(pathname);
   // A redirect that replaces the entry (/ to /hot, a short community address to its full one, a
-  // directory code to its community) is the same page, not a second view.
-  if (replace && path === lastPath) return;
+  // directory code to its community) is the same page, not a second view. Routes are compared, not
+  // paths: the community a directory redirects to may be listed under another directory, or none.
+  if (replace && lastPath !== undefined && getAnalyticsRoute(path) === getAnalyticsRoute(lastPath)) return;
   lastPath = path;
   pageview({ path, route: getAnalyticsRoute(path) });
 };

@@ -121,10 +121,10 @@ export const isPendingPostView = (pathname: string, params: ParamsType): boolean
 /** The /profile/<page> routes; any other /profile/<segment> is the pending page of an account comment. */
 export const PROFILE_PAGE_SEGMENTS: ReadonlySet<string> = new Set(['about', 'upvoted', 'downvoted', 'hidden', 'saved', 'comments', 'submitted']);
 
-/** Like isPendingPostView, for code outside the routes, which has no route params. */
+/** Like isPendingPostView, for code outside the routes, which has no route params. Routes match regardless of case. */
 export const isPendingPostPath = (pathname: string): boolean => {
-  const segment = pathname.match(/^\/profile\/([^/]+)\/?$/)?.[1];
-  return segment !== undefined && !PROFILE_PAGE_SEGMENTS.has(segment);
+  const segment = pathname.match(/^\/profile\/([^/]+)\/?$/i)?.[1];
+  return segment !== undefined && !PROFILE_PAGE_SEGMENTS.has(segment.toLowerCase());
 };
 
 export interface RenderedPendingPost {
