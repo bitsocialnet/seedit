@@ -117,7 +117,7 @@ const htmlSection = section('Static HTML build', [htmlZip && `- seedit-html (zip
 
 const downloads = [macSection, winSection, linuxSection, androidSection, htmlSection].filter(Boolean).join('\n\n');
 
-const releaseBody = `This release restores the Windows portable download, now a zip you extract to run seedit.exe without installing, and updates Electron to 44.10.1 for security fixes.
+const releaseBody = `This release fixes memory growth in feeds left open, shows 5chan posts' verified tripcodes and fortune and dice results, recognizes directories published after the release, and strips addresses and search text from seedit.app's analytics, which now also count failed post attempts.
 
 - Web app: https://seedit.app
 - Decentralized web app via IPFS/IPNS gateways (works on any browser): [seedit.eth.limo](https://seedit.eth.limo), [seedit.eth.link](https://seedit.eth.link), [dweb.link/ipfs.io](https://dweb.link/ipns/seedit.eth)

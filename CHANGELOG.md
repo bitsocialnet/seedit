@@ -1,3 +1,14 @@
+## [0.6.3](https://github.com/bitsocialnet/seedit/compare/v0.6.2...v0.6.3) (2026-11-07)
+
+
+### Features
+
+* **5chan:** show verified tripcodes and CID-derived fortune and dice ([#866](https://github.com/bitsocialnet/seedit/issues/866)) ([0541efd](https://github.com/bitsocialnet/seedit/commit/0541efdf01ddffd6d6c18c48a977e0320d768cdd))
+* **analytics:** strip private route data from seedit.app page views and count failed posts ([#868](https://github.com/bitsocialnet/seedit/issues/868)) ([f1c11f9](https://github.com/bitsocialnet/seedit/commit/f1c11f9a4621d4a09ec4074c3d9c100c8e71c65a))
+* **directories:** learn directories published after the release ([#867](https://github.com/bitsocialnet/seedit/issues/867)) ([c331dc5](https://github.com/bitsocialnet/seedit/commit/c331dc524661d819cc105d3dba8f408b96786c1b))
+
+
+
 ## [0.6.2](https://github.com/bitsocialnet/seedit/compare/v0.6.1...v0.6.2) (2026-11-04)
 
 
