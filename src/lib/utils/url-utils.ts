@@ -6,6 +6,7 @@ import {
   getCommunityReferencePostPath,
   resolveCommunityRouteAddress,
 } from './community-route-utils';
+import type { KnownDirectoryCodes } from './directory-codes';
 
 export const getHostname = (url: string) => {
   try {
@@ -68,8 +69,8 @@ export const isSeeditLink = (url: string): boolean => {
   }
 };
 
-// Transform a valid seedit URL to an internal route
-export const transformSeeditLinkToInternal = (url: string): string | null => {
+// Transform a valid seedit URL to an internal route. Components pass the registry's codes (see getCanonicalCommunityRoutePathname).
+export const transformSeeditLinkToInternal = (url: string, knownDirectoryCodes?: KnownDirectoryCodes): string | null => {
   if (!isSeeditLink(url)) {
     return null;
   }
@@ -81,11 +82,11 @@ export const transformSeeditLinkToInternal = (url: string): string | null => {
     if (parsedUrl.hash && parsedUrl.hash.startsWith('#/')) {
       // Extract the route from the hash, preserving any query params within the hash
       const hashPath = parsedUrl.hash.substring(1); // Remove the #
-      return getCanonicalCommunityRoutePathname(hashPath) ?? hashPath;
+      return getCanonicalCommunityRoutePathname(hashPath, knownDirectoryCodes) ?? hashPath;
     }
 
     // For regular pathname-based routes
-    return (getCanonicalCommunityRoutePathname(parsedUrl.pathname) ?? parsedUrl.pathname) + parsedUrl.search + parsedUrl.hash;
+    return (getCanonicalCommunityRoutePathname(parsedUrl.pathname, knownDirectoryCodes) ?? parsedUrl.pathname) + parsedUrl.search + parsedUrl.hash;
   } catch {
     return null;
   }
@@ -129,7 +130,7 @@ export const isValidCommunityPattern = (pattern: string): boolean => {
 };
 
 // Preprocess content to convert plain text seedit patterns to markdown links
-export const preprocessSeeditPatterns = (content: string): string => {
+export const preprocessSeeditPatterns = (content: string, knownDirectoryCodes?: KnownDirectoryCodes): string => {
   // Pattern to match "s/something" or "s/something/comments/something"
   const pattern = /\bs\/([a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*(?:\/comments\/[a-zA-Z0-9]{10,100})?)([.,:;!?]*)/g;
 
@@ -144,7 +145,9 @@ export const preprocessSeeditPatterns = (content: string): string => {
 
     if (isValidCommunityPattern(fullPattern)) {
       const postMatch = capturedPath.match(/^([^/]+)\/comments\/([^/]+)$/);
-      const internalPath = postMatch ? getCommunityReferencePostPath(postMatch[1], postMatch[2]) : getCommunityReferencePath(capturedPath);
+      const internalPath = postMatch
+        ? getCommunityReferencePostPath(postMatch[1], postMatch[2], knownDirectoryCodes)
+        : getCommunityReferencePath(capturedPath, knownDirectoryCodes);
       // Convert to markdown link format and preserve trailing punctuation
       return `[${fullPattern}](${internalPath})${trailingPunctuation}`;
     }

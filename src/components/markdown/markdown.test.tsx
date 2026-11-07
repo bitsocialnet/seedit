@@ -9,7 +9,10 @@ import Markdown from './markdown';
 
 const testState = vi.hoisted(() => ({
   comments: [] as Array<Record<string, any>>,
+  directoryRegistry: { codes: ['aww'] as string[], settled: true },
 }));
+
+vi.mock('../../hooks/use-directory-registry', () => ({ useDirectoryRegistry: () => testState.directoryRegistry }));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAuthorAddress: ({ comment }: { comment?: { author?: { address?: string; shortAddress?: string } } }) => ({
@@ -49,6 +52,7 @@ describe('Markdown', () => {
 
   beforeEach(() => {
     testState.comments = [];
+    testState.directoryRegistry = { codes: ['aww'], settled: true };
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -57,6 +61,21 @@ describe('Markdown', () => {
   afterEach(() => {
     act(() => root.unmount());
     container.remove();
+  });
+
+  it('keeps links to a not-yet-known directory code as directory routes until the published codes load', async () => {
+    const content = 'See https://seedit.app/#/s/dogs and s/dogs';
+    const linkHrefs = () => Array.from(container.querySelectorAll('a')).map((link) => link.getAttribute('href'));
+
+    testState.directoryRegistry = { codes: ['aww'], settled: false };
+    await act(() => root.render(createElement(HashRouter, null, createElement(Markdown, { content }))));
+    expect(linkHrefs()).toEqual(['#/s/dogs', '#/s/dogs']);
+
+    act(() => root.unmount());
+    root = createRoot(container);
+    testState.directoryRegistry = { codes: ['aww'], settled: true };
+    await act(() => root.render(createElement(HashRouter, null, createElement(Markdown, { content }))));
+    expect(linkHrefs()).toEqual(['#/s/dogs.bso', '#/s/dogs.bso']);
   });
 
   it('renders GitHub-flavored Markdown tables', async () => {

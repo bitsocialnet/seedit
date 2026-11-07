@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isSeeditLink, isValidCommunityPattern, preprocessSeeditPatterns, transformSeeditLinkToInternal } from './url-utils';
+import { VENDORED_DIRECTORY_CODES } from './directory-codes';
 
 const CID = 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3fteh2v6q2f6x2w4g3q';
 
@@ -48,5 +49,22 @@ describe('Seedit comments permalinks', () => {
   it('does not relink references already embedded in URLs or words', () => {
     const content = 'https://example.com/s/aww.bso https://example.com/?next=s/aww.bso https://example.com/#s/aww.bso xs/aww.bso';
     expect(preprocessSeeditPatterns(content)).toBe(content);
+  });
+});
+
+describe('links to directories published after this build', () => {
+  const unsettled = { codes: VENDORED_DIRECTORY_CODES, settled: false };
+  const settled = { codes: VENDORED_DIRECTORY_CODES, settled: true };
+  const published = { codes: [...VENDORED_DIRECTORY_CODES, 'dogs'], settled: true };
+
+  it('keeps an unknown code as a directory route until the published codes load', () => {
+    expect(transformSeeditLinkToInternal('https://seedit.app/#/s/dogs', unsettled)).toBe('/s/dogs');
+    expect(transformSeeditLinkToInternal('https://seedit.app/#/s/dogs', published)).toBe('/s/dogs');
+    expect(transformSeeditLinkToInternal('https://seedit.app/#/s/dogs', settled)).toBe('/s/dogs.bso');
+
+    expect(preprocessSeeditPatterns('See s/dogs.', unsettled)).toBe('See [s/dogs](/s/dogs).');
+    expect(preprocessSeeditPatterns('See s/dogs.', published)).toBe('See [s/dogs](/s/dogs).');
+    expect(preprocessSeeditPatterns('See s/dogs.', settled)).toBe('See [s/dogs](/s/dogs.bso).');
+    expect(preprocessSeeditPatterns(`See s/dogs/comments/${CID}`, unsettled)).toBe(`See [s/dogs/comments/${CID}](/s/dogs/comments/${CID})`);
   });
 });
