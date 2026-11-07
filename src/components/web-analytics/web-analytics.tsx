@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation, useNavigationType } from 'react-router-dom';
+import { getLoadedDirectoryLists } from '../../hooks/use-directory-list';
 import { trackPageView } from '../../lib/analytics';
 import { isPendingPostPath } from '../../lib/utils/view-utils';
 
@@ -17,7 +18,9 @@ const WebAnalytics = () => {
     if (isPendingPostPath(pathname) || (previous !== null && isPendingPostPath(previous))) return;
     // Compare the actual route locally so two different posts still count as
     // two views, while only their shared, sanitized page name is transmitted.
-    trackPageView(pathname, { replace: navigationType === 'REPLACE' });
+    // A directory published after this build is only known from its loaded list, which a redirect to
+    // its community has already read.
+    trackPageView(pathname, { replace: navigationType === 'REPLACE', directoryLists: getLoadedDirectoryLists() });
   }, [navigationType, pathname]);
 
   return null;

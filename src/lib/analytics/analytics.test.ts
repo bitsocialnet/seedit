@@ -295,6 +295,30 @@ describe('analytics initialization', () => {
     expect(sanitizeAnalyticsEvent({ type: 'event', url })).toBeNull();
   });
 
+  it('keeps the code of a directory published after this build for its community, so its redirect counts once', async () => {
+    const { setPublishedDirectoryCodes } = await import('../utils/directory-codes');
+    setPublishedDirectoryCodes(['newdir']);
+    const directoryLists = [
+      {
+        schemaVersion: 1 as const,
+        revision: 1,
+        directoryCode: 'newdir',
+        communities: [{ address: 'NewDir-Winner.bso', publicKey: '12D3KooWNewDirWinnerPubKeyAbcdefghijkmnopqrstuvwxyz' }],
+      },
+    ];
+    const { trackPageView } = await import('.');
+    trackPageView('/s/newdir/submit', { directoryLists });
+    trackPageView('/s/newdir-winner.bso/submit', { replace: true, directoryLists });
+    trackPageView('/s/12D3KooWNewDirWinnerPubKeyAbcdefghijkmnopqrstuvwxyz/comments/QmCid', { directoryLists });
+    trackPageView('/s/unlisted.bso', { directoryLists });
+    await settle();
+    expect(sdk.pageview.mock.calls).toEqual([
+      [{ path: '/s/newdir/submit', route: '/s/[community]/submit' }],
+      [{ path: '/s/newdir/comments', route: '/s/[community]/comments' }],
+      [{ path: '/s/other', route: '/s/[community]' }],
+    ]);
+  });
+
   it('supports the www production hostname', async () => {
     setLocation('https://www.seedit.app/#/s/memes');
     const { trackPageView } = await import('.');

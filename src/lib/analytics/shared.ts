@@ -1,3 +1,5 @@
+import type { DirectoryList } from '../utils/directory-list-utils';
+
 type AnalyticsWindow = Window & { Capacitor?: { isNativePlatform?: () => boolean } };
 
 // Only production builds served over https on seedit.app. The desktop app (Electron), the Android
@@ -18,3 +20,10 @@ export const isAnalyticsEnabled = (): boolean => {
 export type PostingAnalyticsEvent = 'post_validation_failed' | 'post_upload_failed' | 'post_challenge_failed' | 'post_publish_failed' | 'post_cancelled';
 
 export type PostingAnalyticsKind = 'post' | 'reply';
+
+export interface PageViewOptions {
+  /** The navigation replaced the history entry, as a redirect does. */
+  replace?: boolean;
+  /** Directory lists loaded at runtime, so communities of directories published after this build keep their code. */
+  directoryLists?: readonly DirectoryList[];
+}

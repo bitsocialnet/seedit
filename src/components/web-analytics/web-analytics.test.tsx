@@ -49,7 +49,7 @@ describe('hash route pageviews', () => {
   it('tracks the landing route only once in StrictMode and ignores unrelated renders', async () => {
     await render();
     await render();
-    expect(trackPageView).toHaveBeenCalledExactlyOnceWith('/', { replace: false });
+    expect(trackPageView).toHaveBeenCalledExactlyOnceWith('/', { replace: false, directoryLists: [] });
   });
 
   it('tracks feed, post and distinct post navigation while ignoring search and anchor-only changes', async () => {
@@ -67,9 +67,9 @@ describe('hash route pageviews', () => {
     await go('/hot', { replace: true });
     await go('/s/memes');
     expect(vi.mocked(trackPageView).mock.calls).toEqual([
-      ['/', { replace: false }],
-      ['/hot', { replace: true }],
-      ['/s/memes', { replace: false }],
+      ['/', { replace: false, directoryLists: [] }],
+      ['/hot', { replace: true, directoryLists: [] }],
+      ['/s/memes', { replace: false, directoryLists: [] }],
     ]);
   });
 

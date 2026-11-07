@@ -170,6 +170,9 @@ const getDirectoryListStore = (directoryCode: SeeditDirectoryCode): DirectoryLis
 export const getDirectoryListSnapshot = (directoryCode: string | undefined): DirectoryListState =>
   directoryCode && isDirectoryCode(directoryCode) ? getDirectoryListStore(directoryCode).getSnapshot() : EMPTY_SNAPSHOT;
 
+/** The lists this page load has already read, including directories published after this build. Creates no store and starts no fetch. */
+export const getLoadedDirectoryLists = (): DirectoryList[] => [...stores.values()].flatMap(({ snapshot }) => (snapshot.list ? [snapshot.list] : []));
+
 export const subscribeToDirectoryList = (directoryCode: SeeditDirectoryCode, listener: () => void): (() => void) =>
   getDirectoryListStore(directoryCode).subscribe(listener);
 

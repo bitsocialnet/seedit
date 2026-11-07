@@ -2,9 +2,10 @@ import { inject, pageview, track, type BeforeSendEvent } from '@vercel/analytics
 import { getRouteSortType, isValidRouteSortType } from '../../constants/sort-types';
 import { resolveCommunityRouteAddress } from '../utils/community-route-utils';
 import { isDirectoryCode } from '../utils/directory-codes';
+import type { DirectoryList } from '../utils/directory-list-utils';
 import { vendoredDirectoryLists } from '../utils/vendored-directory-lists';
 import { PROFILE_PAGE_SEGMENTS } from '../utils/view-utils';
-import { isAnalyticsEnabled, type PostingAnalyticsEvent, type PostingAnalyticsKind } from './shared';
+import { isAnalyticsEnabled, type PageViewOptions, type PostingAnalyticsEvent, type PostingAnalyticsKind } from './shared';
 
 // Only directory codes from the bundled public directory lists may leave the client. Other community
 // addresses, public keys, comment CIDs, author addresses, search text and settings sections stay local.
@@ -20,12 +21,24 @@ const OTHER_COMMUNITY = 'other';
 const NOT_FOUND = '/not-found';
 const aggregateFeeds = new Set(['all', 'mod']);
 
+// Lists the app loaded at runtime, set by trackPageView: a directory published after this build has no
+// bundled list, so its communities are only known from the list the app fetched for it.
+let runtimeDirectoryLists: readonly DirectoryList[] = [];
+
+const findRuntimeDirectoryCode = (address: string): string | undefined => {
+  const lowerCaseAddress = address.toLowerCase();
+  return runtimeDirectoryLists.find(
+    ({ directoryCode, communities }) =>
+      isDirectoryCode(directoryCode) && communities.some((community) => community.address.toLowerCase() === lowerCaseAddress || community.publicKey === address),
+  )?.directoryCode;
+};
+
 const getAnalyticsCommunity = (routeSegment: string): string => {
   if (isDirectoryCode(routeSegment) || aggregateFeeds.has(routeSegment)) return routeSegment;
   if (routeSegment === OTHER_COMMUNITY) return OTHER_COMMUNITY;
   // The route may use the .bso shorthand or the public key; both name the same listed community.
   const address = resolveCommunityRouteAddress(routeSegment) ?? routeSegment;
-  return publicCommunities.get(address) ?? publicCommunities.get(address.toLowerCase()) ?? OTHER_COMMUNITY;
+  return publicCommunities.get(address) ?? publicCommunities.get(address.toLowerCase()) ?? findRuntimeDirectoryCode(address) ?? OTHER_COMMUNITY;
 };
 
 // Mirrors ValidFeedRoute and hooks/use-time-filter, which lib cannot import: invalid sort or time
@@ -166,9 +179,10 @@ const initialize = () => {
 };
 
 let lastPath: string | undefined;
-export const trackPageView = (pathname: string, { replace = false }: { replace?: boolean } = {}): void => {
+export const trackPageView = (pathname: string, { replace = false, directoryLists }: PageViewOptions = {}): void => {
   if (!isAnalyticsEnabled()) return;
   initialize();
+  if (directoryLists) runtimeDirectoryLists = directoryLists;
   const path = getAnalyticsPath(pathname);
   // A redirect that replaces the entry (/ to /hot, a short community address to its full one, a
   // directory code to its community) is the same page, not a second view.
