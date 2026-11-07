@@ -1,11 +1,13 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCommunities, type Community as CommunityType } from '@bitsocial/bitsocial-react-hooks';
-import { SEEDIT_DIRECTORY_CODES, isDirectoryCode, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
+import { isDirectoryCode, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
 import { useDirectoryList } from '../../hooks/use-directory-list';
+import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
 import { pickDirectoryWinner, sortDirectoryCommunitiesByRank, type DirectoryListCommunity } from '../../lib/utils/directory-list-utils';
 import { deriveCommunityNsfw } from '../../lib/utils/nsfw-utils';
-import { vendoredDirectoryDefaults, vendoredDirectoryLists } from '../../lib/utils/vendored-directory-lists';
+import type { DirectoryDefaultsData, DirectoryDefaultsEntry } from '../../lib/utils/directory-list-utils';
+import { getVendoredDirectoryList } from '../../lib/utils/vendored-directory-lists';
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { DIRECTORY_INDEX_PATH, getCommunityPath, getDirectoryCandidatesPath, getDirectoryPath } from '../../lib/utils/community-route-utils';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
@@ -15,7 +17,11 @@ import DirectorySearch from './directory-search';
 import communityStyles from './communities.module.css';
 import styles from './directory-vote.module.css';
 
-const getDirectoryMetadata = (directoryCode: SeeditDirectoryCode) => vendoredDirectoryDefaults.directories[directoryCode];
+const getDirectoryMetadata = (directoryCode: SeeditDirectoryCode, defaults: DirectoryDefaultsData): DirectoryDefaultsEntry => defaults.directories[directoryCode] ?? {};
+
+// Bundled list tags for bundled directories; published metadata tags for directories added after this build.
+const getDirectorySearchTags = (directoryCode: SeeditDirectoryCode, defaults: DirectoryDefaultsData) =>
+  getVendoredDirectoryList(directoryCode)?.tags ?? defaults.directories[directoryCode]?.tags;
 
 const useDirectorySearchQuery = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -60,10 +66,11 @@ const directoryMatchesSearch = (
 const DirectoryIndexRow = ({ directoryCode, query, onTagSelect }: { directoryCode: SeeditDirectoryCode; query: string; onTagSelect: (tag: string) => void }) => {
   const { t } = useTranslation();
   const { list } = useDirectoryList(directoryCode);
+  const { defaults } = useDirectoryRegistry();
   const winner = list && pickDirectoryWinner(list.communities);
-  const metadata = getDirectoryMetadata(directoryCode) ?? {};
+  const metadata = getDirectoryMetadata(directoryCode, defaults);
   const { title, description } = metadata;
-  const tags = vendoredDirectoryLists[directoryCode].tags;
+  const tags = getDirectorySearchTags(directoryCode, defaults);
 
   if (!directoryMatchesSearch(query, directoryCode, metadata, tags)) return null;
 
@@ -110,20 +117,20 @@ const DirectoryIndexRow = ({ directoryCode, query, onTagSelect }: { directoryCod
 export const DirectoryIndex = () => {
   const { t } = useTranslation();
   const { query, setQuery } = useDirectorySearchQuery();
-  const hasVendoredMatch = SEEDIT_DIRECTORY_CODES.some((directoryCode) => {
-    const metadata = getDirectoryMetadata(directoryCode) ?? {};
-    return directoryMatchesSearch(query, directoryCode, metadata, vendoredDirectoryLists[directoryCode].tags);
-  });
+  const { codes, defaults } = useDirectoryRegistry();
+  const hasMatch = codes.some((directoryCode) =>
+    directoryMatchesSearch(query, directoryCode, getDirectoryMetadata(directoryCode, defaults), getDirectorySearchTags(directoryCode, defaults)),
+  );
 
   return (
     <>
       <DirectorySearch label={t('search_directories')} query={query} onQueryChange={setQuery} />
       <ul className={styles.directoryIndex} role='list'>
-        {SEEDIT_DIRECTORY_CODES.map((directoryCode) => (
+        {codes.map((directoryCode) => (
           <DirectoryIndexRow key={directoryCode} directoryCode={directoryCode} query={query} onTagSelect={setQuery} />
         ))}
       </ul>
-      {!hasVendoredMatch && <p className={styles.directoryNoResults}>{t('no_directories_found')}</p>}
+      {!hasMatch && <p className={styles.directoryNoResults}>{t('no_directories_found')}</p>}
     </>
   );
 };
@@ -141,6 +148,7 @@ const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirect
   const { t } = useTranslation();
   const { query, setQuery } = useDirectorySearchQuery();
   const { list } = useDirectoryList(directoryCode);
+  const { defaults } = useDirectoryRegistry();
   const ranked = list ? sortDirectoryCommunitiesByRank(list.communities) : [];
 
   const { communities } = useCommunities({ communities: getCommunityIdentifiers(ranked.map(({ address }) => address)) });
@@ -151,7 +159,7 @@ const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirect
       .filter((community): community is CommunityType => Boolean(community?.address))
       .map((community) => [community.address, community]),
   );
-  const { title, description } = getDirectoryMetadata(directoryCode) ?? {};
+  const { title, description } = getDirectoryMetadata(directoryCode, defaults);
   const visibleCandidates = ranked.reduce<{ candidate: DirectoryListCommunity; community: CommunityType; rankIndex: number }[]>((matches, candidate, rankIndex) => {
     const community = loadedCommunities.get(candidate.address) ?? ({ address: candidate.address } as CommunityType);
     if (communityMatchesSearch(query, candidate, community)) matches.push({ candidate, community, rankIndex });
@@ -201,9 +209,11 @@ const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirect
 /** Ranked candidates competing for one reserved /s/ route. */
 export const DirectoryCandidates = () => {
   const { directoryCode } = useParams();
+  // Re-render when the published directory codes arrive.
+  useDirectoryRegistry();
 
   // Communities renders not found for an unknown code
-  if (!isDirectoryCode(directoryCode)) {
+  if (!directoryCode || !isDirectoryCode(directoryCode)) {
     return null;
   }
 

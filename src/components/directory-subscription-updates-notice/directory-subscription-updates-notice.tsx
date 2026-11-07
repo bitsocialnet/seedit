@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useAccount } from '@bitsocial/bitsocial-react-hooks';
 import { useTranslation } from 'react-i18next';
-import { SEEDIT_DIRECTORY_CODES, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
+import type { SeeditDirectoryCode } from '../../lib/utils/directory-codes';
 import { observeDirectoryWinnerChanges, type AuthoritativeDirectoryWinnerSnapshot } from '../../lib/utils/directory-subscriptions';
 import { pickDirectoryWinner } from '../../lib/utils/directory-list-utils';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
@@ -14,6 +14,7 @@ import {
   type ManualDirectoryWinnerAction,
 } from '../../lib/utils/directory-account-transforms';
 import { useDirectoryList } from '../../hooks/use-directory-list';
+import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import styles from './directory-subscription-updates-notice.module.css';
 
@@ -97,7 +98,8 @@ const AutomaticDirectoryChangeNotice = ({ directoryCode }: { directoryCode: Seed
 
 const DirectorySubscriptionUpdatesNotice = () => {
   const account = useAccount() as StarterAccount | undefined;
-  const activeCodes = SEEDIT_DIRECTORY_CODES.filter(
+  const { codes } = useDirectoryRegistry();
+  const activeCodes = codes.filter(
     (directoryCode) => account?.seeditDirectoryPreferences?.slots?.[directoryCode] || account?.seeditDirectoryPreferences?.automaticChangeNotices?.[directoryCode],
   );
 

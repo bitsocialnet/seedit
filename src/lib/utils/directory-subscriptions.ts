@@ -1,4 +1,4 @@
-import { isDirectoryCode, type SeeditDirectoryCode } from './directory-codes';
+import { isWellFormedDirectoryCode, type SeeditDirectoryCode } from './directory-codes';
 import type { SeeditStarterSubscriptions } from './starter-subscriptions';
 
 export const SEEDIT_DIRECTORY_PREFERENCES_SCHEMA_VERSION = 1 as const;
@@ -82,7 +82,7 @@ const BASE58_PUBLIC_KEY_PATTERN = /^[1-9A-HJ-NP-Za-km-z]{30,}$/;
 
 /** Directory slugs are never valid subscription values; names and public keys are. */
 export const isExactCommunitySubscriptionAddress = (address: unknown): address is string =>
-  typeof address === 'string' && address.length > 0 && !isDirectoryCode(address) && (address.includes('.') || BASE58_PUBLIC_KEY_PATTERN.test(address));
+  typeof address === 'string' && address.length > 0 && !isWellFormedDirectoryCode(address) && (address.includes('.') || BASE58_PUBLIC_KEY_PATTERN.test(address));
 
 const uniqueExactAddresses = (addresses: readonly string[]): string[] => {
   const seen = new Set<string>();
@@ -126,12 +126,14 @@ export const createEmptyDirectoryPreferences = (): SeeditDirectoryPreferences =>
   automaticChangeNotices: {},
 });
 
+// Slot codes are checked by syntax, not against the codes this client has loaded so far, so a slot for a
+// directory published after this build survives account writes that happen before the registry refreshes.
 export const normalizeDirectoryPreferences = (preferences: SeeditDirectoryPreferences | undefined): SeeditDirectoryPreferences => {
   if (!preferences || preferences.schemaVersion !== SEEDIT_DIRECTORY_PREFERENCES_SCHEMA_VERSION) return createEmptyDirectoryPreferences();
 
   const slots: SeeditDirectoryPreferences['slots'] = {};
   for (const [code, value] of Object.entries(preferences.slots ?? {})) {
-    if (!isDirectoryCode(code) || !value || !isExactCommunitySubscriptionAddress(value.subscriptionAddress)) continue;
+    if (!isWellFormedDirectoryCode(code) || !value || !isExactCommunitySubscriptionAddress(value.subscriptionAddress)) continue;
     const acknowledgedAddress = isExactCommunitySubscriptionAddress(value.acknowledgedWinner?.address) ? value.acknowledgedWinner.address : value.subscriptionAddress;
     slots[code] = {
       subscriptionAddress: value.subscriptionAddress,
@@ -146,7 +148,7 @@ export const normalizeDirectoryPreferences = (preferences: SeeditDirectoryPrefer
   const automaticChangeNotices: SeeditDirectoryPreferences['automaticChangeNotices'] = {};
   for (const [code, value] of Object.entries(preferences.automaticChangeNotices ?? {})) {
     if (
-      !isDirectoryCode(code) ||
+      !isWellFormedDirectoryCode(code) ||
       !slots[code] ||
       !value ||
       value.directoryCode !== code ||
@@ -185,7 +187,7 @@ const removeMissingSubscriptionSlots = (subscriptions: readonly string[], prefer
   const automaticChangeNotices: SeeditDirectoryPreferences['automaticChangeNotices'] = {};
 
   for (const code of Object.keys(preferences.slots).sort()) {
-    if (!isDirectoryCode(code)) continue;
+    if (!isWellFormedDirectoryCode(code)) continue;
     const slot = preferences.slots[code];
     if (!slot || !subscribed.has(slot.subscriptionAddress)) continue;
     slots[code] = slot;
@@ -207,7 +209,7 @@ const isUsableWinner = (winner: AuthoritativeDirectoryWinnerSnapshot | undefined
   Boolean(
     winner &&
     winner.authoritative === true &&
-    isDirectoryCode(winner.directoryCode) &&
+    isWellFormedDirectoryCode(winner.directoryCode) &&
     isExactCommunitySubscriptionAddress(winner.address) &&
     Number.isSafeInteger(winner.revision) &&
     winner.revision >= 1,
@@ -291,7 +293,7 @@ export const leaveDirectorySubscription = (input: DirectoryStateInput & { addres
   const automaticChangeNotices = { ...state.preferences.automaticChangeNotices };
 
   for (const [code, slot] of Object.entries(slots)) {
-    if (!isDirectoryCode(code) || slot?.subscriptionAddress !== input.address) continue;
+    if (!isWellFormedDirectoryCode(code) || slot?.subscriptionAddress !== input.address) continue;
     delete slots[code];
     delete automaticChangeNotices[code];
   }
@@ -313,7 +315,7 @@ export const observeDirectoryWinnerChanges = (input: ObserveDirectoryWinnersInpu
   const pendingChanges: PendingDirectoryWinnerChange[] = [];
 
   for (const code of Object.keys(preferences.slots).sort()) {
-    if (!isDirectoryCode(code)) continue;
+    if (!isWellFormedDirectoryCode(code)) continue;
     const slot = preferences.slots[code];
     const winner = latest[code];
     if (!slot || !winner || !isNewerWinner(slot, winner)) continue;
@@ -414,7 +416,7 @@ export const reconcileAutomaticDirectorySwitches = (input: ObserveDirectoryWinne
   let preferences = state.preferences;
 
   for (const code of Object.keys(preferences.slots).sort()) {
-    if (!isDirectoryCode(code)) continue;
+    if (!isWellFormedDirectoryCode(code)) continue;
     const slot = preferences.slots[code];
     const winner = latest[code];
     if (!slot || !winner || !isNewerWinner(slot, winner)) continue;

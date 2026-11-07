@@ -3,6 +3,7 @@ import { isDirectoryCode, type SeeditDirectoryCode } from '../lib/utils/director
 import { pickDirectoryWinner, type DirectoryList, type DirectoryListCommunity } from '../lib/utils/directory-list-utils';
 import { resolveCommunityRouteAddress } from '../lib/utils/community-route-utils';
 import { useDirectoryList } from './use-directory-list';
+import { useDirectoryRegistry } from './use-directory-registry';
 
 export interface ResolvedCommunityRoute {
   routeIdentifier: string | undefined;
@@ -40,6 +41,8 @@ export const resolveCommunityRouteSnapshot = (
 const useResolvedCommunityRoute = (routeIdentifierOverride?: string): ResolvedCommunityRoute => {
   const params = useParams<{ communityAddress?: string }>();
   const routeIdentifier = routeIdentifierOverride ?? params.communityAddress;
+  // Re-resolve when directories published after this build become known.
+  useDirectoryRegistry();
   const directoryCode = isDirectoryCode(routeIdentifier) ? routeIdentifier : undefined;
   const { list, loading, error } = useDirectoryList(directoryCode);
 

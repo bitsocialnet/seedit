@@ -7,6 +7,7 @@ import {
   keepBothDirectorySubscriptions,
   keepCurrentDirectorySubscription,
   leaveDirectorySubscription,
+  normalizeDirectoryPreferences,
   observeDirectoryWinnerChanges,
   reconcileAutomaticDirectorySwitches,
   setDirectoryAutoSwitch,
@@ -24,7 +25,7 @@ const winner = (directoryCode: SeeditDirectoryCode, address: string, revision: n
 });
 
 const preferences = (
-  entries: Partial<Record<SeeditDirectoryCode, { address: string; revision?: number; acknowledgedAddress?: string; autoSwitch?: boolean }>>,
+  entries: Record<SeeditDirectoryCode, { address: string; revision?: number; acknowledgedAddress?: string; autoSwitch?: boolean }>,
 ): SeeditDirectoryPreferences => ({
   schemaVersion: 1,
   slots: Object.fromEntries(
@@ -380,5 +381,18 @@ describe('per-directory automatic switching', () => {
 
   it('keeps empty schema-v1 preferences deterministic', () => {
     expect(createEmptyDirectoryPreferences()).toEqual({ schemaVersion: 1, slots: {}, automaticChangeNotices: {} });
+  });
+});
+
+describe('directory preference validation', () => {
+  it('keeps slots for directories published after this build and drops keys that cannot be directory codes', () => {
+    const normalized = normalizeDirectoryPreferences(
+      preferences({ dogs: { address: 'good-dogs.bso' }, all: { address: 'all-posting.bso' }, 'dogs.bso': { address: 'dogs-posting.bso' } }),
+    );
+
+    expect(Object.keys(normalized.slots)).toEqual(['dogs']);
+    expect(leaveDirectorySubscription({ subscriptions: ['good-dogs.bso', 'manual.bso'], preferences: normalized, address: 'manual.bso' }).preferences.slots.dogs).toEqual(
+      normalized.slots.dogs,
+    );
   });
 });
