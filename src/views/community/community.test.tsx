@@ -31,6 +31,7 @@ const testState = vi.hoisted(() => ({
   resolvedAddress: 'first.bso',
   community: { title: 'First community', updatedAt: 1, createdAt: 1, started: true, settings: {} },
   directoryList: { revision: 1 },
+  routeError: null as Error | null,
   accountComments: [] as Comment[],
   feed: [{ cid: 'first-post' }] as Comment[],
   hasMore: true,
@@ -74,7 +75,7 @@ vi.mock('../../hooks/use-state-string', () => ({ useFeedStateString: () => '' })
 vi.mock('../../hooks/use-is-community-offline', () => ({ default: () => ({ isOffline: testState.isOffline }) }));
 vi.mock('../../hooks/use-is-nsfw-community', () => ({ useIsNsfwCommunity: () => testState.isNsfw }));
 vi.mock('../../hooks/use-resolved-community-route', () => ({
-  default: () => ({ communityAddress: testState.resolvedAddress, directoryCode: 'news', directoryList: testState.directoryList }),
+  default: () => ({ communityAddress: testState.resolvedAddress, directoryCode: 'news', directoryList: testState.directoryList, error: testState.routeError }),
 }));
 vi.mock('../../hooks/use-time-filter', () => ({
   default: () => ({ timeFilterName: '24h', timeFilterSeconds: 86400, sessionKey: 'community' }),
@@ -89,7 +90,7 @@ vi.mock('../../hooks/use-progressive-feed', () => ({
 }));
 
 vi.mock('../../components/post', () => ({ default: () => null }));
-vi.mock('../../components/error-display', () => ({ default: () => null }));
+vi.mock('../../components/error-display', () => ({ default: ({ error }: { error?: Error | null }) => (error ? <span>error: {error.message}</span> : null) }));
 vi.mock('../../components/empty-feed-message', () => ({ default: () => <span>empty feed</span> }));
 vi.mock('../../components/over-18-warning', () => ({ default: () => <span>NSFW warning</span> }));
 vi.mock('../../components/development-feed-reset-button', () => ({ default: () => null }));
@@ -152,6 +153,7 @@ describe('Community feed updates', () => {
     testState.resolvedAddress = 'first.bso';
     testState.community = { title: 'First community', updatedAt: 1, createdAt: 1, started: true, settings: {} };
     testState.directoryList = { revision: 1 };
+    testState.routeError = null;
     testState.accountComments = [];
     testState.feed = [{ cid: 'first-post' }] as Comment[];
     testState.hasMore = true;
@@ -170,6 +172,17 @@ describe('Community feed updates', () => {
   afterEach(async () => {
     await act(async () => root.unmount());
     container.remove();
+  });
+
+  it('shows why a directory route has no community when its list failed to load', async () => {
+    testState.resolvedAddress = undefined as unknown as string;
+    testState.directoryList = null as unknown as { revision: number };
+    testState.routeError = new Error('Directory list request failed with 404');
+    testState.feed = [];
+
+    await renderCommunity();
+
+    expect(container.textContent).toContain('error: Directory list request failed with 404');
   });
 
   it('preserves pending pagination through feed updates and then uses the latest callback', async () => {

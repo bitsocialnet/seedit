@@ -1,10 +1,14 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DIRECTORY_DEFAULTS_URL } from '../lib/utils/directory-registry';
 import { fetchDirectoryListPayload, getDirectoryListSnapshot, revalidateDirectoryList, subscribeToDirectoryList } from './use-directory-list';
 
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
+
+// List revalidation also refreshes the published directory defaults; count only list requests.
+const countListRequests = (fetchMock: ReturnType<typeof vi.fn>) => fetchMock.mock.calls.filter(([url]) => url !== DIRECTORY_DEFAULTS_URL).length;
 
 describe('fetchDirectoryListPayload', () => {
   it('requests the matching GitHub list without using a cached response', async () => {
@@ -66,7 +70,7 @@ describe('directory list revalidation', () => {
 
     expect(getDirectoryListSnapshot('videos')).toMatchObject({ loading: false, error: null, list: { revision: 1 } });
     expect(revalidateDirectoryList('videos')).toBeNull();
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(countListRequests(fetchMock)).toBe(1);
   });
 
   it('revalidates hourly while a visible subscriber remains mounted', async () => {
@@ -87,10 +91,10 @@ describe('directory list revalidation', () => {
 
     const unsubscribe = subscribeToDirectoryList('gaming', () => undefined);
     await revalidateDirectoryList('gaming');
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(countListRequests(fetchMock)).toBe(1);
 
     await vi.advanceTimersByTimeAsync(60 * 60 * 1000);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(countListRequests(fetchMock)).toBe(2);
     unsubscribe();
   });
 });

@@ -8,6 +8,8 @@ import styles from './markdown.module.css';
 import rehypeRaw from 'rehype-raw';
 import SpoilerTooltip from '../spoiler-tooltip';
 import { isSeeditLink, transformSeeditLinkToInternal, preprocessSeeditPatterns } from '../../lib/utils/url-utils';
+import type { KnownDirectoryCodes } from '../../lib/utils/directory-codes';
+import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
 import { getPostOptionResults, type PostOptionResultsInput } from '../../lib/utils/post-option-results';
 import FivechanQuote from './fivechan-quote';
 import { parseFivechanQuoteHref, preprocessFivechanQuoteLines } from './fivechan-quote-utils';
@@ -66,7 +68,7 @@ const SpoilerText = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const renderAnchorLink = (children: React.ReactNode, href: string, enableFivechanQuotes: boolean, quotedCids: string[]) => {
+const renderAnchorLink = (children: React.ReactNode, href: string, enableFivechanQuotes: boolean, quotedCids: string[], knownDirectoryCodes: KnownDirectoryCodes) => {
   if (!href) {
     return <span>{children}</span>;
   }
@@ -78,7 +80,7 @@ const renderAnchorLink = (children: React.ReactNode, href: string, enableFivecha
 
   // Check if this is a valid seedit link that should be handled internally
   if (isSeeditLink(href)) {
-    const internalPath = transformSeeditLinkToInternal(href);
+    const internalPath = transformSeeditLinkToInternal(href, knownDirectoryCodes);
     if (internalPath) {
       // Check if the link text should be replaced with the internal path
       let shouldReplaceText = false;
@@ -119,6 +121,9 @@ const renderAnchorLink = (children: React.ReactNode, href: string, enableFivecha
 
 const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, postOptions, quotedCids = EMPTY_QUOTED_CIDS }: MarkdownProps) => {
   const { cid, directoryCode, isEdited = false, timestamp } = postOptions ?? {};
+  // Links to directories published after this build resolve once their codes load.
+  const { codes: directoryCodes, settled: directoryCodesSettled } = useDirectoryRegistry();
+  const knownDirectoryCodes = useMemo(() => ({ codes: directoryCodes, settled: directoryCodesSettled }), [directoryCodes, directoryCodesSettled]);
   const {
     content: visibleContent,
     diceText,
@@ -130,8 +135,8 @@ const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, postOpt
 
   // Preprocess content to convert plain text seedit patterns to markdown links
   const preprocessedContent = useMemo(
-    () => preprocessSeeditPatterns(enableFivechanQuotes ? preprocessFivechanQuoteLines(visibleContent, parentNumber) : visibleContent),
-    [visibleContent, enableFivechanQuotes, parentNumber],
+    () => preprocessSeeditPatterns(enableFivechanQuotes ? preprocessFivechanQuoteLines(visibleContent, parentNumber) : visibleContent, knownDirectoryCodes),
+    [visibleContent, enableFivechanQuotes, parentNumber, knownDirectoryCodes],
   );
 
   const remarkPlugins: any[] = [[supersub]];
@@ -167,7 +172,8 @@ const Markdown = ({ content, enableFivechanQuotes = false, parentNumber, postOpt
         rehypePlugins={[[rehypeRaw as any], [rehypeSanitize as any, customSchema]]}
         components={
           {
-            a: ({ children, href }: { children?: React.ReactNode; href?: string }) => renderAnchorLink(children, href || '', enableFivechanQuotes, quotedCids),
+            a: ({ children, href }: { children?: React.ReactNode; href?: string }) =>
+              renderAnchorLink(children, href || '', enableFivechanQuotes, quotedCids, knownDirectoryCodes),
             p: ({ children }: { children?: React.ReactNode }) => {
               const isEmpty =
                 !children ||

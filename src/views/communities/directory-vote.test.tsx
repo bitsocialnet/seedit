@@ -56,24 +56,30 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
+const unfetchedLists = vi.hoisted(() => new Map<string, { loading: boolean; error: Error | null }>());
+
 vi.mock('../../hooks/use-directory-list', () => ({
-  useDirectoryList: (directoryCode: string) => ({
-    list: {
-      schemaVersion: 1,
-      revision: 3,
-      directoryCode,
-      tags: directoryCode === 'aww' ? ['animals', 'cute'] : ['discussion'],
-      communities:
-        directoryCode === 'aww'
-          ? [
-              { address: 'aww.bso', owner: 'first-owner.bso', score: 10, tags: ['cute'] },
-              { address: 'cute-animals.bso', owner: 'second-owner.bso', score: 5, tags: ['animals'] },
-            ]
-          : [{ address: `${directoryCode}.bso` }],
-    },
-    loading: false,
-    error: null,
-  }),
+  useDirectoryList: (directoryCode: string) => {
+    const unfetched = unfetchedLists.get(directoryCode);
+    if (unfetched) return { list: null, ...unfetched };
+    return {
+      list: {
+        schemaVersion: 1,
+        revision: 3,
+        directoryCode,
+        tags: directoryCode === 'aww' ? ['animals', 'cute'] : ['discussion'],
+        communities:
+          directoryCode === 'aww'
+            ? [
+                { address: 'aww.bso', owner: 'first-owner.bso', score: 10, tags: ['cute'] },
+                { address: 'cute-animals.bso', owner: 'second-owner.bso', score: 5, tags: ['animals'] },
+              ]
+            : [{ address: `${directoryCode}.bso` }],
+      },
+      loading: false,
+      error: null,
+    };
+  },
 }));
 
 vi.mock('./community-item', () => ({
@@ -112,6 +118,7 @@ describe('directory vote views', () => {
     act(() => root.unmount());
     container.remove();
     window.location.hash = '';
+    unfetchedLists.clear();
   });
 
   it('presents the directory index as a descriptive list with explicit winners', () => {
@@ -164,6 +171,34 @@ describe('directory vote views', () => {
     const backLink = container.querySelector<HTMLAnchorElement>('a[href="#/communities/directories"]');
 
     expect(backLink?.textContent).toContain('back to all directories');
+  });
+
+  it('shows a directory list that has not been fetched yet as loading or failed, not as empty', () => {
+    unfetchedLists.set('aww', { loading: true, error: null });
+    unfetchedLists.set('cats', { loading: false, error: new Error('Directory list request failed with 503') });
+    render(createElement(DirectoryIndex));
+
+    const rows = Array.from(container.querySelectorAll('ul[role="list"] > li'));
+    const awwRow = rows.find((row) => row.textContent?.includes('s/aww'));
+    const catsRow = rows.find((row) => row.textContent?.includes('s/cats'));
+    expect(awwRow?.textContent).toContain('loading');
+    expect(awwRow?.textContent).not.toContain('candidates:');
+    expect(catsRow?.textContent).toContain('failed');
+    expect(catsRow?.textContent).not.toContain('candidates:');
+
+    act(() => root.unmount());
+    root = createRoot(container);
+    window.location.hash = '#/communities/directories/aww';
+    render(createElement(Routes, null, createElement(Route, { path: '/communities/directories/:directoryCode', element: createElement(DirectoryCandidates) })));
+    expect(container.textContent).toContain('loading');
+    expect(container.textContent).not.toContain('nothing found');
+
+    act(() => root.unmount());
+    root = createRoot(container);
+    window.location.hash = '#/communities/directories/cats';
+    render(createElement(Routes, null, createElement(Route, { path: '/communities/directories/:directoryCode', element: createElement(DirectoryCandidates) })));
+    expect(container.textContent).toContain('Directory list request failed with 503');
+    expect(container.textContent).not.toContain('nothing found');
   });
 
   it('searches a directory without changing candidate ranks or winner state', async () => {

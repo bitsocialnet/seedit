@@ -16,6 +16,7 @@ import {
   getExactCommunityActionRedirectPath,
   resolveCommunityRouteAddress,
 } from './community-route-utils';
+import { VENDORED_DIRECTORY_CODES } from './directory-codes';
 
 const PUBLIC_KEY = '12D3KooWFnLrUYHpvqki7gbL4w9JzdxjpQPKE2JBDEd23Ly6X82X';
 
@@ -123,6 +124,12 @@ describe('getCanonicalCommunityRoutePathname', () => {
 
   it('preserves known directory routes for route-only winner resolution', () => {
     expect(getCanonicalCommunityRoutePathname('/s/aww')).toBeUndefined();
+    // a well-formed code may be a directory added after this build until the published directories load
+    const unsettled = { codes: VENDORED_DIRECTORY_CODES, settled: false };
+    expect(getCanonicalCommunityRoutePathname('/s/dogs/submit', unsettled)).toBeUndefined();
+    expect(getCanonicalCommunityRoutePathname('/s/dogs/submit', { ...unsettled, settled: true })).toBe('/s/dogs.bso/submit');
+    expect(getCanonicalCommunityRoutePathname('/s/dogs/submit', { codes: [...VENDORED_DIRECTORY_CODES, 'dogs'], settled: true })).toBeUndefined();
+    expect(getCanonicalCommunityRoutePathname('/s/unreserved-name', unsettled)).toBe('/s/unreserved-name.bso');
     expect(getCanonicalCommunityRoutePathname('/s/aww/comments/bafy-post-cid')).toBeUndefined();
     expect(getCanonicalCommunityRoutePathname('/s/aww/settings')).toBeUndefined();
   });

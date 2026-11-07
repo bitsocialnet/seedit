@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getCanonicalCommunityRoutePathname } from '../lib/utils/community-route-utils';
+import { useDirectoryRegistry } from './use-directory-registry';
 
 const useCanonicalCommunityRoute = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const canonicalPathname = getCanonicalCommunityRoutePathname(location.pathname);
+  const { codes, settled } = useDirectoryRegistry();
+  const canonicalPathname = getCanonicalCommunityRoutePathname(location.pathname, { codes, settled });
 
   useEffect(() => {
     if (!canonicalPathname) return;

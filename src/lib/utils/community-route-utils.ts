@@ -1,4 +1,4 @@
-import { isDirectoryCode, type SeeditDirectoryCode } from './directory-codes';
+import { getDirectoryCodes, isDirectoryCode, isWellFormedDirectoryCode, type KnownDirectoryCodes, type SeeditDirectoryCode } from './directory-codes';
 
 const DEFAULT_COMMUNITY_TLD = '.bso';
 const RESERVED_COMMUNITY_ROUTE_SEGMENTS = new Set(['all', 'mod']);
@@ -38,15 +38,20 @@ export const getDirectoryCandidatesPath = (directoryCode: SeeditDirectoryCode): 
 export const getDirectoryAboutPath = (directoryCode?: SeeditDirectoryCode): string =>
   directoryCode ? `${getDirectoryCandidatesPath(directoryCode)}/about` : `${DIRECTORY_INDEX_PATH}/about`;
 
-/** Use for typed or linked references that may intentionally name a directory route. */
-export const getCommunityReferencePath = (communityReference: string): string =>
-  isDirectoryCode(communityReference) ? getDirectoryPath(communityReference) : getCommunityPath(communityReference);
+/**
+ * Use for typed or linked references that may intentionally name a directory route. Components pass the registry's
+ * codes; while they load, a well-formed reference keeps its `/s/<code>` route so the route resolver decides it.
+ */
+export const getCommunityReferencePath = (communityReference: string, { codes, settled }: KnownDirectoryCodes = { codes: getDirectoryCodes(), settled: true }): string =>
+  isDirectoryCode(communityReference, codes) || (!settled && isWellFormedDirectoryCode(communityReference))
+    ? getDirectoryPath(communityReference)
+    : getCommunityPath(communityReference);
 
 export const getCommunityPostPath = (communityAddress: string, cid: string): string => `${getCommunityPath(communityAddress)}/comments/${encodeURIComponent(cid)}`;
 
 /** Preserve an explicitly typed directory reference; generated post permalinks use getCommunityPostPath instead. */
-export const getCommunityReferencePostPath = (communityReference: string, cid: string): string =>
-  `${getCommunityReferencePath(communityReference)}/comments/${encodeURIComponent(cid)}`;
+export const getCommunityReferencePostPath = (communityReference: string, cid: string, knownDirectoryCodes?: KnownDirectoryCodes): string =>
+  `${getCommunityReferencePath(communityReference, knownDirectoryCodes)}/comments/${encodeURIComponent(cid)}`;
 
 export const getCommunityPostUrl = (communityAddress: string, cid: string): string => `https://s.seedit.app${getCommunityPostPath(communityAddress, cid)}`;
 
@@ -62,7 +67,14 @@ export const getExactCommunityActionRedirectPath = (
   return `${getCommunityPath(communityAddress)}${pathname.slice(directoryPath.length)}${search}${hash}`;
 };
 
-export const getCanonicalCommunityRoutePathname = (pathname: string): string | undefined => {
+/**
+ * Components pass the registry's codes. While a client with no cached copy waits for the published directories, a
+ * well-formed code is left alone, so a directory added after this build is not rewritten to `<code>.bso`.
+ */
+export const getCanonicalCommunityRoutePathname = (
+  pathname: string,
+  { codes, settled }: KnownDirectoryCodes = { codes: getDirectoryCodes(), settled: true },
+): string | undefined => {
   const routeMatch = pathname.match(/^\/s\/([^/?#]+)(.*)$/);
   if (!routeMatch) return undefined;
 
@@ -73,7 +85,7 @@ export const getCanonicalCommunityRoutePathname = (pathname: string): string | u
     return undefined;
   }
 
-  if (isDirectoryCode(routeSegment)) return undefined;
+  if (isDirectoryCode(routeSegment, codes) || (!settled && isWellFormedDirectoryCode(routeSegment))) return undefined;
 
   const canonicalRouteSegment = getCommunityRouteSegment(routeSegment);
   if (canonicalRouteSegment === routeSegment) return undefined;

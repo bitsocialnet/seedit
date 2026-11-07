@@ -11,7 +11,8 @@ import {
   isCommunitiesOwnerView,
   isCommunitiesDirectoryView,
 } from '../../lib/utils/view-utils';
-import { isDirectoryCode } from '../../lib/utils/directory-codes';
+import { isDirectoryCode, isWellFormedDirectoryCode } from '../../lib/utils/directory-codes';
+import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
 import useErrorStore from '../../stores/use-error-store';
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { useDefaultSubscriptions } from '../../hooks/use-default-subscriptions';
@@ -343,6 +344,10 @@ const Communities = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const { directoryCode } = useParams();
+  const { codes: directoryCodes, settled: directoryCodesSettled } = useDirectoryRegistry();
+  const isKnownDirectory = isDirectoryCode(directoryCode, directoryCodes);
+  // A code may belong to a directory published after this build; wait for the published codes before calling it unknown.
+  const isUnknownDirectory = Boolean(directoryCode) && !isKnownDirectory && (directoryCodesSettled || !isWellFormedDirectoryCode(directoryCode));
   const clearAllErrors = useErrorStore((state) => state.clearAllErrors);
 
   useEffect(() => {
@@ -378,7 +383,7 @@ const Communities = () => {
     if (isInCommunitiesDirectoryView) {
       title += ` - ${startCase(t('directories'))}`;
       // an unknown code renders not found, so it must not title the page after a directory
-      if (isDirectoryCode(directoryCode)) {
+      if (isKnownDirectory) {
         title += ` - s/${directoryCode}`;
       }
     } else if (isInCommunitiesSubscriberView) {
@@ -395,6 +400,7 @@ const Communities = () => {
     return `${title} - Seedit`;
   }, [
     directoryCode,
+    isKnownDirectory,
     isInCommunitiesSubscriberView,
     isInCommunitiesModeratorView,
     isInCommunitiesAdminView,
@@ -408,7 +414,7 @@ const Communities = () => {
     document.title = documentTitle;
   }, [documentTitle]);
 
-  if (isInCommunitiesDirectoryView && directoryCode && !isDirectoryCode(directoryCode)) {
+  if (isInCommunitiesDirectoryView && isUnknownDirectory) {
     return <NotFound />;
   }
 

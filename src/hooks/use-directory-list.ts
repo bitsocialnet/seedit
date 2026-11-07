@@ -1,7 +1,8 @@
 import { useSyncExternalStore } from 'react';
-import { getVendoredDirectoryList, vendoredDirectoryDefaults } from '../lib/utils/vendored-directory-lists';
-import { isDirectoryCode, type SeeditDirectoryCode } from '../lib/utils/directory-codes';
-import { normalizeRemoteDirectoryList, type DirectoryList } from '../lib/utils/directory-list-utils';
+import { getVendoredDirectoryList } from '../lib/utils/vendored-directory-lists';
+import { isDirectoryCode, isWellFormedDirectoryCode, type SeeditDirectoryCode } from '../lib/utils/directory-codes';
+import { normalizeDirectoryList, normalizeRemoteDirectoryList, type DirectoryList } from '../lib/utils/directory-list-utils';
+import { getDirectoryRegistrySnapshot, revalidateDirectoryRegistry } from '../lib/utils/directory-registry';
 
 const GITHUB_URL_TEMPLATE = 'https://raw.githubusercontent.com/bitsocialnet/lists/master/seedit-directories/seedit-{code}-directory.json';
 const REVALIDATE_INTERVAL_MS = 60 * 60 * 1000;
@@ -89,12 +90,16 @@ export const revalidateDirectoryList = (directoryCode: SeeditDirectoryCode): Pro
   store.lastFetchAttemptAt = Date.now();
   setSnapshot(store, { ...store.snapshot, loading: true, error: null });
 
-  const request = fetchDirectoryListPayload(directoryCode)
-    .then((payload) => {
+  // Wait for any defaults refresh so a list published after this build gets its title and description.
+  const request = Promise.all([fetchDirectoryListPayload(directoryCode), revalidateDirectoryRegistry()])
+    .then(([payload]) => {
+      const { defaults } = getDirectoryRegistrySnapshot();
       const currentList = store.snapshot.list ?? getVendoredDirectoryList(directoryCode);
-      if (!currentList) throw new Error(`Missing vendored Seedit directory list: ${directoryCode}`);
+      const remoteList = currentList
+        ? normalizeRemoteDirectoryList(payload, directoryCode, currentList, defaults)
+        : normalizeDirectoryList(payload, directoryCode, defaults);
+      if (!currentList && !remoteList) throw new Error(`Invalid directory list response for ${directoryCode}`);
 
-      const remoteList = normalizeRemoteDirectoryList(payload, directoryCode, currentList, vendoredDirectoryDefaults);
       store.lastFetchSuccessAt = Date.now();
       setSnapshot(store, { list: remoteList ?? currentList, loading: false, error: null });
     })
@@ -115,12 +120,10 @@ export const revalidateDirectoryList = (directoryCode: SeeditDirectoryCode): Pro
 };
 
 const createDirectoryListStore = (directoryCode: SeeditDirectoryCode): DirectoryListStore => {
-  const fallback = getVendoredDirectoryList(directoryCode);
-  if (!fallback) throw new Error(`Missing vendored Seedit directory list: ${directoryCode}`);
-
+  // Directories published after this build have no bundled list and start empty until fetched.
   const store = {
     directoryCode,
-    snapshot: { list: fallback, loading: true, error: null },
+    snapshot: { list: getVendoredDirectoryList(directoryCode), loading: true, error: null },
     listeners: new Set<() => void>(),
     inFlightFetch: null,
     revalidationTimer: null,
@@ -170,8 +173,12 @@ export const getDirectoryListSnapshot = (directoryCode: string | undefined): Dir
 export const subscribeToDirectoryList = (directoryCode: SeeditDirectoryCode, listener: () => void): (() => void) =>
   getDirectoryListStore(directoryCode).subscribe(listener);
 
-/** Read a route-only directory list. This hook never reads or writes account state. */
+/**
+ * Read a route-only directory list. This hook never reads or writes account state. Callers pass a code they know
+ * from useDirectoryRegistry(); the check here is only its format, since a check against the module's current codes
+ * would be memoized by the React Compiler and miss codes published after the first render.
+ */
 export const useDirectoryList = (directoryCode: string | undefined): DirectoryListState => {
-  const store = directoryCode && isDirectoryCode(directoryCode) ? getDirectoryListStore(directoryCode) : null;
+  const store = directoryCode && isWellFormedDirectoryCode(directoryCode) ? getDirectoryListStore(directoryCode) : null;
   return useSyncExternalStore(store?.subscribe ?? emptySubscribe, store?.getSnapshot ?? getEmptySnapshot, store?.getSnapshot ?? getEmptySnapshot);
 };
