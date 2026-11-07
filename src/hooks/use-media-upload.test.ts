@@ -190,6 +190,37 @@ describe('useMediaUpload', () => {
     root = createRoot(container);
   });
 
+  it('tells the form about a failed upload, but not a finished one or one that outlived its form', async () => {
+    const onFailed = vi.fn();
+    vi.mocked(orchestrateUpload).mockRejectedValueOnce(new Error('All providers failed'));
+    await act(async () => {
+      await latestValue.uploadMedia(fileMedia('a.png', 'image/png'), onFailed);
+    });
+    expect(onFailed).toHaveBeenCalledOnce();
+
+    vi.mocked(orchestrateUpload).mockResolvedValueOnce({ url: 'https://forgeimg.net/abc.png' });
+    await act(async () => {
+      await latestValue.uploadMedia(fileMedia('a.png', 'image/png'), onFailed);
+    });
+
+    let fail: (error: Error) => void = () => {};
+    vi.mocked(orchestrateUpload).mockImplementationOnce(
+      () =>
+        new Promise((_resolve, reject) => {
+          fail = reject;
+        }),
+    );
+    let pending: Promise<string | null> = Promise.resolve(null);
+    await act(async () => {
+      pending = latestValue.uploadMedia(fileMedia('a.png', 'image/png'), onFailed);
+    });
+    act(() => root.unmount());
+    fail(new Error('All providers failed'));
+    await expect(pending).resolves.toBeNull();
+    expect(onFailed).toHaveBeenCalledOnce();
+    root = createRoot(container);
+  });
+
   it('shows a single failed attempt as a plain error, without guidance on web', async () => {
     vi.mocked(orchestrateUpload).mockRejectedValue(
       Object.assign(new Error('All providers failed'), { attempts: [{ provider: 'forge', success: false, error: 'Turnstile check failed: Turnstile error 110200' }] }),

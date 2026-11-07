@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getAboutLink, getPendingPostKey, getPendingPostRedirect, isCommunitiesDirectoryAboutView, isCommunitiesDirectoryView } from './view-utils';
+import { getAboutLink, getPendingPostKey, getPendingPostRedirect, isCommunitiesDirectoryAboutView, isCommunitiesDirectoryView, isPendingPostPath } from './view-utils';
 
 describe('isCommunitiesDirectoryView', () => {
   it('matches the directory index and individual directories only', () => {
@@ -56,5 +56,30 @@ describe('getPendingPostRedirect', () => {
   it('does not treat a rendered index without a comment key as rendered', () => {
     expect(getPendingPostRedirect({ accountCommentIndex: '1', key: undefined }, { accountCommentIndex: '1', key: postA }, true)).toBeUndefined();
     expect(getPendingPostRedirect({ accountCommentIndex: '1', key: undefined }, { accountCommentIndex: '1', key: undefined }, false)).toBe('not-found');
+  });
+});
+
+describe('isPendingPostPath', () => {
+  it('matches an account comment pending page and none of the other profile pages', () => {
+    for (const pathname of ['/profile/0', '/profile/12', '/profile/12/', '/profile/not-an-index']) expect(isPendingPostPath(pathname)).toBe(true);
+    for (const pathname of [
+      '/profile',
+      '/profile/about',
+      '/profile/upvoted',
+      '/profile/downvoted',
+      '/profile/hidden',
+      '/profile/saved',
+      '/profile/comments',
+      '/profile/submitted',
+      '/profile/12/about',
+      '/u/profile/12',
+    ]) {
+      expect(isPendingPostPath(pathname)).toBe(false);
+    }
+  });
+
+  it('ignores case, as the router does', () => {
+    expect(isPendingPostPath('/PROFILE/7')).toBe(true);
+    expect(isPendingPostPath('/Profile/ABOUT')).toBe(false);
   });
 });

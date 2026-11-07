@@ -5,6 +5,7 @@ import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import usePublishReply from './use-publish-reply';
+import { startPostingAnalytics } from '../lib/posting-analytics';
 import useChallengesStore from '../stores/use-challenges-store';
 import usePublishReplyStore from '../stores/use-publish-reply-store';
 
@@ -13,8 +14,11 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 
 const testState = vi.hoisted(() => ({
   abandonPublish: vi.fn().mockResolvedValue(undefined),
+  analyticsMock: vi.fn(),
   lastOptions: undefined as Record<string, any> | undefined,
 }));
+
+vi.mock('../lib/analytics', () => ({ trackPostingEvent: (...args: unknown[]) => testState.analyticsMock(...args) }));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   usePublishComment: (options: Record<string, any>) => {
@@ -49,6 +53,8 @@ describe('usePublishReply', () => {
     container.remove();
     useChallengesStore.setState({ challenges: [] });
     usePublishReplyStore.getState().resetReplyStore('parent-cid');
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('routes challenge cancellation to the current usePublishComment abandonPublish', async () => {
@@ -67,6 +73,21 @@ describe('usePublishReply', () => {
     });
 
     expect(testState.abandonPublish).toHaveBeenCalledOnce();
+  });
+
+  it('reports a rejected reply to the attempt it was published with', async () => {
+    await act(async () => {
+      latestValue.setPublishReplyOptions.content('Reply body');
+    });
+    latestValue.publishReply(startPostingAnalytics({ kind: 'reply' }));
+    vi.stubGlobal('alert', vi.fn());
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await testState.lastOptions?.onChallengeVerification({ challengeSuccess: false, reason: 'rejected' }, { content: 'Reply body' });
+
+    expect(testState.analyticsMock.mock.calls).toEqual([['post_challenge_failed', { kind: 'reply' }]]);
+    // The store's alert still explains the rejection.
+    expect(alert).toHaveBeenCalledOnce();
   });
 
   it('puts the published draft back in the reply form when the challenge is cancelled', async () => {

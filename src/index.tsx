@@ -10,12 +10,7 @@ import './themes.css';
 import './preload-assets.css';
 import { App as CapacitorApp } from '@capacitor/app';
 import { registerSW } from 'virtual:pwa-register';
-import { Analytics } from '@vercel/analytics/react';
-
-// Only enable analytics on seedit.app (Vercel deployment)
-// Exclude Electron (file:// or localhost), Capacitor/APK (capacitor:// or localhost), and IPFS (ipfs:// or different domain)
-const isVercelDeployment =
-  typeof window !== 'undefined' && (window.location.hostname === 'seedit.app' || window.location.hostname === 'www.seedit.app') && !window.isElectron;
+import WebAnalytics from './components/web-analytics';
 
 // Must run before the bitsocial-react-hooks accounts store generates the default
 // account, which reads window.defaultPkcOptions.
@@ -46,7 +41,7 @@ const renderApp = async () => {
     <React.StrictMode>
       <Router>
         <App />
-        {isVercelDeployment && <Analytics />}
+        <WebAnalytics />
       </Router>
     </React.StrictMode>
   );

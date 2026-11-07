@@ -42,6 +42,9 @@ const FAQ = ({ footer }: FAQProps) => {
             <li>
               <HashLink to='/about#registerUsername'>Can I choose a readable account name?</HashLink>
             </li>
+            <li>
+              <HashLink to='/about#analytics'>Does Seedit collect analytics?</HashLink>
+            </li>
             {footer && (
               <li>
                 <HashLink to='/about#usefulLinks'>Useful links</HashLink>
@@ -133,6 +136,14 @@ const FAQ = ({ footer }: FAQProps) => {
             ENS
           </a>
           .
+        </p>
+        <hr />
+        <h3 id='analytics'>Does Seedit collect analytics?</h3>
+        <p>
+          Only <code>seedit.app</code> does, using cookieless Vercel Web Analytics. It counts page views by page type and, for communities in Seedit's directories, by
+          directory; other community addresses, post IDs, user addresses, search text and settings sections are removed before anything is sent. It also counts failed
+          post and reply attempts without noting the community, and never records successful posts or what you write. The desktop and Android apps and the other mirrors
+          send no analytics.
         </p>
       </div>
       {footer && (

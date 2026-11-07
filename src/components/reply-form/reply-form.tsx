@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { isValidURL } from '../../lib/utils/url-utils';
+import { startPostingAnalytics } from '../../lib/posting-analytics';
 import useIsCommunityOffline from '../../hooks/use-is-community-offline';
 import usePublishReply from '../../hooks/use-publish-reply';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
@@ -136,19 +137,22 @@ const ReplyForm = ({ cid, isReplyingToReply, hideReplyForm, communityAddress, po
   }, [isReplyingToReply, textRef]);
 
   const onPublish = () => {
+    const attempt = startPostingAnalytics({ kind: 'reply' });
     const currentContent = publishReplyOptions?.content || '';
     const currentUrl = publishReplyOptions?.link || '';
 
     if (!currentContent.trim() && !currentUrl) {
+      attempt.finish('post_validation_failed');
       alert(t('empty_comment_alert'));
       return;
     }
 
     if (currentUrl && !isValidURL(currentUrl)) {
+      attempt.finish('post_validation_failed');
       alert(t('invalid_url_alert'));
       return;
     }
-    publishReply();
+    publishReply(attempt);
   };
 
   useEffect(() => {

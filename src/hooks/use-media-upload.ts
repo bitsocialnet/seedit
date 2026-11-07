@@ -295,11 +295,14 @@ export function useMediaUpload() {
     }
   };
 
-  /** Uploads the media and returns its link, or alerts and returns null when the upload fails. */
-  const uploadMedia = async (media: AttachedMedia): Promise<string | null> => {
+  /** Uploads the media and returns its link, or calls onFailed, alerts and returns null when the upload fails. */
+  const uploadMedia = async (media: AttachedMedia, onFailed?: () => void): Promise<string | null> => {
     setUploadPhase('uploading');
     const uploaded = await uploadThroughProviders(media, { mode: uploadMode, preferredProvider, runtime }, setUploadPhase).catch((error: unknown) => {
-      if (mountedRef.current) alertUploadError(error, media);
+      if (mountedRef.current) {
+        onFailed?.();
+        alertUploadError(error, media);
+      }
       return null;
     });
     setUploadPhase(null);
