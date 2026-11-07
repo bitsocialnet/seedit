@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [ development, master ]
 
+# A newer push to the same pull request cancels its older run. Pushes to a branch never cancel each other.
+concurrency:
+  group: test-builds-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   test-linux-build:
     name: Linux Build + Static Checks
