@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { PublishCommentOptions, usePublishComment } from '@bitsocial/bitsocial-react-hooks';
+import { ChallengeVerification, Comment, PublishCommentOptions, usePublishComment } from '@bitsocial/bitsocial-react-hooks';
+import type { PostingAnalyticsAttempt } from '../lib/posting-analytics';
 import useChallengesStore from '../stores/use-challenges-store';
+
+// A publication keeps the callbacks of the options object it started with, even after its form
+// unmounts or starts another publication, so its analytics attempt is looked up by that object.
+const publicationAttempts = new WeakMap<object, PostingAnalyticsAttempt>();
 
 /** onAbandon runs after the pending comment is discarded, so the caller can restore what it published. */
 const usePublishCommentWithChallengeAbandon = (publishCommentOptions: PublishCommentOptions, onAbandon?: () => void) => {
@@ -11,22 +16,45 @@ const usePublishCommentWithChallengeAbandon = (publishCommentOptions: PublishCom
     onAbandon?.();
   }, [onAbandon]);
 
-  const publishOptionsWithAbandon = useMemo(
-    () => ({
+  const publishOptionsWithAbandon = useMemo(() => {
+    const options: PublishCommentOptions = {
       ...publishCommentOptions,
       onChallenge: async (...args: any[]) => {
-        addChallenge(args, abandonCurrentPublish);
+        publicationAttempts.get(options)?.challenge();
+        addChallenge(args, async () => {
+          publicationAttempts.get(options)?.finish('post_cancelled');
+          await abandonCurrentPublish();
+        });
       },
-    }),
-    [abandonCurrentPublish, addChallenge, publishCommentOptions],
-  );
+      onChallengeVerification: (challengeVerification: ChallengeVerification, comment: Comment) => {
+        publicationAttempts.get(options)?.verify(challengeVerification);
+        return publishCommentOptions?.onChallengeVerification?.(challengeVerification, comment);
+      },
+      onError: (error: Error) => {
+        publicationAttempts.get(options)?.finish('post_publish_failed');
+        return publishCommentOptions?.onError?.(error);
+      },
+    };
+    return options;
+  }, [abandonCurrentPublish, addChallenge, publishCommentOptions]);
 
   const publishResult = usePublishComment(publishOptionsWithAbandon);
   useEffect(() => {
     abandonPublishRef.current = publishResult.abandonPublish;
   }, [publishResult.abandonPublish]);
 
-  return publishResult;
+  const { publishComment: publish } = publishResult;
+  // usePublishComment publishes with the options of the render that returned it, which are these.
+  const publishComment = useCallback(
+    (attempt?: PostingAnalyticsAttempt) => {
+      if (attempt) publicationAttempts.set(publishOptionsWithAbandon, attempt);
+      else publicationAttempts.delete(publishOptionsWithAbandon);
+      return publish();
+    },
+    [publish, publishOptionsWithAbandon],
+  );
+
+  return { ...publishResult, publishComment };
 };
 
 export default usePublishCommentWithChallengeAbandon;

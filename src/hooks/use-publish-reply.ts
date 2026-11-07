@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 import type { Comment } from '@bitsocial/bitsocial-react-hooks';
+import type { PostingAnalyticsAttempt } from '../lib/posting-analytics';
 import usePublishReplyStore from '../stores/use-publish-reply-store';
 import usePublishCommentWithChallengeAbandon from './use-publish-comment-with-challenge-abandon';
 
@@ -75,9 +76,9 @@ const usePublishReply = ({ cid, communityAddress, postCid }: { cid: string; comm
   const resetPublishReplyOptions = useMemo(() => () => resetReplyStore(parentCid), [parentCid, resetReplyStore]);
 
   const { index, publishComment } = usePublishCommentWithChallengeAbandon(publishCommentOptions, restorePublishedDraft);
-  const publishReply = () => {
+  const publishReply = (attempt?: PostingAnalyticsAttempt) => {
     publishedDraftRef.current = publishReplyOptions as Comment;
-    publishComment();
+    publishComment(attempt);
   };
 
   return { setPublishReplyOptions, resetPublishReplyOptions, replyIndex: index, publishReply, publishReplyOptions };

@@ -16,6 +16,7 @@ import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route'
 import { useMediaUpload } from '../../hooks/use-media-upload';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import usePublishCommentWithChallengeAbandon from '../../hooks/use-publish-comment-with-challenge-abandon';
+import { startPostingAnalytics } from '../../lib/posting-analytics';
 import LoadingEllipsis from '../../components/loading-ellipsis';
 import Markdown from '../../components/markdown';
 import Embed from '../../components/embed';
@@ -101,8 +102,9 @@ const UploadMediaForm = memo(function UploadMediaForm() {
   const [isChoosingFile, setIsChoosingFile] = useState(false);
 
   // Uploads to the media hosting provider set in the preferences (Forge Images by default) and fills in the link.
+  // A failed upload is a failed post attempt of its own: the post cannot carry the file.
   const upload = async (media: AttachedMedia) => {
-    const url = await uploadMedia(media);
+    const url = await uploadMedia(media, () => startPostingAnalytics({ kind: 'post' }).finish('post_upload_failed'));
     if (url) setPublishPostStore({ link: url });
   };
 
@@ -453,21 +455,25 @@ const SubmitPage = () => {
   const { index, publishComment } = usePublishCommentWithChallengeAbandon(publishCommentOptions, restorePublishedDraft);
 
   const onPublish = () => {
+    const attempt = startPostingAnalytics({ kind: 'post' });
     if (!title) {
+      attempt.finish('post_validation_failed');
       alert(`Missing title`);
       return;
     }
     if (link && !isValidURL(link)) {
+      attempt.finish('post_validation_failed');
       alert(`Invalid URL`);
       return;
     }
     if (!communityAddress) {
+      attempt.finish('post_validation_failed');
       alert(`Missing community address`);
       return;
     }
 
     publishedDraftRef.current = { communityAddress, title, content, link, spoiler, nsfw, crosspost } as Comment;
-    publishComment();
+    publishComment(attempt);
   };
 
   // redirect to pending page when pending comment is created

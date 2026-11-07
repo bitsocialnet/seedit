@@ -14,6 +14,7 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 
 const testState = vi.hoisted(() => ({
   abandonPublish: vi.fn().mockResolvedValue(undefined),
+  analyticsMock: vi.fn(),
   lastOptions: undefined as Record<string, any> | undefined,
   publishComment: vi.fn(),
   translate: vi.fn((key: string) => key),
@@ -33,6 +34,8 @@ const testState = vi.hoisted(() => ({
   previewRender: vi.fn(),
   crosspostRender: vi.fn(),
 }));
+
+vi.mock('../../lib/analytics', () => ({ trackPostingEvent: (...args: unknown[]) => testState.analyticsMock(...args) }));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAccount: () => {
@@ -134,6 +137,7 @@ describe('SubmitPage', () => {
     useChallengesStore.setState({ challenges: [] });
     usePublishPostStore.getState().resetPublishPostStore();
     vi.unstubAllGlobals();
+    vi.restoreAllMocks();
   });
 
   it('isolates unrelated fields and the text preview from title changes while keeping publish options current', async () => {
@@ -300,7 +304,7 @@ describe('SubmitPage', () => {
       testState.dropzoneOptions?.onDrop([file]);
     });
 
-    expect(testState.mediaUpload.uploadMedia).toHaveBeenCalledWith({ kind: 'file', file, name: 'photo.png', mimeType: 'image/png' });
+    expect(testState.mediaUpload.uploadMedia).toHaveBeenCalledWith({ kind: 'file', file, name: 'photo.png', mimeType: 'image/png' }, expect.any(Function));
     expect(usePublishPostStore.getState().link).toBe('https://forgeimg.net/abc/photo.png');
   });
 
@@ -330,7 +334,10 @@ describe('SubmitPage', () => {
       );
     });
 
-    expect(testState.mediaUpload.uploadMedia).toHaveBeenCalledExactlyOnceWith({ kind: 'file', file: first, name: 'second.png', mimeType: 'image/png' });
+    expect(testState.mediaUpload.uploadMedia).toHaveBeenCalledExactlyOnceWith(
+      { kind: 'file', file: first, name: 'second.png', mimeType: 'image/png' },
+      expect.any(Function),
+    );
     expect(testState.mediaUpload.rejectMedia).not.toHaveBeenCalled();
   });
 
@@ -344,6 +351,45 @@ describe('SubmitPage', () => {
       testState.dropzoneOptions?.onDrop([new File(['png'], 'photo.png', { type: 'image/png' })]);
     });
     expect(usePublishPostStore.getState().link).toBeUndefined();
+  });
+
+  it('counts a failed upload as a failed post attempt', async () => {
+    testState.mediaUpload.uploadMedia.mockImplementation(async (_media: unknown, onFailed?: () => void) => {
+      onFailed?.();
+      return null;
+    });
+    await act(async () => {
+      testState.dropzoneOptions?.onDrop([new File(['png'], 'photo.png', { type: 'image/png' })]);
+    });
+    expect(testState.analyticsMock.mock.calls).toEqual([['post_upload_failed', { kind: 'post' }]]);
+  });
+
+  it('counts a post the form rejects, without publishing it', async () => {
+    vi.stubGlobal('alert', vi.fn());
+    const submitButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'submit');
+    await act(async () => submitButton?.click());
+
+    expect(alert).toHaveBeenCalledWith('Missing title');
+    expect(testState.publishComment).not.toHaveBeenCalled();
+    expect(testState.analyticsMock.mock.calls).toEqual([['post_validation_failed', { kind: 'post' }]]);
+  });
+
+  it('reports a failed publish to the attempt the post was submitted with, and nothing for a submit', async () => {
+    vi.stubGlobal('alert', vi.fn());
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    await act(async () => {
+      usePublishPostStore.getState().setPublishPostStore({ communityAddress: 'example.bso', title: 'Private title' } as any);
+    });
+    const submitButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'submit');
+    await act(async () => submitButton?.click());
+    expect(testState.publishComment).toHaveBeenCalledOnce();
+    expect(testState.analyticsMock).not.toHaveBeenCalled();
+
+    testState.lastOptions?.onError(new Error('network down'));
+    testState.lastOptions?.onError(new Error('network down'));
+
+    expect(testState.analyticsMock.mock.calls).toEqual([['post_publish_failed', { kind: 'post' }]]);
+    expect(alert).toHaveBeenCalledWith('network down');
   });
 
   it('hides the upload box when uploads are turned off', async () => {
