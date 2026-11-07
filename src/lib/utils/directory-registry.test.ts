@@ -68,14 +68,19 @@ describe('directory registry', () => {
   });
 
   it('keeps the same snapshot when a refresh publishes nothing new', async () => {
+    vi.useFakeTimers();
     vi.stubGlobal('localStorage', createStorage({ [CACHE_KEY]: JSON.stringify(dogsDefaults) }));
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(okJson(dogsDefaults)));
     const { getDirectoryRegistrySnapshot, revalidateDirectoryRegistry } = await loadModules();
-    const before = getDirectoryRegistrySnapshot();
 
     await revalidateDirectoryRegistry();
+    const settledSnapshot = getDirectoryRegistrySnapshot();
+    expect(settledSnapshot.settled).toBe(true);
 
-    expect(getDirectoryRegistrySnapshot()).toBe(before);
+    vi.setSystemTime(Date.now() + 60 * 60 * 1000);
+    await revalidateDirectoryRegistry();
+
+    expect(getDirectoryRegistrySnapshot()).toBe(settledSnapshot);
   });
 
   it('keeps refreshing while subscribed: retries after a failure, then hourly, and stops once unsubscribed', async () => {
@@ -106,12 +111,20 @@ describe('directory registry', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
-  it('knows cached published directories before any network request', async () => {
+  it('knows cached published directories before any network request, but waits for this load to settle', async () => {
     vi.stubGlobal('localStorage', createStorage({ [CACHE_KEY]: JSON.stringify(dogsDefaults) }));
-    const { getDirectoryRegistrySnapshot, isDirectoryCode } = await loadModules();
+    // published after the cached copy was written
+    const birdsDefaults = publishedDefaults(300, { ...dogsDefaults.directories, birds: { directoryCode: 'birds', title: 'Birds' } });
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(okJson(birdsDefaults)));
+    const { getDirectoryRegistrySnapshot, isDirectoryCode, revalidateDirectoryRegistry } = await loadModules();
 
     expect(isDirectoryCode('dogs')).toBe(true);
-    expect(getDirectoryRegistrySnapshot().settled).toBe(true);
+    // a stale cache must not let `birds` be treated as a community before this load's request finishes
+    expect(getDirectoryRegistrySnapshot().settled).toBe(false);
+
+    await revalidateDirectoryRegistry();
+
+    expect(getDirectoryRegistrySnapshot()).toMatchObject({ settled: true, codes: expect.arrayContaining(['dogs', 'birds']) });
   });
 
   it('settles on the bundled codes when the published defaults cannot be fetched', async () => {

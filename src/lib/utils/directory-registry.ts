@@ -15,7 +15,7 @@ const FETCH_TIMEOUT_MS = 10 * 1000;
 export interface DirectoryRegistrySnapshot {
   codes: readonly SeeditDirectoryCode[];
   defaults: DirectoryDefaultsData;
-  /** False only while a client with no cached copy waits for the first published defaults. */
+  /** False until this page load's first defaults request finishes, even when a cached copy already supplies codes. */
   settled: boolean;
 }
 
@@ -68,7 +68,8 @@ const createSnapshot = (settled: boolean): DirectoryRegistrySnapshot => ({
   settled,
 });
 
-let snapshot = createSnapshot(publishedDefaults !== null);
+// A cached copy can predate a directory published since, so only this page load's request settles the codes.
+let snapshot = createSnapshot(false);
 const listeners = new Set<() => void>();
 let inFlightFetch: Promise<void> | null = null;
 let revalidationTimer: ReturnType<typeof globalThis.setTimeout> | null = null;

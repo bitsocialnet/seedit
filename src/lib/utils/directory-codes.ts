@@ -38,7 +38,7 @@ export const getDirectoryCodes = (): readonly SeeditDirectoryCode[] => directory
 /** What a component knows about directory codes: `codes` and `settled` from useDirectoryRegistry(). */
 export interface KnownDirectoryCodes {
   codes: readonly SeeditDirectoryCode[];
-  /** False only while a client with no cached copy waits for the first published codes. */
+  /** False until this page load's first published-codes request finishes, even when cached codes are known. */
   settled: boolean;
 }
 
