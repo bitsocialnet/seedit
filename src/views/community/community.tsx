@@ -143,7 +143,7 @@ const CommunityView = () => {
   const location = useLocation();
 
   const rawCommunityIdentifier = params?.communityAddress || '';
-  const { communityAddress: resolvedCommunityAddress, directoryCode, directoryList } = useResolvedCommunityRoute(rawCommunityIdentifier);
+  const { communityAddress: resolvedCommunityAddress, directoryCode, directoryList, error: directoryListError } = useResolvedCommunityRoute(rawCommunityIdentifier);
   const communityAddress = resolvedCommunityAddress || '';
   const canLoadCommunity = !!communityAddress && isResolvableCommunityAddress(communityAddress);
   const community = useCommunity(canLoadCommunity ? { community: getCommunityIdentifier(communityAddress) } : undefined);
@@ -273,6 +273,8 @@ const CommunityView = () => {
 
   // Derive whether to show error directly from current feed state
   const shouldShowErrorToUser = Boolean(error?.message && feed.length === 0);
+  // A directory published after this build has no bundled list, so a failed list request leaves it without a community.
+  const unresolvedDirectoryError = directoryCode && !resolvedCommunityAddress ? directoryListError : null;
 
   if (isLegacyTopRoute(params.sortType)) {
     return <Navigate to={getCanonicalTopPath(location.pathname, location.search)} replace />;
@@ -301,9 +303,9 @@ const CommunityView = () => {
           reset={reset}
         />
       </div>
-      {shouldShowErrorToUser && (
+      {(shouldShowErrorToUser || unresolvedDirectoryError) && (
         <div className={styles.error}>
-          <ErrorDisplay error={error} />
+          <ErrorDisplay error={unresolvedDirectoryError ?? error} />
         </div>
       )}
       <div className={layoutStyles.feed}>

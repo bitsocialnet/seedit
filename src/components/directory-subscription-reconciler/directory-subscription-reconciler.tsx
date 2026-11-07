@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
 import { useAccount } from '@bitsocial/bitsocial-react-hooks';
-import { SEEDIT_DIRECTORY_CODES, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
+import type { SeeditDirectoryCode } from '../../lib/utils/directory-codes';
 import type { AuthoritativeDirectoryWinnerSnapshot } from '../../lib/utils/directory-subscriptions';
 import { pickDirectoryWinner } from '../../lib/utils/directory-list-utils';
 import { persistStarterAccountUpdate } from '../../lib/utils/starter-account-persistence';
 import type { StarterAccount } from '../../lib/utils/starter-account';
 import { reconcileDirectoryWinnerAccount } from '../../lib/utils/directory-account-transforms';
 import { useDirectoryList } from '../../hooks/use-directory-list';
+import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 
 const DirectorySlotReconciler = ({ directoryCode }: { directoryCode: SeeditDirectoryCode }) => {
@@ -36,7 +37,8 @@ const DirectorySlotReconciler = ({ directoryCode }: { directoryCode: SeeditDirec
 
 const DirectorySubscriptionReconciler = () => {
   const account = useAccount() as StarterAccount | undefined;
-  const trackedCodes = SEEDIT_DIRECTORY_CODES.filter((directoryCode) => account?.seeditDirectoryPreferences?.slots?.[directoryCode]);
+  const { codes } = useDirectoryRegistry();
+  const trackedCodes = codes.filter((directoryCode) => account?.seeditDirectoryPreferences?.slots?.[directoryCode]);
 
   return trackedCodes.map((directoryCode) => <DirectorySlotReconciler key={directoryCode} directoryCode={directoryCode} />);
 };

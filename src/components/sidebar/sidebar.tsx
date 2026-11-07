@@ -30,6 +30,7 @@ import useIsMobile from '../../hooks/use-is-mobile';
 import useIsCommunityOffline from '../../hooks/use-is-community-offline';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import useOptionalAccountComment from '../../hooks/use-account-comment';
+import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
 import { getCommunityPath, getCommunityPostUrl, getDirectoryCandidatesPath } from '../../lib/utils/community-route-utils';
 import { isDirectoryCode, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
 import { getDirectoryCommunityProposalUrl, getNewDirectoryProposalUrl } from '../../lib/utils/directory-proposal-utils';
@@ -193,6 +194,7 @@ const Sidebar = ({ comment, communityAddress, directoryCode, directoryRevision, 
 
   const location = useLocation();
   const params = useParams();
+  const { codes: directoryCodes } = useDirectoryRegistry();
   const isInAllView = isAllView(location.pathname);
   const isInChangelogView = isChangelogView(location.pathname);
   const isInDomainView = isDomainView(location.pathname);
@@ -208,7 +210,7 @@ const Sidebar = ({ comment, communityAddress, directoryCode, directoryRevision, 
   const isInCommunitiesDirectoryView = isCommunitiesDirectoryView(location.pathname);
   const isInCommunityAboutView = isCommunityAboutView(location.pathname, params);
   const isInCommunityView = isCommunityView(location.pathname, params);
-  const proposedDirectoryCode = isDirectoryCode(params.directoryCode) ? params.directoryCode : undefined;
+  const proposedDirectoryCode = isDirectoryCode(params.directoryCode, directoryCodes) ? params.directoryCode : undefined;
   const directoryProposalUrl = proposedDirectoryCode ? getDirectoryCommunityProposalUrl(proposedDirectoryCode) : getNewDirectoryProposalUrl();
 
   // the community title box only belongs on routes that stand for a community, not on the standalone pages

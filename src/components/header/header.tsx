@@ -58,6 +58,7 @@ import useWindowWidth from '../../hooks/use-window-width';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import useOptionalAccountComment from '../../hooks/use-account-comment';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
+import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
 import styles from './header.module.css';
 
@@ -66,11 +67,12 @@ const AboutButton = () => {
   const params = useParams();
   const location = useLocation();
   const { communityAddress: routeCommunityAddress } = useResolvedCommunityRoute();
+  const { codes: directoryCodes } = useDirectoryRegistry();
   const aboutLink = routeCommunityAddress
     ? params.commentCid
       ? `${getCommunityPostPath(routeCommunityAddress, params.commentCid)}/about`
       : `${getCommunityPath(routeCommunityAddress)}/about`
-    : getAboutLink(location.pathname, params);
+    : getAboutLink(location.pathname, params, directoryCodes);
   const isInHomeAboutView = isHomeAboutView(location.pathname);
   const isInPostPageAboutView = isPostPageAboutView(location.pathname, params);
   const isInCommunityAboutView = isCommunityAboutView(location.pathname, params);

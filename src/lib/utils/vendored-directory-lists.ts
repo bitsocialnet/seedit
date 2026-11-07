@@ -10,7 +10,7 @@ import newsDirectory from '../../data/seedit-directories/seedit-news-directory.j
 import picsDirectory from '../../data/seedit-directories/seedit-pics-directory.json';
 import todayilearnedDirectory from '../../data/seedit-directories/seedit-todayilearned-directory.json';
 import videosDirectory from '../../data/seedit-directories/seedit-videos-directory.json';
-import { isDirectoryCode, type SeeditDirectoryCode } from './directory-codes';
+import { isVendoredDirectoryCode, type VendoredDirectoryCode } from './directory-codes';
 import { normalizeDirectoryDefaultsData, normalizeDirectoryList, type DirectoryList } from './directory-list-utils';
 
 const rawDirectoryLists = {
@@ -25,7 +25,7 @@ const rawDirectoryLists = {
   funny: funnyDirectory,
   aww: awwDirectory,
   cats: catsDirectory,
-} satisfies Record<SeeditDirectoryCode, unknown>;
+} satisfies Record<VendoredDirectoryCode, unknown>;
 
 export const vendoredDirectoryDefaults = normalizeDirectoryDefaultsData(directoryDefaults);
 
@@ -35,7 +35,7 @@ export const vendoredDirectoryLists = Object.fromEntries(
     if (!list) throw new Error(`Invalid vendored Seedit directory list: ${directoryCode}`);
     return [directoryCode, list];
   }),
-) as Record<SeeditDirectoryCode, DirectoryList>;
+) as Record<VendoredDirectoryCode, DirectoryList>;
 
 export const getVendoredDirectoryList = (directoryCode: string | undefined): DirectoryList | null =>
-  directoryCode && isDirectoryCode(directoryCode) ? vendoredDirectoryLists[directoryCode] : null;
+  isVendoredDirectoryCode(directoryCode) ? vendoredDirectoryLists[directoryCode] : null;
