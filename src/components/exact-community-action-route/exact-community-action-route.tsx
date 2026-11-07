@@ -9,7 +9,7 @@ interface ExactCommunityActionRouteProps {
 
 /** Mutable directory aliases are read-only entry routes; action routes must expose an exact target. */
 const ExactCommunityActionRoute = ({ children }: ExactCommunityActionRouteProps) => {
-  const { directoryCode, communityAddress } = useResolvedCommunityRoute();
+  const { directoryCode, communityAddress, isResolving } = useResolvedCommunityRoute();
   const { pathname, search, hash } = useLocation();
   const navigate = useNavigate();
 
@@ -19,7 +19,8 @@ const ExactCommunityActionRoute = ({ children }: ExactCommunityActionRouteProps)
     if (redirectPath) navigate(redirectPath, { replace: true });
   }, [communityAddress, directoryCode, hash, navigate, pathname, search]);
 
-  return directoryCode ? null : children;
+  // Render nothing until the target is exact: a directory alias redirects, and an unsettled code may still become one.
+  return directoryCode || isResolving ? null : children;
 };
 
 export default ExactCommunityActionRoute;

@@ -33,7 +33,20 @@ let directoryCodesSet: ReadonlySet<string> = VENDORED_DIRECTORY_CODES_SET;
 /** Bundled codes first, then codes published after this build, in published order. */
 export const getDirectoryCodes = (): readonly SeeditDirectoryCode[] => directoryCodes;
 
-export const isDirectoryCode = (value: string | undefined): boolean => typeof value === 'string' && directoryCodesSet.has(value);
+/** What a component knows about directory codes: `codes` and `settled` from useDirectoryRegistry(). */
+export interface KnownDirectoryCodes {
+  codes: readonly SeeditDirectoryCode[];
+  /** False only while a client with no cached copy waits for the first published codes. */
+  settled: boolean;
+}
+
+/**
+ * Whether a value is a directory code this client knows. Components and hooks must pass `codes` from
+ * useDirectoryRegistry(): the React Compiler memoizes a call on its arguments, so a check that only read the
+ * module's current codes would keep its first answer after published codes arrive.
+ */
+export const isDirectoryCode = (value: string | undefined, codes: readonly SeeditDirectoryCode[] = directoryCodes): boolean =>
+  typeof value === 'string' && (codes === directoryCodes ? directoryCodesSet.has(value) : codes.includes(value));
 
 /**
  * Replace the published codes. Bundled codes always stay, because this build ships their lists.

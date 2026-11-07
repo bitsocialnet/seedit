@@ -6,9 +6,9 @@ import About from './about';
 
 const DirectoryAbout = () => {
   const { directoryCode } = useParams();
-  const { settled } = useDirectoryRegistry();
+  const { codes, settled } = useDirectoryRegistry();
   // A code may belong to a directory published after this build; wait for the published codes before calling it unknown.
-  const isUnknownDirectory = directoryCode && !isDirectoryCode(directoryCode) && (settled || !isWellFormedDirectoryCode(directoryCode));
+  const isUnknownDirectory = directoryCode && !isDirectoryCode(directoryCode, codes) && (settled || !isWellFormedDirectoryCode(directoryCode));
 
   return isUnknownDirectory ? <NotFound /> : <About />;
 };

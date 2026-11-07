@@ -33,6 +33,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
@@ -75,6 +76,34 @@ describe('directory registry', () => {
     await revalidateDirectoryRegistry();
 
     expect(getDirectoryRegistrySnapshot()).toBe(before);
+  });
+
+  it('keeps refreshing while subscribed: retries after a failure, then hourly, and stops once unsubscribed', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('localStorage', createStorage());
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 503 })
+      .mockResolvedValueOnce(okJson(publishedDefaults(100, { funny: { directoryCode: 'funny', title: 'Funny' } })))
+      .mockResolvedValue(okJson(dogsDefaults));
+    vi.stubGlobal('fetch', fetchMock);
+    const { isDirectoryCode, subscribeToDirectoryRegistry } = await loadModules();
+
+    const unsubscribe = subscribeToDirectoryRegistry(() => undefined);
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(60 * 1000);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(isDirectoryCode('dogs')).toBe(false);
+
+    await vi.advanceTimersByTimeAsync(60 * 60 * 1000);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(isDirectoryCode('dogs')).toBe(true);
+
+    unsubscribe();
+    await vi.advanceTimersByTimeAsync(3 * 60 * 60 * 1000);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 
   it('knows cached published directories before any network request', async () => {

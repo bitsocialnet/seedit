@@ -1,4 +1,4 @@
-import { isDirectoryCode, type SeeditDirectoryCode } from './directory-codes';
+import { getDirectoryCodes, isDirectoryCode, isWellFormedDirectoryCode, type KnownDirectoryCodes, type SeeditDirectoryCode } from './directory-codes';
 
 const DEFAULT_COMMUNITY_TLD = '.bso';
 const RESERVED_COMMUNITY_ROUTE_SEGMENTS = new Set(['all', 'mod']);
@@ -62,7 +62,14 @@ export const getExactCommunityActionRedirectPath = (
   return `${getCommunityPath(communityAddress)}${pathname.slice(directoryPath.length)}${search}${hash}`;
 };
 
-export const getCanonicalCommunityRoutePathname = (pathname: string): string | undefined => {
+/**
+ * Components pass the registry's codes. While a client with no cached copy waits for the published directories, a
+ * well-formed code is left alone, so a directory added after this build is not rewritten to `<code>.bso`.
+ */
+export const getCanonicalCommunityRoutePathname = (
+  pathname: string,
+  { codes, settled }: KnownDirectoryCodes = { codes: getDirectoryCodes(), settled: true },
+): string | undefined => {
   const routeMatch = pathname.match(/^\/s\/([^/?#]+)(.*)$/);
   if (!routeMatch) return undefined;
 
@@ -73,7 +80,7 @@ export const getCanonicalCommunityRoutePathname = (pathname: string): string | u
     return undefined;
   }
 
-  if (isDirectoryCode(routeSegment)) return undefined;
+  if (isDirectoryCode(routeSegment, codes) || (!settled && isWellFormedDirectoryCode(routeSegment))) return undefined;
 
   const canonicalRouteSegment = getCommunityRouteSegment(routeSegment);
   if (canonicalRouteSegment === routeSegment) return undefined;

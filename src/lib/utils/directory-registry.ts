@@ -62,6 +62,7 @@ const createSnapshot = (settled: boolean): DirectoryRegistrySnapshot => ({
 let snapshot = createSnapshot(publishedDefaults !== null);
 const listeners = new Set<() => void>();
 let inFlightFetch: Promise<void> | null = null;
+let revalidationTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
 let lastFetchSuccessAt = 0;
 let lastFetchAttemptAt = 0;
 
@@ -83,6 +84,25 @@ const shouldRevalidate = (): boolean => {
   const now = Date.now();
   if (lastFetchSuccessAt > 0 && now - lastFetchSuccessAt < REVALIDATE_INTERVAL_MS) return false;
   return lastFetchAttemptAt === 0 || now - lastFetchAttemptAt >= FETCH_RETRY_DELAY_MS;
+};
+
+const getNextRevalidationDelay = (): number => {
+  const now = Date.now();
+  if (lastFetchSuccessAt > 0 && now - lastFetchSuccessAt < REVALIDATE_INTERVAL_MS) return REVALIDATE_INTERVAL_MS - (now - lastFetchSuccessAt);
+  if (lastFetchAttemptAt > 0 && now - lastFetchAttemptAt < FETCH_RETRY_DELAY_MS) return FETCH_RETRY_DELAY_MS - (now - lastFetchAttemptAt);
+  return 0;
+};
+
+/** While anything is subscribed, refresh hourly (or retry after a failure) even if the tab never changes visibility. */
+const scheduleRevalidation = () => {
+  if (revalidationTimer) globalThis.clearTimeout(revalidationTimer);
+  revalidationTimer = null;
+  if (listeners.size === 0) return;
+
+  revalidationTimer = globalThis.setTimeout(() => {
+    revalidationTimer = null;
+    if (!revalidateDirectoryRegistry()) scheduleRevalidation();
+  }, getNextRevalidationDelay());
 };
 
 /** Refresh the published defaults at most hourly. The returned request never rejects. */
@@ -109,9 +129,11 @@ export const revalidateDirectoryRegistry = (): Promise<void> | null => {
     .finally(() => {
       inFlightFetch = null;
       // Hourly refreshes usually change nothing; only a change, or the first settle, re-renders subscribers.
-      if (!changed && snapshot.settled) return;
-      snapshot = createSnapshot(true);
-      listeners.forEach((listener) => listener());
+      if (changed || !snapshot.settled) {
+        snapshot = createSnapshot(true);
+        listeners.forEach((listener) => listener());
+      }
+      scheduleRevalidation();
     });
 
   return inFlightFetch;
@@ -124,10 +146,13 @@ const handleVisibilityChange = () => {
 export const subscribeToDirectoryRegistry = (listener: () => void): (() => void) => {
   listeners.add(listener);
   if (listeners.size === 1 && typeof document !== 'undefined') document.addEventListener('visibilitychange', handleVisibilityChange);
-  void revalidateDirectoryRegistry();
+  if (!revalidateDirectoryRegistry()) scheduleRevalidation();
 
   return () => {
     listeners.delete(listener);
-    if (listeners.size === 0 && typeof document !== 'undefined') document.removeEventListener('visibilitychange', handleVisibilityChange);
+    if (listeners.size > 0) return;
+    if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', handleVisibilityChange);
+    if (revalidationTimer) globalThis.clearTimeout(revalidationTimer);
+    revalidationTimer = null;
   };
 };

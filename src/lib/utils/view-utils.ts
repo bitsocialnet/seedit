@@ -1,5 +1,5 @@
 import { type Comment } from '@bitsocial/bitsocial-react-hooks';
-import { isDirectoryCode } from './directory-codes';
+import { getDirectoryCodes, isDirectoryCode, type SeeditDirectoryCode } from './directory-codes';
 import { DIRECTORY_INDEX_PATH, getDirectoryAboutPath } from './community-route-utils';
 
 export type ParamsType = {
@@ -15,12 +15,13 @@ export type ViewType = 'home' | 'pending' | 'post' | 'submit' | 'community' | 'c
 
 const sortTypes = ['/hot', '/new', '/active', '/top'];
 
-export const getAboutLink = (pathname: string, params: ParamsType): string => {
+/** Components pass `directoryCodes` from useDirectoryRegistry() so the link updates when published codes arrive. */
+export const getAboutLink = (pathname: string, params: ParamsType, directoryCodes: readonly SeeditDirectoryCode[] = getDirectoryCodes()): string => {
   // some communities might use emojis in their address, so we need to decode the pathname
   const decodedPathname = decodeURIComponent(pathname);
 
   if (isCommunitiesDirectoryView(decodedPathname)) {
-    return getDirectoryAboutPath(isDirectoryCode(params.directoryCode) ? params.directoryCode : undefined);
+    return getDirectoryAboutPath(isDirectoryCode(params.directoryCode, directoryCodes) ? params.directoryCode : undefined);
   } else if (decodedPathname.startsWith(`/s/${params.communityAddress}/comments/${params.commentCid}`)) {
     return `/s/${params.communityAddress}/comments/${params.commentCid}/about`;
   } else if (decodedPathname.startsWith(`/s/${params.communityAddress}`)) {

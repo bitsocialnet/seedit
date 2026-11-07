@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react';
 import { getVendoredDirectoryList } from '../lib/utils/vendored-directory-lists';
-import { isDirectoryCode, type SeeditDirectoryCode } from '../lib/utils/directory-codes';
+import { isDirectoryCode, isWellFormedDirectoryCode, type SeeditDirectoryCode } from '../lib/utils/directory-codes';
 import { normalizeDirectoryList, normalizeRemoteDirectoryList, type DirectoryList } from '../lib/utils/directory-list-utils';
 import { getDirectoryRegistrySnapshot, revalidateDirectoryRegistry } from '../lib/utils/directory-registry';
 
@@ -173,8 +173,12 @@ export const getDirectoryListSnapshot = (directoryCode: string | undefined): Dir
 export const subscribeToDirectoryList = (directoryCode: SeeditDirectoryCode, listener: () => void): (() => void) =>
   getDirectoryListStore(directoryCode).subscribe(listener);
 
-/** Read a route-only directory list. This hook never reads or writes account state. */
+/**
+ * Read a route-only directory list. This hook never reads or writes account state. Callers pass a code they know
+ * from useDirectoryRegistry(); the check here is only its format, since a check against the module's current codes
+ * would be memoized by the React Compiler and miss codes published after the first render.
+ */
 export const useDirectoryList = (directoryCode: string | undefined): DirectoryListState => {
-  const store = directoryCode && isDirectoryCode(directoryCode) ? getDirectoryListStore(directoryCode) : null;
+  const store = directoryCode && isWellFormedDirectoryCode(directoryCode) ? getDirectoryListStore(directoryCode) : null;
   return useSyncExternalStore(store?.subscribe ?? emptySubscribe, store?.getSnapshot ?? getEmptySnapshot, store?.getSnapshot ?? getEmptySnapshot);
 };

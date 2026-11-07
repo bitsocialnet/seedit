@@ -11,6 +11,8 @@ import { getVendoredDirectoryList } from '../../lib/utils/vendored-directory-lis
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { DIRECTORY_INDEX_PATH, getCommunityPath, getDirectoryCandidatesPath, getDirectoryPath } from '../../lib/utils/community-route-utils';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
+import ErrorDisplay from '../../components/error-display';
+import LoadingEllipsis from '../../components/loading-ellipsis';
 import SubscribeButton from '../../components/subscribe-button';
 import CommunityItem, { NoCommunitiesMessage } from './community-item';
 import DirectorySearch from './directory-search';
@@ -65,7 +67,7 @@ const directoryMatchesSearch = (
 
 const DirectoryIndexRow = ({ directoryCode, query, onTagSelect }: { directoryCode: SeeditDirectoryCode; query: string; onTagSelect: (tag: string) => void }) => {
   const { t } = useTranslation();
-  const { list } = useDirectoryList(directoryCode);
+  const { list, error } = useDirectoryList(directoryCode);
   const { defaults } = useDirectoryRegistry();
   const winner = list && pickDirectoryWinner(list.communities);
   const metadata = getDirectoryMetadata(directoryCode, defaults);
@@ -98,7 +100,8 @@ const DirectoryIndexRow = ({ directoryCode, query, onTagSelect }: { directoryCod
               </span>
             </span>
           )}
-          <span>{t('directory_candidates_count', { count: list?.communities.length ?? 0 })}</span>
+          {/* Directories published after this build have no bundled list until the fetch completes. */}
+          <span>{list ? t('directory_candidates_count', { count: list.communities.length }) : error ? t('failed') : <LoadingEllipsis string={t('loading')} />}</span>
           {list && (
             <>
               <span className={styles.directoryFactSeparator} aria-hidden='true'>
@@ -147,7 +150,7 @@ const communityMatchesSearch = (query: string, candidate: DirectoryListCommunity
 const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirectoryCode }) => {
   const { t } = useTranslation();
   const { query, setQuery } = useDirectorySearchQuery();
-  const { list } = useDirectoryList(directoryCode);
+  const { list, error } = useDirectoryList(directoryCode);
   const { defaults } = useDirectoryRegistry();
   const ranked = list ? sortDirectoryCommunitiesByRank(list.communities) : [];
 
@@ -183,7 +186,15 @@ const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirect
         <DirectoryTags tags={list?.tags} />
       </div>
       <DirectorySearch label={t('search_communities')} query={query} onQueryChange={setQuery} />
-      {ranked.length === 0 ? (
+      {!list ? (
+        error ? (
+          <ErrorDisplay error={error} />
+        ) : (
+          <p className={styles.directoryNoResults}>
+            <LoadingEllipsis string={t('loading')} />
+          </p>
+        )
+      ) : ranked.length === 0 ? (
         <NoCommunitiesMessage />
       ) : visibleCandidates.length === 0 ? (
         <p className={styles.directoryNoResults}>{t('no_matches_found_for', { query })}</p>
@@ -209,11 +220,10 @@ const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirect
 /** Ranked candidates competing for one reserved /s/ route. */
 export const DirectoryCandidates = () => {
   const { directoryCode } = useParams();
-  // Re-render when the published directory codes arrive.
-  useDirectoryRegistry();
+  const { codes } = useDirectoryRegistry();
 
   // Communities renders not found for an unknown code
-  if (!directoryCode || !isDirectoryCode(directoryCode)) {
+  if (!directoryCode || !isDirectoryCode(directoryCode, codes)) {
     return null;
   }
 

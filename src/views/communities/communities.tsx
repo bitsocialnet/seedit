@@ -344,8 +344,8 @@ const Communities = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const { directoryCode } = useParams();
-  const { settled: directoryCodesSettled } = useDirectoryRegistry();
-  const isKnownDirectory = isDirectoryCode(directoryCode);
+  const { codes: directoryCodes, settled: directoryCodesSettled } = useDirectoryRegistry();
+  const isKnownDirectory = isDirectoryCode(directoryCode, directoryCodes);
   // A code may belong to a directory published after this build; wait for the published codes before calling it unknown.
   const isUnknownDirectory = Boolean(directoryCode) && !isKnownDirectory && (directoryCodesSettled || !isWellFormedDirectoryCode(directoryCode));
   const clearAllErrors = useErrorStore((state) => state.clearAllErrors);
