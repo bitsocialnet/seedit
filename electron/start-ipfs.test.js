@@ -31,6 +31,7 @@ let startIpfs;
 let processOn;
 const exitHooks = () => processOn.mock.calls.filter(([event]) => event === 'exit').map(([, listener]) => listener);
 const nextError = () => new Promise((resolve) => (startIpfs.onError = resolve));
+const nextStart = () => new Promise((resolve) => (startIpfs.onStarted = resolve));
 const retry = () => vi.advanceTimersByTime(1000);
 
 const writeKubo = (script, mode = 0o755) => {
@@ -87,5 +88,42 @@ describe.skipIf(realProcess.platform === 'win32')('IPFS auto-restart', () => {
 
     const error = await within(nextError());
     expect(error.code).toBe('EACCES');
+  });
+
+  it('does not keep exit hooks or dev proxies for daemons that already exited', async () => {
+    writeKubo('if [ "$1" = daemon ]; then echo "daemon crashed" >&2; exit 1; fi');
+    await importStartIpfs();
+
+    expect((await within(nextError())).message).toContain('daemon crashed');
+    const exitHooksAfterFirstDaemon = exitHooks().length;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const failed = nextError();
+      retry();
+      await within(failed);
+    }
+
+    expect(exitHooks()).toHaveLength(exitHooksAfterFirstDaemon);
+    expect(state.startProxy).toHaveBeenCalledTimes(1);
+
+    // at app exit, no signal goes to the pids of daemons that already exited
+    const kill = vi.spyOn(realProcess, 'kill').mockImplementation(() => true);
+    for (const listener of exitHooks()) listener(0);
+    expect(kill).not.toHaveBeenCalled();
+  });
+
+  it('still kills a running daemon when the app exits', async () => {
+    writeKubo('if [ "$1" = daemon ]; then echo $$ > "$IPFS_PATH/daemon.pid"; echo "Daemon is ready"; exec /bin/sleep 30; fi');
+    await importStartIpfs();
+
+    await within(nextStart());
+    const pid = Number(fs.readFileSync(path.join(state.dataPath, 'ipfs', 'daemon.pid'), 'utf8'));
+    const kill = vi.spyOn(realProcess, 'kill').mockImplementation(() => true);
+    try {
+      for (const listener of exitHooks()) listener(0);
+      expect(kill).toHaveBeenCalledWith(pid);
+    } finally {
+      kill.mockRestore();
+      realProcess.kill(pid, 'SIGKILL');
+    }
   });
 });
