@@ -98,14 +98,30 @@ const UrlField = memo(function UrlField() {
 const UploadMediaForm = memo(function UploadMediaForm() {
   const { t } = useTranslation();
   const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
+  const setIsUploadingMedia = usePublishPostStore((state) => state.setIsUploadingMedia);
   const { uploadPhase, fileKinds, accept, pickAndroidMedia, rejectMedia, uploadMedia } = useMediaUpload();
   const [isChoosingFile, setIsChoosingFile] = useState(false);
+  // The post waits for this form's upload, but not once the form is gone: the hook then drops the upload's link.
+  const mountedRef = useRef(false);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+      setIsUploadingMedia(false);
+    };
+  }, [setIsUploadingMedia]);
 
   // Uploads to the media hosting provider set in the preferences (Forge Images by default) and fills in the link.
   // A failed upload is a failed post attempt of its own: the post cannot carry the file.
   const upload = async (media: AttachedMedia) => {
+    // The Android picker can return after the form is gone: its link would be dropped, and nothing would clear the flag.
+    if (!mountedRef.current) return;
+    setIsUploadingMedia(true);
     const url = await uploadMedia(media, () => startPostingAnalytics({ kind: 'post' }).finish('post_upload_failed'));
+    // An unmounted form no longer owns the flag: the form shown again may have started another upload.
+    if (!mountedRef.current) return;
     if (url) setPublishPostStore({ link: url });
+    setIsUploadingMedia(false);
   };
 
   const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
@@ -429,7 +445,8 @@ const SubmitPage = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
 
-  const { crosspost, content, link, nsfw, spoiler, title, communityAddress, publishCommentOptions, setPublishPostStore, resetPublishPostStore } = usePublishPostStore();
+  const { crosspost, content, link, nsfw, spoiler, title, communityAddress, publishCommentOptions, isUploadingMedia, setPublishPostStore, resetPublishPostStore } =
+    usePublishPostStore();
   const { communityAddress: routeCommunityAddress } = useResolvedCommunityRoute();
 
   useEffect(() => {
@@ -530,7 +547,7 @@ const SubmitPage = () => {
           <div className={`${styles.box} ${styles.notice}`}>{t('submit_notice')}</div>
           <div>*{t('required')}</div>
           <div className={styles.submit}>
-            <button className={styles.submitButton} onClick={onPublish}>
+            <button className={styles.submitButton} onClick={onPublish} disabled={isUploadingMedia}>
               {t('submit')}
             </button>
           </div>
