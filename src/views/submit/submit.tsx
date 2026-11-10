@@ -374,6 +374,8 @@ const RulesInfo = memo(function RulesInfo({ shortAddress, rules }: { shortAddres
 
 const SubmitOptions = memo(function SubmitOptions() {
   const { t } = useTranslation();
+  const spoiler = usePublishPostStore((state) => state.spoiler);
+  const nsfw = usePublishPostStore((state) => state.nsfw);
   const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
 
   return (
@@ -383,13 +385,13 @@ const SubmitOptions = memo(function SubmitOptions() {
         <div className={styles.options}>
           <div className={styles.option}>
             <label>
-              <input type='checkbox' onChange={(e) => setPublishPostStore({ spoiler: e.target.checked })} />
+              <input type='checkbox' checked={!!spoiler} onChange={(e) => setPublishPostStore({ spoiler: e.target.checked })} />
               {t('spoiler')}
             </label>
           </div>
           <div className={styles.option}>
             <label>
-              <input type='checkbox' onChange={(e) => setPublishPostStore({ nsfw: e.target.checked })} />
+              <input type='checkbox' checked={!!nsfw} onChange={(e) => setPublishPostStore({ nsfw: e.target.checked })} />
               {t('nsfw')}
             </label>
           </div>
