@@ -126,9 +126,11 @@ export const getPureP2PBrowserPreference = (targetWindow: P2PBrowserConfigWindow
 
 export const setPureP2PBrowserPreference = (enabled: boolean, targetWindow: P2PBrowserConfigWindow = window) => {
   try {
-    targetWindow.localStorage?.setItem(PURE_P2P_BROWSER_SETTING_KEY, String(enabled));
+    if (!targetWindow.localStorage) return false;
+    targetWindow.localStorage.setItem(PURE_P2P_BROWSER_SETTING_KEY, String(enabled));
+    return true;
   } catch {
-    return;
+    return false;
   }
 };
 

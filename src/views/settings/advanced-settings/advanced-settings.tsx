@@ -275,7 +275,8 @@ const AdvancedSettings = () => {
 
     const pkcRpcClientsOptions = fullNodeRpcRef.current?.value.trim() ? [fullNodeRpcRef.current.value.trim()] : undefined;
     const dataPath = p2pDataPathRef.current?.value.trim() || undefined;
-    const pureP2PBrowserPreference = canConfigurePureP2PBrowser ? browserPureP2PEnabled : undefined;
+    // A full node RPC URL selects RPC mode; the pure p2p options below would discard it.
+    const pureP2PBrowserPreference = canConfigurePureP2PBrowser ? browserPureP2PEnabled && !pkcRpcClientsOptions : undefined;
 
     const chainProviders: NonNullable<AccountProtocolOptions['chainProviders']> = getSupportedChainProviders(getChainProviders(account)) ?? {};
     if (ethRpcUrls?.length) chainProviders.eth = { urls: ethRpcUrls, chainId: 1 };
@@ -304,6 +305,12 @@ const AdvancedSettings = () => {
       }
     }
 
+    // Store the mode before the account: without it, the upgrade hook turns a gateway account back to pure p2p after the reload.
+    if (pureP2PBrowserPreference !== undefined && !setPureP2PBrowserPreference(pureP2PBrowserPreference)) {
+      alert('Error saving options: the pure p2p setting could not be stored in browser storage');
+      return;
+    }
+
     try {
       await setAccount({
         ...account,
@@ -311,7 +318,6 @@ const AdvancedSettings = () => {
         chainProviders,
         pkcOptions,
       });
-      if (pureP2PBrowserPreference !== undefined) setPureP2PBrowserPreference(pureP2PBrowserPreference);
       alert('Options saved, reloading...');
       window.location.reload();
     } catch (e) {
