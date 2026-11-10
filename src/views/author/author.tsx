@@ -64,28 +64,31 @@ const Author = () => {
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
 
   let virtuosoData;
+  let authorTab = 'overview';
   if (isInAuthorCommentsView) {
     virtuosoData = replyComments;
+    authorTab = 'comments';
   } else if (isInAuthorSubmittedView) {
     virtuosoData = postComments;
+    authorTab = 'submitted';
   } else {
     virtuosoData = authorComments;
   }
 
+  // save last virtuoso state on each scroll, keyed by the list it belongs to
+  const virtuosoStateKey = `${authorAddress ?? ''}/${authorTab}/${sortType ?? ''}`;
   useEffect(() => {
     const setLastVirtuosoState = () =>
       virtuosoRef.current?.getState((snapshot: StateSnapshot) => {
         if (snapshot?.ranges?.length) {
-          const key = `${authorAddress ?? ''}${sortType ?? ''}`;
-          lastVirtuosoStates[key] = snapshot;
+          lastVirtuosoStates[virtuosoStateKey] = snapshot;
         }
       });
     window.addEventListener('scroll', setLastVirtuosoState);
     return () => window.removeEventListener('scroll', setLastVirtuosoState);
-  }, [authorAddress, sortType]);
+  }, [virtuosoStateKey]);
 
-  const key = `${authorAddress ?? ''}${sortType ?? ''}`;
-  const lastVirtuosoState = lastVirtuosoStates?.[key];
+  const lastVirtuosoState = lastVirtuosoStates?.[virtuosoStateKey];
 
   // always redirect to latest author cid
   useEffect(() => {

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, useState, type Key, type ReactNode } from 'react';
+import { act, useImperativeHandle, useState, type Key, type ReactNode, type Ref } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -15,7 +15,12 @@ interface CommentFixture {
   timestamp?: number;
 }
 
-const testState = vi.hoisted(() => ({ comments: [] as CommentFixture[], rowKeys: [] as Key[] }));
+interface SnapshotFixture {
+  ranges: { startIndex: number; endIndex: number; size: number }[];
+  scrollTop: number;
+}
+
+const testState = vi.hoisted(() => ({ comments: [] as CommentFixture[], rowKeys: [] as Key[], restoredSnapshots: [] as (SnapshotFixture | undefined)[], scrollTop: 0 }));
 
 const RowProbe = ({ comment }: { comment: CommentFixture }) => {
   const [clicks, setClicks] = useState(0);
@@ -44,11 +49,18 @@ vi.mock('react-virtuoso', () => ({
     data = [],
     itemContent,
     computeItemKey,
+    ref,
+    restoreStateFrom,
   }: {
     data?: CommentFixture[];
     itemContent: (index: number, comment: CommentFixture) => ReactNode;
     computeItemKey?: (index: number, comment: CommentFixture) => Key;
+    ref?: Ref<{ getState: (callback: (snapshot: SnapshotFixture) => void) => void }>;
+    restoreStateFrom?: SnapshotFixture;
   }) => {
+    // Virtuoso only reads the snapshot to restore when it mounts
+    useState(() => testState.restoredSnapshots.push(restoreStateFrom));
+    useImperativeHandle(ref, () => ({ getState: (callback) => callback({ ranges: [{ startIndex: 0, endIndex: 0, size: 100 }], scrollTop: testState.scrollTop }) }));
     testState.rowKeys = data.map((comment, index) => computeItemKey?.(index, comment) ?? index);
     return (
       <div>
@@ -76,6 +88,8 @@ describe('Profile virtualized history', () => {
   };
 
   beforeEach(() => {
+    testState.restoredSnapshots = [];
+    testState.scrollTop = 0;
     testState.comments = [
       { cid: 'first-post', parentCid: undefined },
       { cid: 'second-post', parentCid: undefined },
@@ -123,5 +137,22 @@ describe('Profile virtualized history', () => {
     expect(container.querySelector('[data-row="pending-one"]')).toBe(firstRow);
     expect(firstRow?.textContent).toBe('1');
     expect(container.querySelector('[data-row="pending-two"]')?.textContent).toBe('0');
+  });
+
+  it('restores a scroll snapshot only into the history tab it was saved from', async () => {
+    testState.comments = [
+      { cid: 'post', parentCid: undefined },
+      { cid: 'reply', parentCid: 'post' },
+    ];
+    await renderHistory('Overview');
+    testState.scrollTop = 900;
+    await act(async () => window.dispatchEvent(new Event('scroll')));
+
+    await renderHistory('Comments');
+    expect(testState.restoredSnapshots.at(-1)).toBeUndefined();
+    await renderHistory('Submitted');
+    expect(testState.restoredSnapshots.at(-1)).toBeUndefined();
+    await renderHistory('Overview');
+    expect(testState.restoredSnapshots.at(-1)?.scrollTop).toBe(900);
   });
 });

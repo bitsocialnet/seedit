@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, useState, type ComponentType, type Key, type ReactNode } from 'react';
+import { act, useImperativeHandle, useState, type ComponentType, type Key, type ReactNode, type Ref } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -15,7 +15,19 @@ interface CommentFixture {
   timestamp?: number;
 }
 
-const testState = vi.hoisted(() => ({ comments: [] as CommentFixture[], hasMore: true, loadMore: vi.fn(), rowKeys: [] as Key[] }));
+interface SnapshotFixture {
+  ranges: { startIndex: number; endIndex: number; size: number }[];
+  scrollTop: number;
+}
+
+const testState = vi.hoisted(() => ({
+  comments: [] as CommentFixture[],
+  hasMore: true,
+  loadMore: vi.fn(),
+  restoredSnapshots: [] as (SnapshotFixture | undefined)[],
+  rowKeys: [] as Key[],
+  scrollTop: 0,
+}));
 
 const RowProbe = ({ comment }: { comment: CommentFixture }) => {
   const [clicks, setClicks] = useState(0);
@@ -44,13 +56,20 @@ vi.mock('react-virtuoso', () => ({
     computeItemKey,
     components,
     context,
+    ref,
+    restoreStateFrom,
   }: {
     data?: CommentFixture[];
     itemContent: (index: number, comment: CommentFixture) => ReactNode;
     computeItemKey?: (index: number, comment: CommentFixture) => Key;
     components: { Footer: ComponentType<{ context: unknown }> };
     context?: unknown;
+    ref?: Ref<{ getState: (callback: (snapshot: SnapshotFixture) => void) => void }>;
+    restoreStateFrom?: SnapshotFixture;
   }) => {
+    // Virtuoso only reads the snapshot to restore when it mounts
+    useState(() => testState.restoredSnapshots.push(restoreStateFrom));
+    useImperativeHandle(ref, () => ({ getState: (callback) => callback({ ranges: [{ startIndex: 0, endIndex: 0, size: 100 }], scrollTop: testState.scrollTop }) }));
     const Footer = components.Footer;
     testState.rowKeys = data.map((comment, index) => computeItemKey?.(index, comment) ?? index);
     return (
@@ -85,6 +104,8 @@ describe('Author virtualized updates', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    testState.restoredSnapshots = [];
+    testState.scrollTop = 0;
     testState.comments = [{ cid: 'first-post' }, { cid: 'second-post' }];
     testState.hasMore = true;
     container = document.createElement('div');
@@ -153,5 +174,30 @@ describe('Author virtualized updates', () => {
     expect(container.querySelector('[data-row="pending-one"]')).toBe(firstRow);
     expect(firstRow?.textContent).toBe('1');
     expect(container.querySelector('[data-row="pending-two"]')?.textContent).toBe('0');
+  });
+
+  it('restores a scroll snapshot only into the author tab it was saved from', async () => {
+    testState.comments = [{ cid: 'first-post' }, { cid: 'reply', parentCid: 'first-post' }];
+    await renderAuthor();
+    testState.scrollTop = 900;
+    await act(async () => window.dispatchEvent(new Event('scroll')));
+    // switching tabs keeps the same Author, so nothing is saved for the comments tab until it scrolls
+    await act(async () => container.querySelector<HTMLAnchorElement>(`a[href="${basePath}/comments"]`)?.click());
+
+    // returning to the author from a post mounts it again at the current tab
+    const remountAuthorAt = (path: string) =>
+      act(async () =>
+        root.render(
+          <MemoryRouter key={`${path}-${testState.restoredSnapshots.length}`} initialEntries={[path]}>
+            <Routes>
+              <Route path='/u/:authorAddress/comments/:commentCid/:section?' element={<Author />} />
+            </Routes>
+          </MemoryRouter>,
+        ),
+      );
+    await remountAuthorAt(`${basePath}/comments`);
+    expect(testState.restoredSnapshots.at(-1)).toBeUndefined();
+    await remountAuthorAt(basePath);
+    expect(testState.restoredSnapshots.at(-1)?.scrollTop).toBe(900);
   });
 });

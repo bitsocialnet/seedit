@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { HashLink } from 'react-router-hash-link';
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { StateSnapshot, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
 import { useAccount, useAccountComments, useAccountVotes, useComment, type AccountPublicationsFilter } from '@bitsocial/bitsocial-react-hooks';
 import useWindowWidth from '../../hooks/use-window-width';
@@ -104,22 +104,22 @@ const CommentItem = ({ cid }: { cid: string }) => {
   return comment.parentCid ? <Reply key={comment.cid} reply={comment} isSingleReply={true} /> : <Post key={comment.cid} post={comment} />;
 };
 
-const VirtualizedCommentList = ({ comments }: { comments: any[] }) => {
+const VirtualizedCommentList = ({ comments, sortType, tab }: { comments: any[]; sortType: string; tab: string }) => {
   const account = useAccount();
-  const params = useParams();
-  // save last virtuoso state on each scroll
+  // save last virtuoso state on each scroll, keyed by the list it belongs to
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
-  const lastVirtuosoState = lastVirtuosoStates?.[account?.shortAddress + params.sortType];
+  const virtuosoStateKey = `${account?.author?.address}/${tab}/${sortType}`;
+  const lastVirtuosoState = lastVirtuosoStates?.[virtuosoStateKey];
   useEffect(() => {
     const setLastVirtuosoState = () =>
       virtuosoRef.current?.getState((snapshot: StateSnapshot) => {
         if (snapshot?.ranges?.length) {
-          lastVirtuosoStates[account?.shortAddress + params.sortType] = snapshot;
+          lastVirtuosoStates[virtuosoStateKey] = snapshot;
         }
       });
     window.addEventListener('scroll', setLastVirtuosoState);
     return () => window.removeEventListener('scroll', setLastVirtuosoState);
-  }, [account?.shortAddress, params.sortType]);
+  }, [virtuosoStateKey]);
 
   return (
     <Virtuoso
@@ -160,7 +160,11 @@ const Overview = () => {
         </div>
       )}
       <SortDropdown onSortChange={setSortType} />
-      {accountComments.length === 0 ? <div className={styles.nothingFound}>{t('nothing_found')}</div> : <VirtualizedCommentList comments={accountComments} />}
+      {accountComments.length === 0 ? (
+        <div className={styles.nothingFound}>{t('nothing_found')}</div>
+      ) : (
+        <VirtualizedCommentList comments={accountComments} sortType={sortType} tab='overview' />
+      )}
     </div>
   );
 };
@@ -188,7 +192,11 @@ const Comments = () => {
         </div>
       )}
       <SortDropdown onSortChange={setSortType} />
-      {accountComments.length === 0 ? <div className={styles.nothingFound}>{t('nothing_found')}</div> : <VirtualizedCommentList comments={accountComments} />}
+      {accountComments.length === 0 ? (
+        <div className={styles.nothingFound}>{t('nothing_found')}</div>
+      ) : (
+        <VirtualizedCommentList comments={accountComments} sortType={sortType} tab='comments' />
+      )}
     </div>
   );
 };
@@ -216,7 +224,11 @@ const Submitted = () => {
         </div>
       )}
       <SortDropdown onSortChange={setSortType} />
-      {accountComments.length === 0 ? <div className={styles.nothingFound}>{t('nothing_found')}</div> : <VirtualizedCommentList comments={accountComments} />}
+      {accountComments.length === 0 ? (
+        <div className={styles.nothingFound}>{t('nothing_found')}</div>
+      ) : (
+        <VirtualizedCommentList comments={accountComments} sortType={sortType} tab='submitted' />
+      )}
     </div>
   );
 };
