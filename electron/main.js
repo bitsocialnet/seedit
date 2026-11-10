@@ -30,6 +30,9 @@ if (isLinux && !process.env.SEEDIT_NO_ENV_SANITIZE) {
 // Keep a global Tray reference to prevent GC removing the tray icon
 let tray;
 
+// null after the window closes; on macOS 'activate' creates a new one
+let mainWindow = null;
+
 // Determine __filename and dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(__filename);
@@ -61,6 +64,21 @@ if (process.platform === 'darwin') fakeUserAgent = 'Mozilla/5.0 (Macintosh; Inte
 if (process.platform === 'linux') fakeUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36';
 const realUserAgent = `seedit/${packageJson.version}`;
 
+const showMainWindow = () => {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    // ready-to-show shows the new window
+    createMainWindow();
+    return mainWindow;
+  }
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+  return mainWindow;
+};
+
+// notification urls are in-app hash routes, like '/#/s/<community>/comments/<cid>'
+const getNotificationRoute = (url) => (typeof url === 'string' && url.startsWith('/#/') ? url.slice(1) : undefined);
+
 // Handle IPC call to show notification
 ipcMain.on('show-notification', (event, notificationData) => {
   if (Notification.isSupported()) {
@@ -68,11 +86,13 @@ ipcMain.on('show-notification', (event, notificationData) => {
       title: notificationData.title,
       body: notificationData.body,
     });
-    if (notificationData.url) {
+    const route = getNotificationRoute(notificationData.url);
+    if (route) {
       notification.on('click', () => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          shell.openExternal(notificationData.url).catch((err) => console.error('Failed to open URL:', err));
-        }
+        // executeJavaScript waits for a new window to finish loading
+        showMainWindow()
+          .webContents.executeJavaScript(`window.location.hash = ${JSON.stringify(route)}`)
+          .catch((err) => console.error('Failed to open notification route:', err));
       });
     }
     notification.show();
@@ -188,7 +208,7 @@ contextMenu({
 });
 
 const createMainWindow = () => {
-  let mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1000,
     height: 600,
     show: false,
