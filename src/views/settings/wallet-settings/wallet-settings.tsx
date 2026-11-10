@@ -9,6 +9,8 @@ interface Wallet {
   address: string;
   timestamp: number;
   signature: string;
+  // The chain ticker this row is saved under in the account, if it has been saved.
+  savedChainTicker?: string;
 }
 
 const getWalletMessageToSign = (authorAddress: string, timestamp: number): string => {
@@ -35,6 +37,7 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
       address: account.author.wallets[chainTicker].address,
       timestamp: account.author.wallets[chainTicker].timestamp,
       signature: account.author.wallets[chainTicker].signature.signature,
+      savedChainTicker: chainTicker,
     }),
   );
 
@@ -75,10 +78,18 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
     setShowWallet(newShowWallet);
   };
 
+  const getMissingWalletField = (wallet: Wallet): string | undefined => {
+    if (!wallet.chainTicker) return 'chain ticker';
+    if (!wallet.address) return 'address';
+    if (!wallet.timestamp) return 'timestamp';
+    if (!wallet.signature) return 'signature';
+    return undefined;
+  };
+
   const updateWallets = (walletsToUpdate: Wallet[]) => {
     const wallets: { [key: string]: { address: string; timestamp: number; signature: { signature: string; type: string } } } = {};
     walletsToUpdate.forEach((wallet) => {
-      if (wallet.chainTicker && wallet.address && wallet.signature && wallet.timestamp) {
+      if (!getMissingWalletField(wallet)) {
         wallets[wallet.chainTicker] = {
           address: wallet.address,
           timestamp: wallet.timestamp,
@@ -89,18 +100,52 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
         };
       }
     });
-    setAccount({ ...account, author: { ...account.author, wallets } });
+    return setAccount({ ...account, author: { ...account.author, wallets } });
   };
 
-  const handleRemove = (index: number) => {
-    const newWalletsArray = walletsArray.filter((_, i) => i !== index);
-    setWalletsArray(newWalletsArray);
-    updateWallets(newWalletsArray);
+  const alertSaveError = (error: unknown) => alert(error instanceof Error ? error.message : String(error));
+
+  const handleRemove = async (index: number) => {
+    const removedWallet = walletsArray[index];
+    const removeRow = () => setWalletsArray((wallets) => wallets.filter((wallet) => wallet !== removedWallet));
+    if (!removedWallet.savedChainTicker) return removeRow();
+    // Remove only this wallet's saved entry; the other rows may hold unsaved or incomplete edits.
+    const wallets = { ...account.author.wallets };
+    delete wallets[removedWallet.savedChainTicker];
+    try {
+      await setAccount({ ...account, author: { ...account.author, wallets } });
+      removeRow();
+    } catch (error) {
+      alertSaveError(error);
+    }
   };
 
-  const handleSave = () => {
-    updateWallets(walletsArray);
-    alert(t('saved'));
+  const handleSave = async () => {
+    // updateWallets skips incomplete wallets, so saving one would drop it (or the saved wallet it replaces).
+    const incompleteIndex = walletsArray.findIndex((wallet) => getMissingWalletField(wallet));
+    if (incompleteIndex !== -1) {
+      alert(`${t('wallet_number', { index: incompleteIndex + 1 })}: missing ${getMissingWalletField(walletsArray[incompleteIndex])}`);
+      return;
+    }
+    // Wallets are saved by chain ticker, so a duplicate would overwrite the other wallet.
+    const chainTickers = new Set<string>();
+    const duplicateIndex = walletsArray.findIndex(({ chainTicker }) => {
+      if (chainTickers.has(chainTicker)) return true;
+      chainTickers.add(chainTicker);
+      return false;
+    });
+    if (duplicateIndex !== -1) {
+      alert(`${t('wallet_number', { index: duplicateIndex + 1 })}: duplicate chain ticker ${walletsArray[duplicateIndex].chainTicker}`);
+      return;
+    }
+    const savedWallets = new Set(walletsArray);
+    try {
+      await updateWallets(walletsArray);
+      setWalletsArray((wallets) => wallets.map((wallet) => (savedWallets.has(wallet) ? { ...wallet, savedChainTicker: wallet.chainTicker } : wallet)));
+      alert(t('saved'));
+    } catch (error) {
+      alertSaveError(error);
+    }
   };
 
   const walletsInputs = walletsArray.map((wallet, index) => (

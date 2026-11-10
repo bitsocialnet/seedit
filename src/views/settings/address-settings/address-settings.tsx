@@ -94,7 +94,6 @@ const AddressSettings = () => {
           console.error('An unknown error occurred:', error);
         }
       }
-      setSavedCryptoAddress(true);
       setCryptoState((prevState) => ({
         ...prevState,
         checkingCryptoAddress: false,
