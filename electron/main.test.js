@@ -194,6 +194,8 @@ const notify = (url) => {
   return state.notifications.at(-1);
 };
 
+const menuItemsLabeled = (label) => state.applicationMenu.items.filter((item) => item.label === label);
+
 beforeAll(() => {
   state.pkcDataPath = fs.mkdtempSync(path.join(os.tmpdir(), 'seedit-main-test-'));
   fs.writeFileSync(path.join(state.pkcDataPath, 'auth-key'), 'test-auth-key');
@@ -263,5 +265,36 @@ describe('notification click', () => {
 
     expect(window.webContents.executeJavaScript).not.toHaveBeenCalled();
     expect(state.openExternal).not.toHaveBeenCalled();
+  });
+});
+
+describe('application menu', () => {
+  it('adds the back, forward and reload items once when macOS re-creates the window', async () => {
+    setPlatform('darwin');
+    await importMain();
+    state.windows[0].close();
+    state.app.emit('activate');
+    expect(state.windows.filter((window) => !window.isDestroyed())).toHaveLength(1);
+
+    expect(menuItemsLabeled('←')).toHaveLength(1);
+    expect(menuItemsLabeled('→')).toHaveLength(1);
+    expect(menuItemsLabeled('⟳')).toHaveLength(1);
+  });
+
+  it('keeps back and forward usable and acts on the focused window', async () => {
+    setPlatform('win32');
+    await importMain();
+    const [window] = state.windows;
+    const [back] = menuItemsLabeled('←');
+    const [forward] = menuItemsLabeled('→');
+
+    // the items are created before any in-app navigation, when the window has no history yet
+    expect(back.enabled).not.toBe(false);
+    expect(forward.enabled).not.toBe(false);
+
+    back.click(back, window);
+    forward.click(forward, window);
+    expect(window.webContents.goBack).toHaveBeenCalledTimes(1);
+    expect(window.webContents.goForward).toHaveBeenCalledTimes(1);
   });
 });

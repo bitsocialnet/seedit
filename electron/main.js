@@ -424,21 +424,23 @@ const createMainWindow = () => {
       }
     }
   }
+};
 
+// set once, because macOS re-creates the window on 'activate'. The items act on the focused window
+// and stay enabled, as nothing would update them after navigation
+const setApplicationMenu = () => {
   const appMenuBack = new MenuItem({
     label: '←',
-    enabled: mainWindow?.webContents?.canGoBack(),
-    click: () => mainWindow?.webContents?.goBack(),
+    click: (menuItem, browserWindow) => browserWindow?.webContents?.goBack(),
   });
   const appMenuForward = new MenuItem({
     label: '→',
-    enabled: mainWindow?.webContents?.canGoForward(),
-    click: () => mainWindow?.webContents?.goForward(),
+    click: (menuItem, browserWindow) => browserWindow?.webContents?.goForward(),
   });
   const appMenuReload = new MenuItem({
     label: '⟳',
     role: 'reload',
-    click: () => mainWindow?.webContents?.reload(),
+    click: (menuItem, browserWindow) => browserWindow?.webContents?.reload(),
   });
 
   // application menu
@@ -468,6 +470,7 @@ app.whenReady().then(() => {
   }
 
   createMainWindow();
+  setApplicationMenu();
 
   app.on('activate', () => {
     if (!BrowserWindow.getAllWindows().length) {
