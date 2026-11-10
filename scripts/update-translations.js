@@ -63,7 +63,11 @@
 */
 
 import fs from 'fs/promises'
+import os from 'os'
 import path from 'path'
+
+// Set by a signal received while writing; see main().
+let interruptedBy
 
 function parseArgs(argv) {
   const out = { flags: new Set() }
@@ -122,6 +126,8 @@ async function loadJson(filePath) {
 }
 
 async function writeJson(filePath, data) {
+  // Stop between whole-file replacements so every locale file stays valid.
+  if (interruptedBy) throw new Error(`Interrupted by ${interruptedBy} before writing ${filePath}. Files written before it keep their changes.`)
   const json = JSON.stringify(data, null, 2) + '\n'
   const tempDir = await fs.mkdtemp(path.join(path.dirname(filePath), '.update-translations-'))
   try {
@@ -509,6 +515,13 @@ async function main() {
   const write = args.flags.has('--write')
   const force = args.flags.has('--force')
 
+  // An unhandled signal would end the process without the finally below and leave the lock behind.
+  const signals = dryRun ? [] : ['SIGINT', 'SIGTERM', 'SIGHUP']
+  const stopOnSignal = (signal) => {
+    interruptedBy = signal
+  }
+  for (const signal of signals) process.on(signal, stopOnSignal)
+
   // Hold the lock from the first read through the final write to avoid lost updates.
   const releaseLock = dryRun ? undefined : await acquireWriteLock(translationsRoot)
   try {
@@ -547,10 +560,11 @@ async function main() {
     }
   } finally {
     await releaseLock?.()
+    for (const signal of signals) process.off(signal, stopOnSignal)
   }
 }
 
 main().catch((err) => {
   console.error(err.message)
-  process.exitCode = 1
+  process.exitCode = interruptedBy ? 128 + os.constants.signals[interruptedBy] : 1
 })

@@ -202,6 +202,19 @@ test('cleanup leaves a replacement lock owned by another process untouched', { t
   }
 });
 
+test('a writer stopped by a signal writes nothing further and releases the lock', { timeout: 10000 }, async (t) => {
+  const f = await fixture(t);
+  const before = await snapshot(f.translations);
+  const writer = await pauseWriterBeforeRead(f, ['--key', 'keep', '--value', 'changed', '--include-en', '--write']);
+  writer.child.kill('SIGTERM');
+  writer.child.send('continue', () => {});
+  const { code, stderr } = await writer.result;
+  assert.equal(code, 143);
+  assert.match(stderr, /Interrupted by SIGTERM/);
+  assert.deepEqual(await snapshot(f.translations), before);
+  await assertUnlocked(f);
+});
+
 test('a failed atomic replacement preserves the original file and releases the lock', async (t) => {
   const f = await fixture(t);
   const before = await snapshot(f.translations);
