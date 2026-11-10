@@ -6,7 +6,7 @@
 import { execFileSync } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { createSecureServer } from 'node:http2';
-import { tmpdir } from 'node:os';
+import { constants, tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { gzipSync } from 'node:zlib';
@@ -347,8 +347,22 @@ const report = {
 const server = await serveBuild();
 process.stderr.write(`[load] serving ${buildDir} at ${server.origin}; profile ${options.profile}, network ${options.network}\n`);
 let failed = false;
+// Unhandled, a signal would end the process before withBrowser closes the browser, leaving it
+// running and the machine-wide browser slot held. Disconnecting fails pending browser calls at once.
+const interrupt = new AbortController();
+let interruptedBy;
+const stop = (signal) => {
+  if (interruptedBy) return;
+  interruptedBy = signal;
+  process.stderr.write(`[load] ${signal}: closing the browser\n`);
+  interrupt.abort();
+};
+const signals = ['SIGINT', 'SIGTERM', 'SIGHUP'];
+for (const signal of signals) process.on(signal, stop);
 try {
   await withBrowser(packageRoot, !!options.headed, async (browser) => {
+    interrupt.signal.throwIfAborted();
+    interrupt.signal.addEventListener('abort', () => void browser.close().catch(() => {}), { once: true });
     report.browser = await browser.version();
     for (const route of routes) {
       const runs = [];
@@ -393,9 +407,13 @@ try {
       }
     }
   });
+} catch (error) {
+  if (!interruptedBy) throw error;
 } finally {
+  for (const signal of signals) process.off(signal, stop);
   await server.close();
   await writeFile(path.join(output, 'load.json'), JSON.stringify(report, null, 2));
   process.stderr.write(`[load] report: ${path.join(output, 'load.json')}\n`);
 }
-if (failed) process.exitCode = 1;
+if (interruptedBy) process.exitCode = 128 + constants.signals[interruptedBy];
+else if (failed) process.exitCode = 1;

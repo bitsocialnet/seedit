@@ -57,7 +57,18 @@ export async function main(args = process.argv.slice(2)) {
           maxInputBytes: Math.min(128_000, plan.limits.maxSnapshotBytes + 30_000),
         });
     client?.assertReady();
-    const result = await runBrowserPlan(rawPlan, { driver: createPlaywrightDriver(), client, baseline: !!options['--baseline'] });
+    // Unhandled, a signal would end the process before runBrowserPlan closes the browser,
+    // leaving it running and the machine-wide browser slot held.
+    const interrupt = new AbortController();
+    const stop = () => interrupt.abort();
+    const signals = ['SIGINT', 'SIGTERM', 'SIGHUP'];
+    for (const signal of signals) process.on(signal, stop);
+    let result;
+    try {
+      result = await runBrowserPlan(rawPlan, { driver: createPlaywrightDriver({ signal: interrupt.signal }), client, baseline: !!options['--baseline'] });
+    } finally {
+      for (const signal of signals) process.off(signal, stop);
+    }
     process.stdout.write(JSON.stringify({ ...result, plan: planReference() }) + '\n');
     return result.status === 'completed' ? 0 : 2;
   } catch (error) {

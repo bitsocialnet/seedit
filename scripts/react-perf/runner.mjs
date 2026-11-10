@@ -33,9 +33,16 @@ const output = path.resolve(packageRoot, options.output || `.react-perf/${comman
 await mkdir(output, { recursive: true, mode: 0o700 });
 const report = { schemaVersion: 1, command, cpu, samples, viewport: { width: 1280, height: 900 }, output, startedAt: new Date().toISOString(), cases: [], ok: false };
 const abort = new AbortController();
-const interrupt = () => abort.abort(new Error('Profiling interrupted'));
-process.once('SIGINT', interrupt);
-process.once('SIGTERM', interrupt);
+let forceStop;
+// A repeated signal disconnects the browser so pending calls fail now, rather than ending the process
+// before withBrowser closes the owned browser and releases the machine-wide browser slot.
+const interrupt = () => {
+  if (abort.signal.aborted) forceStop?.();
+  else abort.abort(new Error('Profiling interrupted'));
+};
+process.on('SIGINT', interrupt);
+process.on('SIGTERM', interrupt);
+process.on('SIGHUP', interrupt);
 const safeName = (name) => name.replace(/[^a-z0-9._-]/gi, '-');
 
 async function runCase(browser, target, scenario, origin, sample) {
@@ -195,6 +202,7 @@ async function runCase(browser, target, scenario, origin, sample) {
 
 try {
   await withBrowser(packageRoot, !!options.headed, async (browser) => {
+    forceStop = () => void browser.close().catch(() => {});
     report.browser = await browser.version();
     if (command === 'selftest' || command === 'check') {
       process.stderr.write('[perf] Validating collector against React compatibility fixtures\n');
@@ -243,6 +251,7 @@ try {
 } finally {
   process.off('SIGINT', interrupt);
   process.off('SIGTERM', interrupt);
+  process.off('SIGHUP', interrupt);
   report.endedAt = new Date().toISOString();
   const filename = path.join(output, 'report.json');
   await writeFile(filename, JSON.stringify(report, null, 2), { mode: 0o600 });
