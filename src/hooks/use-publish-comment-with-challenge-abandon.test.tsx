@@ -34,11 +34,11 @@ let container: HTMLDivElement;
 let latestValue: ReturnType<typeof usePublishCommentWithChallengeAbandon>;
 let root: Root;
 
-const HookHarness = ({ options }: { options: Record<string, any> }) => {
-  latestValue = usePublishCommentWithChallengeAbandon(options);
+const HookHarness = ({ options, onAbandon }: { options: Record<string, any>; onAbandon?: () => void }) => {
+  latestValue = usePublishCommentWithChallengeAbandon(options, onAbandon);
   return null;
 };
-const renderWith = (options: Record<string, any>) => act(() => root.render(createElement(HookHarness, { options })));
+const renderWith = (options: Record<string, any>, onAbandon?: () => void) => act(() => root.render(createElement(HookHarness, { options, onAbandon })));
 const publish = (attempt: ReturnType<typeof startPostingAnalytics>) =>
   act(async () => {
     await latestValue.publishComment(attempt);
@@ -127,6 +127,33 @@ describe('usePublishCommentWithChallengeAbandon analytics', () => {
     await first.onChallengeVerification({ challengeSuccess: true }, {});
     await second.onChallengeVerification({ challengeSuccess: false, reason: 'rejected' }, {});
     expect(trackedEvents()).toEqual(['post_challenge_failed']);
+  });
+
+  it('cancels an older publication of the form without abandoning or restoring the newer one', async () => {
+    const restorePublishedDraft = vi.fn();
+    await renderWith({ content: 'first reply' }, restorePublishedDraft);
+    await publish(startPostingAnalytics({ kind: 'reply' }));
+    await renderWith({ content: 'second reply' }, restorePublishedDraft);
+    await publish(startPostingAnalytics({ kind: 'reply' }));
+    const [first, second] = testState.publishedOptions;
+    const firstPublication = { stop: vi.fn().mockResolvedValue(undefined) };
+
+    await act(async () => {
+      await first.onChallenge({ challenges: [] }, firstPublication);
+      await useChallengesStore.getState().abandonCurrentChallenge();
+    });
+    expect(testState.abandonPublish).not.toHaveBeenCalled();
+    expect(restorePublishedDraft).not.toHaveBeenCalled();
+    expect(firstPublication.stop).toHaveBeenCalledOnce();
+    expect(trackedEvents()).toEqual(['post_cancelled']);
+
+    // the newest publication is still the one the hook abandons
+    await act(async () => {
+      await second.onChallenge({ challenges: [] }, { stop: vi.fn() });
+      await useChallengesStore.getState().abandonCurrentChallenge();
+    });
+    expect(testState.abandonPublish).toHaveBeenCalledOnce();
+    expect(restorePublishedDraft).toHaveBeenCalledOnce();
   });
 
   it('publishes without analytics when no attempt is given', async () => {
