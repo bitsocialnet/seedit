@@ -1,3 +1,5 @@
+export type NotificationPermissionStatus = 'granted' | 'denied' | 'not-determined' | 'not-supported';
+
 export interface LocalNotification {
   id: number; // Required for Capacitor, can be derived from timestamp or counter
   title: string;

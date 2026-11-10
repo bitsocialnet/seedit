@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { requestNotificationPermission, showLocalNotification } from '../../../lib/push';
+import { getNotificationPermissionStatus, requestNotificationPermission, showLocalNotification } from '../../../lib/push';
 import useContentOptionsStore from '../../../stores/use-content-options-store';
 import styles from './notifications-settings.module.css';
 
@@ -32,7 +32,22 @@ const NotificationsSettings = () => {
 
   // Function to check permission via API, memoized with useCallback
   const checkPermissionStatus = useCallback(async () => {
-    if (!window.electronApi?.getNotificationStatus) return;
+    if (!window.electronApi) {
+      try {
+        const status = await getNotificationPermissionStatus();
+        setPermissionStatus(status);
+        // Web and Android cannot show notifications without permission, which can be revoked outside the app.
+        if (status !== 'granted' && enableLocalNotifications) {
+          setEnableLocalNotifications(false);
+          if (status === 'denied') scheduleFlashReset('denied');
+        }
+      } catch (err) {
+        console.error('[NotificationsSettings] Error checking notification permission:', err);
+        setPermissionStatus('unknown');
+      }
+      return;
+    }
+    if (!window.electronApi.getNotificationStatus) return;
 
     console.log('[Electron Native] Checking OS notification permission status...');
     try {
@@ -60,7 +75,11 @@ const NotificationsSettings = () => {
   }, [enableLocalNotifications, scheduleFlashReset, setEnableLocalNotifications]);
 
   useEffect(() => {
-    if (!window.electronApi) return;
+    if (!window.electronApi) {
+      // oxlint-disable-next-line react/set-state-in-effect -- checkPermissionStatus sets state only after awaiting the platform permission API
+      void checkPermissionStatus();
+      return;
+    }
 
     let cancelled = false;
 

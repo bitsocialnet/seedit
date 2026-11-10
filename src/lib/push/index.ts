@@ -1,7 +1,7 @@
 import { Capacitor } from '@capacitor/core';
-import type { LocalNotification } from './common';
-import { requestWebNotificationPermission, showWebLocalNotification } from './web';
-import { requestNativeNotificationPermission, showNativeLocalNotification, initializeNativeNotificationListeners } from './native';
+import type { LocalNotification, NotificationPermissionStatus } from './common';
+import { getWebNotificationPermissionStatus, requestWebNotificationPermission, showWebLocalNotification } from './web';
+import { getNativeNotificationPermissionStatus, requestNativeNotificationPermission, showNativeLocalNotification, initializeNativeNotificationListeners } from './native';
 import { requestElectronNotificationPermission, showElectronLocalNotification } from './electron';
 
 // --- Platform Detection Functions ---
@@ -54,6 +54,17 @@ export async function requestNotificationPermission(): Promise<boolean> {
   }
   console.warn('Notification permission request: Unknown platform.');
   return false;
+}
+
+/**
+ * Reads the current notification permission on web and native platforms without prompting.
+ * Electron reports its status through window.electronApi.getNotificationStatus instead.
+ */
+export async function getNotificationPermissionStatus(): Promise<NotificationPermissionStatus> {
+  if (checkIsNativePlatform()) {
+    return getNativeNotificationPermissionStatus();
+  }
+  return getWebNotificationPermissionStatus();
 }
 
 // --- Showing Notifications ---
