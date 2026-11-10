@@ -40,14 +40,24 @@ const dirname = path.dirname(__filename);
 // Load package.json dynamically
 const packageJson = JSON.parse(fs.readFileSync(path.join(dirname, '../package.json'), 'utf-8'));
 
-let startIpfsError;
+// only show one IPFS error or it spams the user. It waits for the app to be ready,
+// because before that Linux prints showErrorBox to stderr only
+let pendingIpfsError;
+let ipfsErrorShown = false;
+const showIpfsError = () => {
+  if (ipfsErrorShown || !pendingIpfsError || !app.isReady()) return;
+  ipfsErrorShown = true;
+  dialog.showErrorBox('IPFS warning', pendingIpfsError.message);
+};
 startIpfs.onError = (error) => {
-  // only show error once or it spams the user
-  const alreadyShownIpfsError = !!startIpfsError;
-  startIpfsError = error;
-  if (!alreadyShownIpfsError && error.message) {
-    dialog.showErrorBox('IPFS warning', error.message);
-  }
+  // a daemon that exits without writing to stderr gives an error with no message
+  if (ipfsErrorShown || !error?.message) return;
+  pendingIpfsError = error;
+  showIpfsError();
+};
+// an error that has not been shown yet is stale once ipfs starts
+startIpfs.onStarted = () => {
+  pendingIpfsError = undefined;
 };
 
 // send the local PKC RPC auth key to the renderer
@@ -278,9 +288,7 @@ const createMainWindow = () => {
       mainWindow.openDevTools();
     }
 
-    if (startIpfsError) {
-      dialog.showErrorBox('IPFS warning', startIpfsError.message);
-    }
+    showIpfsError();
   });
 
   mainWindow.on('closed', () => {

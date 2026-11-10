@@ -189,6 +189,19 @@ const importMain = async () => {
   await flush();
 };
 
+const deferAppReady = () => {
+  state.isReady = false;
+  let resolveReady;
+  state.appReady = new Promise((resolve) => {
+    resolveReady = resolve;
+  });
+  return async () => {
+    state.isReady = true;
+    resolveReady();
+    await flush();
+  };
+};
+
 const notify = (url) => {
   state.ipcOn['show-notification']({}, { title: 'You received a reply', body: 'u/someone replied', url });
   return state.notifications.at(-1);
@@ -296,5 +309,53 @@ describe('application menu', () => {
     forward.click(forward, window);
     expect(window.webContents.goBack).toHaveBeenCalledTimes(1);
     expect(window.webContents.goForward).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('IPFS warning', () => {
+  it('shows a start error once, not again when the window is ready', async () => {
+    await importMain();
+    state.startIpfs.onError(new Error('ipfs repo is locked'));
+    state.windows[0].emit('ready-to-show');
+    state.startIpfs.onError(new Error('ipfs repo is locked'));
+
+    expect(state.showErrorBox).toHaveBeenCalledTimes(1);
+    expect(state.showErrorBox).toHaveBeenCalledWith('IPFS warning', 'ipfs repo is locked');
+  });
+
+  it('never shows an empty warning, and an error without a message does not hide a later one', async () => {
+    await importMain();
+    // a daemon that exits without writing to stderr is reported as Error(undefined)
+    state.startIpfs.onError(new Error(undefined));
+    state.windows[0].emit('ready-to-show');
+    expect(state.showErrorBox).not.toHaveBeenCalled();
+
+    state.startIpfs.onError(new Error('ipfs daemon failed'));
+    expect(state.showErrorBox).toHaveBeenCalledTimes(1);
+    expect(state.showErrorBox).toHaveBeenCalledWith('IPFS warning', 'ipfs daemon failed');
+  });
+
+  it('shows an error from before the app was ready once, when the window is ready', async () => {
+    const appIsReady = deferAppReady();
+    await importMain();
+    state.startIpfs.onError(new Error('ipfs repo is locked'));
+    // before ready, Linux prints showErrorBox to stderr only
+    expect(state.showErrorBox).not.toHaveBeenCalled();
+
+    await appIsReady();
+    state.windows[0].emit('ready-to-show');
+    expect(state.showErrorBox).toHaveBeenCalledTimes(1);
+    expect(state.showErrorBox).toHaveBeenCalledWith('IPFS warning', 'ipfs repo is locked');
+  });
+
+  it('does not show an error that a later successful start recovered from', async () => {
+    const appIsReady = deferAppReady();
+    await importMain();
+    state.startIpfs.onError(new Error('ipfs repo is locked'));
+    state.startIpfs.onStarted?.();
+
+    await appIsReady();
+    state.windows[0].emit('ready-to-show');
+    expect(state.showErrorBox).not.toHaveBeenCalled();
   });
 });

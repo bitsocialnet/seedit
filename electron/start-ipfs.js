@@ -196,6 +196,8 @@ const startIpfsAutoRestart = async () => {
       const started = await tcpPortUsed.check(isDev ? 50029 : 50019, '127.0.0.1');
       if (!started) {
         await startIpfs();
+        // try to run exported onStarted callback, can be undefined
+        DefaultExport.onStarted?.();
       }
     } catch (e) {
       console.log('failed starting ipfs', e);
