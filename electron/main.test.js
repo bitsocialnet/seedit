@@ -359,3 +359,27 @@ describe('IPFS warning', () => {
     expect(state.showErrorBox).not.toHaveBeenCalled();
   });
 });
+
+describe('single instance', () => {
+  it('quits a second instance instead of opening another window', async () => {
+    state.singleInstanceLock = false;
+    await importMain();
+
+    expect(state.quit).toHaveBeenCalled();
+    expect(state.windows).toHaveLength(0);
+  });
+
+  it('shows the window hidden in the tray when seedit is launched again', async () => {
+    setPlatform('win32');
+    await importMain();
+    const [window] = state.windows;
+    window.close(); // hidden to the tray
+    window.show.mockClear();
+
+    state.app.emit('second-instance', {}, [], '');
+
+    expect(window.show).toHaveBeenCalled();
+    expect(window.focus).toHaveBeenCalled();
+    expect(state.windows).toHaveLength(1);
+  });
+});

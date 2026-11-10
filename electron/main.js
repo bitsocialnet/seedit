@@ -467,7 +467,17 @@ const setApplicationMenu = () => {
   }
 };
 
+// a second launch shows the running app, which close-to-tray may have hidden, instead of starting another
+// process on the same profile. Dev is exempt so it can run next to an installed seedit
+const hasSingleInstanceLock = isDev || app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) {
+  app.quit();
+}
+app.on('second-instance', () => showMainWindow());
+
 app.whenReady().then(() => {
+  if (!hasSingleInstanceLock) return;
+
   // Set app name and dock icon for development mode on macOS
   if (process.platform === 'darwin') {
     app.setName('seedit');
