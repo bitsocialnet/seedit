@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { deleteAccount, exportAccount, importAccount, setActiveAccount, useAccount, useAccounts } from '@bitsocial/bitsocial-react-hooks';
+import { exportAccount, importAccount, setActiveAccount, useAccount, useAccounts } from '@bitsocial/bitsocial-react-hooks';
 import { getImportedAccountActiveName, processImportedAccount, rememberImportedAccountAddress } from '../../../lib/utils/account-import-utils';
 import { exportFile } from '../../../lib/utils/file-export-utils';
 import styles from './account-settings.module.css';
 import { getDisplayAddress } from '../../../lib/utils/address-utils';
 import { getEditableAccountData } from '../../../lib/utils/account-data-utils';
 import { isElectronRuntime } from '../../../lib/p2p-browser-config';
+import { deleteAccountAfterStarterWrites } from '../../../lib/utils/starter-account-persistence';
 
 const ImportAccountButton = () => {
   const isElectron = isElectronRuntime(window);
@@ -198,7 +199,7 @@ const AccountSettings = () => {
       return;
     } else if (window.confirm(t('delete_confirm', { value: accountName, interpolation: { escapeValue: false } }))) {
       if (window.confirm(t('double_confirm'))) {
-        deleteAccount(accountName);
+        deleteAccountAfterStarterWrites(accountName);
       }
     }
   };
