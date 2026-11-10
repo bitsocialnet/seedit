@@ -211,4 +211,39 @@ describe('CommunitySettings field rendering', () => {
     await act(async () => getButton('create_community').click());
     expect(testState.createCommunity).toHaveBeenCalledOnce();
   });
+
+  it('starts the create form from a blank draft after the settings of another community were open', async () => {
+    testState.community.roles = { 'other-owner.bso': { role: 'owner' } };
+    await render();
+    expect(useCommunitySettingsStore.getState().communityAddress).toBe('example.bso');
+
+    // the create route mounts a new CommunitySettings instance
+    act(() => root.unmount());
+    root = createRoot(container);
+    testState.pathname = '/communities/create';
+    testState.community = {};
+    await render();
+
+    expect(testState.lastCreateOptions).not.toHaveProperty('address');
+    expect(testState.lastCreateOptions).not.toHaveProperty('communityAddress');
+    expect(testState.lastCreateOptions?.title).toBeUndefined();
+    expect(testState.lastCreateOptions?.rules).toEqual([]);
+    expect(testState.lastCreateOptions?.roles).toEqual({ 'owner.bso': { role: 'owner' } });
+    expect(testState.lastCreateOptions?.settings.challenges).toEqual([{ name: 'captcha-canvas-v3', options: { difficulty: '2' } }]);
+    expect(Array.from(container.querySelectorAll('input')).some((input) => input.value === 'Original title' || input.value === 'Original rule')).toBe(false);
+  });
+
+  it('keeps the create draft when the create form is opened again', async () => {
+    testState.pathname = '/communities/create';
+    testState.community = {};
+    await render();
+    await changeInput(getInput(''), 'Draft community');
+
+    act(() => root.unmount());
+    root = createRoot(container);
+    await render();
+
+    expect(getInput('Draft community')).toBeDefined();
+    expect(testState.lastCreateOptions?.title).toBe('Draft community');
+  });
 });

@@ -348,7 +348,6 @@ const CommunitySettings = () => {
   const publishCommunityEditOptions = useCommunitySettingsStore((state) => state.publishCommunityEditOptions);
   const resetCommunitySettingsStore = useCommunitySettingsStore((state) => state.resetCommunitySettingsStore);
   const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
-  const storeTitle = useCommunitySettingsStore((state) => state.title);
   const { error: publishCommunityEditError, publishCommunityEdit } = usePublishCommunityEdit(publishCommunityEditOptions);
   const { error: createCommunityError, createdCommunity, createCommunity } = useCreateCommunity(publishCommunityEditOptions);
 
@@ -454,33 +453,24 @@ const CommunitySettings = () => {
     }
   }, [createdCommunity, navigate, resetCommunitySettingsStore, account, subscribe]);
 
-  const lastViewType = useRef<'create' | 'settings' | 'other' | undefined>(undefined);
-
-  // Initialize store for create view only on first entry or when switching from settings view
+  // The store outlives this view, so the create view starts from blank defaults unless the store already holds a create draft
   useEffect(() => {
-    if (isInCreateCommunityView && lastViewType.current === 'settings') {
-      resetCommunitySettingsStore();
-      const initialRoles: Roles = account?.author?.address ? { [account.author.address]: { role: 'owner' as const } } : {};
-      setCommunitySettingsStore({
-        title: '',
-        description: '',
-        address: undefined,
-        suggested: {},
-        rules: [],
-        roles: initialRoles,
-        settings: {},
-        challenges: [],
-        communityAddress: undefined,
-      });
+    if (!isInCreateCommunityView || useCommunitySettingsStore.getState().isCreateDraft) {
+      return;
     }
-    if (isInCreateCommunityView) {
-      lastViewType.current = 'create';
-    } else if (isInCommunitySettingsView) {
-      lastViewType.current = 'settings';
-    } else {
-      lastViewType.current = 'other';
-    }
-  }, [isInCreateCommunityView, storeTitle, resetCommunitySettingsStore, setCommunitySettingsStore, account, isInCommunitySettingsView]);
+    resetCommunitySettingsStore();
+    const initialRoles: Roles = account?.author?.address ? { [account.author.address]: { role: 'owner' as const } } : {};
+    setCommunitySettingsStore({
+      title: '',
+      description: '',
+      suggested: {},
+      rules: [],
+      roles: initialRoles,
+      settings: {},
+      challenges: [],
+      isCreateDraft: true,
+    });
+  }, [isInCreateCommunityView, resetCommunitySettingsStore, setCommunitySettingsStore, account]);
 
   // Set store for loaded community settings when editing
   useEffect(() => {
