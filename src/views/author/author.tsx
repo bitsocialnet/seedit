@@ -90,12 +90,14 @@ const Author = () => {
 
   const lastVirtuosoState = lastVirtuosoStates?.[virtuosoStateKey];
 
-  // always redirect to latest author cid
+  // always redirect to latest author cid, replacing only the cid segment of /u/:authorAddress/comments/:commentCid so the tab stays
   useEffect(() => {
     if (authorAddress && lastCommentCid && commentCid && lastCommentCid !== commentCid) {
-      navigate(`/u/${authorAddress}/comments/${lastCommentCid}`, { replace: true });
+      const pathSegments = location.pathname.split('/');
+      pathSegments[4] = lastCommentCid;
+      navigate({ pathname: pathSegments.join('/'), search: location.search, hash: location.hash }, { replace: true });
     }
-  }, [authorAddress, lastCommentCid, commentCid, navigate]);
+  }, [authorAddress, lastCommentCid, commentCid, navigate, location.pathname, location.search, location.hash]);
 
   const displayAddress = getDisplayAddress(author?.author?.shortAddress || '');
   const authorDisplayName = stripTripcodeProof(author?.author?.displayName);

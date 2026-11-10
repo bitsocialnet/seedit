@@ -2,7 +2,7 @@
 
 import { act, useImperativeHandle, useState, type ComponentType, type Key, type ReactNode, type Ref } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { Link, MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import Author from './author';
 
@@ -23,6 +23,7 @@ interface SnapshotFixture {
 const testState = vi.hoisted(() => ({
   comments: [] as CommentFixture[],
   hasMore: true,
+  lastCommentCid: undefined as string | undefined,
   loadMore: vi.fn(),
   restoredSnapshots: [] as (SnapshotFixture | undefined)[],
   rowKeys: [] as Key[],
@@ -40,7 +41,12 @@ const RowProbe = ({ comment }: { comment: CommentFixture }) => {
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAuthor: () => ({ author: { shortAddress: 'author-address' } }),
-  useAuthorComments: () => ({ authorComments: testState.comments, hasMore: testState.hasMore, loadMore: testState.loadMore }),
+  useAuthorComments: () => ({
+    authorComments: testState.comments,
+    hasMore: testState.hasMore,
+    lastCommentCid: testState.lastCommentCid,
+    loadMore: testState.loadMore,
+  }),
 }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 vi.mock('../../hooks/use-window-width', () => ({ default: () => 1000 }));
@@ -108,6 +114,7 @@ describe('Author virtualized updates', () => {
     testState.scrollTop = 0;
     testState.comments = [{ cid: 'first-post' }, { cid: 'second-post' }];
     testState.hasMore = true;
+    testState.lastCommentCid = undefined;
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -199,5 +206,34 @@ describe('Author virtualized updates', () => {
     expect(testState.restoredSnapshots.at(-1)).toBeUndefined();
     await remountAuthorAt(basePath);
     expect(testState.restoredSnapshots.at(-1)?.scrollTop).toBe(900);
+  });
+
+  it('keeps the selected tab and query when it redirects to the latest comment cid', async () => {
+    const LocationProbe = () => {
+      const location = useLocation();
+      return <output data-location>{location.pathname + location.search}</output>;
+    };
+    const renderAt = (path: string) =>
+      act(async () =>
+        root.render(
+          <MemoryRouter key={path} initialEntries={[path]}>
+            <Routes>
+              <Route path='/u/:authorAddress/comments/:commentCid/:section?' element={<Author />} />
+            </Routes>
+            <LocationProbe />
+          </MemoryRouter>,
+        ),
+      );
+    const location = () => container.querySelector('[data-location]')?.textContent;
+
+    // the newer cid is discovered after the page opened, e.g. from a link to an older comment
+    await renderAt('/u/author-address/comments/old-cid/submitted?page=2');
+    expect(location()).toBe('/u/author-address/comments/old-cid/submitted?page=2');
+    testState.lastCommentCid = 'newest-cid';
+    await renderAt('/u/author-address/comments/old-cid/submitted?page=2');
+    expect(location()).toBe('/u/author-address/comments/newest-cid/submitted?page=2');
+
+    await renderAt('/u/author-address/comments/old-cid');
+    expect(location()).toBe('/u/author-address/comments/newest-cid');
   });
 });
