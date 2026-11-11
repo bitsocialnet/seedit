@@ -108,6 +108,31 @@ describe('AdvancedSettings full node RPC in the browser', () => {
     expect(savedPkcOptions().libp2pJsClientsOptions).toBeUndefined();
   });
 
+  it('switches a full node RPC account to pure p2p when the box is ticked and the saved RPC URL is left as it was', async () => {
+    testState.account = { id: 'account-1', pkcOptions: { pkcRpcClientsOptions: [RPC_URL], ipfsGatewayUrls: ['https://gateway.example'] } };
+    await render();
+    expect(getRpcInput().value).toBe(RPC_URL);
+
+    await act(async () => getPureP2PCheckbox().click());
+    await save();
+
+    expect(savedPkcOptions().pkcRpcClientsOptions).toBeUndefined();
+    expect(savedPkcOptions().libp2pJsClientsOptions).toEqual([{ key: 'libp2pjs' }]);
+    expect(localStorage.getItem(PURE_P2P_BROWSER_SETTING_KEY)).toBe('true');
+  });
+
+  it('keeps a newly typed RPC URL even when pure p2p was ticked', async () => {
+    testState.account = { id: 'account-1', pkcOptions: { pkcRpcClientsOptions: [RPC_URL], ipfsGatewayUrls: ['https://gateway.example'] } };
+    await render();
+
+    await act(async () => getPureP2PCheckbox().click());
+    getRpcInput().value = 'ws://127.0.0.1:9139/other-secret';
+    await save();
+
+    expect(savedPkcOptions().pkcRpcClientsOptions).toEqual(['ws://127.0.0.1:9139/other-secret']);
+    expect(localStorage.getItem(PURE_P2P_BROWSER_SETTING_KEY)).toBe('false');
+  });
+
   it('still switches to pure p2p once the RPC URL is cleared', async () => {
     testState.account = { id: 'account-1', pkcOptions: { pkcRpcClientsOptions: [RPC_URL], ipfsGatewayUrls: ['https://gateway.example'] } };
     await render();

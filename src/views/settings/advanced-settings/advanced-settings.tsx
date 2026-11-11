@@ -275,8 +275,11 @@ const AdvancedSettings = () => {
 
     const pkcRpcClientsOptions = fullNodeRpcRef.current?.value.trim() ? [fullNodeRpcRef.current.value.trim()] : undefined;
     const dataPath = p2pDataPathRef.current?.value.trim() || undefined;
-    // A full node RPC URL selects RPC mode; the pure p2p options below would discard it.
-    const pureP2PBrowserPreference = canConfigurePureP2PBrowser ? browserPureP2PEnabled && !pkcRpcClientsOptions : undefined;
+    // A full node RPC URL selects RPC mode, since the pure p2p options below would discard it, unless the user
+    // ticked pure p2p and left the saved URL that prefills the field as it was.
+    const pureP2PTickedOverSavedRpcUrl = browserPureP2PSelection === true && pkcRpcClientsOptions?.[0] === protocolOptions?.pkcRpcClientsOptions?.[0];
+    const usesRpcUrl = !!pkcRpcClientsOptions && !pureP2PTickedOverSavedRpcUrl;
+    const pureP2PBrowserPreference = canConfigurePureP2PBrowser ? browserPureP2PEnabled && !usesRpcUrl : undefined;
 
     const chainProviders: NonNullable<AccountProtocolOptions['chainProviders']> = getSupportedChainProviders(getChainProviders(account)) ?? {};
     if (ethRpcUrls?.length) chainProviders.eth = { urls: ethRpcUrls, chainId: 1 };
