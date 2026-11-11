@@ -228,7 +228,8 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
       <div className={styles.addWallet}>
         <Trans
           i18nKey='add_wallet'
-          components={{ 1: <button key={`addWalletButton-${walletsArray.length}`} onClick={() => setWalletsArray([...walletsArray, defaultWalletObject])} /> }}
+          // Rows are removed by identity, so each added row needs its own object.
+          components={{ 1: <button key={`addWalletButton-${walletsArray.length}`} onClick={() => setWalletsArray([...walletsArray, { ...defaultWalletObject }])} /> }}
         />
         <InfoTooltip
           content={`Link crypto wallets to your account by proving ownership through signed messages. Communities can verify your token/NFT holdings to grant posting privileges or special access.`}

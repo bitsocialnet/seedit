@@ -22,10 +22,16 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   setAccount: testState.setAccount,
   useAccount: () => testState.account,
 }));
-vi.mock('react-i18next', () => ({
-  Trans: ({ i18nKey }: { i18nKey: string }) => i18nKey,
-  useTranslation: () => ({ t: (key: string) => key }),
-}));
+vi.mock('react-i18next', async () => {
+  const ReactModule = await import('react');
+  return {
+    Trans: ({ components, i18nKey }: { components?: Record<number, React.ReactElement>; i18nKey: string }) => {
+      const component = components?.[1];
+      return component ? ReactModule.cloneElement(component, {}, i18nKey) : i18nKey;
+    },
+    useTranslation: () => ({ t: (key: string) => key }),
+  };
+});
 vi.mock('../../../components/info-tooltip', () => ({ default: () => null }));
 
 let container: HTMLDivElement;
@@ -149,5 +155,18 @@ describe('WalletSettings', () => {
     await act(async () => getButton('remove').click());
 
     expect(testState.account.author.wallets).toEqual({});
+  });
+
+  it('removes only the chosen row when two new wallets were added', async () => {
+    testState.account = createAccount({});
+    await act(async () => root.render(createElement(WalletSettings)));
+    await act(async () => getButton('add_wallet').click());
+    await act(async () => getButton('add_wallet').click());
+    expect(getButtons('remove')).toHaveLength(2);
+
+    await act(async () => getButtons('remove')[1].click());
+
+    expect(getButtons('remove')).toHaveLength(1);
+    expect(testState.setAccount).not.toHaveBeenCalled();
   });
 });
