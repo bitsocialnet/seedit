@@ -169,4 +169,33 @@ describe('WalletSettings', () => {
     expect(getButtons('remove')).toHaveLength(1);
     expect(testState.setAccount).not.toHaveBeenCalled();
   });
+
+  it('does not start another wallet write before the pending one lands', async () => {
+    testState.account = createAccount({ eth: savedEthWallet, sol: savedSolWallet });
+    let landWrite!: () => void;
+    const writeCanLand = new Promise<void>((resolve) => {
+      landWrite = resolve;
+    });
+    testState.setAccount.mockImplementation(async (account) => {
+      await writeCanLand;
+      testState.account = account;
+    });
+    await act(async () => root.render(createElement(WalletSettings)));
+
+    await act(async () => getButtons('remove')[0].click());
+    // The account prop still lists the removed wallet, so a write started now would bring it back.
+    await act(async () => getButtons('remove')[1].click());
+    await act(async () => getButton('save').click());
+
+    expect(testState.setAccount).toHaveBeenCalledTimes(1);
+    expect([...getButtons('remove'), ...getButtons('save')].every((button) => button.disabled)).toBe(true);
+
+    await act(async () => landWrite());
+    // useAccount re-renders with the saved account in the app; the mock needs an explicit render.
+    await act(async () => root.render(createElement(WalletSettings)));
+    await act(async () => getButton('remove').click());
+
+    expect(testState.setAccount).toHaveBeenCalledTimes(2);
+    expect(testState.account.author.wallets).toEqual({});
+  });
 });

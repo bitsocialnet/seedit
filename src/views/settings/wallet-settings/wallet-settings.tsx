@@ -105,6 +105,9 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
 
   const alertSaveError = (error: unknown) => alert(error instanceof Error ? error.message : String(error));
 
+  // Writes start from the account prop, which updates only after setAccount resolves, so a write started meanwhile could undo the pending one.
+  const [isWriting, setIsWriting] = useState(false);
+
   const handleRemove = async (index: number) => {
     const removedWallet = walletsArray[index];
     const removeRow = () => setWalletsArray((wallets) => wallets.filter((wallet) => wallet !== removedWallet));
@@ -112,12 +115,14 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
     // Remove only this wallet's saved entry; the other rows may hold unsaved or incomplete edits.
     const wallets = { ...account.author.wallets };
     delete wallets[removedWallet.savedChainTicker];
+    setIsWriting(true);
     try {
       await setAccount({ ...account, author: { ...account.author, wallets } });
       removeRow();
     } catch (error) {
       alertSaveError(error);
     }
+    setIsWriting(false);
   };
 
   const handleSave = async () => {
@@ -139,6 +144,7 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
       return;
     }
     const savedWallets = new Set(walletsArray);
+    setIsWriting(true);
     try {
       await updateWallets(walletsArray);
       setWalletsArray((wallets) => wallets.map((wallet) => (savedWallets.has(wallet) ? { ...wallet, savedChainTicker: wallet.chainTicker } : wallet)));
@@ -146,6 +152,7 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
     } catch (error) {
       alertSaveError(error);
     }
+    setIsWriting(false);
   };
 
   const walletsInputs = walletsArray.map((wallet, index) => (
@@ -157,7 +164,9 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
         <button className={styles.toggleWallet} onClick={() => toggleShowWallet(index)}>
           {showWallet[index] ? t('hide') : t('show')}
         </button>
-        <button onClick={() => handleRemove(index)}>{t('remove')}</button>
+        <button disabled={isWriting} onClick={() => handleRemove(index)}>
+          {t('remove')}
+        </button>
         <div className={`${showWallet[index] ? styles.show : styles.hide}`}>
           <div className={styles.walletField}>
             <div className={styles.walletFieldTitle}>{t('chain_ticker')}</div>
@@ -214,7 +223,7 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
               value={wallet.signature}
               placeholder='0x...'
             />
-            <button className={styles.save} onClick={handleSave}>
+            <button className={styles.save} disabled={isWriting} onClick={handleSave}>
               {t('save')}
             </button>
           </div>
