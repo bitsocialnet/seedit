@@ -5,6 +5,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PURE_P2P_BROWSER_SETTING_KEY } from '../../../lib/p2p-browser-config';
+import { shouldUpgradeBrowserPureP2PAccount } from '../../../lib/p2p-runtime';
 import AdvancedSettings from './advanced-settings';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -144,6 +145,26 @@ describe('AdvancedSettings full node RPC in the browser', () => {
     expect(savedPkcOptions().pkcRpcClientsOptions).toBeUndefined();
     expect(savedPkcOptions().libp2pJsClientsOptions).toEqual([{ key: 'libp2pjs' }]);
     expect(localStorage.getItem(PURE_P2P_BROWSER_SETTING_KEY)).toBe('true');
+  });
+
+  it.each([
+    ['a gateway account ticked to pure p2p', { ipfsGatewayUrls: ['https://gateway.example'], pubsubKuboRpcClientsOptions: ['https://pubsub.example/api/v0'] }, 'false'],
+    ['a pure p2p account unticked to gateways', { libp2pJsClientsOptions: [{ key: 'libp2pjs' }], httpRoutersOptions: ['https://routing.lol'] }, null],
+  ])('restores the stored pure p2p setting when saving %s fails', async (_, pkcOptions, storedPreference) => {
+    if (storedPreference !== null) localStorage.setItem(PURE_P2P_BROWSER_SETTING_KEY, storedPreference);
+    testState.account = { id: 'account-1', pkcOptions };
+    testState.setAccount.mockRejectedValue(new Error('database unavailable'));
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    await render();
+
+    await act(async () => getPureP2PCheckbox().click());
+    await save();
+
+    expect(window.alert).toHaveBeenCalledWith('Error saving options: database unavailable');
+    expect(window.location.reload).not.toHaveBeenCalled();
+    expect(localStorage.getItem(PURE_P2P_BROWSER_SETTING_KEY)).toBe(storedPreference);
+    // The next load must not switch the unsaved account to the mode the user tried to pick.
+    expect(shouldUpgradeBrowserPureP2PAccount(testState.account)).toBe(false);
   });
 
   const createThrowingStorage = () => {

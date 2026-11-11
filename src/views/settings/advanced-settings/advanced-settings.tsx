@@ -2,7 +2,13 @@ import { RefObject, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { setAccount, useAccount, usePkcRpcSettings } from '@bitsocial/bitsocial-react-hooks';
-import { getBrowserGatewayPkcOptions, getBrowserPureP2PPkcOptions, setPureP2PBrowserPreference } from '../../../lib/p2p-browser-config';
+import {
+  getBrowserGatewayPkcOptions,
+  getBrowserPureP2PPkcOptions,
+  getPureP2PBrowserPreference,
+  restorePureP2PBrowserPreference,
+  setPureP2PBrowserPreference,
+} from '../../../lib/p2p-browser-config';
 import { canConfigureBrowserPureP2P, isBrowserPureP2PEnabled } from '../../../lib/p2p-runtime';
 import { getSupportedChainProviders } from '../../../lib/utils/chain-provider-utils';
 import styles from './advanced-settings.module.css';
@@ -309,6 +315,7 @@ const AdvancedSettings = () => {
     }
 
     // Store the mode before the account: without it, the upgrade hook turns a gateway account back to pure p2p after the reload.
+    const previousPureP2PBrowserPreference = getPureP2PBrowserPreference();
     if (pureP2PBrowserPreference !== undefined && !setPureP2PBrowserPreference(pureP2PBrowserPreference)) {
       alert('Error saving options: the pure p2p setting could not be stored in browser storage');
       return;
@@ -324,6 +331,8 @@ const AdvancedSettings = () => {
       alert('Options saved, reloading...');
       window.location.reload();
     } catch (e) {
+      // The account kept its old mode, so the stored mode goes back too, or the upgrade hook would switch it on the next load.
+      if (pureP2PBrowserPreference !== undefined) restorePureP2PBrowserPreference(previousPureP2PBrowserPreference);
       if (e instanceof Error) {
         alert('Error saving options: ' + e.message);
         console.log(e);
