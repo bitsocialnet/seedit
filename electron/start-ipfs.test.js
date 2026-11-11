@@ -81,6 +81,18 @@ describe.skipIf(realProcess.platform === 'win32')('IPFS auto-restart', () => {
     expect((await within(retried)).code).toBe('EACCES');
   });
 
+  it('reports ipfs as started when another client starts it after a failed attempt', async () => {
+    writeKubo('', 0o644);
+    await importStartIpfs();
+    await within(nextError());
+
+    // the next retry finds the API port in use
+    state.checkPort.mockResolvedValue(true);
+    const started = nextStart();
+    retry();
+    await within(started);
+  });
+
   it('reports a daemon that cannot be spawned', async () => {
     // init and config succeed, then the binary loses its exec bit before 'ipfs daemon'
     writeKubo('if [ "$1" = config ] && [ "$2" = Addresses.API ]; then /bin/chmod -x "$0"; fi');
