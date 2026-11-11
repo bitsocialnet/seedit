@@ -564,7 +564,12 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  console.error(err.message)
-  process.exitCode = interruptedBy ? 128 + os.constants.signals[interruptedBy] : 1
-})
+main()
+  .then(() => {
+    // A signal after the last write check still ends the run with the signal's status.
+    if (interruptedBy) throw new Error(`Interrupted by ${interruptedBy}.`)
+  })
+  .catch((err) => {
+    console.error(err.message)
+    process.exitCode = interruptedBy ? 128 + os.constants.signals[interruptedBy] : 1
+  })

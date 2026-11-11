@@ -215,6 +215,20 @@ test('a writer stopped by a signal writes nothing further and releases the lock'
   await assertUnlocked(f);
 });
 
+test('a signal received after the last write check still ends the writer with the signal status', { timeout: 10000 }, async (t) => {
+  const f = await fixture(t);
+  const before = await snapshot(f.translations);
+  // Deleting a missing key plans no writes, so no write check observes the signal.
+  const writer = await pauseWriterBeforeRead(f, ['--key', 'missing', '--delete', '--write']);
+  writer.child.kill('SIGHUP');
+  writer.child.send('continue', () => {});
+  const { code, stderr } = await writer.result;
+  assert.equal(code, 129);
+  assert.match(stderr, /Interrupted by SIGHUP/);
+  assert.deepEqual(await snapshot(f.translations), before);
+  await assertUnlocked(f);
+});
+
 test('a failed atomic replacement preserves the original file and releases the lock', async (t) => {
   const f = await fixture(t);
   const before = await snapshot(f.translations);
