@@ -120,4 +120,19 @@ describe('deleteAccountAfterStarterWrites', () => {
     expect(fake.addAccount).not.toHaveBeenCalled();
     expect(fake.database.has(account.id)).toBe(false);
   });
+
+  it('joins a deletion already in progress, so writes stay refused until the account is gone', async () => {
+    const firstDeletion = deleteAccountAfterStarterWrites(account.name);
+    await vi.waitFor(() => expect(fake.deleteAccount).toHaveBeenCalled());
+    const secondDeletion = deleteAccountAfterStarterWrites(account.name);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    await expect(persistStarterAccountUpdate(account.id, addStarterSubscription)).rejects.toThrow('Account disappeared while updating default communities');
+    deleteCanFinish.resolve();
+    await Promise.all([firstDeletion, secondDeletion]);
+
+    expect(fake.deleteAccount).toHaveBeenCalledTimes(1);
+    expect(fake.addAccount).not.toHaveBeenCalled();
+    expect(fake.database.has(account.id)).toBe(false);
+  });
 });
