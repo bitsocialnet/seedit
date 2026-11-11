@@ -11,13 +11,19 @@ import NotificationsSettings from './notifications-settings';
 const testState = vi.hoisted(() => ({
   isNativePlatform: false,
   nativeDisplayPermission: 'granted',
+  // The next checkPermissions call returns this promise instead of resolving right away.
+  pendingCheckPermissions: undefined as Promise<{ display: string }> | undefined,
 }));
 
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 vi.mock('@capacitor/core', () => ({ Capacitor: { isNativePlatform: () => testState.isNativePlatform } }));
 vi.mock('@capacitor/local-notifications', () => ({
   LocalNotifications: {
-    checkPermissions: async () => ({ display: testState.nativeDisplayPermission }),
+    checkPermissions: async () => {
+      const pending = testState.pendingCheckPermissions;
+      testState.pendingCheckPermissions = undefined;
+      return pending ?? { display: testState.nativeDisplayPermission };
+    },
     requestPermissions: async () => ({ display: testState.nativeDisplayPermission }),
     schedule: vi.fn(),
     addListener: vi.fn(),
@@ -53,6 +59,7 @@ describe('NotificationsSettings permission reconciliation', () => {
     window.electronApi = undefined;
     testState.isNativePlatform = false;
     testState.nativeDisplayPermission = 'granted';
+    testState.pendingCheckPermissions = undefined;
     useContentOptionsStore.setState({ enableLocalNotifications: true });
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -118,5 +125,26 @@ describe('NotificationsSettings permission reconciliation', () => {
     await render();
 
     expect(useContentOptionsStore.getState().enableLocalNotifications).toBe(true);
+  });
+
+  it('ignores an Android permission check that resolves after the user granted the permission', async () => {
+    testState.isNativePlatform = true;
+    testState.nativeDisplayPermission = 'denied';
+    let resolveMountCheck: (value: { display: string }) => void = () => undefined;
+    testState.pendingCheckPermissions = new Promise((resolve) => {
+      resolveMountCheck = resolve;
+    });
+    await render();
+    expect(useContentOptionsStore.getState().enableLocalNotifications).toBe(true);
+
+    testState.nativeDisplayPermission = 'granted';
+    await act(async () => getCheckbox().click());
+    await act(async () => getCheckbox().click());
+    expect(useContentOptionsStore.getState().enableLocalNotifications).toBe(true);
+
+    await act(async () => resolveMountCheck({ display: 'denied' }));
+
+    expect(useContentOptionsStore.getState().enableLocalNotifications).toBe(true);
+    expect(getCheckbox().checked).toBe(true);
   });
 });

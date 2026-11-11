@@ -20,6 +20,8 @@ const NotificationsSettings = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [flashStatus, setFlashStatus] = useState<'denied' | 'success' | null>(null);
   const flashTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Bumped by each web/Android permission check and each checkbox change, so a slower earlier check cannot undo them.
+  const permissionCheckIdRef = useRef(0);
 
   const scheduleFlashReset = useCallback((status: 'denied' | 'success') => {
     setFlashStatus(status);
@@ -33,8 +35,10 @@ const NotificationsSettings = () => {
   // Function to check permission via API, memoized with useCallback
   const checkPermissionStatus = useCallback(async () => {
     if (!window.electronApi) {
+      const checkId = ++permissionCheckIdRef.current;
       try {
         const status = await getNotificationPermissionStatus();
+        if (checkId !== permissionCheckIdRef.current) return;
         setPermissionStatus(status);
         // Web and Android cannot show notifications without permission, which can be revoked outside the app.
         if (status !== 'granted' && enableLocalNotifications) {
@@ -42,6 +46,7 @@ const NotificationsSettings = () => {
           if (status === 'denied') scheduleFlashReset('denied');
         }
       } catch (err) {
+        if (checkId !== permissionCheckIdRef.current) return;
         console.error('[NotificationsSettings] Error checking notification permission:', err);
         setPermissionStatus('unknown');
       }
@@ -108,6 +113,7 @@ const NotificationsSettings = () => {
 
   const handleCheckboxChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const isEnabled = event.target.checked;
+    permissionCheckIdRef.current += 1;
     setIsLoading(true);
     setFlashStatus(null);
 
