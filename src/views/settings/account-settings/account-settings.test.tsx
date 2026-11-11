@@ -224,6 +224,8 @@ describe('AccountSettings account deletion', () => {
     hookMocks.useAccount.mockReturnValue({ id: 'current-id', name: 'Account current', author: { shortAddress: 'current' } });
     hookMocks.useAccounts.mockReturnValue({ accounts: [{ id: 'current-id', name: 'Account current', author: { shortAddress: 'current' } }], state: 'succeeded' });
     confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => undefined);
+    persistenceMocks.deleteAccountAfterStarterWrites.mockResolvedValue(undefined);
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -233,16 +235,29 @@ describe('AccountSettings account deletion', () => {
     act(() => root.unmount());
     container.remove();
     confirmSpy.mockRestore();
+    alertSpy.mockRestore();
   });
+
+  const getDeleteButton = () => Array.from(container.querySelectorAll('button')).find((candidate) => candidate.textContent === 'delete_this_account');
 
   it('deletes the account through the helper that waits for its default-community writes', () => {
     render();
-    const deleteButton = Array.from(container.querySelectorAll('button')).find((candidate) => candidate.textContent === 'delete_this_account');
 
-    act(() => deleteButton?.click());
+    act(() => getDeleteButton()?.click());
 
     expect(confirmSpy).toHaveBeenCalledTimes(2);
     expect(persistenceMocks.deleteAccountAfterStarterWrites).toHaveBeenCalledWith('Account current');
     expect(hookMocks.deleteAccount).not.toHaveBeenCalled();
+  });
+
+  it('alerts when deleting the account fails', async () => {
+    persistenceMocks.deleteAccountAfterStarterWrites.mockRejectedValue(new Error('account delete failed'));
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    render();
+
+    await act(async () => getDeleteButton()?.click());
+
+    expect(alertSpy).toHaveBeenCalledWith('account delete failed');
+    consoleErrorSpy.mockRestore();
   });
 });

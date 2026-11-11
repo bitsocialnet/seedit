@@ -199,7 +199,10 @@ const AccountSettings = () => {
       return;
     } else if (window.confirm(t('delete_confirm', { value: accountName, interpolation: { escapeValue: false } }))) {
       if (window.confirm(t('double_confirm'))) {
-        deleteAccountAfterStarterWrites(accountName);
+        deleteAccountAfterStarterWrites(accountName).catch((error) => {
+          console.error('Failed to delete account:', error);
+          alert(error instanceof Error ? error.message : String(error));
+        });
       }
     }
   };
