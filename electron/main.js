@@ -30,6 +30,9 @@ if (isLinux && !process.env.SEEDIT_NO_ENV_SANITIZE) {
 // Keep a global Tray reference to prevent GC removing the tray icon
 let tray;
 
+// null after the window closes; on macOS 'activate' creates a new one
+let mainWindow = null;
+
 // Determine __filename and dirname for ESM
 const __filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(__filename);
@@ -37,14 +40,24 @@ const dirname = path.dirname(__filename);
 // Load package.json dynamically
 const packageJson = JSON.parse(fs.readFileSync(path.join(dirname, '../package.json'), 'utf-8'));
 
-let startIpfsError;
+// only show one IPFS error or it spams the user. It waits for the app to be ready,
+// because before that Linux prints showErrorBox to stderr only
+let pendingIpfsError;
+let ipfsErrorShown = false;
+const showIpfsError = () => {
+  if (ipfsErrorShown || !pendingIpfsError || !app.isReady()) return;
+  ipfsErrorShown = true;
+  dialog.showErrorBox('IPFS warning', pendingIpfsError.message);
+};
 startIpfs.onError = (error) => {
-  // only show error once or it spams the user
-  const alreadyShownIpfsError = !!startIpfsError;
-  startIpfsError = error;
-  if (!alreadyShownIpfsError && error.message) {
-    dialog.showErrorBox('IPFS warning', error.message);
-  }
+  // a daemon that exits without writing to stderr gives an error with no message
+  if (ipfsErrorShown || !error?.message) return;
+  pendingIpfsError = error;
+  showIpfsError();
+};
+// an error that has not been shown yet is stale once ipfs starts
+startIpfs.onStarted = () => {
+  pendingIpfsError = undefined;
 };
 
 // send the local PKC RPC auth key to the renderer
@@ -61,6 +74,21 @@ if (process.platform === 'darwin') fakeUserAgent = 'Mozilla/5.0 (Macintosh; Inte
 if (process.platform === 'linux') fakeUserAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36';
 const realUserAgent = `seedit/${packageJson.version}`;
 
+const showMainWindow = () => {
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    // ready-to-show shows the new window
+    createMainWindow();
+    return mainWindow;
+  }
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.show();
+  mainWindow.focus();
+  return mainWindow;
+};
+
+// notification urls are in-app hash routes, like '/#/s/<community>/comments/<cid>'
+const getNotificationRoute = (url) => (typeof url === 'string' && url.startsWith('/#/') ? url.slice(1) : undefined);
+
 // Handle IPC call to show notification
 ipcMain.on('show-notification', (event, notificationData) => {
   if (Notification.isSupported()) {
@@ -68,11 +96,13 @@ ipcMain.on('show-notification', (event, notificationData) => {
       title: notificationData.title,
       body: notificationData.body,
     });
-    if (notificationData.url) {
+    const route = getNotificationRoute(notificationData.url);
+    if (route) {
       notification.on('click', () => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          shell.openExternal(notificationData.url).catch((err) => console.error('Failed to open URL:', err));
-        }
+        // executeJavaScript waits for a new window to finish loading
+        showMainWindow()
+          .webContents.executeJavaScript(`window.location.hash = ${JSON.stringify(route)}`)
+          .catch((err) => console.error('Failed to open notification route:', err));
       });
     }
     notification.show();
@@ -188,7 +218,7 @@ contextMenu({
 });
 
 const createMainWindow = () => {
-  let mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 1000,
     height: 600,
     show: false,
@@ -258,9 +288,7 @@ const createMainWindow = () => {
       mainWindow.openDevTools();
     }
 
-    if (startIpfsError) {
-      dialog.showErrorBox('IPFS warning', startIpfsError.message);
-    }
+    showIpfsError();
   });
 
   mainWindow.on('closed', () => {
@@ -404,21 +432,23 @@ const createMainWindow = () => {
       }
     }
   }
+};
 
+// set once, because macOS re-creates the window on 'activate'. The items act on the focused window
+// and stay enabled, as nothing would update them after navigation
+const setApplicationMenu = () => {
   const appMenuBack = new MenuItem({
     label: '←',
-    enabled: mainWindow?.webContents?.canGoBack(),
-    click: () => mainWindow?.webContents?.goBack(),
+    click: (menuItem, browserWindow) => browserWindow?.webContents?.goBack(),
   });
   const appMenuForward = new MenuItem({
     label: '→',
-    enabled: mainWindow?.webContents?.canGoForward(),
-    click: () => mainWindow?.webContents?.goForward(),
+    click: (menuItem, browserWindow) => browserWindow?.webContents?.goForward(),
   });
   const appMenuReload = new MenuItem({
     label: '⟳',
     role: 'reload',
-    click: () => mainWindow?.webContents?.reload(),
+    click: (menuItem, browserWindow) => browserWindow?.webContents?.reload(),
   });
 
   // application menu
@@ -437,7 +467,17 @@ const createMainWindow = () => {
   }
 };
 
+// a second launch shows the running app, which close-to-tray may have hidden, instead of starting another
+// process on the same profile. Dev is exempt so it can run next to an installed seedit
+const hasSingleInstanceLock = isDev || app.requestSingleInstanceLock();
+if (!hasSingleInstanceLock) {
+  app.quit();
+}
+app.on('second-instance', () => showMainWindow());
+
 app.whenReady().then(() => {
+  if (!hasSingleInstanceLock) return;
+
   // Set app name and dock icon for development mode on macOS
   if (process.platform === 'darwin') {
     app.setName('seedit');
@@ -448,6 +488,7 @@ app.whenReady().then(() => {
   }
 
   createMainWindow();
+  setApplicationMenu();
 
   app.on('activate', () => {
     if (!BrowserWindow.getAllWindows().length) {
