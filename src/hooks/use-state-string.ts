@@ -1,6 +1,5 @@
 import { useMemo } from 'react';
 import { useClientsStates, useCommunity, useCommunitiesStates } from '@bitsocial/bitsocial-react-hooks';
-import debounce from 'lodash/debounce';
 import { getCommunityIdentifier, getCommunityIdentifiers } from './use-community-identifier';
 
 interface CommentOrCommunity {
@@ -27,18 +26,13 @@ const getClientHost = (clientUrl: string): string => {
 };
 
 const useStateString = (commentOrCommunity: CommentOrCommunity): string | undefined => {
-  const { states: rawStates } = useClientsStates({ comment: commentOrCommunity }) as { states: States };
-
-  const debouncedStates = useMemo(() => {
-    const debouncedValue = debounce((value: States) => value, 300);
-    return debouncedValue(rawStates);
-  }, [rawStates]);
+  const { states } = useClientsStates({ comment: commentOrCommunity }) as { states: States };
 
   return useMemo(() => {
     let stateString: string | undefined = '';
 
-    for (const state in debouncedStates) {
-      const clientUrls = debouncedStates[state];
+    for (const state in states) {
+      const clientUrls = states[state];
       const clientHosts = clientUrls.map((clientUrl: string) => getClientHost(clientUrl));
 
       if (clientHosts.length === 0) {
@@ -76,7 +70,7 @@ const useStateString = (commentOrCommunity: CommentOrCommunity): string | undefi
     }
 
     return stateString === '' ? undefined : stateString;
-  }, [debouncedStates, commentOrCommunity]);
+  }, [states, commentOrCommunity]);
 };
 
 export const useFeedStateString = (communityAddresses?: string[]): string | undefined => {
