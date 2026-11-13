@@ -74,8 +74,12 @@ export async function runVerification({ cwd = repoRoot, lockPath = verificationL
   };
   const onInterrupt = () => forwardSignal('SIGINT');
   const onTerminate = () => forwardSignal('SIGTERM');
+  // A closed terminal sends SIGHUP; unhandled, it would skip the release below
+  // while the detached command keeps running.
+  const onHangup = () => forwardSignal('SIGHUP');
   process.on('SIGINT', onInterrupt);
   process.on('SIGTERM', onTerminate);
+  process.on('SIGHUP', onHangup);
 
   try {
     for (const command of commands) {
@@ -100,6 +104,7 @@ export async function runVerification({ cwd = repoRoot, lockPath = verificationL
   } finally {
     process.off('SIGINT', onInterrupt);
     process.off('SIGTERM', onTerminate);
+    process.off('SIGHUP', onHangup);
     try {
       release();
     } catch (failure) {

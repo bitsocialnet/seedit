@@ -65,8 +65,13 @@ async function pauseWriterBeforeRead(f, args) {
     fs.readFile = async (...args) => {
       if (!paused && path.basename(String(args[0])) === 'default.json') {
         paused = true
+        // Report each signal from within its emit, so a resume sent after the report reaches the writer only after its own handlers ran.
+        const signals = ['SIGINT', 'SIGTERM', 'SIGHUP']
+        const report = (signal) => process.send('signal ' + signal)
+        for (const signal of signals) process.on(signal, report)
         process.send('before-read')
         await once(process, 'message')
+        for (const signal of signals) process.off(signal, report)
       }
       return readFile(...args)
     }
@@ -90,6 +95,13 @@ async function pauseWriterBeforeRead(f, args) {
     }),
   ]);
   return { child, result };
+}
+
+async function interruptPausedWriter(writer, signal) {
+  // Resume only after the writer reports the signal, so the resume message cannot overtake it.
+  writer.child.kill(signal);
+  await Promise.race([once(writer.child, 'message'), writer.result]);
+  writer.child.send('continue', () => {});
 }
 
 test('overlapping update, delete, and audit writers are rejected without losing updates', { timeout: 15000 }, async (t) => {
@@ -200,6 +212,31 @@ test('cleanup leaves a replacement lock owned by another process untouched', { t
     first.child.kill();
     await first.result;
   }
+});
+
+test('a writer stopped by a signal writes nothing further and releases the lock', { timeout: 10000 }, async (t) => {
+  const f = await fixture(t);
+  const before = await snapshot(f.translations);
+  const writer = await pauseWriterBeforeRead(f, ['--key', 'keep', '--value', 'changed', '--include-en', '--write']);
+  await interruptPausedWriter(writer, 'SIGTERM');
+  const { code, stderr } = await writer.result;
+  assert.equal(code, 143);
+  assert.match(stderr, /Interrupted by SIGTERM/);
+  assert.deepEqual(await snapshot(f.translations), before);
+  await assertUnlocked(f);
+});
+
+test('a signal received after the last write check still ends the writer with the signal status', { timeout: 10000 }, async (t) => {
+  const f = await fixture(t);
+  const before = await snapshot(f.translations);
+  // Deleting a missing key plans no writes, so no write check observes the signal.
+  const writer = await pauseWriterBeforeRead(f, ['--key', 'missing', '--delete', '--write']);
+  await interruptPausedWriter(writer, 'SIGHUP');
+  const { code, stderr } = await writer.result;
+  assert.equal(code, 129);
+  assert.match(stderr, /Interrupted by SIGHUP/);
+  assert.deepEqual(await snapshot(f.translations), before);
+  await assertUnlocked(f);
 });
 
 test('a failed atomic replacement preserves the original file and releases the lock', async (t) => {

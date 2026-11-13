@@ -62,7 +62,9 @@ export async function findPlaywrightCli() {
   return 'playwright-cli';
 }
 
-export function createPlaywrightDriver({ execute = exec } = {}) {
+// `signal` stops browser commands; the wrapper's open and the cleanup close still run to completion,
+// so a browser that started is always closed and its slot released.
+export function createPlaywrightDriver({ execute = exec, signal } = {}) {
   const session = `jev-${process.pid}-${randomBytes(4).toString('hex')}`;
   let directory,
     cli,
@@ -76,6 +78,7 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
   delete childEnv.JEV_CONFIG_FILE;
   delete childEnv.JEV_MODEL;
   async function command(args, wrapper = false, cleanup = false) {
+    if (signal?.aborted && !cleanup) throw new JevError('interrupted');
     const remaining = cleanup ? 15_000 : plan.limits.deadlineMs - (Date.now() - started);
     if (remaining <= 0) throw new JevError('deadline_exceeded');
     try {
@@ -84,6 +87,7 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
         env: { ...childEnv, PLAYWRIGHT_CLI_BIN: cli },
         timeout: Math.min(remaining, 30_000),
         maxBuffer: 512_000,
+        signal: wrapper || cleanup ? undefined : signal,
       });
       if (cleanup && /^pw-session: warning: closing browser .* exited \d+/m.test(result.stderr || '')) throw new JevError('cleanup_failed');
       if (/^### Error/m.test(result.stdout)) throw new JevError('browser_command_failed');
@@ -94,6 +98,7 @@ export function createPlaywrightDriver({ execute = exec } = {}) {
         throw new JevError('browser_slot_busy');
       }
       if (error instanceof JevError) throw error;
+      if (signal?.aborted && !cleanup) throw new JevError('interrupted');
       throw new JevError(error.killed ? 'browser_command_timeout' : 'browser_command_failed');
     }
   }
