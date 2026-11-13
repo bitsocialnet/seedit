@@ -37,7 +37,15 @@ const CommunityDataEditor = () => {
     communityAddress: storeCommunityAddress,
   } = useCommunitySettingsStore();
 
-  const { error: publishCommunityEditError, publishCommunityEdit } = usePublishCommunityEdit(publishCommunityEditOptions);
+  // the hook catches save errors and reports them only through onError and a later render, so the save
+  // reads the outcome of the call it awaited from this ref
+  const saveErrorRef = useRef<Error | undefined>(undefined);
+  const { publishCommunityEdit } = usePublishCommunityEdit({
+    ...publishCommunityEditOptions,
+    onError: (error: Error) => {
+      saveErrorRef.current = error;
+    },
+  });
 
   // Use store state if available, otherwise fall back to original community data
   const currentSettings = useMemo(() => {
@@ -128,13 +136,16 @@ const CommunityDataEditor = () => {
       const performSave = async () => {
         try {
           console.log('Performing save with options:', publishCommunityEditOptions);
+          saveErrorRef.current = undefined;
           await publishCommunityEdit();
           setShowSaving(false);
           setTriggerSave(false);
 
-          if (publishCommunityEditError) {
-            setCurrentError(publishCommunityEditError);
-            alert(publishCommunityEditError.message || 'Error: ' + publishCommunityEditError);
+          // onError may have set it during the await
+          const error = saveErrorRef.current as Error | undefined;
+          if (error) {
+            setCurrentError(error);
+            alert(error.message || 'Error: ' + error);
           } else {
             alert(t('settings_saved', { communityAddress }));
           }

@@ -348,11 +348,19 @@ const CommunitySettings = () => {
   const publishCommunityEditOptions = useCommunitySettingsStore((state) => state.publishCommunityEditOptions);
   const resetCommunitySettingsStore = useCommunitySettingsStore((state) => state.resetCommunitySettingsStore);
   const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
-  const storeTitle = useCommunitySettingsStore((state) => state.title);
-  const { error: publishCommunityEditError, publishCommunityEdit } = usePublishCommunityEdit(publishCommunityEditOptions);
-  const { error: createCommunityError, createdCommunity, createCommunity } = useCreateCommunity(publishCommunityEditOptions);
+  // the hooks catch save/create errors and report them only through onError and a later render, so the
+  // handlers read the outcome of the call they awaited from this ref
+  const actionErrorRef = useRef<Error | undefined>(undefined);
+  const communityActionOptions = {
+    ...publishCommunityEditOptions,
+    onError: (error: Error) => {
+      actionErrorRef.current = error;
+    },
+  };
+  const { error: publishCommunityEditError, publishCommunityEdit } = usePublishCommunityEdit(communityActionOptions);
+  const { error: createCommunityError, createdCommunity, createCommunity } = useCreateCommunity(communityActionOptions);
 
-  const [showSaving, setShowSaving] = useState(false);
+  const [status, setStatus] = useState<'idle' | 'saving' | 'deleting'>('idle');
   const [currentError, setCurrentError] = useState<Error | undefined>(publishCommunityEditError || createCommunityError);
 
   // show each new publish/create error; the save handlers can still clear or replace it
@@ -366,20 +374,23 @@ const CommunitySettings = () => {
 
   const saveCommunity = async () => {
     try {
-      setShowSaving(true);
+      setStatus('saving');
       setCurrentError(undefined);
+      actionErrorRef.current = undefined;
       console.log('Saving community with options:', publishCommunityEditOptions);
       await publishCommunityEdit();
-      setShowSaving(false);
+      setStatus('idle');
 
-      if (publishCommunityEditError) {
-        setCurrentError(publishCommunityEditError);
-        alert(publishCommunityEditError.message || 'Error: ' + publishCommunityEditError);
+      // onError may have set it during the await
+      const error = actionErrorRef.current as Error | undefined;
+      if (error) {
+        setCurrentError(error);
+        alert(error.message || 'Error: ' + error);
       } else {
         alert(t('settings_saved', { communityAddress }));
       }
     } catch (e) {
-      setShowSaving(false);
+      setStatus('idle');
       if (e instanceof Error) {
         console.warn(e);
         setCurrentError(e);
@@ -390,17 +401,17 @@ const CommunitySettings = () => {
     }
   };
 
-  const [showDeleting, setShowDeleting] = useState(false);
   const _deleteCommunity = async () => {
     if (communityAddress && window.confirm(t('delete_confirm', { value: `s/${getDisplayAddress(shortAddress || '')}`, interpolation: { escapeValue: false } }))) {
       if (window.confirm(t('double_confirm'))) {
         try {
-          setShowDeleting(true);
+          setStatus('deleting');
           await deleteCommunity(communityAddress);
-          setShowDeleting(false);
+          setStatus('idle');
           alert(t('community_deleted'));
           navigate('/', { replace: true });
         } catch (e) {
+          setStatus('idle');
           if (e instanceof Error) {
             console.warn(e);
             alert(`failed deleting community: ${e.message}`);
@@ -414,18 +425,21 @@ const CommunitySettings = () => {
 
   const _createCommunity = async () => {
     try {
-      setShowSaving(true);
+      setStatus('saving');
       setCurrentError(undefined);
+      actionErrorRef.current = undefined;
       console.log('Creating community with settings:', publishCommunityEditOptions);
       await createCommunity();
-      setShowSaving(false);
+      setStatus('idle');
 
-      if (createCommunityError) {
-        setCurrentError(createCommunityError);
-        alert(createCommunityError.message || 'Error: ' + createCommunityError);
+      // onError may have set it during the await
+      const error = actionErrorRef.current as Error | undefined;
+      if (error) {
+        setCurrentError(error);
+        alert(error.message || 'Error: ' + error);
       }
     } catch (e) {
-      setShowSaving(false);
+      setStatus('idle');
       if (e instanceof Error) {
         console.warn(e);
         setCurrentError(e);
@@ -454,33 +468,24 @@ const CommunitySettings = () => {
     }
   }, [createdCommunity, navigate, resetCommunitySettingsStore, account, subscribe]);
 
-  const lastViewType = useRef<'create' | 'settings' | 'other' | undefined>(undefined);
-
-  // Initialize store for create view only on first entry or when switching from settings view
+  // The store outlives this view, so the create view starts from blank defaults unless the store already holds a create draft
   useEffect(() => {
-    if (isInCreateCommunityView && lastViewType.current === 'settings') {
-      resetCommunitySettingsStore();
-      const initialRoles: Roles = account?.author?.address ? { [account.author.address]: { role: 'owner' as const } } : {};
-      setCommunitySettingsStore({
-        title: '',
-        description: '',
-        address: undefined,
-        suggested: {},
-        rules: [],
-        roles: initialRoles,
-        settings: {},
-        challenges: [],
-        communityAddress: undefined,
-      });
+    if (!isInCreateCommunityView || useCommunitySettingsStore.getState().isCreateDraft) {
+      return;
     }
-    if (isInCreateCommunityView) {
-      lastViewType.current = 'create';
-    } else if (isInCommunitySettingsView) {
-      lastViewType.current = 'settings';
-    } else {
-      lastViewType.current = 'other';
-    }
-  }, [isInCreateCommunityView, storeTitle, resetCommunitySettingsStore, setCommunitySettingsStore, account, isInCommunitySettingsView]);
+    resetCommunitySettingsStore();
+    const initialRoles: Roles = account?.author?.address ? { [account.author.address]: { role: 'owner' as const } } : {};
+    setCommunitySettingsStore({
+      title: '',
+      description: '',
+      suggested: {},
+      rules: [],
+      roles: initialRoles,
+      settings: {},
+      challenges: [],
+      isCreateDraft: true,
+    });
+  }, [isInCreateCommunityView, resetCommunitySettingsStore, setCommunitySettingsStore, account]);
 
   // Set store for loaded community settings when editing
   useEffect(() => {
@@ -580,20 +585,20 @@ const CommunitySettings = () => {
             <div className={styles.boxSubtitle}>{t('delete_community_description')}</div>
             <div className={styles.boxInput}>
               <div className={styles.deleteCommunity}>
-                <button onClick={_deleteCommunity} disabled={showDeleting || showSaving}>
+                <button onClick={_deleteCommunity} disabled={status !== 'idle'}>
                   {t('delete')}
                 </button>
-                <span className={styles.deletingString}>{showDeleting && <LoadingEllipsis string={t('deleting')} />}</span>
+                <span className={styles.deletingString}>{status === 'deleting' && <LoadingEllipsis string={t('deleting')} />}</span>
               </div>
             </div>
           </div>
         )}
         {!isReadOnly && (
-          <button onClick={() => (isInCreateCommunityView ? _createCommunity() : saveCommunity())} disabled={showSaving || showDeleting}>
+          <button onClick={() => (isInCreateCommunityView ? _createCommunity() : saveCommunity())} disabled={status !== 'idle'}>
             {isInCreateCommunityView ? t('create_community') : t('save_options')}
           </button>
         )}
-        {showSaving && <LoadingEllipsis string={t('saving')} />}
+        {status === 'saving' && <LoadingEllipsis string={t('saving')} />}
         {currentError && (
           <div className={styles.error}>
             <ErrorDisplay error={currentError} />

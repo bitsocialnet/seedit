@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { PublishCommentEditOptions, useComment, useEditedComment, usePublishCommentEdit } from '@bitsocial/bitsocial-react-hooks';
 import styles from './edit-menu.module.css';
@@ -28,9 +28,11 @@ const EditMenu = ({ commentCid, showCommentEditForm }: EditMenuProps) => {
   const { deleted } = post || {};
   const communityAddress = getCommentCommunityAddress(post);
 
-  const defaultPublishOptions: PublishCommentEditOptions = {
+  // the menu only toggles deleted, and usePublishCommentEdit publishes the options of the render that
+  // returned it, so the confirm handler can publish the toggled value directly
+  const publishOptions: PublishCommentEditOptions = {
     commentCid,
-    deleted,
+    deleted: !deleted,
     communityAddress,
     onChallenge: (...args: any) => addChallenge([...args, post]),
     onChallengeVerification: alertChallengeVerificationFailed,
@@ -40,7 +42,6 @@ const EditMenu = ({ commentCid, showCommentEditForm }: EditMenuProps) => {
     },
   };
 
-  const [publishOptions, setPublishOptions] = useState(defaultPublishOptions);
   const { publishCommentEdit } = usePublishCommentEdit(publishOptions);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -50,23 +51,13 @@ const EditMenu = ({ commentCid, showCommentEditForm }: EditMenuProps) => {
   }, []);
 
   const confirmDelete = () => {
-    const newDeletedState = !deleted;
-    setPublishOptions((prevOptions) => ({
-      ...prevOptions,
-      deleted: newDeletedState,
-    }));
     setShowDeleteConfirm(false);
+    publishCommentEdit();
   };
 
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
   };
-
-  useEffect(() => {
-    if (publishOptions.deleted !== defaultPublishOptions.deleted) {
-      publishCommentEdit();
-    }
-  }, [publishOptions, publishCommentEdit, defaultPublishOptions.deleted]);
 
   return (
     <>

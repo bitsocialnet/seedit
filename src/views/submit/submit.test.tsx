@@ -212,6 +212,27 @@ describe('SubmitPage', () => {
     expect(testState.publishComment).toHaveBeenCalledOnce();
   });
 
+  it('shows the spoiler and nsfw options kept in the draft when the page is opened again', async () => {
+    await act(async () => {
+      usePublishPostStore.getState().setPublishPostStore({ spoiler: true, nsfw: true } as any);
+    });
+    // leaving and returning to the page keeps the draft store but mounts new inputs
+    act(() => root.unmount());
+    root = createRoot(container);
+    await act(async () => {
+      root.render(createElement(SubmitPage));
+    });
+
+    const [spoiler, nsfw] = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+    expect(spoiler.checked).toBe(true);
+    expect(nsfw.checked).toBe(true);
+
+    await act(async () => spoiler.click());
+    expect(spoiler.checked).toBe(false);
+    expect(usePublishPostStore.getState().spoiler).toBe(undefined);
+    expect(testState.lastOptions?.spoiler).toBe(undefined);
+  });
+
   it('routes challenge cancellation to the current usePublishComment abandonPublish', async () => {
     await act(async () => {
       await testState.lastOptions?.onChallenge({ challenges: [] }, { title: 'Test post' });

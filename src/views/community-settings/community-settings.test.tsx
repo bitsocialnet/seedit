@@ -18,6 +18,7 @@ const testState = vi.hoisted(() => ({
   lastCreateOptions: undefined as Record<string, any> | undefined,
   publishCommunityEdit: vi.fn().mockResolvedValue(undefined),
   createCommunity: vi.fn().mockResolvedValue(undefined),
+  deleteCommunity: vi.fn().mockResolvedValue(undefined),
   navigate: vi.fn(),
   subscribe: vi.fn(),
   t: vi.fn((key: string) => key),
@@ -36,7 +37,7 @@ const testState = vi.hoisted(() => ({
 }));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
-  deleteCommunity: vi.fn(),
+  deleteCommunity: (...args: unknown[]) => testState.deleteCommunity(...args),
   useAccount: () => testState.account,
   useCommunity: () => testState.community,
   usePkcRpcSettings: () => testState.rpcSettings,
@@ -210,5 +211,77 @@ describe('CommunitySettings field rendering', () => {
 
     await act(async () => getButton('create_community').click());
     expect(testState.createCommunity).toHaveBeenCalledOnce();
+  });
+
+  it('starts the create form from a blank draft after the settings of another community were open', async () => {
+    testState.community.roles = { 'other-owner.bso': { role: 'owner' } };
+    await render();
+    expect(useCommunitySettingsStore.getState().communityAddress).toBe('example.bso');
+
+    // the create route mounts a new CommunitySettings instance
+    act(() => root.unmount());
+    root = createRoot(container);
+    testState.pathname = '/communities/create';
+    testState.community = {};
+    await render();
+
+    expect(testState.lastCreateOptions).not.toHaveProperty('address');
+    expect(testState.lastCreateOptions).not.toHaveProperty('communityAddress');
+    expect(testState.lastCreateOptions?.title).toBeUndefined();
+    expect(testState.lastCreateOptions?.rules).toEqual([]);
+    expect(testState.lastCreateOptions?.roles).toEqual({ 'owner.bso': { role: 'owner' } });
+    expect(testState.lastCreateOptions?.settings.challenges).toEqual([{ name: 'captcha-canvas-v3', options: { difficulty: '2' } }]);
+    expect(Array.from(container.querySelectorAll('input')).some((input) => input.value === 'Original title' || input.value === 'Original rule')).toBe(false);
+  });
+
+  it('keeps the create draft when the create form is opened again', async () => {
+    testState.pathname = '/communities/create';
+    testState.community = {};
+    await render();
+    await changeInput(getInput(''), 'Draft community');
+
+    act(() => root.unmount());
+    root = createRoot(container);
+    await render();
+
+    expect(getInput('Draft community')).toBeDefined();
+    expect(testState.lastCreateOptions?.title).toBe('Draft community');
+  });
+
+  it('alerts the outcome of each save rather than the error from before it', async () => {
+    // like the hooks, publishCommunityEdit reports a failure through onError and resolves
+    testState.publishCommunityEdit.mockImplementationOnce(async () => testState.lastEditOptions?.onError?.(new Error('edit failed')));
+    await render();
+
+    await act(async () => getButton('save_options').click());
+    expect(window.alert).toHaveBeenCalledExactlyOnceWith('edit failed');
+
+    vi.mocked(window.alert).mockClear();
+    await act(async () => getButton('save_options').click());
+    expect(window.alert).toHaveBeenCalledExactlyOnceWith('settings_saved');
+  });
+
+  it('alerts a failed create', async () => {
+    testState.pathname = '/communities/create';
+    testState.community = {};
+    testState.createCommunity.mockImplementationOnce(async () => testState.lastCreateOptions?.onError?.(new Error('create failed')));
+    await render();
+
+    await act(async () => getButton('create_community').click());
+    expect(window.alert).toHaveBeenCalledExactlyOnceWith('create failed');
+  });
+
+  it('enables delete and save again after a failed delete', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    testState.deleteCommunity.mockRejectedValueOnce(new Error('delete failed'));
+    await render();
+
+    await act(async () => getButton('delete').click());
+
+    expect(window.alert).toHaveBeenCalledWith('failed deleting community: delete failed');
+    expect(getButton('delete').disabled).toBe(false);
+    expect(getButton('save_options').disabled).toBe(false);
+    expect(testState.navigate).not.toHaveBeenCalled();
   });
 });

@@ -172,16 +172,29 @@ const ReplyForm = ({ cid, isReplyingToReply, hideReplyForm, communityAddress, po
         {showOptions && (
           <div className={formStyles.options}>
             <span className={urlClass}>
-              {t('media_url')}: <input className={`${formStyles.url} ${urlClass}`} onChange={(e) => setPublishReplyOptions.link(e.target.value)} />
+              {t('media_url')}:{' '}
+              <input className={`${formStyles.url} ${urlClass}`} value={publishReplyOptions?.link ?? ''} onChange={(e) => setPublishReplyOptions.link(e.target.value)} />
             </span>
             <span className={`${formStyles.spoiler} ${spoilerClass}`}>
               <label>
-                {t('spoiler')}: <input type='checkbox' className={styles.checkbox} onChange={(e) => setPublishReplyOptions.spoiler(e.target.checked)} />
+                {t('spoiler')}:{' '}
+                <input
+                  type='checkbox'
+                  className={styles.checkbox}
+                  checked={!!publishReplyOptions?.spoiler}
+                  onChange={(e) => setPublishReplyOptions.spoiler(e.target.checked)}
+                />
               </label>
             </span>
             <span className={`${formStyles.spoiler} ${nsfwClass}`}>
               <label>
-                {t('nsfw')}: <input type='checkbox' className={styles.checkbox} onChange={(e) => setPublishReplyOptions.nsfw(e.target.checked)} />
+                {t('nsfw')}:{' '}
+                <input
+                  type='checkbox'
+                  className={styles.checkbox}
+                  checked={!!publishReplyOptions?.nsfw}
+                  onChange={(e) => setPublishReplyOptions.nsfw(e.target.checked)}
+                />
               </label>
             </span>
           </div>
