@@ -318,8 +318,8 @@ const PostPage = () => {
     }
   }, [canonicalPostRedirectPath, isInPendingPostView, locationSearch, navigate]);
 
-  const { hasAcceptedWarning } = useContentOptionsStore();
-  const isNsfwCommunity = useIsNsfwCommunity(communityAddress || '');
+  const hideNsfwCommunities = useContentOptionsStore((state) => state.hideNsfwCommunities);
+  const isHiddenNsfwCommunity = useIsNsfwCommunity(communityAddress || '') && hideNsfwCommunities;
 
   useEffect(() => {
     if (post?.error) {
@@ -340,7 +340,7 @@ const PostPage = () => {
   // Derive whether to show error directly from current post state
   const shouldShowErrorToUser = Boolean(post?.error && ((post?.replyCount > 0 && post?.replies?.length === 0) || post?.state === 'failed'));
 
-  return isNsfwCommunity && !hasAcceptedWarning ? (
+  return isHiddenNsfwCommunity ? (
     <Over18Warning />
   ) : (
     <div className={styles.content}>

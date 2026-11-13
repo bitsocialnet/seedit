@@ -10,6 +10,7 @@ import {
 } from '../lib/utils/starter-community-list';
 
 const REVALIDATE_INTERVAL_MS = 60 * 60 * 1000;
+const FETCH_RETRY_DELAY_MS = 60 * 1000;
 
 interface StarterCommunityListSnapshot {
   list: StarterCommunityList;
@@ -23,22 +24,52 @@ if (!vendoredList) {
 }
 
 let snapshot: StarterCommunityListSnapshot = { list: vendoredList, loading: true, error: null };
-let lastFetchAt = 0;
+let lastFetchSuccessAt = 0;
+let lastFetchAttemptAt = 0;
 let inFlightFetch: Promise<void> | null = null;
+let retryTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
 const listeners = new Set<() => void>();
 
 const emit = () => listeners.forEach((listener) => listener());
 
-const fetchStarterCommunities = () => {
-  if (inFlightFetch || Date.now() - lastFetchAt < REVALIDATE_INTERVAL_MS) return inFlightFetch;
+const shouldFetch = (): boolean => {
+  const now = Date.now();
+  if (lastFetchSuccessAt > 0 && now - lastFetchSuccessAt < REVALIDATE_INTERVAL_MS) return false;
+  return lastFetchAttemptAt === 0 || now - lastFetchAttemptAt >= FETCH_RETRY_DELAY_MS;
+};
 
-  snapshot = { ...snapshot, loading: true, error: null };
-  emit();
-  lastFetchAt = Date.now();
+const clearRetryTimer = () => {
+  if (retryTimer) globalThis.clearTimeout(retryTimer);
+  retryTimer = null;
+};
+
+/** While anything is subscribed, retry a failed request rather than waiting for a remount or visibility change. */
+const scheduleRetry = () => {
+  if (retryTimer || inFlightFetch || !snapshot.error || listeners.size === 0) return;
+  retryTimer = globalThis.setTimeout(
+    () => {
+      retryTimer = null;
+      if (!fetchStarterCommunities()) scheduleRetry();
+    },
+    Math.max(0, FETCH_RETRY_DELAY_MS - (Date.now() - lastFetchAttemptAt)),
+  );
+};
+
+const fetchStarterCommunities = (): Promise<void> | null => {
+  if (inFlightFetch || !shouldFetch()) return inFlightFetch;
+
+  clearRetryTimer();
+  // A retry keeps the fallback state until it succeeds, so pages do not flip back to loading every minute.
+  if (!snapshot.error) {
+    snapshot = { ...snapshot, loading: true, error: null };
+    emit();
+  }
+  lastFetchAttemptAt = Date.now();
 
   inFlightFetch = fetchStarterCommunitiesPayload()
     .then((payload) => {
       const remoteList = normalizeRemoteStarterCommunityList(payload, snapshot.list);
+      lastFetchSuccessAt = Date.now();
       if (remoteList) {
         snapshot = { list: remoteList, loading: false, error: null };
       } else {
@@ -50,6 +81,7 @@ const fetchStarterCommunities = () => {
     })
     .finally(() => {
       inFlightFetch = null;
+      scheduleRetry();
       emit();
     });
 
@@ -63,11 +95,13 @@ const handleVisibilityChange = () => {
 const subscribe = (listener: () => void) => {
   listeners.add(listener);
   if (listeners.size === 1 && typeof document !== 'undefined') document.addEventListener('visibilitychange', handleVisibilityChange);
-  void fetchStarterCommunities();
+  if (!fetchStarterCommunities()) scheduleRetry();
 
   return () => {
     listeners.delete(listener);
-    if (listeners.size === 0 && typeof document !== 'undefined') document.removeEventListener('visibilitychange', handleVisibilityChange);
+    if (listeners.size > 0) return;
+    if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', handleVisibilityChange);
+    clearRetryTimer();
   };
 };
 
