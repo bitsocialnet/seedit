@@ -18,7 +18,12 @@ export const useBrowserPureP2PAccountUpgrade = () => {
   useEffect(() => {
     const accountsStoreInitializing = window.BITSOCIAL_REACT_HOOKS_ACCOUNTS_STORE_INITIALIZING === true;
 
-    if (account?.id) return;
+    if (account?.id) {
+      // Recovery finished, so a later deletion of this account must be able to recover again.
+      missingAccountRecoveryStartedRef.current = false;
+      activeAccountRecoveryNameRef.current = undefined;
+      return;
+    }
 
     if (accounts.length === 0) {
       if (accountsStoreInitializing || missingAccountRecoveryStartedRef.current) return;

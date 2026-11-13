@@ -2,7 +2,13 @@ import { RefObject, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
 import { setAccount, useAccount, usePkcRpcSettings } from '@bitsocial/bitsocial-react-hooks';
-import { getBrowserGatewayPkcOptions, getBrowserPureP2PPkcOptions, setPureP2PBrowserPreference } from '../../../lib/p2p-browser-config';
+import {
+  getBrowserGatewayPkcOptions,
+  getBrowserPureP2PPkcOptions,
+  getPureP2PBrowserPreference,
+  restorePureP2PBrowserPreference,
+  setPureP2PBrowserPreference,
+} from '../../../lib/p2p-browser-config';
 import { canConfigureBrowserPureP2P, isBrowserPureP2PEnabled } from '../../../lib/p2p-runtime';
 import { getSupportedChainProviders } from '../../../lib/utils/chain-provider-utils';
 import styles from './advanced-settings.module.css';
@@ -275,7 +281,11 @@ const AdvancedSettings = () => {
 
     const pkcRpcClientsOptions = fullNodeRpcRef.current?.value.trim() ? [fullNodeRpcRef.current.value.trim()] : undefined;
     const dataPath = p2pDataPathRef.current?.value.trim() || undefined;
-    const pureP2PBrowserPreference = canConfigurePureP2PBrowser ? browserPureP2PEnabled : undefined;
+    // A full node RPC URL selects RPC mode, since the pure p2p options below would discard it, unless the user
+    // ticked pure p2p and left the saved URL that prefills the field as it was.
+    const pureP2PTickedOverSavedRpcUrl = browserPureP2PSelection === true && pkcRpcClientsOptions?.[0] === protocolOptions?.pkcRpcClientsOptions?.[0];
+    const usesRpcUrl = !!pkcRpcClientsOptions && !pureP2PTickedOverSavedRpcUrl;
+    const pureP2PBrowserPreference = canConfigurePureP2PBrowser ? browserPureP2PEnabled && !usesRpcUrl : undefined;
 
     const chainProviders: NonNullable<AccountProtocolOptions['chainProviders']> = getSupportedChainProviders(getChainProviders(account)) ?? {};
     if (ethRpcUrls?.length) chainProviders.eth = { urls: ethRpcUrls, chainId: 1 };
@@ -304,6 +314,13 @@ const AdvancedSettings = () => {
       }
     }
 
+    // Store the mode before the account: without it, the upgrade hook turns a gateway account back to pure p2p after the reload.
+    const previousPureP2PBrowserPreference = getPureP2PBrowserPreference();
+    if (pureP2PBrowserPreference !== undefined && !setPureP2PBrowserPreference(pureP2PBrowserPreference)) {
+      alert('Error saving options: the pure p2p setting could not be stored in browser storage');
+      return;
+    }
+
     try {
       await setAccount({
         ...account,
@@ -311,10 +328,11 @@ const AdvancedSettings = () => {
         chainProviders,
         pkcOptions,
       });
-      if (pureP2PBrowserPreference !== undefined) setPureP2PBrowserPreference(pureP2PBrowserPreference);
       alert('Options saved, reloading...');
       window.location.reload();
     } catch (e) {
+      // The account kept its old mode, so the stored mode goes back too, or the upgrade hook would switch it on the next load.
+      if (pureP2PBrowserPreference !== undefined) restorePureP2PBrowserPreference(previousPureP2PBrowserPreference);
       if (e instanceof Error) {
         alert('Error saving options: ' + e.message);
         console.log(e);

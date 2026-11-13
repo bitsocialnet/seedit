@@ -45,7 +45,7 @@ type P2PBrowserConfigWindow = {
   defaultPkcOptions?: Record<string, unknown>;
   electronApi?: { isElectron?: boolean };
   isElectron?: boolean;
-  localStorage?: Pick<Storage, 'getItem' | 'setItem'>;
+  localStorage?: Pick<Storage, 'getItem' | 'removeItem' | 'setItem'>;
 };
 
 const cloneArray = <T>(value: T[] | undefined) => (value ? [...value] : undefined);
@@ -126,7 +126,22 @@ export const getPureP2PBrowserPreference = (targetWindow: P2PBrowserConfigWindow
 
 export const setPureP2PBrowserPreference = (enabled: boolean, targetWindow: P2PBrowserConfigWindow = window) => {
   try {
-    targetWindow.localStorage?.setItem(PURE_P2P_BROWSER_SETTING_KEY, String(enabled));
+    if (!targetWindow.localStorage) return false;
+    targetWindow.localStorage.setItem(PURE_P2P_BROWSER_SETTING_KEY, String(enabled));
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+// Puts back a value read with getPureP2PBrowserPreference, removing the key when none was stored.
+export const restorePureP2PBrowserPreference = (preference: boolean | undefined, targetWindow: P2PBrowserConfigWindow = window) => {
+  if (preference !== undefined) {
+    setPureP2PBrowserPreference(preference, targetWindow);
+    return;
+  }
+  try {
+    targetWindow.localStorage?.removeItem(PURE_P2P_BROWSER_SETTING_KEY);
   } catch {
     return;
   }
