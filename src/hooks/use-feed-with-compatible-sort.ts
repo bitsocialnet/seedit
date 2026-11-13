@@ -57,6 +57,10 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCom
     () => [...new Set([...requestedSortFeed.communityKeysWithMore, ...preloadedSortFeed.communityKeysWithMore])],
     [preloadedSortFeed.communityKeysWithMore, requestedSortFeed.communityKeysWithMore],
   );
+  const communityKeysWithUnavailableSort = useMemo(
+    () => [...new Set([...requestedSortFeed.communityKeysWithUnavailableSort, ...preloadedSortFeed.communityKeysWithUnavailableSort])],
+    [preloadedSortFeed.communityKeysWithUnavailableSort, requestedSortFeed.communityKeysWithUnavailableSort],
+  );
 
   const loadMore = useCallback(async () => {
     await Promise.all([
@@ -94,6 +98,7 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCom
     reset,
     communityKeysWithNewerPosts,
     communityKeysWithMore,
+    communityKeysWithUnavailableSort,
     isLoadingCommunities: hasLoadingFeedCommunities(communities),
     state: communitiesState === 'failed' ? 'failed' : hasMore ? 'fetching-ipns' : 'succeeded',
     error: communitiesError || requestedSortFeed.error || preloadedSortFeed.error,

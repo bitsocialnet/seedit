@@ -40,6 +40,7 @@ vi.mock('./use-feed-with-compatible-sort', () => ({
       reset: vi.fn(async () => {}),
       communityKeysWithNewerPosts: [],
       communityKeysWithMore: [],
+      communityKeysWithUnavailableSort: [],
       isLoadingCommunities: isBaseFeed ? testState.baseLoadingCommunities : false,
       state: 'succeeded',
       error: undefined,
