@@ -1,14 +1,12 @@
-import { memo, useEffect, useRef, useState, useMemo, useCallback, type ComponentProps } from 'react';
-import { Link, Navigate, useParams, useLocation } from 'react-router-dom';
+import { memo, useEffect, useRef, useMemo, useCallback, type ComponentProps } from 'react';
+import { Link, Navigate } from 'react-router-dom';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { useAccount, Comment } from '@bitsocial/bitsocial-react-hooks';
 import { Trans, useTranslation } from 'react-i18next';
-import { useAutoSubscribeStore } from '../../stores/use-auto-subscribe-store';
-import useTimeFilter from '../../hooks/use-time-filter';
 import useRedirectToDefaultSort from '../../hooks/use-redirect-to-default-sort';
-import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
-import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
-import { useStarterCommunityList } from '../../hooks/use-default-subscriptions';
+import { useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
+import useFeedRoute from '../../hooks/use-feed-route';
+import useHomeSubscriptionState from '../../hooks/use-home-subscription-state';
 import FeedFooter from '../../components/feed-footer';
 import LoadingEllipsis from '../../components/loading-ellipsis';
 import Post from '../../components/post';
@@ -17,15 +15,12 @@ import StarterSubscriptionsNotice from '../../components/starter-subscriptions-n
 import DirectorySubscriptionUpdatesNotice from '../../components/directory-subscription-updates-notice';
 import DevelopmentFeedResetButton from '../../components/development-feed-reset-button';
 import TopTimeFilter from '../../components/top-time-filter';
-import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
-import { getHomeSubscriptionState } from './subscription-state';
 import styles from './home.module.css';
 import layoutStyles from '../../components/feed-layout';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
-import useProgressiveFeed from '../../hooks/use-progressive-feed';
-import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
+const NO_SUBSCRIPTIONS: string[] = [];
 
 type HomeFeedContext = ComponentProps<typeof FeedFooter>;
 
@@ -47,38 +42,14 @@ const HomeNotices = memo(function HomeNotices() {
 const Home = () => {
   const { t } = useTranslation();
   const account = useAccount();
-  const subscriptions = account?.subscriptions ?? [];
-  const communityAddresses = subscriptions;
-  const { isCheckingAccount } = useAutoSubscribeStore();
-  const { loading: starterListLoading } = useStarterCommunityList();
-  const accountAddress = account?.author?.address;
-  const isCheckingSubscriptions = starterListLoading || !accountAddress || isCheckingAccount(accountAddress);
-
-  const params = useParams<{ sortType?: string; timeFilterName?: string }>();
-  const location = useLocation();
-
-  const sortType = getRouteSortType(params.sortType);
-  const feedSortType = getFeedSortType(sortType);
+  const communityAddresses = account?.subscriptions ?? NO_SUBSCRIPTIONS;
 
   useRedirectToDefaultSort();
 
-  const { timeFilterName, timeFilterSeconds, sessionKey, preferredTopTimeFilterPath } = useTimeFilter();
-
-  const currentTimeFilterName = params.timeFilterName || timeFilterName || (sortType === 'top' ? 'all' : '24h');
+  const { feed, hasMore, loadMore, reset, requestKey, sortType, timeFilterName, sessionKey, redirectPath } = useFeedRoute(communityAddresses);
+  const currentTimeFilterName = timeFilterName || (sortType === 'top' ? 'all' : '24h');
 
   const infiniteFeedEnabled = useInfiniteFeedEnabled();
-
-  const feedOptions = useMemo(
-    () => ({
-      newerThan: timeFilterSeconds,
-      postsPerPage: FEED_POSTS_PER_PAGE,
-      sortType: feedSortType,
-      communities: getCommunityIdentifiers(communityAddresses),
-    }),
-    [communityAddresses, feedSortType, timeFilterSeconds],
-  );
-
-  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
 
@@ -117,36 +88,10 @@ const Home = () => {
     [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
-  // wait 800ms after each subscription check settles before showing "no subscriptions"
-  const [safeToShowNoSubscriptions, setSafeToShowNoSubscriptions] = useState(false);
-  if (isCheckingSubscriptions && safeToShowNoSubscriptions) {
-    setSafeToShowNoSubscriptions(false);
-  }
+  const subscriptionState = useHomeSubscriptionState(feed?.length);
 
-  useEffect(() => {
-    if (isCheckingSubscriptions) return;
-
-    const timeout = setTimeout(() => setSafeToShowNoSubscriptions(true), 800);
-    return () => clearTimeout(timeout);
-  }, [isCheckingSubscriptions, accountAddress]);
-
-  const subscriptionState = getHomeSubscriptionState({
-    subscriptionCount: subscriptions.length,
-    feedLength: feed?.length,
-    isCheckingSubscriptions,
-    safeToShowNoSubscriptions,
-  });
-
-  if (isLegacyTopRoute(params.sortType)) {
-    return <Navigate to={getCanonicalTopPath(location.pathname, location.search)} replace />;
-  }
-
-  if (preferredTopTimeFilterPath) {
-    return <Navigate to={preferredTopTimeFilterPath} replace />;
-  }
-
-  if (sortType !== 'top' && params.timeFilterName) {
-    return <Navigate to={getPathWithoutTimeFilter(location.pathname, params.timeFilterName, location.search)} replace />;
+  if (redirectPath) {
+    return <Navigate to={redirectPath} replace />;
   }
 
   return (

@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Uploadet, men værten skal gennemgå denne fil, før den kan vises. Linket begynder at virke, når den er godkendt, hvilket kan tage et par timer. Du kan poste den nu.",
   "upload_failed": "Upload mislykkedes",
   "upload_failed_all_providers": "Alle udbydere mislykkedes",
-  "upload_failed_preferred_guidance": "Vælg en anden udbyder eller sæt til tilfældig."
+  "upload_failed_preferred_guidance": "Vælg en anden udbyder eller sæt til tilfældig.",
+  "navigation_menu": "navigationsmenu",
+  "old_interface": "gammel brugerflade",
+  "modern_interface": "moderne brugerflade",
+  "interface": "brugerflade",
+  "dark_mode": "mørk tilstand",
+  "close": "luk",
+  "upvote": "stem op",
+  "downvote": "stem ned"
 }

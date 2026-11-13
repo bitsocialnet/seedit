@@ -55,9 +55,10 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 - Reuse hooks for repeated logic. Model complex flows clearly instead of accumulating boolean flags.
 - Use React Router for navigation, not manual history manipulation.
 - Add comments for non-obvious constraints or logic, not for obvious code.
-- Preserve Seedit's compact old.reddit-inspired interaction language: dense feed rows, familiar voting and metadata order, square legacy controls, small browser-native typography, and the existing light/dark theme variables.
-- Use existing variables in `src/themes.css` before literal colors. New semantic tokens must work in both light and dark themes.
-- Do not introduce generic dashboard cards, rounded pills, decorative gradients, glass effects, soft elevation, oversized empty layouts, or crypto-first styling on routine browsing surfaces.
+- Seedit has two interfaces sharing one origin, account, and route table: the modern interface (default, `modern-*` components and views) and the old interface (everything else), chosen by `src/stores/use-ui-mode-store.ts`. Routes the modern interface has not built yet render the old one. Keep data logic in shared hooks so both interfaces use it.
+- In the old interface, preserve Seedit's compact old.reddit-inspired interaction language: dense feed rows, familiar voting and metadata order, square legacy controls, small browser-native typography, and the existing light/dark theme variables from `src/themes.css`. Do not add generic dashboard cards, rounded pills, decorative gradients, glass effects, soft elevation, or oversized empty layouts there.
+- In the modern interface, use the `--m-*` tokens defined on the modern layout shell; see the modern interface section of `DESIGN.md`.
+- New semantic tokens must work in both light and dark themes. Avoid crypto-first styling on routine browsing surfaces in either interface.
 - Keep community identity and user ownership inspectable: make clear which address, subscription, or moderation boundary an action affects.
 
 ## Git and ownership

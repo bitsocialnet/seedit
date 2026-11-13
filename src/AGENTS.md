@@ -4,7 +4,7 @@ These rules apply to `src/**`. Follow the repo-root `AGENTS.md` first, then use 
 
 - Before adding new state, decide whether it belongs in render, a reusable hook, or a Zustand store. Do not duplicate the same state logic across views.
 - Use `@bitsocial/bitsocial-react-hooks` for data access. Do not add data-fetching `useEffect` calls or effects that only synchronize derived state.
-- Read `DESIGN.md` before visual, layout, or theme work. Preserve Seedit's compact old.reddit-inspired hierarchy and verify both light and dark themes.
+- Read `DESIGN.md` before visual, layout, or theme work. Preserve the old interface's compact old.reddit-inspired hierarchy, follow the modern interface's own section for `modern-*` modules, and verify both light and dark themes.
 - For state/effect/data-flow or rendering-performance changes, review relevant React guidance. Choose checks and browser/viewports using `docs/agent-playbooks/verification.md`; a copy edit alone does not require React Doctor or a full build.
 - Prefer extending the colocated `*.test.ts(x)` file next to already-covered behavior.
 

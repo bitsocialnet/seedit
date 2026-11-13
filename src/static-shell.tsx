@@ -8,8 +8,13 @@ import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import en from '../public/translations/en/default.json';
 import App from './app';
+import { DEFAULT_UI_MODE } from './lib/utils/ui-mode-utils';
 import useThemeStore from './stores/use-theme-store';
+import useUiModeStore from './stores/use-ui-mode-store';
 import useWindowDimensionsStore from './stores/use-window-dimensions-store';
+
+// Visitors who never picked an interface get the default one, so that is the one the shell shows.
+export const STATIC_SHELL_UI_MODE = DEFAULT_UI_MODE;
 
 export interface StaticShellVariant {
   theme: 'light' | 'dark';
@@ -30,6 +35,7 @@ export const renderStaticShell = async ({ theme, width, height }: StaticShellVar
   }
   window.STATIC_SHELL_RENDER = true;
   useThemeStore.setState({ theme });
+  useUiModeStore.setState({ uiMode: STATIC_SHELL_UI_MODE });
   useWindowDimensionsStore.setState({ width, height, isMobile: width < 640 });
   const container = document.createElement('div');
   document.body.appendChild(container);

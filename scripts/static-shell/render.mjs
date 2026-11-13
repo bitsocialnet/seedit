@@ -1,4 +1,4 @@
-// Renders src/static-shell.tsx for every variant and prints { variants } as JSON.
+// Renders src/static-shell.tsx for every variant and prints { variants, uiMode } as JSON.
 // It runs in its own process because it installs jsdom browser globals, which must not leak
 // into the Vite build that invokes it (scripts/vite-static-shell.mjs).
 import path from 'node:path';
@@ -47,10 +47,10 @@ const server = await createServer({
   optimizeDeps: { noDiscovery: true, include: [] },
 });
 try {
-  const { renderStaticShell } = await server.ssrLoadModule('/src/static-shell.tsx');
+  const { renderStaticShell, STATIC_SHELL_UI_MODE } = await server.ssrLoadModule('/src/static-shell.tsx');
   const rendered = {};
   for (const [name, variant] of Object.entries(variants)) rendered[name] = await renderStaticShell(variant);
-  write(JSON.stringify({ variants: rendered }));
+  write(JSON.stringify({ variants: rendered, uiMode: STATIC_SHELL_UI_MODE }));
 } finally {
   await server.close();
 }

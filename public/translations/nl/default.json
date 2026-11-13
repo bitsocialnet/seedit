@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Geüpload, maar de host moet dit bestand controleren voordat het bekeken kan worden. De link werkt zodra het is goedgekeurd, wat een paar uur kan duren. Je kunt het nu al posten.",
   "upload_failed": "Upload mislukt",
   "upload_failed_all_providers": "Alle providers zijn mislukt",
-  "upload_failed_preferred_guidance": "Kies een andere provider of zet op willekeurig."
+  "upload_failed_preferred_guidance": "Kies een andere provider of zet op willekeurig.",
+  "navigation_menu": "navigatiemenu",
+  "old_interface": "oude interface",
+  "modern_interface": "moderne interface",
+  "interface": "interface",
+  "dark_mode": "donkere modus",
+  "close": "sluiten",
+  "upvote": "upvoten",
+  "downvote": "downvoten"
 }

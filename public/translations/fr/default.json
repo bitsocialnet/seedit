@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Envoyé, mais l'hébergeur doit vérifier ce fichier avant qu'il puisse être affiché. Le lien fonctionnera une fois le fichier approuvé, ce qui peut prendre quelques heures. Vous pouvez le publier dès maintenant.",
   "upload_failed": "Échec du téléchargement",
   "upload_failed_all_providers": "Tous les fournisseurs ont échoué",
-  "upload_failed_preferred_guidance": "Choisissez un autre fournisseur ou réglez sur aléatoire."
+  "upload_failed_preferred_guidance": "Choisissez un autre fournisseur ou réglez sur aléatoire.",
+  "navigation_menu": "menu de navigation",
+  "old_interface": "ancienne interface",
+  "modern_interface": "interface moderne",
+  "interface": "interface",
+  "dark_mode": "mode sombre",
+  "close": "fermer",
+  "upvote": "voter pour",
+  "downvote": "voter contre"
 }

@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Lastet opp, men verten må gå gjennom denne filen før den kan vises. Lenken begynner å virke når den er godkjent, noe som kan ta noen timer. Du kan poste den nå.",
   "upload_failed": "Opplasting mislyktes",
   "upload_failed_all_providers": "Alle leverandører mislyktes",
-  "upload_failed_preferred_guidance": "Velg en annen leverandør eller sett til tilfeldig."
+  "upload_failed_preferred_guidance": "Velg en annen leverandør eller sett til tilfeldig.",
+  "navigation_menu": "navigasjonsmeny",
+  "old_interface": "gammelt grensesnitt",
+  "modern_interface": "moderne grensesnitt",
+  "interface": "grensesnitt",
+  "dark_mode": "mørk modus",
+  "close": "lukk",
+  "upvote": "stem opp",
+  "downvote": "stem ned"
 }

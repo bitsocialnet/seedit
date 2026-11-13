@@ -1,22 +1,20 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { Navigate, useLocation, useParams } from 'react-router-dom';
-import { useAccountComments, useBlock, useCommunity, type Comment } from '@bitsocial/bitsocial-react-hooks';
+import { Navigate, useParams } from 'react-router-dom';
+import { useBlock, useCommunity, type Comment } from '@bitsocial/bitsocial-react-hooks';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
 import { useTranslation } from 'react-i18next';
 import styles from './community.module.css';
 import layoutStyles from '../../components/feed-layout';
 import { useFeedStateString } from '../../hooks/use-state-string';
-import { filterOptimisticLocalPosts } from '../../lib/utils/account-history-utils';
 import useContentOptionsStore from '../../stores/use-content-options-store';
-import useFeedResetStore from '../../stores/use-feed-reset-store';
-import { usePinnedPostsStore } from '../../stores/use-pinned-posts-store';
 import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
 import useIsCommunityOffline from '../../hooks/use-is-community-offline';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
 import { isResolvableCommunityAddress } from '../../lib/utils/community-route-utils';
-import useTimeFilter from '../../hooks/use-time-filter';
-import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
-import { getCommunityIdentifier, getCommunityIdentifiers } from '../../hooks/use-community-identifier';
+import { useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
+import useFeedRoute from '../../hooks/use-feed-route';
+import useCommunityFeedWithAccountPosts from '../../hooks/use-community-feed-with-account-posts';
+import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import ErrorDisplay from '../../components/error-display';
 import EmptyFeedMessage from '../../components/empty-feed-message';
 import FeedPagination from '../../components/feed-pagination';
@@ -26,10 +24,7 @@ import LoadingEllipsis from '../../components/loading-ellipsis';
 import Over18Warning from '../../components/over-18-warning';
 import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
-import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
-import useProgressiveFeed from '../../hooks/use-progressive-feed';
-import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
 
@@ -140,7 +135,6 @@ const CommunitySidebar = memo(Sidebar);
 
 const CommunityView = () => {
   const params = useParams();
-  const location = useLocation();
 
   const rawCommunityIdentifier = params?.communityAddress || '';
   const { communityAddress: resolvedCommunityAddress, directoryCode, directoryList, error: directoryListError } = useResolvedCommunityRoute(rawCommunityIdentifier);
@@ -153,60 +147,9 @@ const CommunityView = () => {
   const isSubCreatedButNotYetPublished = typeof createdAt === 'number' && !updatedAt;
 
   const communityAddresses = useMemo(() => (canLoadCommunity ? [communityAddress] : []), [canLoadCommunity, communityAddress]) as string[];
-  const sortType = getRouteSortType(params.sortType);
-  const feedSortType = getFeedSortType(sortType);
-
-  const { timeFilterSeconds, timeFilterName, sessionKey, preferredTopTimeFilterPath } = useTimeFilter();
+  const { feed, hasMore, loadMore, reset, requestKey, sortType, timeFilterName, sessionKey, redirectPath } = useFeedRoute(communityAddresses);
   const infiniteFeedEnabled = useInfiniteFeedEnabled();
-
-  const feedOptions = useMemo(
-    () => ({
-      communities: getCommunityIdentifiers(communityAddresses),
-      postsPerPage: FEED_POSTS_PER_PAGE,
-      sortType: feedSortType,
-      newerThan: timeFilterSeconds,
-    }),
-    [communityAddresses, feedSortType, timeFilterSeconds],
-  );
-
-  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
-
-  // show account comments instantly in the feed once published (cid defined), instead of waiting for the feed to update
-  const { accountComments } = useAccountComments({ communityAddress, newerThan: 60 * 60 });
-  const filteredComments = useMemo(() => filterOptimisticLocalPosts(accountComments, feed, communityAddress), [accountComments, communityAddress, feed]);
-
-  // reset the feed when a new account comment is published, so it shows instantly in the feed
-  const setResetFunction = useFeedResetStore((state) => state.setResetFunction);
-  useEffect(() => {
-    setResetFunction(reset);
-  }, [reset, setResetFunction, feed]);
-
-  const resetTriggeredRef = useRef(false);
-
-  useEffect(() => {
-    if (filteredComments.length > 0 && !resetTriggeredRef.current) {
-      reset();
-      resetTriggeredRef.current = true;
-    }
-  }, [filteredComments, reset]);
-
-  // show newest account comment at the top of the feed but after pinned posts
-  const combinedFeed = useMemo(() => {
-    const newFeed = [...feed];
-    const lastPinnedIndex = newFeed.map((post) => post.pinned).lastIndexOf(true);
-    if (filteredComments.length > 0) {
-      newFeed.splice(lastPinnedIndex + 1, 0, ...filteredComments);
-    }
-    return newFeed;
-  }, [feed, filteredComments]);
-
-  const setPinnedPostsCount = usePinnedPostsStore((state) => state.setPinnedPostsCount);
-  useEffect(() => {
-    if (feed) {
-      const pinnedCount = feed.filter((post) => post.pinned).length;
-      setPinnedPostsCount(pinnedCount);
-    }
-  }, [feed, setPinnedPostsCount]);
+  const combinedFeed = useCommunityFeedWithAccountPosts(communityAddress, feed, reset);
 
   const footerProps = useMemo<FooterProps>(
     () => ({
@@ -276,16 +219,8 @@ const CommunityView = () => {
   // A directory published after this build has no bundled list, so a failed list request leaves it without a community.
   const unresolvedDirectoryError = directoryCode && !resolvedCommunityAddress ? directoryListError : null;
 
-  if (isLegacyTopRoute(params.sortType)) {
-    return <Navigate to={getCanonicalTopPath(location.pathname, location.search)} replace />;
-  }
-
-  if (preferredTopTimeFilterPath) {
-    return <Navigate to={preferredTopTimeFilterPath} replace />;
-  }
-
-  if (sortType !== 'top' && params.timeFilterName) {
-    return <Navigate to={getPathWithoutTimeFilter(location.pathname, params.timeFilterName, location.search)} replace />;
+  if (redirectPath) {
+    return <Navigate to={redirectPath} replace />;
   }
 
   return isHiddenNsfwCommunity ? (

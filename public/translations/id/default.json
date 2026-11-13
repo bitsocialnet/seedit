@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Berhasil diunggah, tetapi host harus meninjau file ini sebelum dapat dilihat. Tautan akan berfungsi setelah disetujui, yang bisa memakan waktu beberapa jam. Anda bisa mempostingnya sekarang.",
   "upload_failed": "Unggahan gagal",
   "upload_failed_all_providers": "Semua penyedia gagal",
-  "upload_failed_preferred_guidance": "Pilih penyedia lain atau atur ke acak."
+  "upload_failed_preferred_guidance": "Pilih penyedia lain atau atur ke acak.",
+  "navigation_menu": "menu navigasi",
+  "old_interface": "antarmuka lama",
+  "modern_interface": "antarmuka modern",
+  "interface": "antarmuka",
+  "dark_mode": "mode gelap",
+  "close": "tutup",
+  "upvote": "upvote",
+  "downvote": "downvote"
 }

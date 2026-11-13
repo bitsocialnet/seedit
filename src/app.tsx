@@ -14,10 +14,14 @@ import NotFound from './views/not-found';
 import PostPage from './views/post';
 import Profile from './views/profile';
 import CommunityView from './views/community';
+import ModernAll from './views/modern-all';
+import ModernCommunity from './views/modern-community';
+import ModernHome from './views/modern-home';
 import AccountBar from './components/account-bar/';
 import ChallengeModal from './components/challenge-modal';
 import Header from './components/header';
 import LoadingEllipsis from './components/loading-ellipsis';
+import ModernLayout from './components/modern-layout';
 import { preloadMarkdown } from './components/markdown';
 import NotificationHandler from './components/notification-handler';
 import Prefetcher from './components/prefetcher';
@@ -28,6 +32,7 @@ import StickyHeader from './components/sticky-header';
 import TopBar from './components/topbar';
 import ValidFeedRoute from './components/valid-feed-route';
 import { DIRECTORY_INDEX_PATH } from './lib/utils/community-route-utils';
+import useUiModeStore from './stores/use-ui-mode-store';
 import styles from './app.module.css';
 
 initializeNotificationSystem();
@@ -87,6 +92,8 @@ const App = () => {
   useAutoSubscribe();
   useBrowserPureP2PAccountUpgrade();
   useCanonicalCommunityRoute();
+  // The modern interface replaces the routes it has built; every other route keeps the old interface for now.
+  const isModern = useUiModeStore((state) => state.uiMode) === 'modern';
 
   const globalLayout = (
     <>
@@ -98,17 +105,17 @@ const App = () => {
         <SettingsUpgradeModal />
       </Suspense>
       <Outlet />
-      {/* old.reddit shows the same footer on every page, so it lives in the shared layout */}
-      <SiteFooter />
     </>
   );
 
+  // old.reddit shows the same footer on every page, so both old interface layouts end with it
   const pagesLayout = (
     <>
       <TopBar />
       <AccountBar />
       <Header />
       <Outlet />
+      <SiteFooter />
     </>
   );
 
@@ -117,6 +124,7 @@ const App = () => {
       <StickyHeader />
       <Header />
       <Outlet />
+      <SiteFooter />
     </>
   );
 
@@ -148,6 +156,34 @@ const App = () => {
 
       <Routes>
         <Route element={globalLayout}>
+          {isModern && (
+            <Route element={<ModernLayout />}>
+              <Route
+                path='/:sortType?/:timeFilterName?'
+                element={
+                  <ValidFeedRoute>
+                    <ModernHome />
+                  </ValidFeedRoute>
+                }
+              />
+              <Route
+                path='/s/all/:sortType?/:timeFilterName?'
+                element={
+                  <ValidFeedRoute>
+                    <ModernAll />
+                  </ValidFeedRoute>
+                }
+              />
+              <Route
+                path='/s/:communityAddress/:sortType?/:timeFilterName?'
+                element={
+                  <ValidFeedRoute>
+                    <ModernCommunity />
+                  </ValidFeedRoute>
+                }
+              />
+            </Route>
+          )}
           <Route element={pagesLayout}>
             <Route path='/about' element={<AboutView />} />
             <Route path='/changelog' element={<Changelog />} />
@@ -218,24 +254,27 @@ const App = () => {
           <Route element={feedLayout}>
             <Route path='/search' element={<Search />} />
 
-            <Route
-              path='/:sortType?/:timeFilterName?'
-              element={
-                <ValidFeedRoute>
-                  <Home />
-                </ValidFeedRoute>
-              }
-            />
+            {!isModern && (
+              <>
+                <Route
+                  path='/:sortType?/:timeFilterName?'
+                  element={
+                    <ValidFeedRoute>
+                      <Home />
+                    </ValidFeedRoute>
+                  }
+                />
 
-            <Route
-              path='/s/all/:sortType?/:timeFilterName?'
-              element={
-                <ValidFeedRoute>
-                  <All />
-                </ValidFeedRoute>
-              }
-            />
-
+                <Route
+                  path='/s/all/:sortType?/:timeFilterName?'
+                  element={
+                    <ValidFeedRoute>
+                      <All />
+                    </ValidFeedRoute>
+                  }
+                />
+              </>
+            )}
             <Route
               path='/s/mod/:sortType?/:timeFilterName?'
               element={
@@ -245,14 +284,16 @@ const App = () => {
               }
             />
 
-            <Route
-              path='/s/:communityAddress/:sortType?/:timeFilterName?'
-              element={
-                <ValidFeedRoute>
-                  <CommunityView />
-                </ValidFeedRoute>
-              }
-            />
+            {!isModern && (
+              <Route
+                path='/s/:communityAddress/:sortType?/:timeFilterName?'
+                element={
+                  <ValidFeedRoute>
+                    <CommunityView />
+                  </ValidFeedRoute>
+                }
+              />
+            )}
 
             <Route
               path='/domain/:domain/:sortType?/:timeFilterName?'

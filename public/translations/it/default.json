@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Caricato, ma l'host deve esaminare questo file prima che possa essere visualizzato. Il link inizierà a funzionare una volta approvato, il che può richiedere qualche ora. Puoi pubblicarlo subito.",
   "upload_failed": "Caricamento fallito",
   "upload_failed_all_providers": "Tutti i provider sono falliti",
-  "upload_failed_preferred_guidance": "Scegli un provider diverso o imposta su casuale."
+  "upload_failed_preferred_guidance": "Scegli un provider diverso o imposta su casuale.",
+  "navigation_menu": "menu di navigazione",
+  "old_interface": "vecchia interfaccia",
+  "modern_interface": "interfaccia moderna",
+  "interface": "interfaccia",
+  "dark_mode": "modalità scura",
+  "close": "chiudi",
+  "upvote": "vota a favore",
+  "downvote": "vota contro"
 }

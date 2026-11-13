@@ -455,5 +455,13 @@
   "upload_awaiting_review": "اپ لوڈ ہو گیا، لیکن دیکھے جانے سے پہلے ہوسٹ کو اس فائل کا جائزہ لینا ہوگا۔ منظوری ملتے ہی لنک کام کرنے لگے گا، جس میں چند گھنٹے لگ سکتے ہیں۔ آپ اسے ابھی پوسٹ کر سکتے ہیں۔",
   "upload_failed": "اپ لوڈ ناکام",
   "upload_failed_all_providers": "تمام فراہم کنندہ ناکام ہو گئے",
-  "upload_failed_preferred_guidance": "مختلف فراہم کنندہ منتخب کریں یا بے ترتیب پر سیٹ کریں۔"
+  "upload_failed_preferred_guidance": "مختلف فراہم کنندہ منتخب کریں یا بے ترتیب پر سیٹ کریں۔",
+  "navigation_menu": "نیویگیشن مینو",
+  "old_interface": "پرانا انٹرفیس",
+  "modern_interface": "جدید انٹرفیس",
+  "interface": "انٹرفیس",
+  "dark_mode": "ڈارک موڈ",
+  "close": "بند کریں",
+  "upvote": "اپ ووٹ",
+  "downvote": "ڈاؤن ووٹ"
 }

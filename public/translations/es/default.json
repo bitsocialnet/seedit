@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Subido, pero el alojamiento debe revisar este archivo antes de que pueda verse. El enlace empezará a funcionar cuando se apruebe, lo que puede tardar unas horas. Puedes publicarlo ahora.",
   "upload_failed": "Error al subir",
   "upload_failed_all_providers": "Todos los proveedores fallaron",
-  "upload_failed_preferred_guidance": "Elige un proveedor diferente o configura en aleatorio."
+  "upload_failed_preferred_guidance": "Elige un proveedor diferente o configura en aleatorio.",
+  "navigation_menu": "menú de navegación",
+  "old_interface": "interfaz antigua",
+  "modern_interface": "interfaz moderna",
+  "interface": "interfaz",
+  "dark_mode": "modo oscuro",
+  "close": "cerrar",
+  "upvote": "votar a favor",
+  "downvote": "votar en contra"
 }

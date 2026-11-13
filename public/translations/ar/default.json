@@ -455,5 +455,13 @@
   "upload_awaiting_review": "تم الرفع، لكن يجب أن يراجع المضيف هذا الملف قبل أن يمكن عرضه. سيبدأ الرابط بالعمل بمجرد الموافقة عليه، وقد يستغرق ذلك بضع ساعات. يمكنك نشره الآن.",
   "upload_failed": "فشل التحميل",
   "upload_failed_all_providers": "فشل جميع مزودي الخدمة",
-  "upload_failed_preferred_guidance": "اختر مزود خدمة مختلفًا أو اضبط على عشوائي."
+  "upload_failed_preferred_guidance": "اختر مزود خدمة مختلفًا أو اضبط على عشوائي.",
+  "navigation_menu": "قائمة التنقل",
+  "old_interface": "الواجهة القديمة",
+  "modern_interface": "الواجهة الحديثة",
+  "interface": "الواجهة",
+  "dark_mode": "الوضع الداكن",
+  "close": "إغلاق",
+  "upvote": "تصويت إيجابي",
+  "downvote": "تصويت سلبي"
 }

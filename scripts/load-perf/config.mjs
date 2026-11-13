@@ -10,6 +10,9 @@ export default {
     accountBar: '[class*="_content_"]:has(> [class*="_user_"])',
     header: '[class^="_header_"]',
     sidebar: '[class*="_sidebar_"]',
+    // The modern interface's left navigation and right rail.
+    nav: '[class*="_nav_"]',
+    rail: '[class*="_rail_"]',
     feed: '[class*="_feed_"]',
     footer: 'footer',
   },
@@ -23,5 +26,8 @@ export default {
     { name: 'home-german', hash: '/', staticShell: false, locale: 'de-DE' },
     { name: 'home-content-options', hash: '/', staticShell: false, storage: { 'content-options': '{"state":{"hideDefaultCommunities":true},"version":1}' } },
     { name: 'community', hash: '/s/seedit.bso', staticShell: false, content: '[class*="_title_"] a' },
+    // The shell shows the default interface, so a visitor who chose the old one loads without it.
+    { name: 'home-old', hash: '/', staticShell: false, storage: { uiMode: 'old' }, content: '[class*="_title_"] a' },
+    { name: 'community-old', hash: '/s/seedit.bso', staticShell: false, storage: { uiMode: 'old' }, content: '[class*="_title_"] a' },
   ],
 };

@@ -6,6 +6,8 @@ import { setAccount, useAccount, usePkcRpcSettings } from '@bitsocial/bitsocial-
 import { isSettingsAdvancedView, isSettingsP2pStatsView, isSettingsContentOptionsView, isSettingsDebugView } from '../../lib/utils/view-utils';
 import { getReviewableSettingsUpgrades, getSettingsUpgradeKey, type SettingsUpgradeAccount } from '../../lib/settings-upgrades';
 import useTheme from '../../hooks/use-theme';
+import useUiModeStore from '../../stores/use-ui-mode-store';
+import { isUiMode } from '../../lib/utils/ui-mode-utils';
 import useSettingsUpgradeReviewStore from '../../stores/use-settings-upgrade-review-store';
 import { VersionWithCommit } from '../../components/version';
 import AccountSettings from './account-settings';
@@ -130,6 +132,19 @@ const ThemeSettings = () => {
   );
 };
 
+const UiModeSettings = () => {
+  const { t } = useTranslation();
+  const uiMode = useUiModeStore((state) => state.uiMode);
+  const setUiMode = useUiModeStore((state) => state.setUiMode);
+
+  return (
+    <select value={uiMode} aria-label={t('interface')} onChange={(e) => isUiMode(e.target.value) && setUiMode(e.target.value)}>
+      <option value='modern'>{t('modern_interface')}</option>
+      <option value='old'>{t('old_interface')}</option>
+    </select>
+  );
+};
+
 const DisplayNameSetting = () => {
   const { t } = useTranslation();
   const account = useAccount();
@@ -193,6 +208,12 @@ const GeneralSettings = () => {
         <span className={styles.categoryTitle}>{t('theme')}</span>
         <span className={styles.categorySettings}>
           <ThemeSettings />
+        </span>
+      </div>
+      <div className={styles.category}>
+        <span className={styles.categoryTitle}>{t('interface')}</span>
+        <span className={styles.categorySettings}>
+          <UiModeSettings />
         </span>
       </div>
       <div className={`${styles.category} ${location.hash === '#displayName' ? styles.highlightedSetting : ''}`} id='displayName'>

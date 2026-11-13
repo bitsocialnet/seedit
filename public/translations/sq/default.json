@@ -455,5 +455,13 @@
   "upload_awaiting_review": "U ngarkua, por hosti duhet ta shqyrtojë këtë skedar para se të mund të shihet. Lidhja do të fillojë të funksionojë sapo të miratohet, gjë që mund të zgjasë disa orë. Mund ta postoni tani.",
   "upload_failed": "Ngarkimi dështoi",
   "upload_failed_all_providers": "Të gjithë ofruesit dështuan",
-  "upload_failed_preferred_guidance": "Zgjidhni një ofrues tjetër ose vendosni në rastësishëm."
+  "upload_failed_preferred_guidance": "Zgjidhni një ofrues tjetër ose vendosni në rastësishëm.",
+  "navigation_menu": "menuja e navigimit",
+  "old_interface": "ndërfaqja e vjetër",
+  "modern_interface": "ndërfaqja moderne",
+  "interface": "ndërfaqja",
+  "dark_mode": "modaliteti i errët",
+  "close": "mbyll",
+  "upvote": "votë pro",
+  "downvote": "votë kundër"
 }

@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Nahráno, ale hostitel musí tento soubor před zobrazením zkontrolovat. Odkaz začne fungovat po schválení, což může trvat několik hodin. Můžete ho zveřejnit už teď.",
   "upload_failed": "Nahrávání se nezdařilo",
   "upload_failed_all_providers": "Všichni poskytovatelé selhali",
-  "upload_failed_preferred_guidance": "Zvolte jiného poskytovatele nebo nastavte náhodné."
+  "upload_failed_preferred_guidance": "Zvolte jiného poskytovatele nebo nastavte náhodné.",
+  "navigation_menu": "navigační nabídka",
+  "old_interface": "staré rozhraní",
+  "modern_interface": "moderní rozhraní",
+  "interface": "rozhraní",
+  "dark_mode": "tmavý režim",
+  "close": "zavřít",
+  "upvote": "hlasovat pro",
+  "downvote": "hlasovat proti"
 }

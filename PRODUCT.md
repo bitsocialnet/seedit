@@ -10,7 +10,7 @@ People who want a familiar Reddit-style discussion experience without a central 
 
 ## Product Purpose
 
-Seedit is a serverless, adminless Bitsocial client with an old.reddit-inspired interface. It should make peer-to-peer communities feel understandable and dependable while preserving user control over identity, subscriptions, discovery, and moderation boundaries.
+Seedit is a serverless, adminless Bitsocial client with two interfaces: a modern one by default and the old.reddit-inspired one, which stays available from settings, the account menu, or old.seedit.app. It should make peer-to-peer communities feel understandable and dependable while preserving user control over identity, subscriptions, discovery, and moderation boundaries.
 
 ## Brand Personality
 
@@ -29,7 +29,7 @@ Familiar, direct, independent. Seedit should feel dense and practical rather tha
 2. Discovery can recommend without silently changing user-owned state.
 3. Prefer readable, inspectable identity over cosmetic URL shortcuts.
 4. Progressive disclosure should keep routine browsing uninterrupted.
-5. Reuse Seedit's compact old.reddit interaction vocabulary before adding new UI patterns.
+5. In the old interface, reuse Seedit's compact old.reddit interaction vocabulary before adding new UI patterns. The modern interface may look current, but keeps principles 1 to 4.
 
 ## Accessibility & Inclusion
 

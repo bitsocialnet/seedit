@@ -34,17 +34,18 @@ test('inlines startup stylesheets in place and keeps a disabled link for the run
 });
 
 test('adds the shell templates and insertion script after an empty root', () => {
-  const output = injectStaticShell('<body><div id="root"></div></body>', { 'desktop-light': '<div class="app">shell</div>' });
+  const output = injectStaticShell('<body><div id="root"></div></body>', { 'desktop-light': '<div class="app">shell</div>' }, 'modern');
   assert.match(output, /<div id="root"><\/div><template id="static-shell-desktop-light"><div class="app">shell<\/div><\/template><script>/);
-  assert.throws(() => injectStaticShell('<body><div id="root">x</div></body>', {}), /no empty/);
+  assert.throws(() => injectStaticShell('<body><div id="root">x</div></body>', {}, 'modern'), /no empty/);
+  assert.throws(() => injectStaticShell('<body><div id="root"></div></body>', {}, undefined), /unknown ui mode/);
 });
 
 const variants = { 'desktop-light': 'desktop light', 'desktop-dark': 'desktop dark', 'mobile-light': 'mobile light', 'mobile-dark': 'mobile dark' };
 
-const loadWithShell = ({ hash = '', storage = {}, languages = ['en-US'], width = 1280 } = {}) => {
+const loadWithShell = ({ search = '', hash = '', storage = {}, languages = ['en-US'], width = 1280, uiMode = 'modern' } = {}) => {
   const markup = Object.fromEntries(Object.entries(variants).map(([name, text]) => [name, `<div class="app">${text}</div>`]));
-  const html = injectStaticShell('<!doctype html><html><body><div id="root"></div></body></html>', markup);
-  const dom = new JSDOM(html, { url: `https://seedit.test/${hash}`, runScripts: 'outside-only' });
+  const html = injectStaticShell('<!doctype html><html><body><div id="root"></div></body></html>', markup, uiMode);
+  const dom = new JSDOM(html, { url: `https://seedit.test/${search}${hash}`, runScripts: 'outside-only' });
   for (const [key, value] of Object.entries(storage)) dom.window.localStorage.setItem(key, value);
   Object.defineProperty(dom.window.navigator, 'languages', { value: languages });
   Object.defineProperty(dom.window, 'innerWidth', { value: width });
@@ -59,6 +60,8 @@ test('shows the shell variant matching the visitor on the home page', () => {
   assert.equal(loadWithShell({ hash: '#/', storage: { theme: 'dark' } }), 'desktop dark / body dark');
   assert.equal(loadWithShell({ width: 375 }), 'mobile light / body light');
   assert.equal(loadWithShell({ storage: { i18nextLng: 'en' }, languages: ['fr-FR'] }), 'desktop light / body light');
+  assert.equal(loadWithShell({ storage: { uiMode: 'modern' } }), 'desktop light / body light');
+  assert.equal(loadWithShell({ uiMode: 'old', storage: { uiMode: 'old' } }), 'desktop light / body light');
 });
 
 test('skips the shell when the first frame would differ', () => {
@@ -66,6 +69,9 @@ test('skips the shell when the first frame would differ', () => {
   assert.equal(loadWithShell({ languages: ['de-DE', 'en'] }), 'no shell');
   assert.equal(loadWithShell({ storage: { i18nextLng: 'de' } }), 'no shell');
   assert.equal(loadWithShell({ storage: { theme: 'sepia' } }), 'no shell');
+  assert.equal(loadWithShell({ storage: { uiMode: 'old' } }), 'no shell');
+  assert.equal(loadWithShell({ uiMode: 'old', storage: { uiMode: 'modern' } }), 'no shell');
+  assert.equal(loadWithShell({ search: '?ui=old' }), 'no shell');
   assert.equal(loadWithShell({ storage: { 'content-options': '{"state":{"hideDefaultCommunities":true},"version":0}' } }), 'no shell');
 });
 

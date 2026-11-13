@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Na-upload na, pero kailangang suriin muna ng host ang file na ito bago ito matingnan. Gagana ang link kapag naaprubahan na ito, na maaaring tumagal nang ilang oras. Puwede mo na itong i-post ngayon.",
   "upload_failed": "Nabigo ang pag-upload",
   "upload_failed_all_providers": "Lahat ng mga provider ay nabigo",
-  "upload_failed_preferred_guidance": "Pumili ng ibang provider o itakda sa random."
+  "upload_failed_preferred_guidance": "Pumili ng ibang provider o itakda sa random.",
+  "navigation_menu": "menu ng nabigasyon",
+  "old_interface": "lumang interface",
+  "modern_interface": "modernong interface",
+  "interface": "interface",
+  "dark_mode": "dark mode",
+  "close": "isara",
+  "upvote": "upvote",
+  "downvote": "downvote"
 }

@@ -1,0 +1,45 @@
+.avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--m-surface-raised);
+  color: #ffffff;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.small {
+  width: 24px;
+  height: 24px;
+  font-size: 12px;
+}
+
+.medium {
+  width: 32px;
+  height: 32px;
+  font-size: 15px;
+}
+
+.large {
+  width: 72px;
+  height: 72px;
+  font-size: 32px;
+  border: 4px solid var(--m-bg);
+}
+
+/* Fallback tones keep white initials at 4.5:1 contrast or better. */
+.tone0 { background: #2f7d32; }
+.tone1 { background: #1f6fb2; }
+.tone2 { background: #8a4fbf; }
+.tone3 { background: #b4471f; }
+.tone4 { background: #0f7f7a; }
+.tone5 { background: #a6325a; }

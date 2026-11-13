@@ -455,5 +455,13 @@
   "upload_awaiting_review": "הקובץ הועלה, אבל המארח צריך לבדוק אותו לפני שאפשר יהיה לצפות בו. הקישור יתחיל לעבוד לאחר שיאושר, וזה עשוי להימשך כמה שעות. אפשר לפרסם אותו עכשיו.",
   "upload_failed": "ההעלאה נכשלה",
   "upload_failed_all_providers": "כל הספקים נכשלו",
-  "upload_failed_preferred_guidance": "בחר ספק אחר או הגדר לאקראי."
+  "upload_failed_preferred_guidance": "בחר ספק אחר או הגדר לאקראי.",
+  "navigation_menu": "תפריט ניווט",
+  "old_interface": "ממשק ישן",
+  "modern_interface": "ממשק מודרני",
+  "interface": "ממשק",
+  "dark_mode": "מצב כהה",
+  "close": "סגירה",
+  "upvote": "הצבעה בעד",
+  "downvote": "הצבעה נגד"
 }

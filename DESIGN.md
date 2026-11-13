@@ -62,6 +62,10 @@ components:
     padding: "5px"
 ---
 
+## Two interfaces
+
+Seedit ships a modern interface (the default) and the old interface described in most of this file. Both run from one build and origin, so they share accounts, subscriptions, and routes; `src/stores/use-ui-mode-store.ts` holds the choice, and `?ui=old` or `?ui=modern` switches it once (old.seedit.app redirects to `seedit.app/?ui=old`). Routes the modern interface has not built yet render the old interface. The colors, typography, layout, and Do/Don't rules below apply to the old interface; the modern interface follows its own section at the end.
+
 ## Overview
 
 **Creative North Star: "The Familiar Community Front Page"**
@@ -142,3 +146,15 @@ Use inline notices or compact bordered boxes that fit the feed. Explain what hap
 - Do not make decentralization or crypto styling dominate routine browsing.
 - Do not silently change a user's chosen community or hide which address a route or subscription represents.
 - Do not rely on color alone for identity, loading, error, moderation, or subscription state.
+
+## Modern interface
+
+The modern interface lives in `modern-*` components and views. It reads like a current community app: a sticky header with search and create, a left navigation with the account's communities, a centered feed of posts, and a right rail for context at wide widths.
+
+- **Tokens:** use the `--m-*` variables defined for light and dark on the shell in `src/components/modern-layout/modern-layout.module.css`. Add a token there, for both themes, before using a literal color. Text on upvote, downvote, and danger fills uses `--m-on-strong`, and the sprout green is the accent.
+- **Typography:** the system UI font stack at 14px, 18px semibold post titles, 12px metadata. No web fonts. Translated labels are lowercase in the locale files, so modern labels use the `sentenceCase` class rather than new keys.
+- **Shape:** rounded controls, pill buttons, 12–16px media and card radii, and hover backgrounds are part of this interface. Keep decoration functional: no decorative gradients or glass effects.
+- **Layout:** the left navigation is static from 1024px and a drawer below it; the right rail shows from 1200px; the header must fit at 375px without horizontal overflow.
+- **Identity:** show `s/` and `u/` addresses next to names, as the old interface does, and keep the subscription, community, and moderation boundaries explicit.
+- **Accessibility:** every icon-only control has an aria-label, icons are hidden from assistive technology, and focus is visible.
+

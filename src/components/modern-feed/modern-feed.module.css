@@ -1,0 +1,98 @@
+.feed {
+  min-width: 0;
+}
+
+.sortBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 0 8px 8px;
+  border-bottom: 1px solid var(--m-border);
+}
+
+.sortTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.sortTab {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  color: var(--m-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.sortTab:hover {
+  background: var(--m-surface-hover);
+  color: var(--m-text);
+}
+
+.sortTabActive,
+.sortTabActive:hover {
+  background: var(--m-surface-raised);
+  color: var(--m-text);
+}
+
+.timeFilter {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  background: var(--m-surface);
+  color: var(--m-text);
+  font-size: 13px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 72px;
+  color: var(--m-text-muted);
+  font-size: 14px;
+}
+
+.footerText::first-letter {
+  text-transform: uppercase;
+}
+
+.footerEnd {
+  height: 48px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--m-border-strong);
+  border-top-color: var(--m-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+@media (max-width: 639px) {
+  .sortBar {
+    padding: 0 12px 8px;
+  }
+}

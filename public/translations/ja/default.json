@@ -455,5 +455,13 @@
   "upload_awaiting_review": "アップロードしましたが、表示できるようになる前にホストによるこのファイルの審査が必要です。承認されるとリンクが機能し始めます。数時間かかる場合があります。今すぐ投稿することもできます。",
   "upload_failed": "アップロードに失敗しました",
   "upload_failed_all_providers": "すべてのプロバイダーが失敗しました",
-  "upload_failed_preferred_guidance": "別のプロバイダーを選択するか、ランダムに設定してください。"
+  "upload_failed_preferred_guidance": "別のプロバイダーを選択するか、ランダムに設定してください。",
+  "navigation_menu": "ナビゲーションメニュー",
+  "old_interface": "旧インターフェース",
+  "modern_interface": "モダンインターフェース",
+  "interface": "インターフェース",
+  "dark_mode": "ダークモード",
+  "close": "閉じる",
+  "upvote": "賛成票",
+  "downvote": "反対票"
 }

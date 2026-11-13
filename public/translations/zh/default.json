@@ -455,5 +455,13 @@
   "upload_awaiting_review": "已上传，但托管方需要先审核此文件才能查看。审核通过后链接即可使用，这可能需要几个小时。你现在就可以发布。",
   "upload_failed": "上传失败",
   "upload_failed_all_providers": "所有提供商均失败",
-  "upload_failed_preferred_guidance": "选择其他提供商或设置为随机。"
+  "upload_failed_preferred_guidance": "选择其他提供商或设置为随机。",
+  "navigation_menu": "导航菜单",
+  "old_interface": "旧版界面",
+  "modern_interface": "现代界面",
+  "interface": "界面",
+  "dark_mode": "深色模式",
+  "close": "关闭",
+  "upvote": "赞成",
+  "downvote": "反对"
 }

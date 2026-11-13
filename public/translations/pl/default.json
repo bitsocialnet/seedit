@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Przesłano, ale host musi sprawdzić ten plik, zanim będzie można go wyświetlić. Link zacznie działać po zatwierdzeniu, co może potrwać kilka godzin. Możesz opublikować go już teraz.",
   "upload_failed": "Przesyłanie nie powiodło się",
   "upload_failed_all_providers": "Wszyscy dostawcy zawiedli",
-  "upload_failed_preferred_guidance": "Wybierz innego dostawcę lub ustaw na losowy."
+  "upload_failed_preferred_guidance": "Wybierz innego dostawcę lub ustaw na losowy.",
+  "navigation_menu": "menu nawigacji",
+  "old_interface": "stary interfejs",
+  "modern_interface": "nowoczesny interfejs",
+  "interface": "interfejs",
+  "dark_mode": "tryb ciemny",
+  "close": "zamknij",
+  "upvote": "głos za",
+  "downvote": "głos przeciw"
 }

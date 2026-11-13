@@ -10,6 +10,19 @@ const waitForAccount = async (page) => {
   await page.getByRole('textbox', { name: 'My Name', exact: true }).waitFor();
   await page.waitForFunction(() => [...document.querySelectorAll('select option')].some((option) => option.textContent?.startsWith('u/')));
 };
+// The built-in protocol fixture, with remote media blocked so the rendering gate is independent of external
+// image/CDN availability, in the interface the scenario measures.
+const prepareMockFeed = async ({ page, uiMode }) => {
+  await page.addInitScript((mode) => {
+    localStorage.setItem('development-debug:v1', JSON.stringify({ mockContentEnabled: true, showFeedResetButton: false }));
+    localStorage.setItem('uiMode', mode);
+  }, uiMode);
+  await page.route('**/*', (route) =>
+    ['image', 'media'].includes(route.request().resourceType()) && !new URL(route.request().url()).hostname.match(/^(127\.0\.0\.1|localhost)$/)
+      ? route.abort()
+      : route.continue(),
+  );
+};
 const localBudget = (name, updates) => ({ components: { [name]: { minUpdates: updates, maxUpdates: updates } }, maxCommits: 30, maxRenderMs: 1000, maxActionMs: 5000 });
 
 export default {
@@ -70,16 +83,7 @@ export default {
           path: '/#/s/memes.eth',
           async prepare({ page }) {
             await prepare({ page });
-            await page.addInitScript(() => {
-              localStorage.setItem('development-debug:v1', JSON.stringify({ mockContentEnabled: true, showFeedResetButton: false }));
-            });
-            // Fixed built-in protocol fixture, with remote media blocked so the
-            // rendering gate is independent of external image/CDN availability.
-            await page.route('**/*', (route) =>
-              ['image', 'media'].includes(route.request().resourceType()) && !new URL(route.request().url()).hostname.match(/^(127\.0\.0\.1|localhost)$/)
-                ? route.abort()
-                : route.continue(),
-            );
+            await prepareMockFeed({ page, uiMode: 'old' });
           },
           async run({ page, measure }) {
             const posts = page.locator('.expando-button');
@@ -105,6 +109,27 @@ export default {
                 await page.waitForFunction(() => window.scrollY > 0);
               },
               { components: { FeedPost: { minMounts: 1, maxMounts: 20, maxUpdates: 0 } }, maxCommits: 100, maxRenderMs: 3000, maxActionMs: 10000 },
+            );
+          },
+        },
+        {
+          name: 'populated-modern-feed',
+          path: '/#/s/memes.eth',
+          async prepare({ page }) {
+            await prepare({ page });
+            await prepareMockFeed({ page, uiMode: 'modern' });
+          },
+          async run({ page, measure }) {
+            const posts = page.locator('article');
+            await posts.first().waitFor();
+            assert.ok((await posts.count()) >= 5, 'Expected populated protocol fixture');
+            await measure(
+              'scroll-modern-feed',
+              async () => {
+                await page.evaluate(() => window.scrollTo(0, 1500));
+                await page.waitForFunction(() => window.scrollY > 0);
+              },
+              { components: { ModernPostCard: { minMounts: 1, maxMounts: 20, maxUpdates: 0 } }, maxCommits: 100, maxRenderMs: 3000, maxActionMs: 10000 },
             );
           },
         },

@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Hochgeladen, aber der Host muss diese Datei prüfen, bevor sie angezeigt werden kann. Der Link funktioniert, sobald sie freigegeben ist, was einige Stunden dauern kann. Du kannst sie jetzt schon posten.",
   "upload_failed": "Upload fehlgeschlagen",
   "upload_failed_all_providers": "Alle Anbieter sind fehlgeschlagen",
-  "upload_failed_preferred_guidance": "Wählen Sie einen anderen Anbieter oder setzen Sie auf Zufall."
+  "upload_failed_preferred_guidance": "Wählen Sie einen anderen Anbieter oder setzen Sie auf Zufall.",
+  "navigation_menu": "Navigationsmenü",
+  "old_interface": "alte Oberfläche",
+  "modern_interface": "moderne Oberfläche",
+  "interface": "Oberfläche",
+  "dark_mode": "Dunkelmodus",
+  "close": "schließen",
+  "upvote": "positiv bewerten",
+  "downvote": "negativ bewerten"
 }

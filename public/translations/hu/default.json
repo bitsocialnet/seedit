@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Feltöltve, de a tárhelynek ellenőriznie kell ezt a fájlt, mielőtt megtekinthető lesz. A link a jóváhagyás után kezd működni, ami néhány órát is igénybe vehet. Már most közzéteheted.",
   "upload_failed": "A feltöltés sikertelen",
   "upload_failed_all_providers": "Minden szolgáltató sikertelen volt",
-  "upload_failed_preferred_guidance": "Válasszon másik szolgáltatót vagy állítsa véletlenszerűre."
+  "upload_failed_preferred_guidance": "Válasszon másik szolgáltatót vagy állítsa véletlenszerűre.",
+  "navigation_menu": "navigációs menü",
+  "old_interface": "régi felület",
+  "modern_interface": "modern felület",
+  "interface": "felület",
+  "dark_mode": "sötét mód",
+  "close": "bezárás",
+  "upvote": "pozitív szavazat",
+  "downvote": "negatív szavazat"
 }

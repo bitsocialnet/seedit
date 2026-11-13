@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Uppladdad, men värden måste granska filen innan den kan visas. Länken börjar fungera när den har godkänts, vilket kan ta några timmar. Du kan posta den nu.",
   "upload_failed": "Uppladdning misslyckades",
   "upload_failed_all_providers": "Alla leverantörer misslyckades",
-  "upload_failed_preferred_guidance": "Välj en annan leverantör eller sätt till slumpmässig."
+  "upload_failed_preferred_guidance": "Välj en annan leverantör eller sätt till slumpmässig.",
+  "navigation_menu": "navigeringsmeny",
+  "old_interface": "gammalt gränssnitt",
+  "modern_interface": "modernt gränssnitt",
+  "interface": "gränssnitt",
+  "dark_mode": "mörkt läge",
+  "close": "stäng",
+  "upvote": "rösta upp",
+  "downvote": "rösta ned"
 }

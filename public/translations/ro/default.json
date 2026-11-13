@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Încărcat, dar gazda trebuie să verifice acest fișier înainte să poată fi vizualizat. Linkul va începe să funcționeze după aprobare, ceea ce poate dura câteva ore. Îl poți publica acum.",
   "upload_failed": "Încărcarea a eșuat",
   "upload_failed_all_providers": "Toți furnizorii au eșuat",
-  "upload_failed_preferred_guidance": "Alegeți un furnizor diferit sau setați la aleatoriu."
+  "upload_failed_preferred_guidance": "Alegeți un furnizor diferit sau setați la aleatoriu.",
+  "navigation_menu": "meniu de navigare",
+  "old_interface": "interfața veche",
+  "modern_interface": "interfața modernă",
+  "interface": "interfață",
+  "dark_mode": "mod întunecat",
+  "close": "închide",
+  "upvote": "vot pozitiv",
+  "downvote": "vot negativ"
 }

@@ -222,9 +222,10 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 - Reuse hooks for repeated logic. Model complex flows clearly instead of accumulating boolean flags.
 - Use React Router for navigation, not manual history manipulation.
 - Add comments for non-obvious constraints or logic, not for obvious code.
-- Preserve Seedit's compact old.reddit-inspired interaction language: dense feed rows, familiar voting and metadata order, square legacy controls, small browser-native typography, and the existing light/dark theme variables.
-- Use existing variables in `src/themes.css` before literal colors. New semantic tokens must work in both light and dark themes.
-- Do not introduce generic dashboard cards, rounded pills, decorative gradients, glass effects, soft elevation, oversized empty layouts, or crypto-first styling on routine browsing surfaces.
+- Seedit has two interfaces sharing one origin, account, and route table: the modern interface (default, `modern-*` components and views) and the old interface (everything else), chosen by `src/stores/use-ui-mode-store.ts`. Routes the modern interface has not built yet render the old one. Keep data logic in shared hooks so both interfaces use it.
+- In the old interface, preserve Seedit's compact old.reddit-inspired interaction language: dense feed rows, familiar voting and metadata order, square legacy controls, small browser-native typography, and the existing light/dark theme variables from `src/themes.css`. Do not add generic dashboard cards, rounded pills, decorative gradients, glass effects, soft elevation, or oversized empty layouts there.
+- In the modern interface, use the `--m-*` tokens defined on the modern layout shell; see the modern interface section of `DESIGN.md`.
+- New semantic tokens must work in both light and dark themes. Avoid crypto-first styling on routine browsing surfaces in either interface.
 - Keep community identity and user ownership inspectable: make clear which address, subscription, or moderation boundary an action affects.
 
 ## Git and ownership
@@ -304,7 +305,7 @@ People who want a familiar Reddit-style discussion experience without a central 
 
 ## Product Purpose
 
-Seedit is a serverless, adminless Bitsocial client with an old.reddit-inspired interface. It should make peer-to-peer communities feel understandable and dependable while preserving user control over identity, subscriptions, discovery, and moderation boundaries.
+Seedit is a serverless, adminless Bitsocial client with two interfaces: a modern one by default and the old.reddit-inspired one, which stays available from settings, the account menu, or old.seedit.app. It should make peer-to-peer communities feel understandable and dependable while preserving user control over identity, subscriptions, discovery, and moderation boundaries.
 
 ## Brand Personality
 
@@ -323,7 +324,7 @@ Familiar, direct, independent. Seedit should feel dense and practical rather tha
 2. Discovery can recommend without silently changing user-owned state.
 3. Prefer readable, inspectable identity over cosmetic URL shortcuts.
 4. Progressive disclosure should keep routine browsing uninterrupted.
-5. Reuse Seedit's compact old.reddit interaction vocabulary before adding new UI patterns.
+5. In the old interface, reuse Seedit's compact old.reddit interaction vocabulary before adding new UI patterns. The modern interface may look current, but keeps principles 1 to 4.
 
 ## Accessibility & Inclusion
 
@@ -400,6 +401,10 @@ components:
     rounded: "{rounded.legacy}"
     padding: "5px"
 ---
+
+## Two interfaces
+
+Seedit ships a modern interface (the default) and the old interface described in most of this file. Both run from one build and origin, so they share accounts, subscriptions, and routes; `src/stores/use-ui-mode-store.ts` holds the choice, and `?ui=old` or `?ui=modern` switches it once (old.seedit.app redirects to `seedit.app/?ui=old`). Routes the modern interface has not built yet render the old interface. The colors, typography, layout, and Do/Don't rules below apply to the old interface; the modern interface follows its own section at the end.
 
 ## Overview
 
@@ -481,6 +486,17 @@ Use inline notices or compact bordered boxes that fit the feed. Explain what hap
 - Do not make decentralization or crypto styling dominate routine browsing.
 - Do not silently change a user's chosen community or hide which address a route or subscription represents.
 - Do not rely on color alone for identity, loading, error, moderation, or subscription state.
+
+## Modern interface
+
+The modern interface lives in `modern-*` components and views. It reads like a current community app: a sticky header with search and create, a left navigation with the account's communities, a centered feed of posts, and a right rail for context at wide widths.
+
+- **Tokens:** use the `--m-*` variables defined for light and dark on the shell in `src/components/modern-layout/modern-layout.module.css`. Add a token there, for both themes, before using a literal color. Text on upvote, downvote, and danger fills uses `--m-on-strong`, and the sprout green is the accent.
+- **Typography:** the system UI font stack at 14px, 18px semibold post titles, 12px metadata. No web fonts. Translated labels are lowercase in the locale files, so modern labels use the `sentenceCase` class rather than new keys.
+- **Shape:** rounded controls, pill buttons, 12–16px media and card radii, and hover backgrounds are part of this interface. Keep decoration functional: no decorative gradients or glass effects.
+- **Layout:** the left navigation is static from 1024px and a drawer below it; the right rail shows from 1200px; the header must fit at 375px without horizontal overflow.
+- **Identity:** show `s/` and `u/` addresses next to names, as the old interface does, and keep the subscription, community, and moderation boundaries explicit.
+- **Accessibility:** every icon-only control has an aria-label, icons are hidden from assistive technology, and focus is visible.
 ```
 
 ---
@@ -496,7 +512,7 @@ These rules apply to `src/**`. Follow the repo-root `AGENTS.md` first, then use 
 
 - Before adding new state, decide whether it belongs in render, a reusable hook, or a Zustand store. Do not duplicate the same state logic across views.
 - Use `@bitsocial/bitsocial-react-hooks` for data access. Do not add data-fetching `useEffect` calls or effects that only synchronize derived state.
-- Read `DESIGN.md` before visual, layout, or theme work. Preserve Seedit's compact old.reddit-inspired hierarchy and verify both light and dark themes.
+- Read `DESIGN.md` before visual, layout, or theme work. Preserve the old interface's compact old.reddit-inspired hierarchy, follow the modern interface's own section for `modern-*` modules, and verify both light and dark themes.
 - For state/effect/data-flow or rendering-performance changes, review relevant React guidance. Choose checks and browser/viewports using `docs/agent-playbooks/verification.md`; a copy edit alone does not require React Doctor or a full build.
 - Prefer extending the colocated `*.test.ts(x)` file next to already-covered behavior.
 

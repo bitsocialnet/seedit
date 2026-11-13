@@ -455,5 +455,13 @@
   "upload_awaiting_review": "Yüklendi, ancak görüntülenebilmesi için barındırıcının bu dosyayı incelemesi gerekiyor. Bağlantı onaylandığında çalışmaya başlayacak; bu birkaç saat sürebilir. Şimdi gönderebilirsin.",
   "upload_failed": "Yükleme başarısız",
   "upload_failed_all_providers": "Tüm sağlayıcılar başarısız oldu",
-  "upload_failed_preferred_guidance": "Farklı bir sağlayıcı seçin veya rastgeleye ayarlayın."
+  "upload_failed_preferred_guidance": "Farklı bir sağlayıcı seçin veya rastgeleye ayarlayın.",
+  "navigation_menu": "gezinme menüsü",
+  "old_interface": "eski arayüz",
+  "modern_interface": "modern arayüz",
+  "interface": "arayüz",
+  "dark_mode": "karanlık mod",
+  "close": "kapat",
+  "upvote": "olumlu oy",
+  "downvote": "olumsuz oy"
 }

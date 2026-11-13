@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getHomeSubscriptionState } from './subscription-state';
+import { getHomeSubscriptionState } from './home-subscription-state';
 
 describe('getHomeSubscriptionState', () => {
   it('keeps an empty home loading while default subscriptions are still being checked', () => {

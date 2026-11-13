@@ -26,9 +26,14 @@ export const STATIC_SHELL_VARIANTS = {
 // localStorage "theme", i18next-browser-languagedetector checks ?lng=, the i18next cookie, then
 // cached i18nextLng values before the browser languages, and the persisted content options store
 // ("content-options", written only once a user changes an option) filters the top bar's links.
-const insertShellScript = `(function () {
+// src/stores/use-ui-mode-store.ts reads ?ui= and then localStorage "uiMode"; the shell shows the
+// interface it was rendered with, which is the default one for visitors who never chose.
+const getInsertShellScript = (uiMode) => `(function () {
   try {
     if (location.hash && location.hash !== '#' && location.hash !== '#/') return;
+    if (/[?&]ui=/.test(location.search)) return;
+    var uiMode = localStorage.getItem('uiMode');
+    if (uiMode !== null && uiMode !== ${JSON.stringify(uiMode)}) return;
     var theme = localStorage.getItem('theme') || 'light';
     if (theme !== 'light' && theme !== 'dark') return;
     if (localStorage.getItem('content-options') !== null) return;
@@ -76,13 +81,14 @@ export function inlineStartupStylesheets(html, preloadAttribute, base, readAsset
   });
 }
 
-export function injectStaticShell(html, variants) {
+export function injectStaticShell(html, variants, uiMode) {
   if (!html.includes('<div id="root"></div>')) throw new Error('static shell: index.html has no empty <div id="root"></div>');
+  if (uiMode !== 'modern' && uiMode !== 'old') throw new Error(`static shell: unknown ui mode ${uiMode}`);
   const templates = Object.entries(variants)
     .map(([name, markup]) => `<template id="static-shell-${name}">${markup}</template>`)
     .join('');
   // A replacer function keeps `$` sequences in the rendered markup literal.
-  return html.replace('<div id="root"></div>', () => `<div id="root"></div>${templates}<script>${insertShellScript}</script>`);
+  return html.replace('<div id="root"></div>', () => `<div id="root"></div>${templates}<script>${getInsertShellScript(uiMode)}</script>`);
 }
 
 export function staticShellPlugin({ preloadAttribute }) {
@@ -105,13 +111,13 @@ export function staticShellPlugin({ preloadAttribute }) {
         maxBuffer: 16 * 1024 * 1024,
         stdio: ['ignore', 'pipe', 'inherit'],
       });
-      const { variants } = JSON.parse(output);
+      const { variants, uiMode } = JSON.parse(output);
       const readAsset = (fileName) => {
         const asset = bundle[fileName];
         if (!asset || asset.type !== 'asset') throw new Error(`static shell: ${fileName} is not in the bundle`);
         return String(asset.source);
       };
-      index.source = injectStaticShell(inlineStartupStylesheets(String(index.source), preloadAttribute, base, readAsset), variants);
+      index.source = injectStaticShell(inlineStartupStylesheets(String(index.source), preloadAttribute, base, readAsset), variants, uiMode);
     },
   };
 }

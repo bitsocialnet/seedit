@@ -1,12 +1,8 @@
 import { useLocation, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAccount, useSubscribe, type Account } from '@bitsocial/bitsocial-react-hooks';
 import styles from './subscribe-button.module.css';
 import { isAuthorView, isProfileView, isPendingPostView } from '../../lib/utils/view-utils';
-import { persistStarterAccountUpdate } from '../../lib/utils/starter-account-persistence';
-import { leaveStarterSubscription, type SeeditStarterSubscriptions } from '../../lib/utils/starter-subscriptions';
-import { leaveDirectorySubscription, type SeeditDirectoryPreferences } from '../../lib/utils/directory-subscriptions';
-import { joinDirectoryWinnerAccount } from '../../lib/utils/directory-account-transforms';
+import useCommunitySubscription from '../../hooks/use-community-subscription';
 import type { SeeditDirectoryCode } from '../../lib/utils/directory-codes';
 
 interface subscribeButtonProps {
@@ -17,10 +13,7 @@ interface subscribeButtonProps {
 }
 
 const SubscribeButton = ({ address, directoryCode, directoryRevision, onUnsubscribe }: subscribeButtonProps) => {
-  const { subscribe, subscribed, unsubscribe } = useSubscribe({ communityAddress: address });
-  const account = useAccount() as
-    | (Account & { seeditDirectoryPreferences?: SeeditDirectoryPreferences; seeditStarterSubscriptions?: SeeditStarterSubscriptions })
-    | undefined;
+  const { subscribed, toggleSubscription } = useCommunitySubscription({ address, directoryCode, directoryRevision, onUnsubscribe });
   const { t } = useTranslation();
   const location = useLocation();
   const params = useParams();
@@ -32,54 +25,9 @@ const SubscribeButton = ({ address, directoryCode, directoryRevision, onUnsubscr
   const communityPageString = subscribed ? `${t('leave')}` : `${t('join')}`;
   const authorPageString = '+ friends'; // TODO: add functionality once implemented in backend
 
-  const handleSubscribe = async () => {
+  const handleSubscribe = () => {
     if (isInAuthorView) return; // TODO: remove once implemented in backend
-
-    try {
-      if (subscribed === false) {
-        if (address && account && directoryCode && directoryRevision) {
-          await persistStarterAccountUpdate(account.id, (currentAccount) => {
-            return joinDirectoryWinnerAccount(currentAccount, {
-              directoryCode,
-              address,
-              revision: directoryRevision,
-              authoritative: true,
-            });
-          });
-        } else {
-          await subscribe();
-        }
-      } else if (subscribed === true) {
-        if (address && account) {
-          await persistStarterAccountUpdate(account.id, (currentAccount) => {
-            const starterResult = leaveStarterSubscription({
-              subscriptions: currentAccount.subscriptions ?? [],
-              provenance: currentAccount.seeditStarterSubscriptions,
-              address,
-            });
-            const directoryResult = leaveDirectorySubscription({
-              subscriptions: starterResult.subscriptions,
-              preferences: currentAccount.seeditDirectoryPreferences,
-              address,
-            });
-            return {
-              ...currentAccount,
-              subscriptions: directoryResult.subscriptions,
-              seeditDirectoryPreferences: directoryResult.preferences,
-              ...(starterResult.provenance ? { seeditStarterSubscriptions: starterResult.provenance } : {}),
-            };
-          });
-        } else {
-          await unsubscribe();
-        }
-        if (onUnsubscribe && address) {
-          onUnsubscribe(address);
-        }
-      }
-    } catch (error) {
-      console.error('Subscription update error:', error);
-      alert(error instanceof Error ? error.message : t('failed'));
-    }
+    void toggleSubscription();
   };
 
   return (
