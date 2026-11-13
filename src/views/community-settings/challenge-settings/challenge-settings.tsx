@@ -429,6 +429,7 @@ const Challenges = memo(function Challenges({
   const { t } = useTranslation();
   const settings = useCommunitySettingsStore((state) => state.settings);
   const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
+  const isCreateDraft = useCommunitySettingsStore((state) => state.isCreateDraft);
   const location = useLocation();
   const isInCreateCommunityView = isCreateCommunityView(location.pathname);
   const challenges = settings?.challenges || readOnlyChallenges || [];
@@ -442,8 +443,16 @@ const Challenges = memo(function Challenges({
     valuesRef.current = { settings, setCommunitySettingsStore };
   });
 
+  // wait for the create view to initialize its draft, which would otherwise replace the default challenge
   useEffect(() => {
-    if (isInCreateCommunityView && !hasSetDefaultChallenge.current && challengeOptions && challengesSettings && !valuesRef.current.settings?.challenges?.length) {
+    if (
+      isInCreateCommunityView &&
+      isCreateDraft &&
+      !hasSetDefaultChallenge.current &&
+      challengeOptions &&
+      challengesSettings &&
+      !valuesRef.current.settings?.challenges?.length
+    ) {
       const defaultChallengeName = challengesSettings?.['captcha-canvas-v3'] ? 'captcha-canvas-v3' : challengeNames?.[0] || Object.keys(challengeOptions)[0];
       const defaultChallenge = {
         name: defaultChallengeName,
@@ -459,7 +468,7 @@ const Challenges = memo(function Challenges({
 
       hasSetDefaultChallenge.current = true;
     }
-  }, [isInCreateCommunityView, challengeOptions, challengesSettings, challengeNames]);
+  }, [isInCreateCommunityView, isCreateDraft, challengeOptions, challengesSettings, challengeNames]);
 
   const toggleSettings = (index: number) => {
     const newShowSettings = [...showSettings];

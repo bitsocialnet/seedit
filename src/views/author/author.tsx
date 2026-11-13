@@ -64,35 +64,40 @@ const Author = () => {
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
 
   let virtuosoData;
+  let authorTab = 'overview';
   if (isInAuthorCommentsView) {
     virtuosoData = replyComments;
+    authorTab = 'comments';
   } else if (isInAuthorSubmittedView) {
     virtuosoData = postComments;
+    authorTab = 'submitted';
   } else {
     virtuosoData = authorComments;
   }
 
+  // save last virtuoso state on each scroll, keyed by the list it belongs to
+  const virtuosoStateKey = `${authorAddress ?? ''}/${authorTab}/${sortType ?? ''}`;
   useEffect(() => {
     const setLastVirtuosoState = () =>
       virtuosoRef.current?.getState((snapshot: StateSnapshot) => {
         if (snapshot?.ranges?.length) {
-          const key = `${authorAddress ?? ''}${sortType ?? ''}`;
-          lastVirtuosoStates[key] = snapshot;
+          lastVirtuosoStates[virtuosoStateKey] = snapshot;
         }
       });
     window.addEventListener('scroll', setLastVirtuosoState);
     return () => window.removeEventListener('scroll', setLastVirtuosoState);
-  }, [authorAddress, sortType]);
+  }, [virtuosoStateKey]);
 
-  const key = `${authorAddress ?? ''}${sortType ?? ''}`;
-  const lastVirtuosoState = lastVirtuosoStates?.[key];
+  const lastVirtuosoState = lastVirtuosoStates?.[virtuosoStateKey];
 
-  // always redirect to latest author cid
+  // always redirect to latest author cid, replacing only the cid segment of /u/:authorAddress/comments/:commentCid so the tab stays
   useEffect(() => {
     if (authorAddress && lastCommentCid && commentCid && lastCommentCid !== commentCid) {
-      navigate(`/u/${authorAddress}/comments/${lastCommentCid}`, { replace: true });
+      const pathSegments = location.pathname.split('/');
+      pathSegments[4] = lastCommentCid;
+      navigate({ pathname: pathSegments.join('/'), search: location.search, hash: location.hash }, { replace: true });
     }
-  }, [authorAddress, lastCommentCid, commentCid, navigate]);
+  }, [authorAddress, lastCommentCid, commentCid, navigate, location.pathname, location.search, location.hash]);
 
   const displayAddress = getDisplayAddress(author?.author?.shortAddress || '');
   const authorDisplayName = stripTripcodeProof(author?.author?.displayName);

@@ -4,11 +4,13 @@ import { validatePlan, candidatesFromSnapshot, runBrowserPlan } from '../browser
 import { createJevClient, JevError } from '../client.mjs';
 import { canonicalNavigationAllowed, browserOriginGuard, createPlaywrightDriver, findPlaywrightCli } from '../browser-playwright.mjs';
 import { runInNewContext } from 'node:vm';
-import { mkdtemp, writeFile, rm } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { mkdtemp, readFile, writeFile, rm } from 'node:fs/promises';
+import { once } from 'node:events';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 
 const basePlan = () => ({
   version: 1,
@@ -146,6 +148,54 @@ test('live CLI preflights missing credentials and model before a browser command
       assert.equal(JSON.parse(result.stdout).reason, reason);
     }
   } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('a signal during a live run closes its browser and releases the shared slot', { timeout: 20000 }, async () => {
+  const directory = await mkdtemp(path.join(tmpdir(), 'jev-signal-test-'));
+  const lock = path.join(directory, 'slot.lock');
+  try {
+    // Stands in for playwright-cli behind the real pw-session.sh; the observation hangs like a slow page.
+    const cli = path.join(directory, 'fake-playwright-cli');
+    await writeFile(
+      cli,
+      `#!/bin/bash
+dir="$(dirname "$0")"
+printf '%s\\n' "$*" >>"$dir/calls.log"
+[ "$1" = list ] && { echo '### Browsers'; exit 0; }
+if [ "$2" = run-code ]; then
+  if [ ! -f "$dir/capabilities" ]; then touch "$dir/capabilities"; printf '### Result\\n{"ariaSnapshot":true}\\n'; exit 0; fi
+  touch "$dir/observing"
+  for _ in $(seq 200); do [ -f "$dir/release" ] && break; sleep 0.05; done
+fi
+exit 0
+`,
+      { mode: 0o755 },
+    );
+    const planFile = path.join(directory, 'plan.json');
+    await writeFile(planFile, JSON.stringify(basePlan()));
+    const child = spawn(process.execPath, [fileURLToPath(new URL('../browser.mjs', import.meta.url)), '--plan', planFile, '--live', '--baseline'], {
+      env: { ...process.env, PLAYWRIGHT_CLI_BIN: cli, PLAYWRIGHT_RESOURCE_LOCK_DIR: lock },
+    });
+    let stdout = '';
+    child.stdout.on('data', (chunk) => (stdout += chunk));
+    const closed = once(child, 'close');
+    for (let attempt = 0; !existsSync(path.join(directory, 'observing')); attempt++) {
+      assert.ok(attempt < 400, 'the run never reached its first observation');
+      await new Promise((resolve) => setTimeout(resolve, 25));
+    }
+    assert.equal(existsSync(lock), true);
+
+    child.kill('SIGTERM');
+    const [code] = await closed;
+    assert.equal(code, 2);
+    assert.equal(JSON.parse(stdout).reason, 'interrupted');
+    assert.match(await readFile(path.join(directory, 'calls.log'), 'utf8'), /^-s=jev-\S+ close$/m);
+    assert.equal(existsSync(lock), false);
+  } finally {
+    // Lets a fake left behind by a killed run exit.
+    await writeFile(path.join(directory, 'release'), '');
     await rm(directory, { recursive: true, force: true });
   }
 });
@@ -479,6 +529,20 @@ test('semantic issue requires review while preserving separate deterministic com
   assert.equal(result.flowCompleted, true);
   assert.equal(result.reason, 'semantic_review_required');
   assert.deepEqual(result.semantic, [{ id: 'clarity', advisory: true, verdict: 'issue' }]);
+});
+
+test('an interrupt during a semantic check ends the run as interrupted and closes the browser', async () => {
+  const plan = basePlan();
+  plan.semanticChecks = [{ id: 'clarity', role: 'status', name: '', criterion: 'Explains next action' }];
+  const driver = fixtureDriver({
+    text: async () => {
+      throw new JevError('interrupted');
+    },
+  });
+  const result = await runBrowserPlan(plan, { driver, client: fixtureClient(['open', 'theme', 'close']) });
+  assert.equal(result.status, 'incomplete');
+  assert.equal(result.reason, 'interrupted');
+  assert.equal(driver.inspect().closed, 1);
 });
 
 test('baseline does not claim that unrun semantic checks passed', async () => {

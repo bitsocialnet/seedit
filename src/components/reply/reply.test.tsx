@@ -11,6 +11,7 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 
 const testState = vi.hoisted(() => ({
   blocked: false,
+  mediaInfo: undefined as Record<string, string> | undefined,
   pathname: '/s/example.bso/comments/post-cid',
   repliesByCid: {} as Record<string, Record<string, any>[]>,
 }));
@@ -34,14 +35,16 @@ vi.mock('../../hooks/use-replies', () => ({ default: (comment: { cid?: string })
 vi.mock('../../hooks/use-state-string', () => ({ default: () => '' }));
 vi.mock('../../hooks/use-upvote', () => ({ default: () => [false, vi.fn()] }));
 vi.mock('../../hooks/use-downvote', () => ({ default: () => [false, vi.fn()] }));
-vi.mock('../../hooks/use-comment-media-info', () => ({ useCommentMediaInfo: () => undefined }));
+vi.mock('../../hooks/use-comment-media-info', () => ({ useCommentMediaInfo: () => testState.mediaInfo }));
 vi.mock('../../lib/utils/media-utils', () => ({ getHasThumbnail: () => false }));
 vi.mock('../../lib/utils/time-utils', () => ({ formatLocalizedUTCTimestamp: () => '', getFormattedTimeAgo: () => '' }));
 vi.mock('../comment-edit-form', () => ({ default: () => null }));
 vi.mock('../loading-ellipsis', () => ({ default: () => null }));
 vi.mock('../markdown', () => ({ default: ({ content }: { content: string }) => createElement('p', null, content) }));
-vi.mock('../expand-button', () => ({ default: () => null }));
-vi.mock('../expando', () => ({ default: () => null }));
+vi.mock('../expand-button', () => ({
+  default: ({ toggleExpanded }: { toggleExpanded: () => void }) => createElement('span', { 'data-expand-button': '', onClick: toggleExpanded }),
+}));
+vi.mock('../expando', () => ({ default: () => createElement('div', { 'data-expando': '' }) }));
 vi.mock('../flair', () => ({
   default: ({ flair, author }: { flair: { text: string }; author?: boolean }) => (author ? createElement('span', { 'data-author-flair': '' }, flair.text) : null),
 }));
@@ -66,6 +69,7 @@ const replyOrder = () => Array.from(container.querySelectorAll('[data-reply-butt
 describe('Nested Reply identity', () => {
   beforeEach(() => {
     testState.blocked = false;
+    testState.mediaInfo = undefined;
     testState.pathname = '/s/example.bso/comments/post-cid';
     testState.repliesByCid = { parent: [child('first'), child('second')], first: [child('grandchild')] };
     container = document.createElement('div');
@@ -153,6 +157,21 @@ describe('Nested Reply identity', () => {
     testState.blocked = true;
     await renderRemovedReply();
     expect(collapseToggle('[+]')).toBeDefined();
+  });
+
+  it.each([
+    ['iframe', 'https://x.com/example/status/1'],
+    ['audio', 'https://example.com/song.mp3'],
+  ])('opens an %s embed without a thumbnail from its expand button', async (type, link) => {
+    testState.repliesByCid = {};
+    testState.mediaInfo = { type, url: link };
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, link } as any })));
+
+    const expandButton = container.querySelector<HTMLSpanElement>('[data-expand-button]');
+    expect(expandButton).not.toBeNull();
+    expect(container.querySelector('[data-expando]')).toBeNull();
+    await act(async () => expandButton?.click());
+    expect(container.querySelector('[data-expando]')).not.toBeNull();
   });
 
   it('renders author flairs in the inbox byline', async () => {

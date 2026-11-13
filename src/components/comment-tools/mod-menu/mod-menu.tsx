@@ -53,6 +53,14 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   const [publishCommentModerationOptions, setPublishCommentModerationOptions] = useState(defaultPublishOptions);
   const { publishCommentModeration } = usePublishCommentModeration(publishCommentModerationOptions);
 
+  // the menu mounts with the comment, long before it opens, so the form starts from the comment's current flags on open
+  const setModMenuOpen = (open: boolean) => {
+    if (open && !isModMenuOpen) {
+      setPublishCommentModerationOptions(defaultPublishOptions);
+    }
+    setIsModMenuOpen(open);
+  };
+
   const [banDuration, setBanDuration] = useState(1);
 
   const daysToTimestampInSeconds = (days: number) => {
@@ -103,7 +111,7 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   const { refs, floatingStyles, context } = useFloating({
     placement: 'bottom-start',
     open: isModMenuOpen,
-    onOpenChange: setIsModMenuOpen,
+    onOpenChange: setModMenuOpen,
     middleware: [offset(2), flip({ fallbackAxisSideDirection: 'end' }), shift()],
     whileElementsMounted: autoUpdate,
   });
@@ -134,7 +142,7 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   return (
     <>
       <li className={styles.button} ref={refs.setReference} {...(cid && getReferenceProps())}>
-        <span onClick={() => cid && setIsModMenuOpen(!isModMenuOpen)}>{t('moderation')}</span>
+        <span onClick={() => cid && setModMenuOpen(!isModMenuOpen)}>{t('moderation')}</span>
       </li>
       {isModMenuOpen && (
         <FloatingFocusManager context={context} modal={false}>

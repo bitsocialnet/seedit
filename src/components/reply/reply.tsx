@@ -177,17 +177,9 @@ const ReplyMedia = ({ commentMediaInfo, content, expanded, hasThumbnail, link, l
           isPdf={commentMediaInfo?.type === 'pdf'}
         />
       )}
-      {type === 'iframe' ||
-        (type === 'audio' && (
-          <ExpandButton
-            commentMediaInfo={commentMediaInfo}
-            content={content}
-            expanded={expanded}
-            hasThumbnail={hasThumbnail}
-            link={link}
-            toggleExpanded={toggleExpanded}
-          />
-        ))}
+      {(type === 'iframe' || type === 'audio') && (
+        <ExpandButton commentMediaInfo={commentMediaInfo} content={content} expanded={expanded} hasThumbnail={hasThumbnail} link={link} toggleExpanded={toggleExpanded} />
+      )}
       {link && (type === 'iframe' || type === 'webpage' || type === 'audio') && (
         <>
           <a href={link} target='_blank' rel='noopener noreferrer'>

@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
+import { once } from 'node:events';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -153,6 +154,23 @@ test('termination forwards to the active command, stops later checks, and releas
   const result = await run.completed;
   assert.equal(result.code, 143);
   assert.match(result.output, /signal SIGTERM/);
+  assert.equal(readFileSync(logPath, 'utf8'), 'build:start\n');
+  assert.equal(existsSync(lockPath), false);
+});
+
+test('a hangup from a closed terminal forwards to the active command and releases the lock', async (t) => {
+  const { root, lockPath, logPath, command } = fixture(t);
+  const gate = path.join(root, 'release-command');
+  const run = launchVerification({ cwd: root, lockPath, commands: [command('build', 0, gate), command('must-not-run')] });
+  t.after(() => run.child.kill('SIGTERM'));
+  await waitForFile(logPath);
+  run.child.kill('SIGHUP');
+  await once(run.child, 'exit');
+  // A command left running would hold the output pipes open; let it finish so the run can be inspected.
+  writeFileSync(gate, 'continue');
+  const result = await run.completed;
+  assert.equal(result.code, 129);
+  assert.match(result.output, /signal SIGHUP/);
   assert.equal(readFileSync(logPath, 'utf8'), 'build:start\n');
   assert.equal(existsSync(lockPath), false);
 });

@@ -12,7 +12,7 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 const testState = vi.hoisted(() => ({
   analyticsMock: vi.fn(),
   publishReply: vi.fn(),
-  publishReplyOptions: {} as { content?: string; link?: string },
+  publishReplyOptions: {} as { content?: string; link?: string; spoiler?: boolean; nsfw?: boolean },
 }));
 
 vi.mock('../../lib/analytics', () => ({ trackPostingEvent: (...args: unknown[]) => testState.analyticsMock(...args) }));
@@ -75,5 +75,27 @@ describe('ReplyForm posting analytics', () => {
 
     testState.publishReply.mock.calls[0][0].finish('post_publish_failed');
     expect(testState.analyticsMock.mock.calls).toEqual([['post_publish_failed', { kind: 'reply' }]]);
+  });
+
+  it('shows the link, spoiler and nsfw kept in the reply draft each time the options are shown', async () => {
+    testState.publishReplyOptions = { content: 'Reply body', link: 'https://example.com/image.png', spoiler: true, nsfw: true };
+    await act(async () => {
+      root.render(createElement(ReplyForm, { cid: 'parent-cid', communityAddress: 'example.bso', postCid: 'post-cid' }));
+    });
+    const toggleOptions = (text: string) =>
+      act(async () => (Array.from(container.querySelectorAll('span')).find((span) => span.textContent === text) as HTMLElement).click());
+
+    for (const [show, hide] of [
+      ['options', 'hide_options'],
+      ['options', 'hide_options'],
+    ]) {
+      await toggleOptions(show);
+      const [link] = Array.from(container.querySelectorAll<HTMLInputElement>('input:not([type])'));
+      const [spoiler, nsfw] = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+      expect(link.value).toBe('https://example.com/image.png');
+      expect(spoiler.checked).toBe(true);
+      expect(nsfw.checked).toBe(true);
+      await toggleOptions(hide);
+    }
   });
 });
