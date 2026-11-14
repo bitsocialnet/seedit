@@ -44,7 +44,7 @@ export function validateWorkflow(root) {
         `Manual skill needs Codex invocation policy: ${policyFile}`,
       );
     }
-    check(!/\.(?:codex|claude)\/skills\//.test(body), `Skill must reference canonical source paths: ${file}`);
+    check(!/\.(?:codex|cursor|claude)\/skills\//.test(body), `Skill must reference canonical source paths: ${file}`);
   }
 
   const config = parseToml(read('.codex/config.toml'));
