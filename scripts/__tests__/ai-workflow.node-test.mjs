@@ -78,7 +78,7 @@ test('duplicate legacy skill roots fail validation', (t) => {
 
 test('shared skills cannot link to retired Cursor skill paths', (t) => {
   const root = fixture(t);
-  const file = '.agents/skills/commit/SKILL.md';
+  const file = path.join('.agents/skills', 'commit/SKILL.md');
   fs.appendFileSync(path.join(root, file), '\nSee [commit](../../../.cursor/skills/commit/SKILL.md).\n');
   assert.ok(validateWorkflow(root).errors.includes(`Skill must reference canonical source paths: ${file}`));
 });
