@@ -103,10 +103,10 @@ If uncertain, ask the developer before adding an entry.
 - **Date:** 2026-04-08
 - **Updated:** 2026-07-10
 - **Observed by:** contributor + Codex
-- **Context:** Reviewing repo-managed agent configs under `.codex/agents`, `.cursor/agents`, and `.claude/agents`
+- **Context:** Reviewing repo-managed agent configs under `.codex/agents` and `.claude/agents`
 - **What was surprising:** Model names are harness-specific, and Codex does not document a `latest` alias that automatically tracks the current parent session.
 - **Impact:** Pinned Codex agent models or reasoning levels silently become stale and can diverge from the parent session a contributor intentionally selected.
-- **Mitigation:** Keep Cursor and Claude model controls harness-specific. In every committed Codex custom-agent TOML under `.codex/**/agents/*.toml`, omit both `model` and `model_reasoning_effort` so the agent inherits the current parent session settings.
+- **Mitigation:** In every committed Codex custom-agent TOML under `.codex/**/agents/*.toml`, omit both `model` and `model_reasoning_effort` so the agent inherits the current parent session settings.
 - **Status:** confirmed
 
 ### Regenerating the whole changelog reverts the rebrand
