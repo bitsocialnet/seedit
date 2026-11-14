@@ -11,7 +11,7 @@ const editTools = new Set(['Edit', 'Write', 'MultiEdit', 'apply_patch']);
 
 export function editedPaths(payload) {
   if (!payload || typeof payload !== 'object') return [];
-  if (payload.hook_event_name && !['PostToolUse', 'afterFileEdit'].includes(payload.hook_event_name)) return [];
+  if (payload.hook_event_name && payload.hook_event_name !== 'PostToolUse') return [];
   if (payload.tool_name && !editTools.has(payload.tool_name)) return [];
   if (payload.tool_response?.isError === true || payload.tool_response?.success === false) return [];
 
