@@ -1395,12 +1395,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bitsocial/bitsocial-react-hooks@npm:0.2.3":
-  version: 0.2.3
-  resolution: "@bitsocial/bitsocial-react-hooks@npm:0.2.3"
+"@bitsocial/bitsocial-react-hooks@npm:0.2.4":
+  version: 0.2.4
+  resolution: "@bitsocial/bitsocial-react-hooks@npm:0.2.4"
   dependencies:
     "@bitsocial/bso-resolver": "npm:0.0.10"
-    "@pkcprotocol/pkc-js": "npm:0.0.142"
+    "@pkcprotocol/pkc-js": "npm:0.0.148"
     "@pkcprotocol/pkc-logger": "npm:0.1.0"
     ethers: "npm:5.8.0"
     localforage: "npm:1.10.0"
@@ -1415,7 +1415,7 @@ __metadata:
     zustand: "npm:4.5.7"
   peerDependencies:
     react: ">=16.8"
-  checksum: 10c0/90404093f482612913b6e4ce2a99b06cc04a0895c301c694348b1b98214cdba51abe4abe4a755fec7d138a628bc69ee4f3c4b201185b8d248419748d656b5b5c
+  checksum: 10c0/5431de1bf47e197344bafaa3a55395a5c68905e4e3c6835cc6a6b0baff7449810304ea9dc97337eef651f8a0ef1bb3bea8c2a9b097a1d482fadaeb6218348fdd
   languageName: node
   linkType: hard
 
@@ -6510,9 +6510,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pkcprotocol/pkc-js@npm:0.0.144":
-  version: 0.0.144
-  resolution: "@pkcprotocol/pkc-js@npm:0.0.144"
+"@pkcprotocol/pkc-js@npm:0.0.148":
+  version: 0.0.148
+  resolution: "@pkcprotocol/pkc-js@npm:0.0.148"
   dependencies:
     "@enhances/with-resolvers": "npm:0.0.5"
     "@helia/bitswap": "npm:4.0.20"
@@ -6580,7 +6580,7 @@ __metadata:
     uuid: "npm:14.0.3"
     ws: "npm:8.22.0"
     zod: "npm:4.6.7"
-  checksum: 10c0/9818c9ed87f05a7397181b470379ad2552a78df0039b573615a6f476b5e91bb955feba7b9541ec686c8d0296e3e22a6604092c9b754f3130a972d56286135f6e
+  checksum: 10c0/b532299e54d35b13f88d99b218410109ecda167694e114243d19b70e8e5f988aae5fdc078fb998da593d6aca9a24f1728acde89bc6de344a867eb4ed273a21e7
   languageName: node
   linkType: hard
 
@@ -19712,7 +19712,7 @@ __metadata:
   resolution: "seedit@workspace:."
   dependencies:
     "@babel/core": "npm:7.29.7"
-    "@bitsocial/bitsocial-react-hooks": "npm:0.2.3"
+    "@bitsocial/bitsocial-react-hooks": "npm:0.2.4"
     "@bitsocial/bso-resolver": "npm:0.0.10"
     "@capacitor/android": "npm:7.6.9"
     "@capacitor/app": "npm:7.0.1"
@@ -19731,7 +19731,7 @@ __metadata:
     "@floating-ui/react": "npm:0.26.1"
     "@noble/curves": "npm:2.0.1"
     "@noble/hashes": "npm:2.0.1"
-    "@pkcprotocol/pkc-js": "npm:0.0.144"
+    "@pkcprotocol/pkc-js": "npm:0.0.148"
     "@playwright/cli": "npm:0.1.19"
     "@reforged/maker-appimage": "npm:6.0.0"
     "@rolldown/plugin-babel": "npm:0.2.4"
