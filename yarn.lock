@@ -1395,12 +1395,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bitsocial/bitsocial-react-hooks@npm:0.2.4":
-  version: 0.2.4
-  resolution: "@bitsocial/bitsocial-react-hooks@npm:0.2.4"
+"@bitsocial/bitsocial-react-hooks@npm:0.2.5":
+  version: 0.2.5
+  resolution: "@bitsocial/bitsocial-react-hooks@npm:0.2.5"
   dependencies:
     "@bitsocial/bso-resolver": "npm:0.0.10"
-    "@pkcprotocol/pkc-js": "npm:0.0.148"
+    "@pkcprotocol/pkc-js": "npm:0.0.151"
     "@pkcprotocol/pkc-logger": "npm:0.1.0"
     ethers: "npm:5.8.0"
     localforage: "npm:1.10.0"
@@ -1415,7 +1415,7 @@ __metadata:
     zustand: "npm:4.5.7"
   peerDependencies:
     react: ">=16.8"
-  checksum: 10c0/5431de1bf47e197344bafaa3a55395a5c68905e4e3c6835cc6a6b0baff7449810304ea9dc97337eef651f8a0ef1bb3bea8c2a9b097a1d482fadaeb6218348fdd
+  checksum: 10c0/2ec48a62051d8b8641951dfcbed6449a7c93dc94d1d49ca30b59c67607bc2b1b4fea26a269f3304dc425e1b3af83f0613bfb639d5a4e614a1c782b5de68a4d1e
   languageName: node
   linkType: hard
 
@@ -3501,6 +3501,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ipld/dag-pb@npm:4.2.0, @ipld/dag-pb@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "@ipld/dag-pb@npm:4.2.0"
+  dependencies:
+    multiformats: "npm:^14.0.0"
+  checksum: 10c0/f65427c32b08e35b0b0c4bb54110b145b492722824f4198d3c18c9983170e6b5d16aa33b033e643681e209c08f6773ef2680cafc8f94ee6ef4f2a54ba373b949
+  languageName: node
+  linkType: hard
+
 "@ipld/dag-pb@npm:^4.0.0":
   version: 4.1.5
   resolution: "@ipld/dag-pb@npm:4.1.5"
@@ -3516,15 +3525,6 @@ __metadata:
   dependencies:
     multiformats: "npm:^14.0.0"
   checksum: 10c0/93c68778c05749f021393c2a98f7966700ab921216ca632c7dded7ae8191e98770dafe15623755d4ea04c690d73d3980ef3b2ca08448fb7950353d071bdad133
-  languageName: node
-  linkType: hard
-
-"@ipld/dag-pb@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "@ipld/dag-pb@npm:4.2.0"
-  dependencies:
-    multiformats: "npm:^14.0.0"
-  checksum: 10c0/f65427c32b08e35b0b0c4bb54110b145b492722824f4198d3c18c9983170e6b5d16aa33b033e643681e209c08f6773ef2680cafc8f94ee6ef4f2a54ba373b949
   languageName: node
   linkType: hard
 
@@ -4982,6 +4982,15 @@ __metadata:
     uint8-varint: "npm:^2.0.1"
     uint8arrays: "npm:^5.0.0"
   checksum: 10c0/e5f360c6674cf96010fe7c6875e62c4bf35639e8a8a75e6fad9384a23f1abf35ca689b90446341ba47c242c83a9d529c25d2610bee46fe2ff68f44d19321c138
+  languageName: node
+  linkType: hard
+
+"@multiformats/murmur3@npm:2.2.5":
+  version: 2.2.5
+  resolution: "@multiformats/murmur3@npm:2.2.5"
+  dependencies:
+    multiformats: "npm:^14.0.0"
+  checksum: 10c0/f3e081af0ba8da49f719fa5b2608e77aaedf83cd872bf1bf777d60bd96dbb49373b12538d168933f9a6ed5d67684dac1afbdbf0c4cbc1caebc03270a5fa55859
   languageName: node
   linkType: hard
 
@@ -6510,9 +6519,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pkcprotocol/pkc-js@npm:0.0.148":
-  version: 0.0.148
-  resolution: "@pkcprotocol/pkc-js@npm:0.0.148"
+"@pkcprotocol/pkc-js@npm:0.0.151":
+  version: 0.0.151
+  resolution: "@pkcprotocol/pkc-js@npm:0.0.151"
   dependencies:
     "@enhances/with-resolvers": "npm:0.0.5"
     "@helia/bitswap": "npm:4.0.20"
@@ -6521,6 +6530,7 @@ __metadata:
     "@helia/libp2p": "npm:2.1.5"
     "@helia/unixfs": "npm:8.0.9"
     "@ipld/dag-cbor": "npm:9.2.7"
+    "@ipld/dag-pb": "npm:4.2.0"
     "@libp2p/crypto": "npm:5.2.0"
     "@libp2p/fetch": "npm:4.1.17"
     "@libp2p/gossipsub": "npm:17.2.1"
@@ -6530,6 +6540,7 @@ __metadata:
     "@libp2p/utils": "npm:7.4.5"
     "@libp2p/webtransport": "npm:6.0.44"
     "@multiformats/multiaddr": "npm:13.0.3"
+    "@multiformats/murmur3": "npm:2.2.5"
     "@noble/curves": "npm:2.2.0"
     "@pkcprotocol/pkc-logger": "npm:0.1.0"
     "@pkcprotocol/proper-lock-file": "npm:4.2.1"
@@ -6580,7 +6591,7 @@ __metadata:
     uuid: "npm:14.0.3"
     ws: "npm:8.22.0"
     zod: "npm:4.6.7"
-  checksum: 10c0/b532299e54d35b13f88d99b218410109ecda167694e114243d19b70e8e5f988aae5fdc078fb998da593d6aca9a24f1728acde89bc6de344a867eb4ed273a21e7
+  checksum: 10c0/81f8c1e5dc2a2cb5d4d089dc41182f05f4654b61ee7bee72e722132c0588cb163fb9d0563a24683d12f16c730d13867e2557a861259e926b275a1c85ebd4fa53
   languageName: node
   linkType: hard
 
@@ -19712,7 +19723,7 @@ __metadata:
   resolution: "seedit@workspace:."
   dependencies:
     "@babel/core": "npm:7.29.7"
-    "@bitsocial/bitsocial-react-hooks": "npm:0.2.4"
+    "@bitsocial/bitsocial-react-hooks": "npm:0.2.5"
     "@bitsocial/bso-resolver": "npm:0.0.10"
     "@capacitor/android": "npm:7.6.9"
     "@capacitor/app": "npm:7.0.1"
@@ -19731,7 +19742,7 @@ __metadata:
     "@floating-ui/react": "npm:0.26.1"
     "@noble/curves": "npm:2.0.1"
     "@noble/hashes": "npm:2.0.1"
-    "@pkcprotocol/pkc-js": "npm:0.0.148"
+    "@pkcprotocol/pkc-js": "npm:0.0.151"
     "@playwright/cli": "npm:0.1.19"
     "@reforged/maker-appimage": "npm:6.0.0"
     "@rolldown/plugin-babel": "npm:0.2.4"
