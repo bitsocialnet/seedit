@@ -16,7 +16,7 @@ concurrency:
 jobs:
   review:
     # Fork pull requests get no secrets, and the action rejects bot actors such as Dependabot.
-    if: github.event.pull_request.head.repo.full_name == github.repository && !endsWith(github.actor, '[bot]')
+    if: github.event.pull_request.head.repo.full_name == github.repository && !endsWith(github.actor, '[bot]') && !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
