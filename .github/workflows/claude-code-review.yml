@@ -7,16 +7,16 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+    types: [opened, synchronize, ready_for_review, reopened, converted_to_draft]
 
 concurrency:
-  group: claude-code-review-${{ github.event.pull_request.number }}
+  group: claude-code-review-${{ github.event.pull_request.number }}${{ github.event.pull_request.draft && github.event.action != 'converted_to_draft' && '-draft' || '' }}
   cancel-in-progress: true
 
 jobs:
   review:
     # Fork pull requests get no secrets, and the action rejects bot actors such as Dependabot.
-    if: github.event.pull_request.head.repo.full_name == github.repository && !endsWith(github.actor, '[bot]')
+    if: github.event.pull_request.head.repo.full_name == github.repository && !endsWith(github.actor, '[bot]') && !github.event.pull_request.draft
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
