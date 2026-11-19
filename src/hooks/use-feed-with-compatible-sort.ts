@@ -2,7 +2,8 @@ import { useCallback, useMemo } from 'react';
 import { useCommunities, useFeed, type UseFeedOptions, type UseFeedResult } from '@bitsocial/bitsocial-react-hooks';
 import { getFeedCommunityGroups, hasLoadingFeedCommunities, hasUnresolvedPostSortMetadata, mergeAndSortFeeds } from '../lib/utils/feed-sort-utils';
 
-export type UseFeedWithCompatibleSortResult = UseFeedResult & {
+// The merged feed does not provide useFeed's updatedFeed and bufferedFeed, which Seedit does not read.
+export type UseFeedWithCompatibleSortResult = Omit<UseFeedResult, 'updatedFeed' | 'bufferedFeed'> & {
   /** Some of the feed's communities have not loaded their first record yet. */
   isLoadingCommunities: boolean;
 };
