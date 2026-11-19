@@ -16428,6 +16428,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"modern-web-guidance@npm:1.0.0":
+  version: 1.0.0
+  resolution: "modern-web-guidance@npm:1.0.0"
+  bin:
+    modern-web-guidance: skills/modern-web-guidance/modern-web.mjs
+  checksum: 10c0/227875ba43c9ef9390c5bdc4d98c309930e1a7848b10b3558bf810b650d2a94fb3d0239627f8fe6ed1e921a1e81be417e629883e2d717bb1a641cb60617b3a38
+  languageName: node
+  linkType: hard
+
 "modify-filename@npm:^1.1.0":
   version: 1.1.0
   resolution: "modify-filename@npm:1.1.0"
@@ -19787,6 +19796,7 @@ __metadata:
     lint-staged: "npm:12.3.8"
     lodash: "npm:4.18.0"
     memoizee: "npm:0.4.17"
+    modern-web-guidance: "npm:1.0.0"
     node-fetch: "npm:3.3.2"
     oxc-parser: "npm:0.138.0"
     oxfmt: "npm:0.24.0"
