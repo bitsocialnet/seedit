@@ -36,33 +36,16 @@ import usePrefetchIntent from '../../hooks/use-prefetch-intent';
 import { loadMarkdown } from '../markdown';
 
 interface PostAuthorProps {
-  authorAddress: string;
+  post: Comment;
   authorRole: string;
-  cid: string;
-  displayName: string;
-  flairs?: FlairData[];
-  index?: number;
-  pinned?: boolean;
-  shortAddress: string;
-  shortAuthorAddress: string | undefined;
-  authorAddressChanged: boolean;
-  /** The verified 5chan tripcode (`!trip`), shown after the name as on 5chan. */
-  trip?: string;
 }
 
-const PostAuthor = ({
-  authorAddress,
-  authorRole,
-  cid,
-  displayName,
-  flairs,
-  index,
-  pinned,
-  shortAddress,
-  shortAuthorAddress,
-  authorAddressChanged,
-  trip,
-}: PostAuthorProps) => {
+const PostAuthor = ({ post, authorRole }: PostAuthorProps) => {
+  const { author, cid, index, pinned } = post || {};
+  const { address: authorAddress, shortAddress, flairs } = author || {};
+  const displayName = stripTripcodeProof(author?.displayName);
+  const trip = useCommentTripcode(post);
+  const { shortAuthorAddress, authorAddressChanged } = useAuthorAddress({ comment: post });
   // TODO: implement comment.highlightRole once implemented in API
   const isAuthorOwner = authorRole === 'owner';
   const isAuthorAdmin = authorRole === 'admin';
@@ -92,7 +75,7 @@ const PostAuthor = ({
           <span className={`${styles.authorAddressVisible} ${authorAddressChanged && styles.authorAddressChanged}`}>u/{getDisplayAddress(shortAuthorAddress || '')}</span>
         </span>
       </Link>
-      {flairs?.map((flair, index) => (
+      {flairs?.map((flair: FlairData, index: number) => (
         <React.Fragment key={index}>
           {' '}
           <Flair flair={flair} author />
@@ -161,11 +144,6 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   // Check if the community is NSFW based on its tags
   const isNsfwCommunity = useIsNsfwCommunity(communityAddress || '');
   const nsfw = post?.nsfw || isNsfwCommunity;
-
-  const shortAddress = author?.shortAddress;
-  const displayName = stripTripcodeProof(author?.displayName);
-  const trip = useCommentTripcode(post);
-  const { shortAuthorAddress, authorAddressChanged } = useAuthorAddress({ comment: post });
 
   const { t, i18n } = useTranslation();
   const { language } = i18n;
@@ -343,19 +321,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                   {t('submitted')} <span title={postDate}>{getFormattedTimeAgo(timestamp)}</span>{' '}
                   {edit && isInPostPageView && <span className={styles.timeEdit}>{t('last_edited', { timestamp: getFormattedTimeAgo(edit.timestamp) })}</span>}{' '}
                   {t('post_by')}
-                  <PostAuthor
-                    authorAddress={author?.address}
-                    authorRole={authorRole}
-                    cid={cid}
-                    displayName={displayName}
-                    flairs={author?.flairs}
-                    index={post?.index}
-                    pinned={pinned}
-                    shortAddress={shortAddress}
-                    shortAuthorAddress={shortAuthorAddress}
-                    authorAddressChanged={authorAddressChanged}
-                    trip={trip}
-                  />
+                  <PostAuthor post={post} authorRole={authorRole} />
                   {!isInCommunityView && (
                     <>
                        {t('post_to')}

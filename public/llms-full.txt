@@ -201,6 +201,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 | Code or automation changed | Select affected checks using [verification.md](docs/agent-playbooks/verification.md); use `agent:verify` for integration/build changes or an explicitly requested full pass |
 | React state, effects, data flow, or rendering performance changed | Review relevant React guidance; run `yarn doctor:check` and affected `yarn perf:check` scenarios. For profiling, use the [local skill](.agents/skills/profile-browsing/SKILL.md) ([published copy](https://github.com/bitsocialnet/seedit/blob/master/.agents/skills/profile-browsing/SKILL.md)) |
 | React, Bippy, or the render collector upgraded | Run `yarn perf:test` |
+| Choosing a native control, focus behavior, browser API, or browser-sensitive layout | Consult [Modern Web Guidance](.agents/skills/modern-web-guidance/SKILL.md) for the relevant feature |
 | UI behavior/layout changed | Verify the affected flow; select browsers/viewports using [verification.md](docs/agent-playbooks/verification.md) |
 | Loading/navigation/performance work | Add a throttled Chromium pass; see [low-spec-verification.md](docs/agent-playbooks/low-spec-verification.md) |
 | Translation keys/values | Use the `translate` skill; one process applies locale changes at a time |
