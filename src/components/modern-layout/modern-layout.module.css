@@ -270,7 +270,7 @@
   box-sizing: border-box;
 }
 
-.menuItem:hover {
+.menuItem[data-highlighted] {
   background: var(--m-surface-hover);
 }
 

@@ -20,6 +20,8 @@
     "@noble/curves": "2.0.1",
     "@noble/hashes": "2.0.1",
     "@pkcprotocol/pkc-js": "0.0.132",
+    "@ui-sdk/core": "0.1.0-beta.6",
+    "@ui-sdk/react": "0.1.0-beta.6",
     "@vercel/analytics": "1.6.1",
     "ace-builds": "1.45.2",
     "electron-context-menu": "3.3.0",
