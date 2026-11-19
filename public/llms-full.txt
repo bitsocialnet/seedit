@@ -200,6 +200,7 @@ For an unexpected repo-specific issue, tell the contributor and continue indepen
 | Files under `src/` or `scripts/` | Read the directory's `AGENTS.md` |
 | Code or automation changed | Select affected checks using [verification.md](docs/agent-playbooks/verification.md); use `agent:verify` for integration/build changes or an explicitly requested full pass |
 | React state, effects, data flow, or rendering performance changed | Review relevant React guidance; run `yarn doctor:check` and affected `yarn perf:check` scenarios |
+| Choosing a native control, focus behavior, browser API, or browser-sensitive layout | Consult [Modern Web Guidance](.agents/skills/modern-web-guidance/SKILL.md) for the relevant feature |
 | UI behavior/layout changed | Verify the affected flow; select browsers/viewports using [verification.md](docs/agent-playbooks/verification.md) |
 | Loading/navigation/performance work | Add a throttled Chromium pass; see [low-spec-verification.md](docs/agent-playbooks/low-spec-verification.md) |
 | Translation keys/values | Use the `translate` skill; one process applies locale changes at a time |

@@ -160,6 +160,7 @@
     "jsdom": "28.1.0",
     "knip": "6.42.1",
     "lint-staged": "12.3.8",
+    "modern-web-guidance": "1.0.0",
     "node-fetch": "3.3.2",
     "oxc-parser": "0.138.0",
     "oxfmt": "0.24.0",
