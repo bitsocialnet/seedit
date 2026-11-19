@@ -32,11 +32,29 @@ vi.mock('../../hooks/use-theme', () => ({
 let container: HTMLDivElement;
 let root: Root;
 
+type ChallengeEntryFixture = { challenge: string; type: string };
+
+// pkc-js 0.0.152 CHALLENGE messages key the pending challenges by challenge index, so keys can be sparse.
+const createChallengeMessage = (challenges: Record<string, ChallengeEntryFixture>, publishChallengeAnswers = vi.fn(), content = 'challenge post') =>
+  [{ challenges }, { communityAddress: 'example.bso', content, publishChallengeAnswers }] as never;
+
 const createChallenge = (prompt: string, publishChallengeAnswers = vi.fn()) =>
-  [{ challenges: [{ challenge: prompt, type: 'text/plain' }] }, { communityAddress: 'example.bso', content: prompt, publishChallengeAnswers }] as never;
+  createChallengeMessage({ '0': { challenge: prompt, type: 'text/plain' } }, publishChallengeAnswers, prompt);
 
 const createIframeChallenge = (url: string, publishChallengeAnswers = vi.fn()) =>
-  [{ challenges: [{ challenge: url, type: 'url/iframe' }] }, { communityAddress: 'example.bso', content: 'iframe post', publishChallengeAnswers }] as never;
+  createChallengeMessage({ '0': { challenge: url, type: 'url/iframe' } }, publishChallengeAnswers, 'iframe post');
+
+const postIframeAnswers = async (challengeAnswers: string[]) => {
+  await act(async () => {
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        origin: 'https://spamblocker.bitsocial.net',
+        data: { type: 'challengeAnswer', challengeAnswers, sessionId: 'session-123' },
+      }),
+    );
+    await Promise.resolve();
+  });
+};
 
 const renderModal = async () => {
   await act(async () => {
@@ -121,7 +139,7 @@ describe('ChallengeModal', () => {
     await enterAnswer('four');
     await clickButton('submit');
 
-    expect(publishChallengeAnswers).toHaveBeenCalledWith(['four']);
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '0': 'four' });
     expect(firstAbandon).not.toHaveBeenCalled();
     expect(useChallengesStore.getState().challenges).toHaveLength(1);
     expect(container.textContent).toContain('second prompt');
@@ -169,7 +187,7 @@ describe('ChallengeModal', () => {
     });
 
     expect(publishChallengeAnswers).toHaveBeenCalledOnce();
-    expect(publishChallengeAnswers).toHaveBeenCalledWith(['turnstile-token']);
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '0': 'turnstile-token' });
     expect(useChallengesStore.getState().challenges).toHaveLength(0);
   });
 
@@ -207,7 +225,114 @@ describe('ChallengeModal', () => {
 
     await clickButton('done');
 
-    expect(publishChallengeAnswers).toHaveBeenCalledWith(['']);
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '0': '' });
     expect(useChallengesStore.getState().challenges).toHaveLength(0);
+  });
+
+  it('walks sparse challenge keys in numeric order and submits answers keyed by challenge index', async () => {
+    const publishChallengeAnswers = vi.fn();
+    useChallengesStore.getState().addChallenge(
+      createChallengeMessage(
+        {
+          '10': { challenge: 'third prompt', type: 'text/plain' },
+          '3': { challenge: 'second prompt', type: 'text/plain' },
+          '1': { challenge: 'first prompt', type: 'text/plain' },
+        },
+        publishChallengeAnswers,
+      ),
+    );
+    await renderModal();
+
+    expect(container.textContent).toContain('first prompt');
+    expect(container.textContent).toContain('1/3');
+    await enterAnswer('one');
+    await clickButton('next');
+    expect(container.textContent).toContain('second prompt');
+    expect(container.textContent).toContain('2/3');
+    await enterAnswer('two');
+    await clickButton('next');
+    expect(container.textContent).toContain('third prompt');
+    await enterAnswer('three');
+    await clickButton('submit');
+
+    expect(publishChallengeAnswers).toHaveBeenCalledOnce();
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '1': 'one', '3': 'two', '10': 'three' });
+  });
+
+  it('sends an empty answer for a sparse key the user skipped instead of dropping the key', async () => {
+    const publishChallengeAnswers = vi.fn();
+    useChallengesStore
+      .getState()
+      .addChallenge(
+        createChallengeMessage(
+          { '1': { challenge: 'first prompt', type: 'text/plain' }, '3': { challenge: 'second prompt', type: 'text/plain' } },
+          publishChallengeAnswers,
+        ),
+      );
+    await renderModal();
+
+    await clickButton('next');
+    await enterAnswer('two');
+    await clickButton('submit');
+
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '1': '', '3': 'two' });
+  });
+
+  it('keys the iframe answer by the challenge currently shown', async () => {
+    const publishChallengeAnswers = vi.fn();
+    useChallengesStore.getState().addChallenge(
+      createChallengeMessage(
+        {
+          '0': { challenge: 'first prompt', type: 'text/plain' },
+          '2': { challenge: 'https://spamblocker.bitsocial.net/api/v1/iframe/session-123', type: 'url/iframe' },
+        },
+        publishChallengeAnswers,
+      ),
+    );
+    await renderModal();
+
+    await enterAnswer('four');
+    await clickButton('next');
+    await clickButton('open');
+    await postIframeAnswers(['turnstile-token']);
+
+    expect(publishChallengeAnswers).toHaveBeenCalledOnce();
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '0': 'four', '2': 'turnstile-token' });
+    expect(useChallengesStore.getState().challenges).toHaveLength(0);
+  });
+
+  it('fills the following challenge keys in order when the iframe returns several answers', async () => {
+    const publishChallengeAnswers = vi.fn();
+    useChallengesStore.getState().addChallenge(
+      createChallengeMessage(
+        {
+          '1': { challenge: 'https://spamblocker.bitsocial.net/api/v1/iframe/session-123', type: 'url/iframe' },
+          '4': { challenge: 'second prompt', type: 'text/plain' },
+          '7': { challenge: 'third prompt', type: 'text/plain' },
+        },
+        publishChallengeAnswers,
+      ),
+    );
+    await renderModal();
+    await clickButton('open');
+
+    await postIframeAnswers(['token-a', 'token-b']);
+
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '1': 'token-a', '4': 'token-b', '7': '' });
+  });
+
+  it('keys the manual Done answer by a sparse iframe challenge index', async () => {
+    const publishChallengeAnswers = vi.fn();
+    useChallengesStore
+      .getState()
+      .addChallenge(
+        createChallengeMessage({ '2': { challenge: 'https://spamblocker.bitsocial.net/api/v1/iframe/session-123', type: 'url/iframe' } }, publishChallengeAnswers),
+      );
+    await renderModal();
+    await clickButton('open');
+
+    await clickButton('done');
+
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '2': '' });
   });
 });

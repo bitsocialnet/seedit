@@ -6519,9 +6519,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pkcprotocol/pkc-js@npm:0.0.151":
-  version: 0.0.151
-  resolution: "@pkcprotocol/pkc-js@npm:0.0.151"
+"@pkcprotocol/pkc-js@npm:0.0.152":
+  version: 0.0.152
+  resolution: "@pkcprotocol/pkc-js@npm:0.0.152"
   dependencies:
     "@enhances/with-resolvers": "npm:0.0.5"
     "@helia/bitswap": "npm:4.0.20"
@@ -6591,7 +6591,7 @@ __metadata:
     uuid: "npm:14.0.3"
     ws: "npm:8.22.0"
     zod: "npm:4.6.7"
-  checksum: 10c0/81f8c1e5dc2a2cb5d4d089dc41182f05f4654b61ee7bee72e722132c0588cb163fb9d0563a24683d12f16c730d13867e2557a861259e926b275a1c85ebd4fa53
+  checksum: 10c0/8eb94f148d8848cd08d8a374102ddec7ed0ae77fd0d25fd5b3c2716a7e0c2ba69654701ca805703bdfbc81d9f258fd946111bc44c96daf56d66b91e7ae482c30
   languageName: node
   linkType: hard
 
@@ -19751,7 +19751,7 @@ __metadata:
     "@floating-ui/react": "npm:0.26.1"
     "@noble/curves": "npm:2.0.1"
     "@noble/hashes": "npm:2.0.1"
-    "@pkcprotocol/pkc-js": "npm:0.0.151"
+    "@pkcprotocol/pkc-js": "npm:0.0.152"
     "@playwright/cli": "npm:0.1.19"
     "@reforged/maker-appimage": "npm:6.0.0"
     "@rolldown/plugin-babel": "npm:0.2.4"
