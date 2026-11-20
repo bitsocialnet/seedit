@@ -35,7 +35,8 @@ export const getFeedLoadFailure = (
   const errorsByMessage = new Map<string, Error>();
   for (const { error, lastRetriableError } of feedStatuses) {
     const reason = error || lastRetriableError;
-    if (reason && !errorsByMessage.has(reason.message)) errorsByMessage.set(reason.message, reason);
+    // a reason without a message would show as a blank line
+    if (reason?.message && !errorsByMessage.has(reason.message)) errorsByMessage.set(reason.message, reason);
   }
   return { state: feedStatuses.every(({ state }) => state === 'failed') ? 'failed' : 'retrying', errors: [...errorsByMessage.values()] };
 };

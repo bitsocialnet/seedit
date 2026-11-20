@@ -40,6 +40,11 @@ describe('getFeedLoadFailure', () => {
     expect(failure?.errors.map(({ message }) => message)).toEqual(['No name resolver', 'Domain resolver did not find the text record']);
   });
 
+  it('leaves out reasons without a message to show', () => {
+    expect(getFeedLoadFailure(ids('a.xyz', 'b.xyz'), [failed(''), failed('No name resolver')])).toEqual({ state: 'failed', errors: [new Error('No name resolver')] });
+    expect(getFeedLoadFailure(ids('a.xyz'), [failed('')])).toEqual({ state: 'failed', errors: [] });
+  });
+
   it('is undefined while a community loaded or is still loading without a failure, or without communities', () => {
     expect(getFeedLoadFailure(ids('a.xyz', 'b.bso'), [failed('No name resolver'), status({ state: 'succeeded', hasCachedData: true })])).toBeUndefined();
     expect(getFeedLoadFailure(ids('a.xyz', 'b.bso'), [failed('No name resolver'), status({})])).toBeUndefined();

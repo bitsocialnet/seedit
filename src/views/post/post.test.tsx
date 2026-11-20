@@ -217,6 +217,18 @@ describe('Post failed states', () => {
     expect(container.textContent).not.toContain('failed');
   });
 
+  it('says failed when a load error has no message to show', async () => {
+    const statusLine = () => container.querySelector('[class*="loadingString"]')?.textContent;
+    testState.post = { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 0, state: 'failed', error: new Error('') };
+    await render();
+    expect(statusLine()).toBe('failed');
+
+    testState.post = { cid: 'post-cid', parentCid: 'parent-cid', postCid: 'op-cid', communityAddress: 'example.bso', timestamp: 1, content: 'A reply' };
+    testState.otherComments = { 'op-cid': { state: 'failed', error: new Error('') } };
+    await render();
+    expect(container.querySelector('[class*="postLoadFailure"]')?.textContent).toBe('failed');
+  });
+
   it('calls the account post whose publication failed a failed post', async () => {
     testState.post = { cid: undefined, communityAddress: 'example.bso', timestamp: 1, title: 'Test post', state: 'failed', index: 0 };
     await render();

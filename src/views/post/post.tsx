@@ -86,7 +86,7 @@ const SortDropdown = ({ sortBy, onSortChange }: SortDropdownProps) => {
 const PostLoadFailure = ({ post }: { post: Comment }) => {
   const { t } = useTranslation();
   if (!isCommentLoadFailed(post)) return null;
-  return <div className={styles.postLoadFailure}>{post.error ? <ErrorDisplay error={post.error} /> : t('failed')}</div>;
+  return <div className={styles.postLoadFailure}>{post.error?.message ? <ErrorDisplay error={post.error} /> : t('failed')}</div>;
 };
 
 const Post = ({ post }: { post: Comment }) => {
@@ -214,7 +214,7 @@ const Post = ({ post }: { post: Comment }) => {
           </div>
         ) : (
           // the page shows the error of a failed post in this line's place
-          state === 'failed' && !post?.error && t('failed')
+          state === 'failed' && !post?.error?.message && t('failed')
         )}
       </span>
     </>
@@ -247,7 +247,7 @@ const PostWithContext = ({ post }: { post: Comment }) => {
               <LoadingEllipsis string={stateString} />
             </div>
           ) : (
-            state === 'failed' && !post?.error && t('failed')
+            state === 'failed' && !post?.error?.message && t('failed')
           )}
         </div>
         <div className={styles.singleCommentInfobar}>

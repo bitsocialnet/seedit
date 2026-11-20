@@ -65,6 +65,12 @@ describe('FeedFooter load failures', () => {
     expect(container.textContent).toBe('error: No name resolver can handle this address|failed');
   });
 
+  it('shows only the failed line when the failure has no message to show', async () => {
+    testState.statuses = [failed('')];
+    await render(['example.xyz']);
+    expect(container.textContent).toBe('failed');
+  });
+
   it('keeps loading a feed of one community that is retrying, and shows why', async () => {
     testState.statuses = [retrying('Domain resolver did not find the text record')];
     await render(['missing.bso']);

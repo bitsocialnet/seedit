@@ -154,6 +154,9 @@ describe('Nested Reply identity', () => {
     await act(async () => root.render(createElement(Reply, { reply: { ...failedLoad, error: undefined } as any, cidOfReplyWithContext: 'context-reply' })));
     expect(container.textContent).toContain('failed');
 
+    await act(async () => root.render(createElement(Reply, { reply: { ...failedLoad, error: new Error('') } as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('failed');
+
     await act(async () => root.render(createElement(Reply, { reply: failedLoad as any, isSingleComment: true })));
     expect(container.textContent).not.toContain('Invalid signature');
 

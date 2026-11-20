@@ -606,7 +606,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                         {t('edit')}: {edit.reason}
                       </p>
                     )}
-                    {showLoadFailure && (reply.error ? <ErrorDisplay error={reply.error} /> : <p>{t('failed')}</p>)}
+                    {showLoadFailure && (reply.error?.message ? <ErrorDisplay error={reply.error} /> : <p>{t('failed')}</p>)}
                   </div>
                 )}
               </div>
