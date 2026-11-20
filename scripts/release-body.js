@@ -117,7 +117,7 @@ const htmlSection = section('Static HTML build', [htmlZip && `- seedit-html (zip
 
 const downloads = [macSection, winSection, linuxSection, androidSection, htmlSection].filter(Boolean).join('\n\n');
 
-const releaseBody = `This release fixes memory growth in feeds left open, shows 5chan posts' verified tripcodes and fortune and dice results, recognizes directories published after the release, and strips addresses and search text from seedit.app's analytics, which now also count failed post attempts.
+const releaseBody = `This release moves to the new Bitsocial challenge protocol that updated communities require for posting, replying and voting, so desktop and Android users must update; it also holds posts until their media upload finishes, restores reply embeds and thumbnails, and fixes notification replays and clicks and stale state in settings, moderation and draft forms.
 
 - Web app: https://seedit.app
 - Decentralized web app via IPFS/IPNS gateways (works on any browser): [seedit.eth.limo](https://seedit.eth.limo), [seedit.eth.link](https://seedit.eth.link), [dweb.link/ipfs.io](https://dweb.link/ipns/seedit.eth)
