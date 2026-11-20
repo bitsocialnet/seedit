@@ -12,6 +12,7 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 
 const testState = vi.hoisted(() => ({
   account: { author: { address: 'owner.bso' } },
+  stateString: '',
   community: {} as Record<string, any>,
   pathname: '/s/example.bso/settings',
   lastEditOptions: undefined as Record<string, any> | undefined,
@@ -61,9 +62,10 @@ vi.mock('react-router-dom', () => ({
 }));
 vi.mock('../../hooks/use-resolved-community-route', () => ({ default: () => ({ communityAddress: 'example.bso' }) }));
 vi.mock('../../hooks/use-is-community-offline', () => ({ default: () => ({ isOffline: false, offlineTitle: '' }) }));
-vi.mock('../../hooks/use-state-string', () => ({ default: () => '' }));
+vi.mock('../../hooks/use-state-string', () => ({ default: () => testState.stateString }));
 vi.mock('../../components/error-display', () => ({ default: ({ error }: { error?: Error }) => (error ? createElement('span', null, `error: ${error.message}`) : null) }));
-vi.mock('../../components/loading-ellipsis', () => ({ default: () => null }));
+// a loading status is an attribute rather than text, so the text of the views stays unchanged
+vi.mock('../../components/loading-ellipsis', () => ({ default: ({ string }: { string: string }) => createElement('span', { 'data-loading-status': string }) }));
 vi.mock('../../components/sidebar', () => ({ default: () => null }));
 vi.mock('../../components/markdown', () => ({ default: ({ content }: { content: string }) => createElement('div', { 'data-testid': 'preview' }, content) }));
 vi.mock('../../components/reply-form', () => ({ FormattingHelpTable: () => null }));
@@ -98,6 +100,7 @@ describe('CommunitySettings field rendering', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     testState.pathname = '/s/example.bso/settings';
+    testState.stateString = '';
     testState.lastEditOptions = undefined;
     testState.lastCreateOptions = undefined;
     testState.community = {
@@ -128,13 +131,18 @@ describe('CommunitySettings field rendering', () => {
   });
 
   it('shows a community whose first load failed as failed, and why a retrying one has not loaded', async () => {
+    const loadingStatus = () => container.querySelector('[data-loading-status]')?.getAttribute('data-loading-status') ?? undefined;
     testState.community = { state: 'failed', firstLoadFailed: true, error: new Error('No name resolver can handle this address') };
     await render();
     expect(container.textContent).toBe('error: No name resolver can handle this addressfailed');
 
+    expect(loadingStatus()).toBeUndefined();
+
     testState.community = { state: 'fetching-ipns', firstLoadFailed: true, lastRetriableError: new Error('Domain resolver did not find the text record') };
+    testState.stateString = 'Waiting retry';
     await render();
     expect(container.textContent).toBe('error: Domain resolver did not find the text record');
+    expect(loadingStatus()).toBe('Waiting retry');
   });
 
   it('edits the title without rendering unrelated fields and keeps the complete latest save options', async () => {

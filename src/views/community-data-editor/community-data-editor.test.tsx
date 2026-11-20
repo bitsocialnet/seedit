@@ -10,13 +10,17 @@ import CommunityDataEditor from './community-data-editor';
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 const act = (React as { act?: (callback: () => void | Promise<void>) => void | Promise<void> }).act as (callback: () => void | Promise<void>) => void | Promise<void>;
 
+const loadedCommunity = { address: 'example.bso', createdAt: 1, title: 'Title', settings: {} } as Record<string, any>;
+
 const testState = vi.hoisted(() => ({
+  community: undefined as Record<string, any> | undefined,
+  stateString: '',
   lastEditOptions: undefined as Record<string, any> | undefined,
   publishCommunityEdit: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
-  useCommunity: () => ({ address: 'example.bso', createdAt: 1, title: 'Title', settings: {} }),
+  useCommunity: () => testState.community,
   usePublishCommunityEdit: (options: Record<string, any>) => {
     testState.lastEditOptions = options;
     return { publishCommunityEdit: testState.publishCommunityEdit };
@@ -28,10 +32,11 @@ vi.mock('react-i18next', () => ({
 }));
 vi.mock('react-router-dom', () => ({ useNavigate: () => vi.fn() }));
 vi.mock('../../hooks/use-resolved-community-route', () => ({ default: () => ({ communityAddress: 'example.bso' }) }));
-vi.mock('../../hooks/use-state-string', () => ({ default: () => '' }));
+vi.mock('../../hooks/use-state-string', () => ({ default: () => testState.stateString }));
 vi.mock('../../components/json-editor', () => ({ default: () => null }));
-vi.mock('../../components/error-display', () => ({ default: () => null }));
-vi.mock('../../components/loading-ellipsis', () => ({ default: () => null }));
+vi.mock('../../components/error-display', () => ({ default: ({ error }: { error?: Error }) => (error ? createElement('span', null, `error: ${error.message}`) : null) }));
+// a loading status is an attribute rather than text, so the text of the view stays unchanged
+vi.mock('../../components/loading-ellipsis', () => ({ default: ({ string }: { string: string }) => createElement('span', { 'data-loading-status': string }) }));
 
 let container: HTMLDivElement;
 let root: Root;
@@ -42,9 +47,40 @@ const clickSave = async () => {
   await act(async () => {});
 };
 
+describe('CommunityDataEditor before the community loads', () => {
+  const loadingStatus = () => container.querySelector('[data-loading-status]')?.getAttribute('data-loading-status') ?? undefined;
+
+  beforeEach(() => {
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    testState.community = loadedCommunity;
+    testState.stateString = '';
+  });
+
+  it('shows a community whose first load failed as failed, and why a retrying one has not loaded', async () => {
+    testState.community = { state: 'failed', firstLoadFailed: true, error: new Error('No name resolver can handle this address') };
+    await act(async () => root.render(createElement(CommunityDataEditor)));
+    expect(container.textContent).toBe('error: No name resolver can handle this addressfailed');
+    expect(loadingStatus()).toBeUndefined();
+
+    testState.community = { state: 'fetching-ipns', firstLoadFailed: true, lastRetriableError: new Error('Domain resolver did not find the text record') };
+    testState.stateString = 'Waiting retry';
+    await act(async () => root.render(createElement(CommunityDataEditor)));
+    expect(container.textContent).toBe('error: Domain resolver did not find the text record');
+    expect(loadingStatus()).toBe('Waiting retry');
+  });
+});
+
 describe('CommunityDataEditor save', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
+    testState.community = loadedCommunity;
     useCommunitySettingsStore.getState().resetCommunitySettingsStore();
     vi.spyOn(window, 'alert').mockImplementation(() => undefined);
     vi.spyOn(console, 'log').mockImplementation(() => undefined);
