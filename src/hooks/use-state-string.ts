@@ -12,6 +12,10 @@ interface States {
   [key: string]: string[];
 }
 
+// publishing and updating states that are over, which get no loading text; pkc-js can report a failed publication
+// before the hooks mark the account comment failed
+const finishedStates = new Set(['stopped', 'succeeded', 'failed']);
+
 const clientHosts: { [key: string]: string } = {};
 
 const getClientHost = (clientUrl: string): string => {
@@ -29,6 +33,11 @@ const useStateString = (commentOrCommunity: CommentOrCommunity): string | undefi
   const { states } = useClientsStates({ comment: commentOrCommunity }) as { states: States };
 
   return useMemo(() => {
+    // a failed load or publication is not loading, so it gets no loading text, even while pkc-js retries it
+    if (commentOrCommunity?.state === 'failed') {
+      return undefined;
+    }
+
     let stateString: string | undefined = '';
 
     for (const state in states) {
@@ -48,10 +57,11 @@ const useStateString = (commentOrCommunity: CommentOrCommunity): string | undefi
     }
 
     if (!stateString && commentOrCommunity?.state !== 'succeeded') {
-      if (commentOrCommunity?.publishingState && commentOrCommunity?.publishingState !== 'stopped' && commentOrCommunity?.publishingState !== 'succeeded') {
-        stateString = commentOrCommunity.publishingState;
-      } else if (commentOrCommunity?.updatingState !== 'stopped' && commentOrCommunity?.updatingState !== 'succeeded') {
-        stateString = commentOrCommunity.updatingState;
+      const { publishingState, updatingState } = commentOrCommunity || {};
+      if (publishingState && !finishedStates.has(publishingState)) {
+        stateString = publishingState;
+      } else if (updatingState && !finishedStates.has(updatingState)) {
+        stateString = updatingState;
       }
       if (stateString) {
         stateString = stateString.replaceAll('-', ' ').replace('fetching', 'downloading').replace('ipfs', 'post');

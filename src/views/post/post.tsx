@@ -194,9 +194,9 @@ const Post = ({ post }: { post: Comment }) => {
         </div>
       )}
       <span className={styles.loadingString}>
-        {stateString && stateString !== 'Failed' ? (
+        {stateString ? (
           <div className={styles.stateString}>
-            <LoadingEllipsis string={stateString || t('loading')} />
+            <LoadingEllipsis string={stateString} />
           </div>
         ) : (
           state === 'failed' && t('failed')
@@ -226,7 +226,7 @@ const PostWithContext = ({ post }: { post: Comment }) => {
       <PostComponent post={postComment} />
       <div className={styles.replyArea}>
         <div className={styles.menuArea}>
-          {stateString && stateString !== 'Failed' ? (
+          {stateString ? (
             <div className={styles.stateString}>
               <LoadingEllipsis string={stateString} />
             </div>

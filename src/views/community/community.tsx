@@ -40,6 +40,7 @@ interface FooterProps {
   paginationFeedLength: number;
   isOnline: boolean;
   hasCommunityLoaded: boolean;
+  hasCommunityFailed: boolean;
   started: boolean;
   isSubCreatedButNotYetPublished: boolean;
   hasMore: boolean;
@@ -55,6 +56,7 @@ const Footer = ({
   paginationFeedLength,
   isOnline,
   hasCommunityLoaded,
+  hasCommunityFailed,
   started: _started,
   isSubCreatedButNotYetPublished: _isSubCreatedButNotYetPublished,
   hasMore,
@@ -71,7 +73,8 @@ const Footer = ({
 
   const loadingString = (
     <>
-      <div className={layoutStyles.stateString}>{loadingStateString === 'Failed' ? 'failed' : <LoadingEllipsis string={loadingStateString} />}</div>
+      {/* a community whose first load failed is no longer loading; the error it reported shows above the feed */}
+      <div className={layoutStyles.stateString}>{hasCommunityFailed ? t('failed') : <LoadingEllipsis string={loadingStateString} />}</div>
     </>
   );
 
@@ -147,7 +150,7 @@ const CommunityView = () => {
   const communityAddress = resolvedCommunityAddress || '';
   const canLoadCommunity = !!communityAddress && isResolvableCommunityAddress(communityAddress);
   const community = useCommunity(canLoadCommunity ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { createdAt, error, shortAddress, started, title, updatedAt, settings } = community || {};
+  const { createdAt, error, shortAddress, started, state, title, updatedAt, settings } = community || {};
   const { isOffline } = useIsCommunityOffline(community || {});
   const isOnline = !isOffline;
   const isSubCreatedButNotYetPublished = typeof createdAt === 'number' && !updatedAt;
@@ -216,6 +219,7 @@ const CommunityView = () => {
       paginationFeedLength: feed.length,
       isOnline,
       hasCommunityLoaded: Boolean(updatedAt),
+      hasCommunityFailed: state === 'failed',
       started,
       isSubCreatedButNotYetPublished,
       hasMore,
@@ -230,6 +234,7 @@ const CommunityView = () => {
       feed.length,
       isOnline,
       updatedAt,
+      state,
       started,
       isSubCreatedButNotYetPublished,
       hasMore,

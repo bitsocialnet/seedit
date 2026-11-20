@@ -413,7 +413,11 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
   const formattedScore = formatScore(score);
   const scoreString = score === 1 ? t('reply_score_singular') : t('reply_score_plural', { score: formattedScore });
   const stateString = useStateString(reply);
-  const loadingString = stateString && <span className={styles.stateString}>{stateString !== 'Failed' ? <LoadingEllipsis string={stateString} /> : ''}</span>;
+  const loadingString = stateString && (
+    <span className={styles.stateString}>
+      <LoadingEllipsis string={stateString} />
+    </span>
+  );
 
   const [upvoted, upvote] = useUpvote(reply);
   const [downvoted, downvote] = useDownvote(reply);
