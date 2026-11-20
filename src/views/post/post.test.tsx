@@ -12,6 +12,8 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 
 const testState = vi.hoisted(() => ({
   post: { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 2 } as Record<string, any>,
+  otherComments: {} as Record<string, Record<string, any>>,
+  search: '',
   account: { author: { address: 'reader.bso' } },
   replies: [] as Record<string, any>[],
   isNsfwCommunity: false,
@@ -24,13 +26,13 @@ const loadedPost = testState.post;
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAccount: () => testState.account,
   useAccountComments: () => ({ accountComments: [] }),
-  useComment: ({ commentCid }: { commentCid?: string }) => (commentCid === 'post-cid' ? testState.post : {}),
+  useComment: ({ commentCid }: { commentCid?: string }) => (commentCid === 'post-cid' ? testState.post : (testState.otherComments[commentCid ?? ''] ?? {})),
   useCommunity: () => ({ title: 'Example' }),
 }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 vi.mock('react-router-dom', () => ({
   Link: ({ children }: { children: React.ReactNode }) => createElement('a', null, children),
-  useLocation: () => ({ pathname: '/s/example.bso/comments/post-cid', search: '' }),
+  useLocation: () => ({ pathname: '/s/example.bso/comments/post-cid', search: testState.search }),
   useParams: () => ({ communityAddress: 'example.bso', commentCid: 'post-cid' }),
   useNavigate: () => testState.navigate,
 }));
@@ -39,7 +41,7 @@ vi.mock('../../hooks/use-replies', () => ({ default: () => testState.replies }))
 vi.mock('../../hooks/use-resolved-community-route', () => ({ default: () => ({ communityAddress: 'example.bso' }) }));
 vi.mock('../../hooks/use-is-nsfw-community', () => ({ useIsNsfwCommunity: () => testState.isNsfwCommunity }));
 vi.mock('../../hooks/use-state-string', () => ({ default: () => '' }));
-vi.mock('../../components/error-display', () => ({ default: () => null }));
+vi.mock('../../components/error-display', () => ({ default: ({ error }: { error?: Error }) => (error ? createElement('span', null, `error: ${error.message}`) : null) }));
 vi.mock('../../components/loading-ellipsis', () => ({ default: () => null }));
 vi.mock('../../components/over-18-warning', () => ({ default: () => createElement('div', { 'data-over-18-warning': true }) }));
 vi.mock('../../components/post', () => ({ default: () => null }));
@@ -166,6 +168,8 @@ describe('Post failed states', () => {
     act(() => root.unmount());
     container.remove();
     testState.post = loadedPost;
+    testState.otherComments = {};
+    testState.search = '';
     vi.restoreAllMocks();
   });
 
@@ -194,6 +198,23 @@ describe('Post failed states', () => {
     testState.post = { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 0, state: 'failed' };
     await render();
     expect(statusLine()).toBe('failed');
+  });
+
+  it('shows why the post above a single comment or its context failed to load', async () => {
+    const reply = { cid: 'post-cid', parentCid: 'parent-cid', postCid: 'op-cid', communityAddress: 'example.bso', timestamp: 1, content: 'A reply' };
+    testState.post = reply;
+    testState.otherComments = { 'op-cid': { state: 'failed', error: new Error('Invalid signature') } };
+    await render();
+    expect(container.textContent).toContain('error: Invalid signature');
+
+    testState.search = '?context=1';
+    testState.otherComments = { 'op-cid': { state: 'failed' } };
+    await render();
+    expect(container.textContent).toContain('failed');
+
+    testState.otherComments = { 'op-cid': { cid: 'op-cid', state: 'succeeded', title: 'Loaded post' } };
+    await render();
+    expect(container.textContent).not.toContain('failed');
   });
 
   it('calls the account post whose publication failed a failed post', async () => {

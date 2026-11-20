@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Comment, useAuthorAddress, useBlock, useComment, useEditedComment, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { isInboxView, isPostContextView, isPostPageView } from '../../lib/utils/view-utils';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
-import { getCommentCommunityAddress, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isCommentLoadFailed, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import useCommentTripcode from '../../hooks/use-comment-tripcode';
@@ -21,6 +21,7 @@ import useReplies from '../../hooks/use-replies';
 import useStateString from '../../hooks/use-state-string';
 import useUpvote from '../../hooks/use-upvote';
 import CommentEditForm from '../comment-edit-form';
+import ErrorDisplay from '../error-display';
 import LoadingEllipsis from '../loading-ellipsis/';
 import Markdown from '../markdown';
 import CommentTools from '../comment-tools';
@@ -447,6 +448,8 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
   // failed to load gets neither label and keeps its links
   const publicationFailed = isCommentPublicationFailed(reply);
   const publicationPending = cid === undefined && typeof reply?.index === 'number' && !publicationFailed;
+  // a reply that failed to load says why it is empty, unless it is the post page's own comment, whose error the page shows
+  const showLoadFailure = isCommentLoadFailed(reply) && !isSingleComment;
   const stateLabel = (
     <span className={styles.stateLabel}>
       {publicationFailed && <Label color='red' text={t('failed')} />}
@@ -603,6 +606,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                         {t('edit')}: {edit.reason}
                       </p>
                     )}
+                    {showLoadFailure && (reply.error ? <ErrorDisplay error={reply.error} /> : <p>{t('failed')}</p>)}
                   </div>
                 )}
               </div>

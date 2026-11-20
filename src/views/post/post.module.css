@@ -113,6 +113,11 @@
   margin-left: 3px;
 }
 
+.postLoadFailure {
+  padding: 5px 10px;
+  font-size: 13px;
+}
+
 .loadingString {
   display: block;
   padding: 10px;

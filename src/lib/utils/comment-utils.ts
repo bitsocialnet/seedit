@@ -19,3 +19,6 @@ export const getCommentCommunityAddress = (comment?: unknown): string | undefine
  * one `failed` because of a failed load, so `failed` with an index is a failed publication and without one a failed load.
  */
 export const isCommentPublicationFailed = (comment?: { state?: string; index?: number }): boolean => comment?.state === 'failed' && typeof comment.index === 'number';
+
+/** A comment whose load failed, as opposed to the account's own comment whose publication failed. */
+export const isCommentLoadFailed = (comment?: { state?: string; index?: number }): boolean => comment?.state === 'failed' && typeof comment.index !== 'number';

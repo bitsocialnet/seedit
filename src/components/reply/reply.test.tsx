@@ -144,6 +144,24 @@ describe('Nested Reply identity', () => {
     expect(toolsFailed()).toBe('true');
   });
 
+  it('shows why a reply that failed to load is empty, unless the post page shows it as its own comment', async () => {
+    testState.repliesByCid = {};
+    const failedLoad = { cid: 'top-parent', communityAddress: 'example.bso', state: 'failed', error: new Error('Invalid signature') };
+
+    await act(async () => root.render(createElement(Reply, { reply: failedLoad as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('error: Invalid signature');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...failedLoad, error: undefined } as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('failed');
+
+    await act(async () => root.render(createElement(Reply, { reply: failedLoad as any, isSingleComment: true })));
+    expect(container.textContent).not.toContain('Invalid signature');
+
+    const failedPublication = { ...parent, cid: undefined, state: 'failed', index: 2, error: new Error('publication rejected') };
+    await act(async () => root.render(createElement(Reply, { reply: failedPublication as any })));
+    expect(container.textContent).not.toContain('publication rejected');
+  });
+
   it('labels only the account reply without a CID as pending, not one that is loading or failed to load', async () => {
     testState.repliesByCid = {};
     const labels = () => Array.from(container.querySelectorAll('[data-label]')).map((element) => element.textContent);

@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Comment, useAccount, useAccountComments, useComment, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import findTopParentCidOfReply from '../../lib/utils/cid-utils';
-import { getCommentCommunityAddress, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isCommentLoadFailed, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { sortRepliesByBest } from '../../lib/utils/post-utils';
 import { getCanonicalCommunityPostRedirectPath, getCommunityPostPath, resolveCommunityRouteAddress } from '../../lib/utils/community-route-utils';
 import { getPendingPostKey, getPendingPostRedirect, isPendingPostView, isPostContextView, RenderedPendingPost } from '../../lib/utils/view-utils';
@@ -82,6 +82,13 @@ const SortDropdown = ({ sortBy, onSortChange }: SortDropdownProps) => {
   );
 };
 
+// The page shows the error of its own comment; the post above a single comment or its context is a load of its own.
+const PostLoadFailure = ({ post }: { post: Comment }) => {
+  const { t } = useTranslation();
+  if (!isCommentLoadFailed(post)) return null;
+  return <div className={styles.postLoadFailure}>{post.error ? <ErrorDisplay error={post.error} /> : t('failed')}</div>;
+};
+
 const Post = ({ post }: { post: Comment }) => {
   const { t } = useTranslation();
   const location = useLocation();
@@ -147,7 +154,14 @@ const Post = ({ post }: { post: Comment }) => {
           <div className={styles.lockedInfobarText}>{t('post_locked_info', { state: lowerCase(lockedState) })}</div>
         </div>
       )}
-      {isSingleComment ? <PostComponent post={postComment} /> : <PostComponent post={post} />}
+      {isSingleComment ? (
+        <>
+          <PostComponent post={postComment} />
+          <PostLoadFailure post={postComment} />
+        </>
+      ) : (
+        <PostComponent post={post} />
+      )}
       {timestamp && (
         <div className={styles.replyArea}>
           {!isSingleComment && (
@@ -225,6 +239,7 @@ const PostWithContext = ({ post }: { post: Comment }) => {
         </div>
       )}
       <PostComponent post={postComment} />
+      <PostLoadFailure post={postComment} />
       <div className={styles.replyArea}>
         <div className={styles.menuArea}>
           {stateString ? (
