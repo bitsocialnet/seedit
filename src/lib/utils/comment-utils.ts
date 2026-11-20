@@ -12,3 +12,10 @@ export const getCommentCommunityAddress = (comment?: unknown): string | undefine
 
   return undefined;
 };
+
+/**
+ * useComment reports `failed` both for the account's own comment whose publication failed and for any comment whose
+ * load failed. Only the account's own comment carries its account `index`, and bitsocial-react-hooks never marks that
+ * one `failed` because of a failed load, so `failed` with an index is a failed publication and without one a failed load.
+ */
+export const isCommentPublicationFailed = (comment?: { state?: string; index?: number }): boolean => comment?.state === 'failed' && typeof comment.index === 'number';

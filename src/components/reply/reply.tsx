@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Comment, useAuthorAddress, useBlock, useComment, useEditedComment, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { isInboxView, isPostContextView, isPostPageView } from '../../lib/utils/view-utils';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
-import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import useCommentTripcode from '../../hooks/use-comment-tripcode';
@@ -439,10 +439,12 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
     setCollapsed(!collapsed);
   };
 
+  // a reply that only failed to load keeps its links and gets no publication label
+  const publicationFailed = isCommentPublicationFailed(reply);
   const stateLabel = (
     <span className={styles.stateLabel}>
-      {state === 'failed' && <Label color='red' text={t('failed')} />}
-      {cid === undefined && state !== 'failed' && <Label color='yellow' text={t('pending')} />}
+      {publicationFailed && <Label color='red' text={t('failed')} />}
+      {cid === undefined && !publicationFailed && <Label color='yellow' text={t('pending')} />}
       {editState === 'failed' && <Label color='red' text={t('failed_edit')} />}
       {editState === 'pending' && <Label color='yellow' text={t('pending_edit')} />}
       {spoiler && <Label color='black' text={t('spoiler')} />}
@@ -606,7 +608,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                 author={author}
                 cid={cid}
                 deleted={deleted}
-                failed={state === 'failed'}
+                failed={publicationFailed}
                 isReply={true}
                 isSingleReply={isSingleReply}
                 index={reply?.index}

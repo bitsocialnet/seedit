@@ -11,7 +11,7 @@ import useContentOptionsStore from '../../stores/use-content-options-store';
 const act = (React as { act?: (callback: () => void | Promise<void>) => void | Promise<void> }).act as (callback: () => void | Promise<void>) => void | Promise<void>;
 
 const testState = vi.hoisted(() => ({
-  post: { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 2 },
+  post: { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 2 } as Record<string, any>,
   account: { author: { address: 'reader.bso' } },
   replies: [] as Record<string, any>[],
   isNsfwCommunity: false,
@@ -19,6 +19,7 @@ const testState = vi.hoisted(() => ({
   unmount: vi.fn(),
   navigate: vi.fn(),
 }));
+const loadedPost = testState.post;
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAccount: () => testState.account,
@@ -75,6 +76,7 @@ const replyOrder = () => Array.from(container.querySelectorAll('[data-reply-id]'
 describe('Post reply identity', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    testState.post = loadedPost;
     testState.replies = [
       { cid: 'first', timestamp: 1, author: { address: 'writer.bso' } },
       { cid: 'second', timestamp: 2, author: { address: 'writer.bso' } },
@@ -146,6 +148,39 @@ describe('Post reply identity', () => {
     testState.replies = [{ ...testState.replies[0], cid: 'published-one', state: 'succeeded' }, testState.replies[1]];
     await render();
     expect(replyOrder()).toEqual(['published-one', 'pending-two']);
+  });
+});
+
+describe('Post failed states', () => {
+  const repliesTitle = () => container.querySelector('span')?.textContent;
+
+  beforeEach(() => {
+    testState.replies = [];
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    testState.post = loadedPost;
+    vi.restoreAllMocks();
+  });
+
+  it('does not call a post whose update failed to load a failed post', async () => {
+    testState.post = { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', state: 'failed' };
+    await render();
+    expect(repliesTitle()).toBe('failed');
+    expect(container.textContent).not.toContain('post_has_failed');
+    expect(container.textContent).not.toContain('downloading_comments');
+  });
+
+  it('calls the account post whose publication failed a failed post', async () => {
+    testState.post = { cid: undefined, communityAddress: 'example.bso', timestamp: 1, title: 'Test post', state: 'failed', index: 0 };
+    await render();
+    expect(repliesTitle()).toBe('post_has_failed');
   });
 });
 

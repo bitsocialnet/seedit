@@ -13,7 +13,7 @@ import { useCommentMediaInfo } from '../../hooks/use-comment-media-info';
 import useDownvote from '../../hooks/use-downvote';
 import useIsMobile from '../../hooks/use-is-mobile';
 import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
-import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import useCommentTripcode from '../../hooks/use-comment-tripcode';
@@ -354,7 +354,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                   cid={cid}
                   comment={post}
                   deleted={deleted}
-                  failed={state === 'failed'}
+                  failed={isCommentPublicationFailed(post)}
                   editState={editState}
                   index={post?.index}
                   nsfw={nsfw}

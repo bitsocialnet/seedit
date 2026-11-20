@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Comment, useAccount, useAccountComments, useComment, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import findTopParentCidOfReply from '../../lib/utils/cid-utils';
-import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { sortRepliesByBest } from '../../lib/utils/post-utils';
 import { getCanonicalCommunityPostRedirectPath, getCommunityPostPath, resolveCommunityRouteAddress } from '../../lib/utils/community-route-utils';
 import { getPendingPostKey, getPendingPostRedirect, isPendingPostView, isPostContextView, RenderedPendingPost } from '../../lib/utils/view-utils';
@@ -155,11 +155,14 @@ const Post = ({ post }: { post: Comment }) => {
               <span className={styles.title}>
                 {replyCount !== undefined
                   ? commentCount
-                  : state === 'failed'
+                  : isCommentPublicationFailed(post)
                     ? t('post_has_failed')
-                    : cid
-                      ? `${t('downloading_comments')}...`
-                      : `${t('post_is_pending')}...`}
+                    : state === 'failed'
+                      ? // the post's update failed to load, so its comments can't be downloaded
+                        t('failed')
+                      : cid
+                        ? `${t('downloading_comments')}...`
+                        : `${t('post_is_pending')}...`}
               </span>
             </div>
           )}
