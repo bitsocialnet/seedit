@@ -53,8 +53,9 @@ const useIsCommunityOffline = (community: Community) => {
   const nowSeconds = Date.now() / 1000;
   const freshnessNowSeconds = getCommunityFreshnessNowSeconds(syncInfo || {}, nowSeconds);
   // a community without a record whose load failed, including one pkc-js keeps retrying because it cannot reach it, is
-  // offline at once rather than after the initial load; one that is only slow still gets the initial load
-  const firstLoadFailed = !updatedAt && Boolean(syncInfo?.firstLoadFailed);
+  // offline at once rather than after the initial load; one that is only slow still gets the initial load. A useCommunity
+  // result carries the flag itself, also for a community whose load failed before it had an address to read the cache by.
+  const firstLoadFailed = !updatedAt && Boolean(community?.firstLoadFailed || syncInfo?.firstLoadFailed);
 
   const isLoading =
     !firstLoadFailed && communityOfflineStore.initialLoad && (!updatedAt || freshnessNowSeconds - updatedAt >= 120 * 60) && nowSeconds - loadingStartTimestamp < 30;

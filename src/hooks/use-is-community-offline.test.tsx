@@ -87,6 +87,13 @@ describe('useIsCommunityOffline', () => {
     expect(hookResult.offlineTitle).toBe('community_offline_info');
   });
 
+  it('shows a community offline whose load failed before it reached the store, from its useCommunity result', async () => {
+    testState.syncInfo = {};
+    await act(() => root.render(createElement(HookHarness, { community: { state: 'failed', firstLoadFailed: true } as Community })));
+    expect(hookResult.isOffline).toBe(true);
+    expect(hookResult.offlineTitle).toBe('community_offline_info');
+  });
+
   it('keeps a community without a record loading during the initial load while no load failed', async () => {
     testState.syncInfo = { syncState: 'loading', firstLoadFailed: false };
     await act(() => root.render(createElement(HookHarness, { community: { address: 'slow.bso' } as Community })));
