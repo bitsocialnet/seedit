@@ -144,6 +144,20 @@ describe('Nested Reply identity', () => {
     expect(toolsFailed()).toBe('true');
   });
 
+  it('labels only the account reply without a CID as pending, not one that is loading or failed to load', async () => {
+    testState.repliesByCid = {};
+    const labels = () => Array.from(container.querySelectorAll('[data-label]')).map((element) => element.textContent);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'failed' } as any })));
+    expect(labels()).toEqual([]);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'fetching-ipfs' } as any })));
+    expect(labels()).toEqual([]);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'pending', index: 1 } as any })));
+    expect(labels()).toEqual(['pending']);
+  });
+
   it('renders author flairs next to the author and hides them when collapsed', async () => {
     testState.repliesByCid = {};
     const flairedReply = { ...parent, author: { address: 'askwise.bso', flairs: [{ text: 'bot' }, { text: 'helper' }] } };

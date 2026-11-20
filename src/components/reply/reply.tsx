@@ -443,12 +443,14 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
     setCollapsed(!collapsed);
   };
 
-  // a reply that only failed to load keeps its links and gets no publication label
+  // only the account's own reply, which carries its index, can be pending or fail to publish; a reply that is loading or
+  // failed to load gets neither label and keeps its links
   const publicationFailed = isCommentPublicationFailed(reply);
+  const publicationPending = cid === undefined && typeof reply?.index === 'number' && !publicationFailed;
   const stateLabel = (
     <span className={styles.stateLabel}>
       {publicationFailed && <Label color='red' text={t('failed')} />}
-      {cid === undefined && !publicationFailed && <Label color='yellow' text={t('pending')} />}
+      {publicationPending && <Label color='yellow' text={t('pending')} />}
       {editState === 'failed' && <Label color='red' text={t('failed_edit')} />}
       {editState === 'pending' && <Label color='yellow' text={t('pending_edit')} />}
       {spoiler && <Label color='black' text={t('spoiler')} />}
