@@ -199,7 +199,8 @@ const Post = ({ post }: { post: Comment }) => {
             <LoadingEllipsis string={stateString} />
           </div>
         ) : (
-          state === 'failed' && t('failed')
+          // the page shows the error of a failed post in this line's place
+          state === 'failed' && !post?.error && t('failed')
         )}
       </span>
     </>
@@ -231,7 +232,7 @@ const PostWithContext = ({ post }: { post: Comment }) => {
               <LoadingEllipsis string={stateString} />
             </div>
           ) : (
-            state === 'failed' && t('failed')
+            state === 'failed' && !post?.error && t('failed')
           )}
         </div>
         <div className={styles.singleCommentInfobar}>

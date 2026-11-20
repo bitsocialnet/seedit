@@ -177,6 +177,25 @@ describe('Post failed states', () => {
     expect(container.textContent).not.toContain('downloading_comments');
   });
 
+  it('leaves the line under a failed post to its error, and says failed only without one', async () => {
+    const statusLine = () => container.querySelector('[class*="loadingString"]')?.textContent;
+    testState.post = {
+      cid: 'post-cid',
+      communityAddress: 'example.bso',
+      timestamp: 1,
+      title: 'Test post',
+      replyCount: 0,
+      state: 'failed',
+      error: new Error('Invalid cid'),
+    };
+    await render();
+    expect(statusLine()).toBe('');
+
+    testState.post = { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 0, state: 'failed' };
+    await render();
+    expect(statusLine()).toBe('failed');
+  });
+
   it('calls the account post whose publication failed a failed post', async () => {
     testState.post = { cid: undefined, communityAddress: 'example.bso', timestamp: 1, title: 'Test post', state: 'failed', index: 0 };
     await render();
