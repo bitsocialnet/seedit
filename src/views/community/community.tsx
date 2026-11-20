@@ -150,7 +150,10 @@ const CommunityView = () => {
   const communityAddress = resolvedCommunityAddress || '';
   const canLoadCommunity = !!communityAddress && isResolvableCommunityAddress(communityAddress);
   const community = useCommunity(canLoadCommunity ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { createdAt, error, shortAddress, started, state, title, updatedAt, settings } = community || {};
+  const { createdAt, error, firstLoadFailed, lastRetriableError, shortAddress, started, state, title, updatedAt, settings } = community || {};
+  // pkc-js keeps retrying a community it cannot reach, so its load never ends in an error; while a community without a
+  // record is retrying after a failed load, show why its last attempt failed
+  const loadError = error || (firstLoadFailed ? lastRetriableError : undefined);
   const { isOffline } = useIsCommunityOffline(community || {});
   const isOnline = !isOffline;
   const isSubCreatedButNotYetPublished = typeof createdAt === 'number' && !updatedAt;
@@ -277,7 +280,7 @@ const CommunityView = () => {
   }, [title, shortAddress, rawCommunityIdentifier, communityAddress, directoryList?.title]);
 
   // Derive whether to show error directly from current feed state
-  const shouldShowErrorToUser = Boolean(error?.message && feed.length === 0);
+  const shouldShowErrorToUser = Boolean(loadError?.message && feed.length === 0);
   // A directory published after this build has no bundled list, so a failed list request leaves it without a community.
   const unresolvedDirectoryError = directoryCode && !resolvedCommunityAddress ? directoryListError : null;
 
@@ -310,7 +313,7 @@ const CommunityView = () => {
       </div>
       {(shouldShowErrorToUser || unresolvedDirectoryError) && (
         <div className={styles.error}>
-          <ErrorDisplay error={unresolvedDirectoryError ?? error} />
+          <ErrorDisplay error={unresolvedDirectoryError ?? loadError} />
         </div>
       )}
       <div className={layoutStyles.feed}>

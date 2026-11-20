@@ -196,6 +196,26 @@ describe('Community feed updates', () => {
     expect(container.textContent).not.toContain('loading');
   });
 
+  it('shows why a community without a record keeps retrying while it still loads', async () => {
+    testState.community = { state: 'fetching-ipns', firstLoadFailed: true, lastRetriableError: new Error('IPNS name could not be resolved') };
+    testState.feed = [];
+
+    await renderCommunity();
+
+    expect(container.textContent).toContain('error: IPNS name could not be resolved');
+    expect(container.textContent).toContain('loading');
+    expect(container.textContent).not.toContain('failed');
+  });
+
+  it('does not show the retriable error of a community that has a record', async () => {
+    testState.community = { state: 'succeeded', updatedAt: 1, firstLoadFailed: false, lastRetriableError: new Error('refresh timed out') };
+    testState.feed = [];
+
+    await renderCommunity();
+
+    expect(container.textContent).not.toContain('refresh timed out');
+  });
+
   it('keeps showing a community that has not loaded yet as loading', async () => {
     testState.community = { state: 'fetching-ipns' };
     testState.feed = [];
