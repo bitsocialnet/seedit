@@ -17,6 +17,7 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCom
   const communityIdentifiers = useMemo(() => options.communities || [], [options.communities]);
   const {
     communities,
+    communityLoadStatuses,
     state: communitiesState,
     error: communitiesError,
     errors: communitiesErrors,
@@ -100,7 +101,7 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCom
     communityKeysWithNewerPosts,
     communityKeysWithMore,
     communityKeysWithUnavailableSort,
-    isLoadingCommunities: hasLoadingFeedCommunities(communities),
+    isLoadingCommunities: hasLoadingFeedCommunities(communities, communityLoadStatuses),
     state: communitiesState === 'failed' ? 'failed' : hasMore ? 'fetching-ipns' : 'succeeded',
     error: communitiesError || requestedSortFeed.error || preloadedSortFeed.error,
     errors: [...communitiesErrors, ...requestedSortFeed.errors, ...preloadedSortFeed.errors],

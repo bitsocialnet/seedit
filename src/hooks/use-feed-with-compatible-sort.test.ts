@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { describe, expect, it } from 'vitest';
-import type { Comment, Community, CommunityIdentifier } from '@bitsocial/bitsocial-react-hooks';
+import type { Comment, Community, CommunityIdentifier, CommunityLoadStatus } from '@bitsocial/bitsocial-react-hooks';
 import { getFeedCommunityGroups, hasLoadingFeedCommunities, hasUnresolvedPostSortMetadata, mergeAndSortFeeds } from '../lib/utils/feed-sort-utils';
 
 const identifier = (name: string): CommunityIdentifier => ({ name });
@@ -83,6 +83,14 @@ describe('hasLoadingFeedCommunities', () => {
 
   it.each(['waiting-retry', 'failed', 'succeeded'])('does not wait for a %s community without a record', (updatingState) => {
     expect(hasLoadingFeedCommunities([{ updatingState } as Community])).toBe(false);
+  });
+
+  it('does not wait for a community whose first load failed, also before it reached the store', () => {
+    const failedLoad = { firstLoadFailed: true } as CommunityLoadStatus;
+    const loading = { firstLoadFailed: false } as CommunityLoadStatus;
+    expect(hasLoadingFeedCommunities([community({ pages: ['hot'] }), undefined], [loading, failedLoad])).toBe(false);
+    expect(hasLoadingFeedCommunities([community({ pages: ['hot'] }), { updatingState: 'stopped' } as Community], [loading, failedLoad])).toBe(false);
+    expect(hasLoadingFeedCommunities([community({ pages: ['hot'] }), undefined], [loading, loading])).toBe(true);
   });
 
   it('keeps a feed loading while a new community has not started its first update beside a loaded one', () => {
