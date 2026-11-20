@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { useCommunities } from '@bitsocial/bitsocial-react-hooks';
+import { useCommunities, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { isModView } from '../../lib/utils/view-utils';
+import { getCommunityLoadError } from '../../lib/utils/community-load-utils';
 import { useCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { useFeedStateString } from '../../hooks/use-state-string';
 import EmptyFeedMessage from '../empty-feed-message';
+import ErrorDisplay from '../error-display';
 import { useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
 import FeedPagination from '../feed-pagination';
 import LoadingEllipsis from '../loading-ellipsis';
@@ -31,6 +33,11 @@ const FeedFooter = ({ requestKey, feedLength, hasFeedLoaded, hasMore, communityA
   const feedCommunityIdentifiers = useCommunityIdentifiers(communityAddresses);
   const { communities } = useCommunities({ communities: feedCommunityIdentifiers });
   const feedStateString = useFeedStateString(communityAddresses);
+  // useCommunities reports no load failure per community, so only a feed of one community can tell that it failed, or why
+  // it keeps retrying; an empty feed of several communities keeps loading
+  const singleCommunity = useCommunity(feedCommunityIdentifiers.length === 1 ? { community: feedCommunityIdentifiers[0] } : undefined);
+  const singleCommunityLoadError = feedLength === 0 ? getCommunityLoadError(singleCommunity) : undefined;
+  const hasSingleCommunityFailed = feedLength === 0 && singleCommunity?.state === 'failed';
   const loadingStateString = feedStateString || (!hasFeedLoaded || feedLength === 0 ? t('loading_feed') : t('looking_for_more_posts'));
   const hasEmptyFeedData = shouldShowEmptyFeed({
     requestedCommunityCount: feedCommunityIdentifiers.length,
@@ -80,7 +87,14 @@ const FeedFooter = ({ requestKey, feedLength, hasFeedLoaded, hasMore, communityA
               </div>
             )
           ) : shouldShowFeedLoading({ feedLength, hasMore, infiniteFeedEnabled }) ? (
-            <LoadingEllipsis string={feedStateString || loadingStateString} />
+            <>
+              {singleCommunityLoadError && (
+                <div className={styles.error}>
+                  <ErrorDisplay error={singleCommunityLoadError} />
+                </div>
+              )}
+              {hasSingleCommunityFailed ? t('failed') : <LoadingEllipsis string={feedStateString || loadingStateString} />}
+            </>
           ) : null}
         </div>
       </>

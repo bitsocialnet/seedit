@@ -20,6 +20,8 @@ const testState = vi.hoisted(() => ({
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAccountCommunities: () => ({ accountCommunities: testState.accountCommunities }),
+  // the feed footer reads the community of a one-community feed
+  useCommunity: () => ({}),
   useCommunities: (options: unknown) => {
     testState.readCommunities(options);
     return { communities: [{ updatedAt: 1 }] };
