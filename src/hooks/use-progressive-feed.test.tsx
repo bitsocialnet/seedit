@@ -4,7 +4,8 @@ import * as React from 'react';
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Comment, UseFeedOptions, UseFeedResult } from '@bitsocial/bitsocial-react-hooks';
+import type { Comment, UseFeedOptions } from '@bitsocial/bitsocial-react-hooks';
+import type { UseFeedWithCompatibleSortResult } from './use-feed-with-compatible-sort';
 import useProgressiveFeed from './use-progressive-feed';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -27,7 +28,7 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({ useAccount: () => ({ id: te
 const posts = (count: number): Comment[] => Array.from({ length: count }, (_, index) => ({ cid: `post-${index}` }) as Comment);
 
 vi.mock('./use-feed-with-compatible-sort', () => ({
-  default: (options: UseFeedOptions): UseFeedResult & { isLoadingCommunities: boolean } => {
+  default: (options: UseFeedOptions): UseFeedWithCompatibleSortResult => {
     const isDisabled = options.communities?.length === 0;
     if (!isDisabled) testState.enabledWindows.push(options.newerThan);
     const isBaseFeed = options.newerThan === day;
