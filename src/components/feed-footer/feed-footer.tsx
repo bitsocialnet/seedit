@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { useCommunities, useCommunity } from '@bitsocial/bitsocial-react-hooks';
+import { useAccount, useCommunities } from '@bitsocial/bitsocial-react-hooks';
 import { isModView } from '../../lib/utils/view-utils';
-import { getCommunityLoadError } from '../../lib/utils/community-load-utils';
+import { getFeedLoadFailure } from '../../lib/utils/community-load-utils';
 import { useCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { useFeedStateString } from '../../hooks/use-state-string';
 import EmptyFeedMessage from '../empty-feed-message';
@@ -31,13 +31,11 @@ const FeedFooter = ({ requestKey, feedLength, hasFeedLoaded, hasMore, communityA
   const isInModView = isModView(location.pathname);
   const infiniteFeedEnabled = useInfiniteFeedEnabled();
   const feedCommunityIdentifiers = useCommunityIdentifiers(communityAddresses);
-  const { communities } = useCommunities({ communities: feedCommunityIdentifiers });
+  const { communities, communityLoadStatuses } = useCommunities({ communities: feedCommunityIdentifiers });
+  const blockedAddresses = useAccount()?.blockedAddresses;
   const feedStateString = useFeedStateString(communityAddresses);
-  // useCommunities reports no load failure per community, so only a feed of one community can tell that it failed, or why
-  // it keeps retrying; an empty feed of several communities keeps loading
-  const singleCommunity = useCommunity(feedCommunityIdentifiers.length === 1 ? { community: feedCommunityIdentifiers[0] } : undefined);
-  const singleCommunityLoadError = feedLength === 0 ? getCommunityLoadError(singleCommunity) : undefined;
-  const hasSingleCommunityFailed = feedLength === 0 && singleCommunity?.state === 'failed';
+  // an empty feed whose communities failed to load says so, and why, instead of loading forever
+  const feedLoadFailure = feedLength === 0 ? getFeedLoadFailure(feedCommunityIdentifiers, communityLoadStatuses, blockedAddresses) : undefined;
   const loadingStateString = feedStateString || (!hasFeedLoaded || feedLength === 0 ? t('loading_feed') : t('looking_for_more_posts'));
   const hasEmptyFeedData = shouldShowEmptyFeed({
     requestedCommunityCount: feedCommunityIdentifiers.length,
@@ -88,12 +86,12 @@ const FeedFooter = ({ requestKey, feedLength, hasFeedLoaded, hasMore, communityA
             )
           ) : shouldShowFeedLoading({ feedLength, hasMore, infiniteFeedEnabled }) ? (
             <>
-              {singleCommunityLoadError && (
-                <div className={styles.error}>
-                  <ErrorDisplay error={singleCommunityLoadError} />
+              {feedLoadFailure?.errors.map((error) => (
+                <div className={styles.error} key={error.message}>
+                  <ErrorDisplay error={error} />
                 </div>
-              )}
-              {hasSingleCommunityFailed ? t('failed') : <LoadingEllipsis string={feedStateString || loadingStateString} />}
+              ))}
+              {feedLoadFailure?.state === 'failed' ? t('failed') : <LoadingEllipsis string={feedStateString || loadingStateString} />}
             </>
           ) : null}
         </div>

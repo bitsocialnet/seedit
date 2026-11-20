@@ -31,9 +31,7 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
       },
       () => testState.account,
     ),
-  // the feed footer reads the community of a one-community feed
-  useCommunity: () => ({}),
-  useCommunities: () => ({ communities: [{ updatedAt: 1 }] }),
+  useCommunities: () => ({ communities: [{ updatedAt: 1 }], communityLoadStatuses: [{ state: 'succeeded', hasCachedData: true, firstLoadFailed: false }] }),
 }));
 
 vi.mock('react-i18next', () => ({
