@@ -14,6 +14,7 @@ import {
 import { isUserOwnerOrAdmin, Roles } from '../../lib/utils/user-utils';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
 import { isCreateCommunityView, isCommunitySettingsView } from '../../lib/utils/view-utils';
+import { getCommunityLoadError } from '../../lib/utils/community-load-utils';
 import useCommunitySettingsStore from '../../stores/use-community-settings-store';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
@@ -313,7 +314,7 @@ const CommunitySettings = () => {
   const { t } = useTranslation();
   const { communityAddress } = useResolvedCommunityRoute();
   const community = useCommunity(communityAddress ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { address, challenges, createdAt, description, error, rules, shortAddress, settings, suggested, roles, title } = community || {};
+  const { address, challenges, createdAt, description, rules, shortAddress, settings, suggested, roles, title } = community || {};
   const hasLoaded = !!createdAt;
 
   const { pkcRpcSettings, state: rpcState } = usePkcRpcSettings();
@@ -544,18 +545,17 @@ const CommunitySettings = () => {
   }, []);
 
   const loadingStateString = useStateString(community);
+  const loadError = getCommunityLoadError(community);
 
   if (!hasLoaded && !isInCreateCommunityView) {
     return (
       <>
-        {error?.message && (
+        {loadError?.message && (
           <div className={styles.error}>
-            <ErrorDisplay error={error} />
+            <ErrorDisplay error={loadError} />
           </div>
         )}
-        <div className={styles.loading}>
-          <LoadingEllipsis string={loadingStateString || t('loading')} />
-        </div>
+        <div className={styles.loading}>{community?.state === 'failed' ? t('failed') : <LoadingEllipsis string={loadingStateString || t('loading')} />}</div>
       </>
     );
   }

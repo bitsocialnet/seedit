@@ -11,7 +11,9 @@ import useContentOptionsStore from '../../stores/use-content-options-store';
 const act = (React as { act?: (callback: () => void | Promise<void>) => void | Promise<void> }).act as (callback: () => void | Promise<void>) => void | Promise<void>;
 
 const testState = vi.hoisted(() => ({
-  post: { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 2 },
+  post: { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 2 } as Record<string, any>,
+  otherComments: {} as Record<string, Record<string, any>>,
+  search: '',
   account: { author: { address: 'reader.bso' } },
   replies: [] as Record<string, any>[],
   isNsfwCommunity: false,
@@ -19,17 +21,18 @@ const testState = vi.hoisted(() => ({
   unmount: vi.fn(),
   navigate: vi.fn(),
 }));
+const loadedPost = testState.post;
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAccount: () => testState.account,
   useAccountComments: () => ({ accountComments: [] }),
-  useComment: ({ commentCid }: { commentCid?: string }) => (commentCid === 'post-cid' ? testState.post : {}),
+  useComment: ({ commentCid }: { commentCid?: string }) => (commentCid === 'post-cid' ? testState.post : (testState.otherComments[commentCid ?? ''] ?? {})),
   useCommunity: () => ({ title: 'Example' }),
 }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 vi.mock('react-router-dom', () => ({
   Link: ({ children }: { children: React.ReactNode }) => createElement('a', null, children),
-  useLocation: () => ({ pathname: '/s/example.bso/comments/post-cid', search: '' }),
+  useLocation: () => ({ pathname: '/s/example.bso/comments/post-cid', search: testState.search }),
   useParams: () => ({ communityAddress: 'example.bso', commentCid: 'post-cid' }),
   useNavigate: () => testState.navigate,
 }));
@@ -38,7 +41,7 @@ vi.mock('../../hooks/use-replies', () => ({ default: () => testState.replies }))
 vi.mock('../../hooks/use-resolved-community-route', () => ({ default: () => ({ communityAddress: 'example.bso' }) }));
 vi.mock('../../hooks/use-is-nsfw-community', () => ({ useIsNsfwCommunity: () => testState.isNsfwCommunity }));
 vi.mock('../../hooks/use-state-string', () => ({ default: () => '' }));
-vi.mock('../../components/error-display', () => ({ default: () => null }));
+vi.mock('../../components/error-display', () => ({ default: ({ error }: { error?: Error }) => (error ? createElement('span', null, `error: ${error.message}`) : null) }));
 vi.mock('../../components/loading-ellipsis', () => ({ default: () => null }));
 vi.mock('../../components/over-18-warning', () => ({ default: () => createElement('div', { 'data-over-18-warning': true }) }));
 vi.mock('../../components/post', () => ({ default: () => null }));
@@ -75,6 +78,7 @@ const replyOrder = () => Array.from(container.querySelectorAll('[data-reply-id]'
 describe('Post reply identity', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    testState.post = loadedPost;
     testState.replies = [
       { cid: 'first', timestamp: 1, author: { address: 'writer.bso' } },
       { cid: 'second', timestamp: 2, author: { address: 'writer.bso' } },
@@ -146,6 +150,89 @@ describe('Post reply identity', () => {
     testState.replies = [{ ...testState.replies[0], cid: 'published-one', state: 'succeeded' }, testState.replies[1]];
     await render();
     expect(replyOrder()).toEqual(['published-one', 'pending-two']);
+  });
+});
+
+describe('Post failed states', () => {
+  const repliesTitle = () => container.querySelector('span')?.textContent;
+
+  beforeEach(() => {
+    testState.replies = [];
+    vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    testState.post = loadedPost;
+    testState.otherComments = {};
+    testState.search = '';
+    vi.restoreAllMocks();
+  });
+
+  it('does not call a post whose update failed to load a failed post', async () => {
+    testState.post = { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', state: 'failed' };
+    await render();
+    expect(repliesTitle()).toBe('failed');
+    expect(container.textContent).not.toContain('post_has_failed');
+    expect(container.textContent).not.toContain('downloading_comments');
+  });
+
+  it('leaves the line under a failed post to its error, and says failed only without one', async () => {
+    const statusLine = () => container.querySelector('[class*="loadingString"]')?.textContent;
+    testState.post = {
+      cid: 'post-cid',
+      communityAddress: 'example.bso',
+      timestamp: 1,
+      title: 'Test post',
+      replyCount: 0,
+      state: 'failed',
+      error: new Error('Invalid cid'),
+    };
+    await render();
+    expect(statusLine()).toBe('');
+
+    testState.post = { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 0, state: 'failed' };
+    await render();
+    expect(statusLine()).toBe('failed');
+  });
+
+  it('shows why the post above a single comment or its context failed to load', async () => {
+    const reply = { cid: 'post-cid', parentCid: 'parent-cid', postCid: 'op-cid', communityAddress: 'example.bso', timestamp: 1, content: 'A reply' };
+    testState.post = reply;
+    testState.otherComments = { 'op-cid': { state: 'failed', error: new Error('Invalid signature') } };
+    await render();
+    expect(container.textContent).toContain('error: Invalid signature');
+
+    testState.search = '?context=1';
+    testState.otherComments = { 'op-cid': { state: 'failed' } };
+    await render();
+    expect(container.textContent).toContain('failed');
+
+    testState.otherComments = { 'op-cid': { cid: 'op-cid', state: 'succeeded', title: 'Loaded post' } };
+    await render();
+    expect(container.textContent).not.toContain('failed');
+  });
+
+  it('says failed when a load error has no message to show', async () => {
+    const statusLine = () => container.querySelector('[class*="loadingString"]')?.textContent;
+    testState.post = { cid: 'post-cid', communityAddress: 'example.bso', timestamp: 1, title: 'Test post', replyCount: 0, state: 'failed', error: new Error('') };
+    await render();
+    expect(statusLine()).toBe('failed');
+
+    testState.post = { cid: 'post-cid', parentCid: 'parent-cid', postCid: 'op-cid', communityAddress: 'example.bso', timestamp: 1, content: 'A reply' };
+    testState.otherComments = { 'op-cid': { state: 'failed', error: new Error('') } };
+    await render();
+    expect(container.querySelector('[class*="postLoadFailure"]')?.textContent).toBe('failed');
+  });
+
+  it('calls the account post whose publication failed a failed post', async () => {
+    testState.post = { cid: undefined, communityAddress: 'example.bso', timestamp: 1, title: 'Test post', state: 'failed', index: 0 };
+    await render();
+    expect(repliesTitle()).toBe('post_has_failed');
   });
 });
 

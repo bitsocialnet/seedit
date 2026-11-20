@@ -79,6 +79,28 @@ describe('useIsCommunityOffline', () => {
     expect(hookResult.offlineTitle).toBe('posts_last_synced_info');
   });
 
+  it('shows a community without a record offline as soon as its first load failed, also while it retries', async () => {
+    testState.syncInfo = { syncState: 'retrying', firstLoadFailed: true };
+    await act(() => root.render(createElement(HookHarness, { community: { address: 'unreachable.bso' } as Community })));
+    expect(hookResult.isOffline).toBe(true);
+    expect(hookResult.isOnlineStatusLoading).toBe(false);
+    expect(hookResult.offlineTitle).toBe('community_offline_info');
+  });
+
+  it('shows a community offline whose load failed before it reached the store, from its useCommunity result', async () => {
+    testState.syncInfo = {};
+    await act(() => root.render(createElement(HookHarness, { community: { state: 'failed', firstLoadFailed: true } as Community })));
+    expect(hookResult.isOffline).toBe(true);
+    expect(hookResult.offlineTitle).toBe('community_offline_info');
+  });
+
+  it('keeps a community without a record loading during the initial load while no load failed', async () => {
+    testState.syncInfo = { syncState: 'loading', firstLoadFailed: false };
+    await act(() => root.render(createElement(HookHarness, { community: { address: 'slow.bso' } as Community })));
+    expect(hookResult.isOffline).toBe(false);
+    expect(hookResult.isOnlineStatusLoading).toBe(true);
+  });
+
   it('shows a community offline when its latest fetch still returns an old record', async () => {
     testState.syncInfo = { syncState: 'succeeded', lastSuccessfulFetchAt: NOW_SECONDS };
     await renderPastInitialLoad(pausedCommunity('old-record.bso'));

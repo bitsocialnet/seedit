@@ -31,7 +31,7 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
       },
       () => testState.account,
     ),
-  useCommunities: () => ({ communities: [{ updatedAt: 1 }] }),
+  useCommunities: () => ({ communities: [{ updatedAt: 1 }], communityLoadStatuses: [{ state: 'succeeded', hasCachedData: true, firstLoadFailed: false }] }),
 }));
 
 vi.mock('react-i18next', () => ({

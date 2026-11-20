@@ -276,9 +276,11 @@ const SingleReplyTools = ({
   );
 };
 
-const CommentToolsLabel = ({ cid, deleted, failed, editState, isReply, nsfw, removed, spoiler }: CommentToolsProps) => {
+const CommentToolsLabel = ({ cid, deleted, failed, editState, index, isReply, nsfw, removed, spoiler }: CommentToolsProps) => {
   const { t } = useTranslation();
-  const pending = cid === undefined && !isReply && !failed;
+  // only the account's own post, which carries its index, is pending publication; a post without a CID that is still
+  // loading or failed to load is not
+  const pending = cid === undefined && typeof index === 'number' && !isReply && !failed;
   const failedEdit = editState === 'failed';
   const pendingEdit = editState === 'pending';
 
@@ -379,6 +381,7 @@ const CommentTools = ({
               deleted={deleted}
               failed={failed}
               editState={editState}
+              index={index}
               isReply={isReply}
               nsfw={nsfw}
               removed={removed}

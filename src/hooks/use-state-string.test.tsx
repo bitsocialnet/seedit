@@ -46,6 +46,7 @@ describe('useStateString', () => {
     container.remove();
     vi.useRealTimers();
     testState.clientsStates = {};
+    testState.community = { address: 'news.bso', state: 'succeeded' };
   });
 
   it('describes what each client is fetching', async () => {
@@ -55,6 +56,30 @@ describe('useStateString', () => {
       vi.advanceTimersByTime(1000);
     });
     expect(result).toBe('Fetching IPFS from gateway.example');
+  });
+
+  it('gives no loading text to a failed load, even while a client still fetches it', async () => {
+    testState.clientsStates = { 'fetching-update-ipns': ['https://gateway.example/'] };
+    await act(async () => root.render(createElement(StateStringHarness, { comment: { state: 'failed', updatingState: 'fetching-update-ipns' } })));
+    expect(result).toBeUndefined();
+  });
+
+  it('gives no loading text to a publication pkc-js reported failed before the hooks did', async () => {
+    await act(async () => root.render(createElement(StateStringHarness, { comment: { state: 'pending', publishingState: 'failed', updatingState: 'stopped' } })));
+    expect(result).toBeUndefined();
+  });
+
+  it('describes a loading publication or update', async () => {
+    await act(async () => root.render(createElement(StateStringHarness, { comment: { state: 'pending', publishingState: 'publishing-challenge-request' } })));
+    expect(result).toBe('Publishing challenge request');
+    await act(async () => root.render(createElement(StateStringHarness, { comment: { state: 'fetching-ipns', updatingState: 'waiting-retry' } })));
+    expect(result).toBe('Waiting retry');
+  });
+
+  it('gives no loading text to a single community feed whose community failed to load', async () => {
+    testState.community = { address: 'missing.bso', state: 'failed', updatingState: 'failed' };
+    await act(async () => root.render(createElement(FeedStateStringHarness, { communityAddresses: ['missing.bso'] })));
+    expect(result).toBeUndefined();
   });
 
   it('shows the pages a loaded community feed is still fetching', async () => {

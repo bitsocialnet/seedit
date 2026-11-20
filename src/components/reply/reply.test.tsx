@@ -48,10 +48,11 @@ vi.mock('../expando', () => ({ default: () => createElement('div', { 'data-expan
 vi.mock('../flair', () => ({
   default: ({ flair, author }: { flair: { text: string }; author?: boolean }) => (author ? createElement('span', { 'data-author-flair': '' }, flair.text) : null),
 }));
-vi.mock('../label', () => ({ default: () => null }));
+vi.mock('../label', () => ({ default: ({ text }: { text: string }) => createElement('span', { 'data-label': text }, text) }));
 vi.mock('../thumbnail', () => ({ default: () => null }));
 vi.mock('../comment-tools', () => ({
-  default: ({ cid, showReplyForm }: { cid?: string; showReplyForm: () => void }) => createElement('button', { 'data-reply-button': cid, onClick: showReplyForm }, cid),
+  default: ({ cid, failed, showReplyForm }: { cid?: string; failed?: boolean; showReplyForm: () => void }) =>
+    createElement('button', { 'data-reply-button': cid, 'data-failed': String(failed), onClick: showReplyForm }, cid),
 }));
 vi.mock('../reply-form', () => ({
   default: ({ cid }: { cid?: string }) => createElement('textarea', { 'data-reply-draft': cid, defaultValue: '' }),
@@ -127,6 +128,55 @@ describe('Nested Reply identity', () => {
     expect(container.textContent).toContain('Pending two');
     expect(container.querySelectorAll('button')).toHaveLength(3);
     expect(consoleError.mock.calls.flat().join(' ')).not.toMatch(/same key/);
+  });
+
+  it('labels a reply whose publication failed, but not one that only failed to load', async () => {
+    testState.repliesByCid = {};
+    const labels = () => Array.from(container.querySelectorAll('[data-label]')).map((element) => element.textContent);
+    const toolsFailed = () => container.querySelector('[data-failed]')?.getAttribute('data-failed');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, state: 'failed' } as any })));
+    expect(labels()).toEqual([]);
+    expect(toolsFailed()).toBe('false');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'failed', index: 2 } as any })));
+    expect(labels()).toEqual(['failed']);
+    expect(toolsFailed()).toBe('true');
+  });
+
+  it('shows why a reply that failed to load is empty, unless the post page shows it as its own comment', async () => {
+    testState.repliesByCid = {};
+    const failedLoad = { cid: 'top-parent', communityAddress: 'example.bso', state: 'failed', error: new Error('Invalid signature') };
+
+    await act(async () => root.render(createElement(Reply, { reply: failedLoad as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('error: Invalid signature');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...failedLoad, error: undefined } as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('failed');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...failedLoad, error: new Error('') } as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('failed');
+
+    await act(async () => root.render(createElement(Reply, { reply: failedLoad as any, isSingleComment: true })));
+    expect(container.textContent).not.toContain('Invalid signature');
+
+    const failedPublication = { ...parent, cid: undefined, state: 'failed', index: 2, error: new Error('publication rejected') };
+    await act(async () => root.render(createElement(Reply, { reply: failedPublication as any })));
+    expect(container.textContent).not.toContain('publication rejected');
+  });
+
+  it('labels only the account reply without a CID as pending, not one that is loading or failed to load', async () => {
+    testState.repliesByCid = {};
+    const labels = () => Array.from(container.querySelectorAll('[data-label]')).map((element) => element.textContent);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'failed' } as any })));
+    expect(labels()).toEqual([]);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'fetching-ipfs' } as any })));
+    expect(labels()).toEqual([]);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'pending', index: 1 } as any })));
+    expect(labels()).toEqual(['pending']);
   });
 
   it('renders author flairs next to the author and hides them when collapsed', async () => {

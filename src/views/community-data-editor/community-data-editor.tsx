@@ -7,6 +7,7 @@ import LoadingEllipsis from '../../components/loading-ellipsis';
 import useCommunitySettingsStore from '../../stores/use-community-settings-store';
 import { useNavigate } from 'react-router-dom';
 import ErrorDisplay from '../../components/error-display';
+import { getCommunityLoadError } from '../../lib/utils/community-load-utils';
 import useStateString from '../../hooks/use-state-string';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
@@ -20,7 +21,7 @@ const CommunityDataEditor = () => {
 
   const { communityAddress } = useResolvedCommunityRoute();
   const community = useCommunity(communityAddress ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { address, createdAt, description, error, rules, settings, suggested, roles, title } = community || {};
+  const { address, createdAt, description, rules, settings, suggested, roles, title } = community || {};
   const hasLoaded = !!createdAt;
 
   const {
@@ -222,18 +223,17 @@ const CommunityDataEditor = () => {
   }, [hasLoaded, resetCommunitySettingsStore, setCommunitySettingsStore, title, description, address, suggested, rules, roles, settings, communityAddress]);
 
   const loadingStateString = useStateString(community);
+  const loadError = getCommunityLoadError(community);
 
   if (!hasLoaded) {
     return (
       <>
-        {error?.message && (
+        {loadError?.message && (
           <div className={styles.error}>
-            <ErrorDisplay error={error} />
+            <ErrorDisplay error={loadError} />
           </div>
         )}
-        <div className={styles.loading}>
-          <LoadingEllipsis string={loadingStateString || t('loading')} />
-        </div>
+        <div className={styles.loading}>{community?.state === 'failed' ? t('failed') : <LoadingEllipsis string={loadingStateString || t('loading')} />}</div>
       </>
     );
   }

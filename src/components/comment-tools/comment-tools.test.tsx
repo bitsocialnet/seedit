@@ -90,6 +90,27 @@ describe('CommentTools', () => {
     expect(testState.unsaveComment).toHaveBeenCalledOnce();
   });
 
+  it('labels only the account post without a CID as pending, not a post that is loading or failed to load', async () => {
+    const renderPostWithoutCid = (props: { index?: number; failed?: boolean }) =>
+      act(async () => {
+        root.render(
+          <MemoryRouter>
+            <CommentTools cid={undefined as unknown as string} communityAddress='community.eth' {...props} />
+          </MemoryRouter>,
+        );
+      });
+    const labels = () => Array.from(container.querySelectorAll('[class*="stamp"]')).map((element) => element.textContent);
+
+    await renderPostWithoutCid({});
+    expect(labels()).toEqual([]);
+
+    await renderPostWithoutCid({ index: 0 });
+    expect(labels()).toEqual(['pending']);
+
+    await renderPostWithoutCid({ index: 0, failed: true });
+    expect(labels()).toEqual(['failed']);
+  });
+
   it('alerts that reporting is not available yet', async () => {
     const alert = vi.spyOn(window, 'alert').mockImplementation(() => undefined);
     await renderTools();

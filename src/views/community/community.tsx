@@ -28,6 +28,7 @@ import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
 import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
+import { getCommunityLoadError } from '../../lib/utils/community-load-utils';
 import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 
@@ -40,6 +41,7 @@ interface FooterProps {
   paginationFeedLength: number;
   isOnline: boolean;
   hasCommunityLoaded: boolean;
+  hasCommunityFailed: boolean;
   started: boolean;
   isSubCreatedButNotYetPublished: boolean;
   hasMore: boolean;
@@ -55,6 +57,7 @@ const Footer = ({
   paginationFeedLength,
   isOnline,
   hasCommunityLoaded,
+  hasCommunityFailed,
   started: _started,
   isSubCreatedButNotYetPublished: _isSubCreatedButNotYetPublished,
   hasMore,
@@ -71,7 +74,8 @@ const Footer = ({
 
   const loadingString = (
     <>
-      <div className={layoutStyles.stateString}>{loadingStateString === 'Failed' ? 'failed' : <LoadingEllipsis string={loadingStateString} />}</div>
+      {/* a community whose first load failed is no longer loading; the error it reported shows above the feed */}
+      <div className={layoutStyles.stateString}>{hasCommunityFailed ? t('failed') : <LoadingEllipsis string={loadingStateString} />}</div>
     </>
   );
 
@@ -147,7 +151,8 @@ const CommunityView = () => {
   const communityAddress = resolvedCommunityAddress || '';
   const canLoadCommunity = !!communityAddress && isResolvableCommunityAddress(communityAddress);
   const community = useCommunity(canLoadCommunity ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { createdAt, error, shortAddress, started, title, updatedAt, settings } = community || {};
+  const { createdAt, error, shortAddress, started, state, title, updatedAt, settings } = community || {};
+  const loadError = getCommunityLoadError(community);
   const { isOffline } = useIsCommunityOffline(community || {});
   const isOnline = !isOffline;
   const isSubCreatedButNotYetPublished = typeof createdAt === 'number' && !updatedAt;
@@ -216,6 +221,7 @@ const CommunityView = () => {
       paginationFeedLength: feed.length,
       isOnline,
       hasCommunityLoaded: Boolean(updatedAt),
+      hasCommunityFailed: state === 'failed',
       started,
       isSubCreatedButNotYetPublished,
       hasMore,
@@ -230,6 +236,7 @@ const CommunityView = () => {
       feed.length,
       isOnline,
       updatedAt,
+      state,
       started,
       isSubCreatedButNotYetPublished,
       hasMore,
@@ -272,7 +279,7 @@ const CommunityView = () => {
   }, [title, shortAddress, rawCommunityIdentifier, communityAddress, directoryList?.title]);
 
   // Derive whether to show error directly from current feed state
-  const shouldShowErrorToUser = Boolean(error?.message && feed.length === 0);
+  const shouldShowErrorToUser = Boolean(loadError?.message && feed.length === 0);
   // A directory published after this build has no bundled list, so a failed list request leaves it without a community.
   const unresolvedDirectoryError = directoryCode && !resolvedCommunityAddress ? directoryListError : null;
 
@@ -305,7 +312,7 @@ const CommunityView = () => {
       </div>
       {(shouldShowErrorToUser || unresolvedDirectoryError) && (
         <div className={styles.error}>
-          <ErrorDisplay error={unresolvedDirectoryError ?? error} />
+          <ErrorDisplay error={unresolvedDirectoryError ?? loadError} />
         </div>
       )}
       <div className={layoutStyles.feed}>
