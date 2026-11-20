@@ -62,7 +62,7 @@ vi.mock('react-router-dom', () => ({
 vi.mock('../../hooks/use-resolved-community-route', () => ({ default: () => ({ communityAddress: 'example.bso' }) }));
 vi.mock('../../hooks/use-is-community-offline', () => ({ default: () => ({ isOffline: false, offlineTitle: '' }) }));
 vi.mock('../../hooks/use-state-string', () => ({ default: () => '' }));
-vi.mock('../../components/error-display', () => ({ default: () => null }));
+vi.mock('../../components/error-display', () => ({ default: ({ error }: { error?: Error }) => (error ? createElement('span', null, `error: ${error.message}`) : null) }));
 vi.mock('../../components/loading-ellipsis', () => ({ default: () => null }));
 vi.mock('../../components/sidebar', () => ({ default: () => null }));
 vi.mock('../../components/markdown', () => ({ default: ({ content }: { content: string }) => createElement('div', { 'data-testid': 'preview' }, content) }));
@@ -125,6 +125,16 @@ describe('CommunitySettings field rendering', () => {
     container.remove();
     useCommunitySettingsStore.getState().resetCommunitySettingsStore();
     vi.restoreAllMocks();
+  });
+
+  it('shows a community whose first load failed as failed, and why a retrying one has not loaded', async () => {
+    testState.community = { state: 'failed', firstLoadFailed: true, error: new Error('No name resolver can handle this address') };
+    await render();
+    expect(container.textContent).toBe('error: No name resolver can handle this addressfailed');
+
+    testState.community = { state: 'fetching-ipns', firstLoadFailed: true, lastRetriableError: new Error('Domain resolver did not find the text record') };
+    await render();
+    expect(container.textContent).toBe('error: Domain resolver did not find the text record');
   });
 
   it('edits the title without rendering unrelated fields and keeps the complete latest save options', async () => {

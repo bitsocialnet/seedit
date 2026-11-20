@@ -28,6 +28,7 @@ import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
 import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
+import { getCommunityLoadError } from '../../lib/utils/community-load-utils';
 import useProgressiveFeed from '../../hooks/use-progressive-feed';
 import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 
@@ -150,10 +151,8 @@ const CommunityView = () => {
   const communityAddress = resolvedCommunityAddress || '';
   const canLoadCommunity = !!communityAddress && isResolvableCommunityAddress(communityAddress);
   const community = useCommunity(canLoadCommunity ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { createdAt, error, firstLoadFailed, lastRetriableError, shortAddress, started, state, title, updatedAt, settings } = community || {};
-  // pkc-js keeps retrying a community it cannot reach, so its load never ends in an error; while a community without a
-  // record is retrying after a failed load, show why its last attempt failed
-  const loadError = error || (firstLoadFailed ? lastRetriableError : undefined);
+  const { createdAt, error, shortAddress, started, state, title, updatedAt, settings } = community || {};
+  const loadError = getCommunityLoadError(community);
   const { isOffline } = useIsCommunityOffline(community || {});
   const isOnline = !isOffline;
   const isSubCreatedButNotYetPublished = typeof createdAt === 'number' && !updatedAt;
