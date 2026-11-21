@@ -146,6 +146,28 @@ describe('ChallengeModal', () => {
     expect(container.querySelector<HTMLInputElement>('input')?.value).toBe('');
   });
 
+  it('handles an answer pkc-js rejects because the challenge exchange already ended', async () => {
+    // pkc-js 0.0.154 rejects an answer to a challenge whose exchange ended while it waited in the modal, for example
+    // after the community stopped waiting for the answer
+    const exchangeEnded = Object.assign(new Error('challenge exchange ended'), { code: 'ERR_PUBLICATION_CHALLENGE_EXCHANGE_ENDED' });
+    const publishChallengeAnswers = vi.fn().mockRejectedValue(exchangeEnded);
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
+    useChallengesStore.getState().addChallenge(createChallenge('stale prompt', publishChallengeAnswers));
+    useChallengesStore.getState().addChallenge(createChallenge('next prompt'));
+    await renderModal();
+
+    await enterAnswer('four');
+    await clickButton('submit');
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(publishChallengeAnswers).toHaveBeenCalledWith({ '0': 'four' });
+    expect(consoleError).toHaveBeenCalledWith('Failed to publish challenge answers:', exchangeEnded);
+    expect(container.textContent).toContain('next prompt');
+    consoleError.mockRestore();
+  });
+
   it('shows only the trusted Spamblocker hostname in the confirmation', async () => {
     useChallengesStore.getState().addChallenge(createIframeChallenge('https://spamblocker.bitsocial.net/api/v1/iframe/session-123?token=large-token'));
 
