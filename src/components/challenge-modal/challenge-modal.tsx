@@ -66,9 +66,9 @@ const getChallengeEntries = (challenges: unknown): ChallengeEntries =>
 const getAnswersByChallengeIndex = (challengeEntries: ChallengeEntries, answers: string[]) =>
   Object.fromEntries(challengeEntries.map(([challengeIndex], position) => [challengeIndex, answers[position] ?? '']));
 
-// A challenge stays queued here after its exchange ended, for example when the community stopped waiting for an
-// answer and rejected the publication, and pkc-js rejects an answer sent then. The publication's own verification or
-// error already reported that outcome, so the rejection is only logged instead of going unhandled.
+// The challenges store drops a challenge once its exchange ends, but an answer can still be sent as it ends, for
+// example while pkc-js encrypts it, and pkc-js then rejects it. The publication's own verification or error already
+// reported that outcome, so the rejection is only logged instead of going unhandled.
 const sendChallengeAnswers = async (publication: ChallengeType[1], challengeAnswers: Record<string, string>) => {
   try {
     await publication.publishChallengeAnswers(challengeAnswers);

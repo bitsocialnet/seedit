@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import { EventEmitter } from 'node:events';
 import * as React from 'react';
 import { createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
@@ -43,6 +44,30 @@ const createChallenge = (prompt: string, publishChallengeAnswers = vi.fn()) =>
 
 const createIframeChallenge = (url: string, publishChallengeAnswers = vi.fn()) =>
   createChallengeMessage({ '0': { challenge: url, type: 'url/iframe' } }, publishChallengeAnswers, 'iframe post');
+
+// A pkc-js publication whose challenge waits in the modal, for the tests of an exchange that ends meanwhile
+const createLiveChallenge = (prompt: string, type = 'text/plain') => {
+  const publication = Object.assign(new EventEmitter(), {
+    communityAddress: 'example.bso',
+    content: prompt,
+    publishChallengeAnswers: vi.fn(),
+    state: 'publishing',
+    publishingState: 'waiting-challenge-answers',
+  });
+  publication.on('error', () => {});
+  return { challenge: [{ challenges: { '0': { challenge: prompt, type } } }, publication] as never, publication };
+};
+
+// pkc-js 0.0.154 order when a publication fails, e.g. after the community stopped waiting for an answer
+const failPublication = async (publication: EventEmitter & { state: string; publishingState: string }) => {
+  await act(async () => {
+    publication.state = 'stopped';
+    publication.emit('statechange', 'stopped');
+    publication.publishingState = 'failed';
+    publication.emit('error', new Error('publication failed'));
+    publication.emit('publishingstatechange', 'failed');
+  });
+};
 
 const postIframeAnswers = async (challengeAnswers: string[]) => {
   await act(async () => {
@@ -166,6 +191,40 @@ describe('ChallengeModal', () => {
     expect(consoleError).toHaveBeenCalledWith('Failed to publish challenge answers:', exchangeEnded);
     expect(container.textContent).toContain('next prompt');
     consoleError.mockRestore();
+  });
+
+  it('closes a challenge whose exchange ended and shows the next queued one', async () => {
+    const first = createLiveChallenge('first prompt');
+    const second = createLiveChallenge('second prompt');
+    const firstAbandon = vi.fn();
+    useChallengesStore.getState().addChallenge(first.challenge, firstAbandon);
+    useChallengesStore.getState().addChallenge(second.challenge);
+    await renderModal();
+    await enterAnswer('half typed');
+
+    await failPublication(first.publication);
+
+    expect(container.textContent).not.toContain('first prompt');
+    expect(container.textContent).toContain('second prompt');
+    expect(container.querySelector<HTMLInputElement>('input')?.value).toBe('');
+    // the exchange ended on its own, so the publication is not abandoned as if the user cancelled it
+    expect(firstAbandon).not.toHaveBeenCalled();
+    expect(first.publication.publishChallengeAnswers).not.toHaveBeenCalled();
+  });
+
+  it('closes an open iframe challenge whose exchange ended', async () => {
+    const iframe = createLiveChallenge('https://spamblocker.bitsocial.net/api/v1/iframe/session-123', 'url/iframe');
+    useChallengesStore.getState().addChallenge(iframe.challenge);
+    await renderModal();
+    await clickButton('open');
+    expect(container.querySelector('iframe')).not.toBeNull();
+
+    await failPublication(iframe.publication);
+    await postIframeAnswers(['late-token']);
+
+    expect(container.querySelector('iframe')).toBeNull();
+    expect(useChallengesStore.getState().challenges).toHaveLength(0);
+    expect(iframe.publication.publishChallengeAnswers).not.toHaveBeenCalled();
   });
 
   it('shows only the trusted Spamblocker hostname in the confirmation', async () => {
