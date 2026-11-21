@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PublishCommentEditOptions, useComment, useEditedComment, usePublishCommentEdit } from '@bitsocial/bitsocial-react-hooks';
+import { ChallengeVerification, PublishCommentEditOptions, useComment, useEditedComment, usePublishCommentEdit } from '@bitsocial/bitsocial-react-hooks';
 import { FormattingHelpTable } from '../reply-form';
 import formStyles from '../comment-form';
 import styles from './comment-edit-form.module.css';
 import { alertChallengeVerificationFailed } from '../../lib/utils/challenge-utils';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
 import challengesStore from '../../stores/use-challenges-store';
+import useCommentEditDraftStore from '../../stores/use-comment-edit-draft-store';
 import Markdown from '../markdown';
 
 const { addChallenge } = challengesStore.getState();
@@ -36,6 +37,12 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
   const { content, reason, spoiler, nsfw } = post || {};
   const communityAddress = getCommentCommunityAddress(post);
 
+  // Saving hides (unmounts) this form, and a failed or abandoned edit drops off the comment, so the last save the
+  // community has not accepted yet is kept per comment and the form starts from it. Only an accepted edit clears it.
+  const savedDraft = useCommentEditDraftStore((state) => state.drafts[commentCid]);
+  const setDraft = useCommentEditDraftStore((state) => state.setDraft);
+  const clearDraft = useCommentEditDraftStore((state) => state.clearDraft);
+
   const defaultPublishOptions: PublishCommentEditOptions = {
     commentCid,
     content,
@@ -44,11 +51,11 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
     nsfw,
     communityAddress,
     onChallenge: (...args: any) => addChallenge([...args, post]),
-    onChallengeVerification: alertChallengeVerificationFailed,
     onError: (error: Error) => {
       console.warn(error);
       alert(error.message);
     },
+    ...savedDraft,
   };
 
   const [publishCommentEditOptions, setPublishCommentEditOptions] = useState(defaultPublishOptions);
@@ -71,9 +78,22 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
   };
 
   // usePublishCommentEdit publishes the options of the render it was called in, so they must
-  // already have the edit reason parsed out for the save handler to publish directly
-  const parsedEditContent = typeof publishCommentEditOptions.content === 'string' ? parseEditContent(publishCommentEditOptions.content) : {};
-  const { publishCommentEdit } = usePublishCommentEdit({ ...publishCommentEditOptions, ...parsedEditContent });
+  // already have the edit reason parsed out for the save handler to publish directly. Text equal to
+  // the saved draft was parsed when it was saved: parsing it again would turn its last remaining
+  // "edit:" line into the reason, so an unchanged retry would publish something else.
+  const parsedEditContent =
+    typeof publishCommentEditOptions.content === 'string' && publishCommentEditOptions.content !== savedDraft?.content
+      ? parseEditContent(publishCommentEditOptions.content)
+      : {};
+  const editOptions: PublishCommentEditOptions = { ...publishCommentEditOptions, ...parsedEditContent };
+  const editDraft = { content: editOptions.content, reason: editOptions.reason, spoiler: editOptions.spoiler, nsfw: editOptions.nsfw };
+  const { publishCommentEdit } = usePublishCommentEdit({
+    ...editOptions,
+    onChallengeVerification: async (challengeVerification: ChallengeVerification, commentEdit: unknown) => {
+      if (challengeVerification?.challengeSuccess) clearDraft(commentCid, editDraft);
+      alertChallengeVerificationFailed(challengeVerification, commentEdit);
+    },
+  });
 
   useEffect(() => {
     if (textRef.current) {
@@ -150,6 +170,7 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
           className={formStyles.save}
           onClick={() => {
             setPublishCommentEditOptions((state) => ({ ...state, ...parsedEditContent }));
+            setDraft(commentCid, editDraft);
             publishCommentEdit();
             if (hideCommentEditForm) hideCommentEditForm();
           }}
