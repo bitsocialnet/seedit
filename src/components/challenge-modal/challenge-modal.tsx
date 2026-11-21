@@ -66,6 +66,17 @@ const getChallengeEntries = (challenges: unknown): ChallengeEntries =>
 const getAnswersByChallengeIndex = (challengeEntries: ChallengeEntries, answers: string[]) =>
   Object.fromEntries(challengeEntries.map(([challengeIndex], position) => [challengeIndex, answers[position] ?? '']));
 
+// A challenge stays queued here after its exchange ended, for example when the community stopped waiting for an
+// answer and rejected the publication, and pkc-js rejects an answer sent then. The publication's own verification or
+// error already reported that outcome, so the rejection is only logged instead of going unhandled.
+const sendChallengeAnswers = async (publication: ChallengeType[1], challengeAnswers: Record<string, string>) => {
+  try {
+    await publication.publishChallengeAnswers(challengeAnswers);
+  } catch (error) {
+    console.error('Failed to publish challenge answers:', error);
+  }
+};
+
 // An iframe posts positional answers: the first answers the challenge shown, further ones the challenges after it.
 const withIframeAnswers = (answers: string[], position: number, iframeAnswers: string[]) => {
   const updatedAnswers = [...answers];
@@ -98,7 +109,7 @@ const RegularChallengeContent = ({ challenge, closeModal, abandonModal }: Regula
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const handledIframeAutoCompleteRef = useRef(false);
   const onIframeAutoComplete = useEffectEvent((challengeAnswers: string[]) => {
-    challenge[1].publishChallengeAnswers(getAnswersByChallengeIndex(challengeEntries, withIframeAnswers(answers, currentChallengeIndex, challengeAnswers)));
+    void sendChallengeAnswers(challenge[1], getAnswersByChallengeIndex(challengeEntries, withIframeAnswers(answers, currentChallengeIndex, challengeAnswers)));
     closeModal();
   });
 
@@ -120,14 +131,14 @@ const RegularChallengeContent = ({ challenge, closeModal, abandonModal }: Regula
   };
 
   const onSubmit = useCallback(() => {
-    challenge[1].publishChallengeAnswers(getAnswersByChallengeIndex(challengeEntries, answers));
+    void sendChallengeAnswers(challenge[1], getAnswersByChallengeIndex(challengeEntries, answers));
     setAnswers([]);
     closeModal();
   }, [challenge, challengeEntries, answers, closeModal]);
 
   const onIframeDone = useCallback(() => {
     // Submit empty string as answer for iframe challenges
-    challenge[1].publishChallengeAnswers(getAnswersByChallengeIndex(challengeEntries, withIframeAnswers(answers, currentChallengeIndex, [''])));
+    void sendChallengeAnswers(challenge[1], getAnswersByChallengeIndex(challengeEntries, withIframeAnswers(answers, currentChallengeIndex, [''])));
     closeModal();
   }, [challenge, challengeEntries, answers, currentChallengeIndex, closeModal]);
 
