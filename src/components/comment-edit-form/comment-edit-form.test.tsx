@@ -118,6 +118,25 @@ describe('CommentEditForm', () => {
     expect(testState.publishedOptions[1]).toMatchObject({ content: 'Updated text', reason: 'typo fix' });
   });
 
+  it('retries a failed edit unchanged when its text ended with two "edit:" lines', async () => {
+    await renderForm(vi.fn());
+    await typeContent('Body text\nedit: kept in the body\nedit: the reason');
+    await clickSave();
+    await unmountForm();
+    expect(testState.publishedOptions[0]).toMatchObject({ content: 'Body text\nedit: kept in the body', reason: 'the reason' });
+
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const alert = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    (testState.publishedOptions[0] as { onError: (error: Error) => void }).onError(new Error('no response from the community'));
+    consoleWarn.mockRestore();
+    alert.mockRestore();
+
+    await renderForm();
+    expect(container.querySelector('textarea')?.value).toBe('Body text\nedit: kept in the body');
+    await clickSave();
+    expect(testState.publishedOptions[1]).toMatchObject({ content: 'Body text\nedit: kept in the body', reason: 'the reason' });
+  });
+
   it('starts from the comment again once the community accepted the edit', async () => {
     await renderForm(vi.fn());
     await typeContent('Accepted text');

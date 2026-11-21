@@ -78,8 +78,13 @@ const CommentEditForm = ({ commentCid, hideCommentEditForm }: CommentEditFormPro
   };
 
   // usePublishCommentEdit publishes the options of the render it was called in, so they must
-  // already have the edit reason parsed out for the save handler to publish directly
-  const parsedEditContent = typeof publishCommentEditOptions.content === 'string' ? parseEditContent(publishCommentEditOptions.content) : {};
+  // already have the edit reason parsed out for the save handler to publish directly. Text equal to
+  // the saved draft was parsed when it was saved: parsing it again would turn its last remaining
+  // "edit:" line into the reason, so an unchanged retry would publish something else.
+  const parsedEditContent =
+    typeof publishCommentEditOptions.content === 'string' && publishCommentEditOptions.content !== savedDraft?.content
+      ? parseEditContent(publishCommentEditOptions.content)
+      : {};
   const editOptions: PublishCommentEditOptions = { ...publishCommentEditOptions, ...parsedEditContent };
   const editDraft = { content: editOptions.content, reason: editOptions.reason, spoiler: editOptions.spoiler, nsfw: editOptions.nsfw };
   const { publishCommentEdit } = usePublishCommentEdit({
