@@ -4,6 +4,7 @@ import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import CommentEditForm from './comment-edit-form';
+import useCommentEditDraftStore from '../../stores/use-comment-edit-draft-store';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -43,9 +44,19 @@ const clickSave = async () => {
   await act(async () => saveButton.click());
 };
 
+// like post.tsx and reply.tsx: hideCommentEditForm unmounts the form, and the edit menu mounts a new one
+const renderForm = async (hideCommentEditForm?: () => void) => {
+  await act(async () => root.render(createElement(CommentEditForm, { commentCid: 'comment-cid', hideCommentEditForm })));
+};
+const unmountForm = async () => {
+  await act(async () => root.render(null));
+};
+
 describe('CommentEditForm', () => {
   beforeEach(() => {
+    testState.comment = { cid: 'comment-cid', content: 'Original text', reason: 'old reason', spoiler: false, nsfw: false };
     testState.publishedOptions = [];
+    useCommentEditDraftStore.setState({ drafts: {} });
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -79,5 +90,62 @@ describe('CommentEditForm', () => {
     await clickSave();
     expect(testState.publishedOptions[1]).toMatchObject({ content: 'Second edit', reason: 'clarified' });
     expect(container.querySelector('textarea')?.value).toBe('Second edit');
+  });
+
+  it('reopens with the saved text while the edit is not accepted, also after it failed', async () => {
+    await renderForm(vi.fn());
+    await typeContent('Updated text\nedit: typo fix');
+    await clickSave();
+    await unmountForm();
+
+    // abandoned or still pending: no verification arrived
+    await renderForm();
+    expect(container.querySelector('textarea')?.value).toBe('Updated text');
+    await unmountForm();
+
+    // the community never answered: the hooks roll the stored edit back, so the comment shows the old text again
+    const failedEdit = testState.publishedOptions[0] as { onError: (error: Error) => void };
+    const consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const alert = vi.spyOn(window, 'alert').mockImplementation(() => {});
+    failedEdit.onError(new Error('no response from the community'));
+    expect(alert).toHaveBeenCalledWith('no response from the community');
+    consoleWarn.mockRestore();
+    alert.mockRestore();
+
+    await renderForm();
+    expect(container.querySelector('textarea')?.value).toBe('Updated text');
+    await clickSave();
+    expect(testState.publishedOptions[1]).toMatchObject({ content: 'Updated text', reason: 'typo fix' });
+  });
+
+  it('starts from the comment again once the community accepted the edit', async () => {
+    await renderForm(vi.fn());
+    await typeContent('Accepted text');
+    await clickSave();
+    await unmountForm();
+
+    const acceptedEdit = testState.publishedOptions[0] as { onChallengeVerification: (challengeVerification: unknown, commentEdit: unknown) => void };
+    acceptedEdit.onChallengeVerification({ challengeSuccess: true }, {});
+    testState.comment = { ...testState.comment, content: 'Accepted text, as the community stored it' };
+
+    await renderForm();
+    expect(container.querySelector('textarea')?.value).toBe('Accepted text, as the community stored it');
+  });
+
+  it('keeps a newer saved text when an older edit is accepted', async () => {
+    await renderForm(vi.fn());
+    await typeContent('First save');
+    await clickSave();
+    await unmountForm();
+    await renderForm(vi.fn());
+    await typeContent('Second save');
+    await clickSave();
+    await unmountForm();
+
+    const firstEdit = testState.publishedOptions[0] as { onChallengeVerification: (challengeVerification: unknown, commentEdit: unknown) => void };
+    firstEdit.onChallengeVerification({ challengeSuccess: true }, {});
+
+    await renderForm();
+    expect(container.querySelector('textarea')?.value).toBe('Second save');
   });
 });
