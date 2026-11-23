@@ -124,9 +124,9 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
     downvoteCount,
     edit,
     flair,
-    link,
-    linkHeight,
-    linkWidth,
+    link: postLink,
+    linkHeight: postLinkHeight,
+    linkWidth: postLinkWidth,
     number,
     pinned,
     quotedCids,
@@ -140,6 +140,10 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
     upvoteCount,
   } = post || {};
   const communityAddress = getCommentCommunityAddress(post);
+  // Like Reddit, an author-deleted post keeps its title and replies but stops showing the link or media its author shared.
+  const link = deleted ? undefined : postLink;
+  const linkHeight = deleted ? undefined : postLinkHeight;
+  const linkWidth = deleted ? undefined : postLinkWidth;
 
   // Check if the community is NSFW based on its tags
   const isNsfwCommunity = useIsNsfwCommunity(communityAddress || '');
@@ -163,7 +167,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   const isInProfileHiddenView = isProfileHiddenView(location.pathname);
   const isInCommunityView = isCommunityView(location.pathname, params);
 
-  const commentMediaInfo = useCommentMediaInfo(post);
+  const commentMediaInfo = useCommentMediaInfo(deleted ? EMPTY_POST : post);
 
   const { mediaPreviewOption, thumbnailDisplayOption } = useContentOptionsStore();
 
