@@ -2,7 +2,7 @@
   "name": "seedit",
   "version": "0.7.0",
   "description": "A decentralized Reddit alternative",
-  "author": "Bitsocial Forge",
+  "author": "Bitsocial contributors",
   "type": "module",
   "license": "GPL-3.0-or-later",
   "private": true,
