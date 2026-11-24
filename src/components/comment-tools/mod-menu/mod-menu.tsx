@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { autoUpdate, flip, FloatingFocusManager, offset, shift, useClick, useDismiss, useFloating, useId, useInteractions, useRole } from '@floating-ui/react';
 import { Trans, useTranslation } from 'react-i18next';
 import { PublishCommentModerationOptions, useComment, useEditedComment, usePublishCommentModeration } from '@bitsocial/bitsocial-react-hooks';
@@ -27,8 +27,12 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   const isReply = post?.parentCid;
   const [isModMenuOpen, setIsModMenuOpen] = useState(false);
 
-  const { removed, locked, spoiler, nsfw, pinned, banExpiresAt, purged } = post || {};
+  const { removed, locked, spoiler, nsfw, pinned, purged } = post || {};
   const communityAddress = getCommentCommunityAddress(post);
+  // A ban (commentModeration.author.banExpiresAt) marks the comment it is published on with authorBanExpiresAt, so
+  // the ban checkbox starts from this comment's own ban (the account's pending moderation, then the published mark),
+  // never from the author-wide author.community.banExpiresAt, and only while that ban is still running (checked on open).
+  const thisCommentBanExpiresAt = post?.commentModeration?.author?.banExpiresAt ?? post?.authorBanExpiresAt;
 
   const defaultPublishOptions: PublishCommentModerationOptions = {
     commentCid: cid,
@@ -40,7 +44,6 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
       spoiler: spoiler ?? false,
       nsfw: nsfw ?? false,
       pinned: pinned ?? false,
-      banExpiresAt,
     },
     onChallenge: (...args: any) => addChallenge([...args, post]),
     onChallengeVerification: alertChallengeVerificationFailed,
@@ -51,17 +54,36 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   };
 
   const [publishCommentModerationOptions, setPublishCommentModerationOptions] = useState(defaultPublishOptions);
-  const { publishCommentModeration } = usePublishCommentModeration(publishCommentModerationOptions);
-
-  // the menu mounts with the comment, long before it opens, so the form starts from the comment's current flags on open
-  const setModMenuOpen = (open: boolean) => {
-    if (open && !isModMenuOpen) {
-      setPublishCommentModerationOptions(defaultPublishOptions);
-    }
-    setIsModMenuOpen(open);
-  };
-
+  // the running ban this comment had when the menu opened, the moderator's draft of it (undefined when unchecked), and
+  // when the moderator unchecked it
+  const [openedBanExpiresAt, setOpenedBanExpiresAt] = useState<number | undefined>(undefined);
+  const [draftBanExpiresAt, setDraftBanExpiresAt] = useState<number | undefined>(undefined);
+  const [banLiftedAt, setBanLiftedAt] = useState<number | undefined>(undefined);
   const [banDuration, setBanDuration] = useState(1);
+
+  // A ban is sent only when the moderator sets, changes or lifts it in this menu, compared with the ban the menu opened
+  // with, so removing or locking a banned comment does not republish its ban. Lifting publishes the time the moderator
+  // unchecked it, as pkc-js unbans: the ban ends and the comment keeps its label. The author key is otherwise left
+  // out, because the hooks read an author key, even undefined, as a change to the ban.
+  const banExpiresAtToPublish =
+    draftBanExpiresAt !== undefined
+      ? draftBanExpiresAt !== openedBanExpiresAt
+        ? draftBanExpiresAt
+        : undefined
+      : openedBanExpiresAt !== undefined
+        ? banLiftedAt
+        : undefined;
+  const moderationOptions = useMemo(
+    () => ({
+      ...publishCommentModerationOptions,
+      commentModeration: {
+        ...publishCommentModerationOptions.commentModeration,
+        ...(banExpiresAtToPublish !== undefined && { author: { banExpiresAt: banExpiresAtToPublish } }),
+      },
+    }),
+    [publishCommentModerationOptions, banExpiresAtToPublish],
+  );
+  const { publishCommentModeration } = usePublishCommentModeration(moderationOptions);
 
   const daysToTimestampInSeconds = (days: number) => {
     const now = new Date();
@@ -69,16 +91,25 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
     return Math.floor(now.getTime() / 1000);
   };
 
+  // the menu mounts with the comment, long before it opens, so the form starts from the comment's current flags on open
+  const setModMenuOpen = (open: boolean) => {
+    if (open && !isModMenuOpen) {
+      const nowInSeconds = Math.floor(Date.now() / 1000);
+      const runningBanExpiresAt = typeof thisCommentBanExpiresAt === 'number' && thisCommentBanExpiresAt > nowInSeconds ? thisCommentBanExpiresAt : undefined;
+      setPublishCommentModerationOptions(defaultPublishOptions);
+      setOpenedBanExpiresAt(runningBanExpiresAt);
+      setDraftBanExpiresAt(runningBanExpiresAt);
+      setBanLiftedAt(undefined);
+      setBanDuration(runningBanExpiresAt ? Math.max(1, Math.floor((runningBanExpiresAt - nowInSeconds) / (24 * 60 * 60))) : 1);
+    }
+    setIsModMenuOpen(open);
+  };
+
   const onCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
     if (id === 'banUser') {
-      setPublishCommentModerationOptions((state) => ({
-        ...state,
-        commentModeration: {
-          ...state.commentModeration,
-          banExpiresAt: checked ? daysToTimestampInSeconds(banDuration) : undefined,
-        },
-      }));
+      setDraftBanExpiresAt(checked ? daysToTimestampInSeconds(banDuration) : undefined);
+      setBanLiftedAt(checked ? undefined : Math.floor(Date.now() / 1000));
     } else {
       setPublishCommentModerationOptions((state) => ({
         ...state,
@@ -90,13 +121,8 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   const onBanDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const days = parseInt(e.target.value, 10) || 1;
     setBanDuration(days);
-    setPublishCommentModerationOptions((state) => ({
-      ...state,
-      commentModeration: {
-        ...state.commentModeration,
-        banExpiresAt: daysToTimestampInSeconds(days),
-      },
-    }));
+    // only a checked ban takes the new length
+    setDraftBanExpiresAt((draft) => (draft === undefined ? undefined : daysToTimestampInSeconds(days)));
   };
 
   const onReason = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -189,7 +215,7 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
               {!isCommentAuthorMod && (
                 <div className={styles.menuItem}>
                   <label>
-                    <input onChange={onCheckbox} checked={!!publishCommentModerationOptions.commentModeration.banExpiresAt} type='checkbox' id='banUser' />
+                    <input onChange={onCheckbox} checked={draftBanExpiresAt !== undefined} type='checkbox' id='banUser' />
                     <Trans
                       i18nKey='ban_user_for'
                       shouldUnescape={true}
