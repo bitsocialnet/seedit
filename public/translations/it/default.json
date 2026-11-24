@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Caricato, ma l'host deve esaminare questo file prima che possa essere visualizzato. Il link inizierà a funzionare una volta approvato, il che può richiedere qualche ora. Puoi pubblicarlo subito.",
   "upload_failed": "Caricamento fallito",
   "upload_failed_all_providers": "Tutti i provider sono falliti",
-  "upload_failed_preferred_guidance": "Scegli un provider diverso o imposta su casuale."
+  "upload_failed_preferred_guidance": "Scegli un provider diverso o imposta su casuale.",
+  "user_banned_for_this_post": "L'utente è stato bannato per questo post",
+  "user_banned_for_this_comment": "L'utente è stato bannato per questo commento"
 }

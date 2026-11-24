@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Nahráno, ale hostitel musí tento soubor před zobrazením zkontrolovat. Odkaz začne fungovat po schválení, což může trvat několik hodin. Můžete ho zveřejnit už teď.",
   "upload_failed": "Nahrávání se nezdařilo",
   "upload_failed_all_providers": "Všichni poskytovatelé selhali",
-  "upload_failed_preferred_guidance": "Zvolte jiného poskytovatele nebo nastavte náhodné."
+  "upload_failed_preferred_guidance": "Zvolte jiného poskytovatele nebo nastavte náhodné.",
+  "user_banned_for_this_post": "Uživatel byl zablokován za tento příspěvek",
+  "user_banned_for_this_comment": "Uživatel byl zablokován za tento komentář"
 }

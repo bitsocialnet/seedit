@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Uppladdad, men värden måste granska filen innan den kan visas. Länken börjar fungera när den har godkänts, vilket kan ta några timmar. Du kan posta den nu.",
   "upload_failed": "Uppladdning misslyckades",
   "upload_failed_all_providers": "Alla leverantörer misslyckades",
-  "upload_failed_preferred_guidance": "Välj en annan leverantör eller sätt till slumpmässig."
+  "upload_failed_preferred_guidance": "Välj en annan leverantör eller sätt till slumpmässig.",
+  "user_banned_for_this_post": "Användaren blev blockerad för detta inlägg",
+  "user_banned_for_this_comment": "Användaren blev blockerad för denna kommentar"
 }

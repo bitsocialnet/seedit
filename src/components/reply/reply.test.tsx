@@ -144,6 +144,17 @@ describe('Nested Reply identity', () => {
     expect(toolsFailed()).toBe('true');
   });
 
+  it('says the author was banned only on the comment the ban was published on', async () => {
+    testState.repliesByCid = {};
+    const bannedAuthor = { address: 'author.bso', community: { banExpiresAt: 1_900_000_000 } };
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, author: bannedAuthor, authorBanExpiresAt: 1_900_000_000 } as any })));
+    expect(container.textContent).toContain('user_banned_for_this_comment');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: 'other', author: bannedAuthor } as any })));
+    expect(container.textContent).not.toContain('user_banned_for_this_comment');
+  });
+
   it('shows why a reply that failed to load is empty, unless the post page shows it as its own comment', async () => {
     testState.repliesByCid = {};
     const failedLoad = { cid: 'top-parent', communityAddress: 'example.bso', state: 'failed', error: new Error('Invalid signature') };

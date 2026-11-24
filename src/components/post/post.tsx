@@ -13,7 +13,7 @@ import { useCommentMediaInfo } from '../../hooks/use-comment-media-info';
 import useDownvote from '../../hooks/use-downvote';
 import useIsMobile from '../../hooks/use-is-mobile';
 import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
-import { getCommentCommunityAddress, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isAuthorBannedForComment, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import useCommentTripcode from '../../hooks/use-comment-tripcode';
@@ -376,6 +376,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                     <CommentEditForm commentCid={cid} hideCommentEditForm={hideCommentEditForm} />
                   ) : (
                     <Expando
+                      authorBanned={isAuthorBannedForComment(post)}
                       authorEditReason={edit?.reason}
                       commentMediaInfo={commentMediaInfo}
                       content={removed ? `[${lowerCase(t('removed'))}]` : deleted ? `[${lowerCase(t('deleted'))}]` : content}
@@ -402,6 +403,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                 <CommentEditForm commentCid={cid} hideCommentEditForm={hideCommentEditForm} />
               ) : (
                 <Expando
+                  authorBanned={isAuthorBannedForComment(post)}
                   authorEditReason={edit?.reason}
                   commentMediaInfo={commentMediaInfo}
                   content={removed ? `[${lowerCase(t('removed'))}]` : deleted ? `[${lowerCase(t('deleted'))}]` : content}

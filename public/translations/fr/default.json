@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Envoyé, mais l'hébergeur doit vérifier ce fichier avant qu'il puisse être affiché. Le lien fonctionnera une fois le fichier approuvé, ce qui peut prendre quelques heures. Vous pouvez le publier dès maintenant.",
   "upload_failed": "Échec du téléchargement",
   "upload_failed_all_providers": "Tous les fournisseurs ont échoué",
-  "upload_failed_preferred_guidance": "Choisissez un autre fournisseur ou réglez sur aléatoire."
+  "upload_failed_preferred_guidance": "Choisissez un autre fournisseur ou réglez sur aléatoire.",
+  "user_banned_for_this_post": "L'utilisateur a été banni pour ce post",
+  "user_banned_for_this_comment": "L'utilisateur a été banni pour ce commentaire"
 }

@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Enviado, mas o host precisa revisar este arquivo antes que ele possa ser visualizado. O link começará a funcionar assim que for aprovado, o que pode levar algumas horas. Você já pode publicá-lo.",
   "upload_failed": "Falha no envio",
   "upload_failed_all_providers": "Todos os provedores falharam",
-  "upload_failed_preferred_guidance": "Escolha um provedor diferente ou defina como aleatório."
+  "upload_failed_preferred_guidance": "Escolha um provedor diferente ou defina como aleatório.",
+  "user_banned_for_this_post": "O usuário foi banido por este post",
+  "user_banned_for_this_comment": "O usuário foi banido por este comentário"
 }

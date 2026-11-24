@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Hochgeladen, aber der Host muss diese Datei prüfen, bevor sie angezeigt werden kann. Der Link funktioniert, sobald sie freigegeben ist, was einige Stunden dauern kann. Du kannst sie jetzt schon posten.",
   "upload_failed": "Upload fehlgeschlagen",
   "upload_failed_all_providers": "Alle Anbieter sind fehlgeschlagen",
-  "upload_failed_preferred_guidance": "Wählen Sie einen anderen Anbieter oder setzen Sie auf Zufall."
+  "upload_failed_preferred_guidance": "Wählen Sie einen anderen Anbieter oder setzen Sie auf Zufall.",
+  "user_banned_for_this_post": "Benutzer wurde für diesen Beitrag gesperrt",
+  "user_banned_for_this_comment": "Benutzer wurde für diesen Kommentar gesperrt"
 }

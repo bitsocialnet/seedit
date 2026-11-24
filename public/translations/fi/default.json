@@ -454,5 +454,7 @@
   "upload_awaiting_review": "Ladattu, mutta palvelun on tarkistettava tämä tiedosto ennen kuin sitä voi katsoa. Linkki alkaa toimia, kun tiedosto on hyväksytty, mikä voi kestää muutaman tunnin. Voit julkaista sen nyt.",
   "upload_failed": "Lataus epäonnistui",
   "upload_failed_all_providers": "Kaikki palveluntarjoajat epäonnistuivat",
-  "upload_failed_preferred_guidance": "Valitse toinen palveluntarjoaja tai aseta satunnaiseksi."
+  "upload_failed_preferred_guidance": "Valitse toinen palveluntarjoaja tai aseta satunnaiseksi.",
+  "user_banned_for_this_post": "Käyttäjä sai porttikiellon tämän viestin vuoksi",
+  "user_banned_for_this_comment": "Käyttäjä sai porttikiellon tämän kommentin vuoksi"
 }

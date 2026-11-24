@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Comment, useAuthorAddress, useBlock, useComment, useEditedComment, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { isInboxView, isPostContextView, isPostPageView } from '../../lib/utils/view-utils';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
-import { getCommentCommunityAddress, isCommentLoadFailed, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isAuthorBannedForComment, isCommentLoadFailed, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import useCommentTripcode from '../../hooks/use-comment-tripcode';
@@ -596,6 +596,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                           quotedCids={quotedCids}
                         />
                       ))}
+                    {isAuthorBannedForComment(reply) && <p className={styles.modReason}>{t('user_banned_for_this_comment')}</p>}
                     {reason && (
                       <p className={styles.modReason}>
                         {lowerCase(t('mod_edit_reason'))}: {reason}

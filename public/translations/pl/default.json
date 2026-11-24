@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Przesłano, ale host musi sprawdzić ten plik, zanim będzie można go wyświetlić. Link zacznie działać po zatwierdzeniu, co może potrwać kilka godzin. Możesz opublikować go już teraz.",
   "upload_failed": "Przesyłanie nie powiodło się",
   "upload_failed_all_providers": "Wszyscy dostawcy zawiedli",
-  "upload_failed_preferred_guidance": "Wybierz innego dostawcę lub ustaw na losowy."
+  "upload_failed_preferred_guidance": "Wybierz innego dostawcę lub ustaw na losowy.",
+  "user_banned_for_this_post": "Użytkownik został zablokowany za ten post",
+  "user_banned_for_this_comment": "Użytkownik został zablokowany za ten komentarz"
 }

@@ -465,5 +465,7 @@
   "upload_awaiting_review": "Uploaded, but the host must review this file before it can be viewed. The link will start working once it is approved, which can take a few hours. You can post it now.",
   "upload_failed": "Upload failed",
   "upload_failed_all_providers": "All providers failed",
-  "upload_failed_preferred_guidance": "Choose a different provider or set to random."
+  "upload_failed_preferred_guidance": "Choose a different provider or set to random.",
+  "user_banned_for_this_post": "User was banned for this post",
+  "user_banned_for_this_comment": "User was banned for this comment"
 }

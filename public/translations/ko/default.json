@@ -455,5 +455,7 @@
   "upload_awaiting_review": "업로드되었지만 표시되기 전에 호스트가 이 파일을 검토해야 합니다. 승인되면 링크가 작동하기 시작하며, 몇 시간이 걸릴 수 있습니다. 지금 바로 게시할 수 있습니다.",
   "upload_failed": "업로드 실패",
   "upload_failed_all_providers": "모든 제공업체가 실패했습니다",
-  "upload_failed_preferred_guidance": "다른 제공업체를 선택하거나 무작위로 설정하세요."
+  "upload_failed_preferred_guidance": "다른 제공업체를 선택하거나 무작위로 설정하세요.",
+  "user_banned_for_this_post": "이 게시물로 인해 사용자가 차단되었습니다",
+  "user_banned_for_this_comment": "이 댓글로 인해 사용자가 차단되었습니다"
 }

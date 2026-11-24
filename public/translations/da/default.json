@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Uploadet, men værten skal gennemgå denne fil, før den kan vises. Linket begynder at virke, når den er godkendt, hvilket kan tage et par timer. Du kan poste den nu.",
   "upload_failed": "Upload mislykkedes",
   "upload_failed_all_providers": "Alle udbydere mislykkedes",
-  "upload_failed_preferred_guidance": "Vælg en anden udbyder eller sæt til tilfældig."
+  "upload_failed_preferred_guidance": "Vælg en anden udbyder eller sæt til tilfældig.",
+  "user_banned_for_this_post": "Brugeren blev blokeret for dette indlæg",
+  "user_banned_for_this_comment": "Brugeren blev blokeret for denne kommentar"
 }

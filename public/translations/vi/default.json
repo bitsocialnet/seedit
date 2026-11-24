@@ -455,5 +455,7 @@
   "upload_awaiting_review": "Đã tải lên, nhưng máy chủ lưu trữ phải xem xét tệp này trước khi có thể xem được. Liên kết sẽ hoạt động sau khi được phê duyệt, việc này có thể mất vài giờ. Bạn có thể đăng ngay bây giờ.",
   "upload_failed": "Tải lên thất bại",
   "upload_failed_all_providers": "Tất cả nhà cung cấp đều thất bại",
-  "upload_failed_preferred_guidance": "Chọn nhà cung cấp khác hoặc đặt thành ngẫu nhiên."
+  "upload_failed_preferred_guidance": "Chọn nhà cung cấp khác hoặc đặt thành ngẫu nhiên.",
+  "user_banned_for_this_post": "Người dùng đã bị cấm vì bài đăng này",
+  "user_banned_for_this_comment": "Người dùng đã bị cấm vì bình luận này"
 }
