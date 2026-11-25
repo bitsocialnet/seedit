@@ -1,5 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Account, setAccount, useAccount } from '@bitsocial/bitsocial-react-hooks';
+import { getWalletMessageToSign, verifyAuthorWallet } from '@bitsocial/bitsocial-react-hooks/author-wallet-proof';
 import styles from './wallet-settings.module.css';
 import { Trans, useTranslation } from 'react-i18next';
 import InfoTooltip from '../../../components/info-tooltip';
@@ -13,14 +14,7 @@ interface Wallet {
   savedChainTicker?: string;
 }
 
-const getWalletMessageToSign = (authorAddress: string, timestamp: number): string => {
-  const messageToSign = {
-    domainSeparator: 'pkc-author-wallet',
-    authorAddress,
-    timestamp,
-  };
-  return JSON.stringify(messageToSign);
-};
+const toWalletEntry = (wallet: Wallet) => ({ address: wallet.address, timestamp: wallet.timestamp, signature: { signature: wallet.signature, type: 'eip191' } });
 
 const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
   const { t } = useTranslation();
@@ -28,7 +22,8 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
   if (!account) {
     throw Error('CryptoWalletsForm account prop must be defined');
   }
-  const authorAddress = account?.author?.address;
+  // BSIP-22 proofs name the account's key address, which stays the same when author.address is a name.
+  const authorPublicKey: string = account?.signer?.address;
   const defaultWalletObject: Wallet = { chainTicker: '', address: '', timestamp: 0, signature: '' };
 
   const walletsFromAccount = Object.keys(account?.author?.wallets || {}).map(
@@ -60,7 +55,7 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
       return alert('missing address');
     }
     const timestamp = wallet.timestamp || Math.floor(Date.now() / 1000);
-    const messageToSign = getWalletMessageToSign(authorAddress, timestamp);
+    const messageToSign = getWalletMessageToSign(authorPublicKey, wallet.address, timestamp);
     if (timestamp !== wallet.timestamp) {
       setWalletsArrayProperty(index, 'timestamp', timestamp);
     }
@@ -86,18 +81,21 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
     return undefined;
   };
 
+  // pkc-js refuses to publish while any wallet has an invalid proof, so one is never saved.
+  const getInvalidWalletReason = (wallet: Wallet): string | undefined => {
+    const result = verifyAuthorWallet(toWalletEntry(wallet), authorPublicKey);
+    return result.outcome === 'invalid' ? result.reason : undefined;
+  };
+
+  // A wallet saved before BSIP-22 was signed over an older message and must be signed again.
+  const mustSignAgain = (wallet: Wallet) =>
+    wallet.savedChainTicker !== undefined && verifyAuthorWallet(account.author.wallets[wallet.savedChainTicker], authorPublicKey).outcome === 'invalid';
+
   const updateWallets = (walletsToUpdate: Wallet[]) => {
-    const wallets: { [key: string]: { address: string; timestamp: number; signature: { signature: string; type: string } } } = {};
+    const wallets: { [key: string]: ReturnType<typeof toWalletEntry> } = {};
     walletsToUpdate.forEach((wallet) => {
       if (!getMissingWalletField(wallet)) {
-        wallets[wallet.chainTicker] = {
-          address: wallet.address,
-          timestamp: wallet.timestamp,
-          signature: {
-            signature: wallet.signature,
-            type: 'eip191',
-          },
-        };
+        wallets[wallet.chainTicker] = toWalletEntry(wallet);
       }
     });
     return setAccount({ ...account, author: { ...account.author, wallets } });
@@ -143,6 +141,11 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
       alert(`${t('wallet_number', { index: duplicateIndex + 1 })}: duplicate chain ticker ${walletsArray[duplicateIndex].chainTicker}`);
       return;
     }
+    const invalidIndex = walletsArray.findIndex((wallet) => getInvalidWalletReason(wallet));
+    if (invalidIndex !== -1) {
+      alert(`${t('wallet_number', { index: invalidIndex + 1 })}: ${getInvalidWalletReason(walletsArray[invalidIndex])}`);
+      return;
+    }
     const savedWallets = new Set(walletsArray);
     setIsWriting(true);
     try {
@@ -161,6 +164,7 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
         <Trans i18nKey='wallet_number' values={{ index: index + 1 }} />
       </div>
       <div key={index} className={styles.walletBox}>
+        {mustSignAgain(wallet) && <div className={styles.signAgain}>{t('wallet_sign_again')}</div>}
         <button className={styles.toggleWallet} onClick={() => toggleShowWallet(index)}>
           {showWallet[index] ? t('hide') : t('show')}
         </button>

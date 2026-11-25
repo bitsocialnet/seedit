@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "すべてのプロバイダーが失敗しました",
   "upload_failed_preferred_guidance": "別のプロバイダーを選択するか、ランダムに設定してください。",
   "user_banned_for_this_post": "この投稿によりユーザーはBANされました",
-  "user_banned_for_this_comment": "このコメントによりユーザーはBANされました"
+  "user_banned_for_this_comment": "このコメントによりユーザーはBANされました",
+  "wallet_sign_again": "このウォレットの署名は無効になりました。新しいメッセージをコピーし、このウォレットで署名して、新しい署名を貼り付けてください。"
 }

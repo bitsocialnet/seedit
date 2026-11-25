@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Lahat ng mga provider ay nabigo",
   "upload_failed_preferred_guidance": "Pumili ng ibang provider o itakda sa random.",
   "user_banned_for_this_post": "Na-ban ang user dahil sa post na ito",
-  "user_banned_for_this_comment": "Na-ban ang user dahil sa komentong ito"
+  "user_banned_for_this_comment": "Na-ban ang user dahil sa komentong ito",
+  "wallet_sign_again": "Hindi na tinatanggap ang lagda ng wallet na ito. Kopyahin ang bagong mensahe, pirmahan ito gamit ang wallet na ito at i-paste ang bagong lagda."
 }

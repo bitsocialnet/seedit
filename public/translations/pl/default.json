@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Wszyscy dostawcy zawiedli",
   "upload_failed_preferred_guidance": "Wybierz innego dostawcę lub ustaw na losowy.",
   "user_banned_for_this_post": "Użytkownik został zablokowany za ten post",
-  "user_banned_for_this_comment": "Użytkownik został zablokowany za ten komentarz"
+  "user_banned_for_this_comment": "Użytkownik został zablokowany za ten komentarz",
+  "wallet_sign_again": "Podpis tego portfela nie jest już akceptowany. Skopiuj nową wiadomość, podpisz ją tym portfelem i wklej nowy podpis."
 }

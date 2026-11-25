@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Todos os provedores falharam",
   "upload_failed_preferred_guidance": "Escolha um provedor diferente ou defina como aleatório.",
   "user_banned_for_this_post": "O usuário foi banido por este post",
-  "user_banned_for_this_comment": "O usuário foi banido por este comentário"
+  "user_banned_for_this_comment": "O usuário foi banido por este comentário",
+  "wallet_sign_again": "A assinatura desta carteira não é mais aceita. Copie a nova mensagem, assine-a com esta carteira e cole a nova assinatura."
 }

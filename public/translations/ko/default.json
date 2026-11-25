@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "모든 제공업체가 실패했습니다",
   "upload_failed_preferred_guidance": "다른 제공업체를 선택하거나 무작위로 설정하세요.",
   "user_banned_for_this_post": "이 게시물로 인해 사용자가 차단되었습니다",
-  "user_banned_for_this_comment": "이 댓글로 인해 사용자가 차단되었습니다"
+  "user_banned_for_this_comment": "이 댓글로 인해 사용자가 차단되었습니다",
+  "wallet_sign_again": "이 지갑의 서명은 더 이상 허용되지 않습니다. 새 메시지를 복사하고 이 지갑으로 서명한 다음 새 서명을 붙여넣으세요."
 }

@@ -9,15 +9,23 @@ import WalletSettings from './wallet-settings';
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 const act = (React as { act?: (callback: () => void | Promise<void>) => void | Promise<void> }).act as (callback: () => void | Promise<void>) => void | Promise<void>;
 
-const savedEthWallet = { address: '0xwallet', timestamp: 1700000000, signature: { signature: '0xsignature', type: 'eip191' } };
+// The BSIP-22 test vector (BSIPs assets/bsip-22/wallet-proof-vectors.json). Test keys only.
+const KEY_ADDRESS = '12D3KooWK99VoVxNE7XzyBwXEzW7xhK7Gpv85r9F3V3fyKSUKPH5';
+const WALLET_ADDRESS = '0x5050A4F4b3f9338C3472dcC01A87C76A144b3c9c';
+const VALID_SIGNATURE = '0xfc705f790e2744d8acbec610783ce999e253392b9699cef1c20b338648a5aa132b8e6f5f836d314ad173ec97bb453d8a2df2fd1207ced2263f5701bdad17f0e31c';
+// A signature of the same shape over another message, as a wallet saved before BSIP-22 has.
+const OUTDATED_SIGNATURE = `0x${'11'.repeat(64)}1b`;
+
+const savedEthWallet = { address: WALLET_ADDRESS, timestamp: 1790000000, signature: { signature: VALID_SIGNATURE, type: 'eip191' } };
 const savedSolWallet = { address: 'solwallet', timestamp: 1700000001, signature: { signature: 'solsignature', type: 'eip191' } };
-const createAccount = (wallets: Record<string, typeof savedEthWallet>) => ({ author: { address: 'author-address', wallets } });
+const createAccount = (wallets: Record<string, typeof savedEthWallet>) => ({ author: { address: 'name.bso', wallets }, signer: { address: KEY_ADDRESS } });
 
 const testState = vi.hoisted(() => ({
-  account: undefined as unknown as { author: { address: string; wallets: Record<string, unknown> } },
+  account: undefined as unknown as { author: { address: string; wallets: Record<string, unknown> }; signer: { address: string } },
   setAccount: vi.fn(),
 }));
 
+// Account reads and writes are mocked; the message and the proof check are the real BSIP-22 code from its own entry point.
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   setAccount: testState.setAccount,
   useAccount: () => testState.account,
@@ -40,7 +48,7 @@ let root: Root;
 const getButtons = (label: string) => Array.from(container.querySelectorAll('button')).filter((button) => button.textContent === label);
 const getButton = (label: string) => getButtons(label)[0];
 const getInputWithValue = (value: string) => Array.from(container.querySelectorAll('input')).find((input) => input.value === value) as HTMLInputElement;
-const getSignatureInput = () => getInputWithValue('0xsignature');
+const getSignatureInput = () => getInputWithValue(VALID_SIGNATURE);
 
 const setInput = async (input: HTMLInputElement, value: string) => {
   await act(async () => {
@@ -120,7 +128,7 @@ describe('WalletSettings', () => {
     await act(async () => getButton('remove').click());
 
     expect(window.alert).toHaveBeenCalledWith('account write failed');
-    expect(getInputWithValue('0xwallet')).toBeDefined();
+    expect(getInputWithValue(WALLET_ADDRESS)).toBeDefined();
   });
 
   it('does not save while two wallets share a chain ticker, so removing one keeps the other', async () => {
@@ -197,5 +205,41 @@ describe('WalletSettings', () => {
 
     expect(testState.setAccount).toHaveBeenCalledTimes(2);
     expect(testState.account.author.wallets).toEqual({});
+  });
+
+  it('copies the BSIP-22 message, over the key address and the lowercase wallet address', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    await act(async () => root.render(createElement(WalletSettings)));
+
+    await act(async () => getButton('copy_message_etherscan').click());
+
+    expect(writeText).toHaveBeenCalledWith(
+      `{"domainSeparator":"bitsocial-author-wallet","authorPublicKey":"${KEY_ADDRESS}","walletAddress":"${WALLET_ADDRESS.toLowerCase()}","timestamp":1790000000}`,
+    );
+  });
+
+  it('does not save a wallet whose signature is not a proof for this account, and says why', async () => {
+    testState.setAccount.mockResolvedValue(undefined);
+    await act(async () => root.render(createElement(WalletSettings)));
+    await setInput(getSignatureInput(), OUTDATED_SIGNATURE);
+
+    await act(async () => getButton('save').click());
+
+    expect(testState.setAccount).not.toHaveBeenCalled();
+    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('signature does not recover the wallet address'));
+    expect(window.alert).not.toHaveBeenCalledWith('saved');
+  });
+
+  it('asks to sign a saved wallet again only when its proof is no longer valid', async () => {
+    await act(async () => root.render(createElement(WalletSettings)));
+    expect(container.textContent).not.toContain('wallet_sign_again');
+
+    testState.account = createAccount({ eth: { ...savedEthWallet, signature: { signature: OUTDATED_SIGNATURE, type: 'eip191' } } });
+    act(() => root.unmount());
+    root = createRoot(container);
+    await act(async () => root.render(createElement(WalletSettings)));
+
+    expect(container.textContent).toContain('wallet_sign_again');
   });
 });

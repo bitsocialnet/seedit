@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "همه ارائه‌دهندگان ناموفق بودند",
   "upload_failed_preferred_guidance": "ارائه‌دهنده دیگری انتخاب کنید یا روی تصادفی تنظیم کنید.",
   "user_banned_for_this_post": "این کاربر برای این پست مسدود شد",
-  "user_banned_for_this_comment": "این کاربر برای این نظر مسدود شد"
+  "user_banned_for_this_comment": "این کاربر برای این نظر مسدود شد",
+  "wallet_sign_again": "امضای این کیف پول دیگر پذیرفته نمی‌شود. پیام جدید را کپی کنید، با این کیف پول امضا کنید و امضای جدید را بچسبانید."
 }

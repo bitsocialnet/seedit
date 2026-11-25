@@ -456,5 +456,6 @@
   "upload_failed_all_providers": "Kaikki palveluntarjoajat epäonnistuivat",
   "upload_failed_preferred_guidance": "Valitse toinen palveluntarjoaja tai aseta satunnaiseksi.",
   "user_banned_for_this_post": "Käyttäjä sai porttikiellon tämän viestin vuoksi",
-  "user_banned_for_this_comment": "Käyttäjä sai porttikiellon tämän kommentin vuoksi"
+  "user_banned_for_this_comment": "Käyttäjä sai porttikiellon tämän kommentin vuoksi",
+  "wallet_sign_again": "Tämän lompakon allekirjoitusta ei enää hyväksytä. Kopioi uusi viesti, allekirjoita se tällä lompakolla ja liitä uusi allekirjoitus."
 }

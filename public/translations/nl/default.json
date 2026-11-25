@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Alle providers zijn mislukt",
   "upload_failed_preferred_guidance": "Kies een andere provider of zet op willekeurig.",
   "user_banned_for_this_post": "Gebruiker is verbannen voor deze post",
-  "user_banned_for_this_comment": "Gebruiker is verbannen voor deze reactie"
+  "user_banned_for_this_comment": "Gebruiker is verbannen voor deze reactie",
+  "wallet_sign_again": "De handtekening van deze portemonnee wordt niet meer geaccepteerd. Kopieer het nieuwe bericht, onderteken het met deze portemonnee en plak de nieuwe handtekening."
 }

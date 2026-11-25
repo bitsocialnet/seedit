@@ -1395,11 +1395,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bitsocial/bitsocial-react-hooks@npm:0.3.6":
-  version: 0.3.6
-  resolution: "@bitsocial/bitsocial-react-hooks@npm:0.3.6"
+"@bitsocial/bitsocial-react-hooks@npm:0.4.0":
+  version: 0.4.0
+  resolution: "@bitsocial/bitsocial-react-hooks@npm:0.4.0"
   dependencies:
     "@bitsocial/bso-resolver": "npm:0.0.10"
+    "@noble/curves": "npm:2.2.0"
+    "@noble/hashes": "npm:2.2.0"
     "@pkcprotocol/pkc-js": "npm:0.0.154"
     "@pkcprotocol/pkc-logger": "npm:0.1.0"
     ethers: "npm:5.8.0"
@@ -1411,11 +1413,10 @@ __metadata:
     typestub-ipfs-only-hash: "npm:4.0.0"
     uint8arrays: "npm:3.1.1"
     uuid: "npm:14.0.3"
-    viem: "npm:2.55.8"
     zustand: "npm:4.5.7"
   peerDependencies:
     react: ">=16.8"
-  checksum: 10c0/618309faf434cb00e120b3b3a09d4f9fbcc760494ffeadcb4a6543b84c125aa8292b0d3bc4fffadeba2d580b077a8613bf6bb9052b0fb9a63c3d04eaeff42958
+  checksum: 10c0/50c3d4e594ad389037168d772fa22ae3972b6e27a1e165e5181d1607487e19db66488307b6e9edf7ccad764d1abf980944c1929c6ca8f24b4d7a8f9076e060db
   languageName: node
   linkType: hard
 
@@ -5073,6 +5074,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@noble/curves@npm:2.4.0"
+  dependencies:
+    "@noble/hashes": "npm:2.4.0"
+  checksum: 10c0/b60b737f65cc4e128dd94fea467df1ed73c5c0c089ef1bdb61614a0897db1fa7151d7f95bb7205854a9030d3f80a879e00f3bb74990befde061184ae43dfaec6
+  languageName: node
+  linkType: hard
+
 "@noble/curves@npm:~1.9.0":
   version: 1.9.7
   resolution: "@noble/curves@npm:1.9.7"
@@ -5107,6 +5117,13 @@ __metadata:
   version: 2.2.0
   resolution: "@noble/hashes@npm:2.2.0"
   checksum: 10c0/cad8630c504d6b9271984f685cd0af9101b40988fc2dfbe17ccdf068a9941f95cc5c9957d89e9ca4b7ca94c15cb35f93510c5d53a09fbcc83ee503b93d0a1034
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@noble/hashes@npm:2.4.0"
+  checksum: 10c0/f5820a38c52886073a69722a030688ad188bbacb822d01554545371259961c2b916266c57c013c2ce5a0d78aec977142fc68fd2a79be4c97b0644fcee9bb35f6
   languageName: node
   linkType: hard
 
@@ -6519,9 +6536,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pkcprotocol/pkc-js@npm:0.0.154":
-  version: 0.0.154
-  resolution: "@pkcprotocol/pkc-js@npm:0.0.154"
+"@pkcprotocol/pkc-js@npm:0.0.163":
+  version: 0.0.163
+  resolution: "@pkcprotocol/pkc-js@npm:0.0.163"
   dependencies:
     "@enhances/with-resolvers": "npm:0.0.5"
     "@helia/bitswap": "npm:4.0.20"
@@ -6541,7 +6558,8 @@ __metadata:
     "@libp2p/webtransport": "npm:6.0.44"
     "@multiformats/multiaddr": "npm:13.0.3"
     "@multiformats/murmur3": "npm:2.2.5"
-    "@noble/curves": "npm:2.2.0"
+    "@noble/curves": "npm:2.4.0"
+    "@noble/hashes": "npm:2.4.0"
     "@pkcprotocol/pkc-logger": "npm:0.1.0"
     "@types/better-sqlite3": "npm:7.6.13"
     assert: "npm:2.1.0"
@@ -6569,7 +6587,7 @@ __metadata:
     localforage: "npm:1.10.0"
     lodash.merge: "npm:4.6.2"
     lru-cache: "npm:10.1.0"
-    multiformats: "npm:14.0.5"
+    multiformats: "npm:14.0.7"
     node-forge: "npm:1.4.2"
     open-graph-scraper: "npm:6.11.0"
     p-limit: "npm:7.3.0"
@@ -6590,7 +6608,7 @@ __metadata:
     uuid: "npm:14.0.3"
     ws: "npm:8.22.0"
     zod: "npm:4.6.7"
-  checksum: 10c0/f4d12f5307c60faa5e4d6f77508e1af0be1eaace485ab6ccf4a5fcca9b8dfe9f3243d93f11cc471d1028714aac236857e62cac36d1dc715c0d509d5a9e451f6a
+  checksum: 10c0/1c7005129531b402dbcb6c3aad5613ac5b8868374d9560616d23fa97bd9e57c690c2633a87abc53be4366281664012c37ba5907c4f66f140ef246817a2c8d001
   languageName: node
   linkType: hard
 
@@ -16530,6 +16548,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"multiformats@npm:14.0.7":
+  version: 14.0.7
+  resolution: "multiformats@npm:14.0.7"
+  checksum: 10c0/944f2ac1f0b4bfe8c2fccf70f4697222348c53461631ff919a3cb6758ef6032035dc0b9089359ecfe75a52921be428d444b7794115f2e4e2d976ffb7b4d64420
+  languageName: node
+  linkType: hard
+
 "multiformats@npm:^13.0.0, multiformats@npm:^13.1.0, multiformats@npm:^13.3.1, multiformats@npm:^13.4.0":
   version: 13.4.1
   resolution: "multiformats@npm:13.4.1"
@@ -17185,27 +17210,6 @@ __metadata:
     typescript:
       optional: true
   checksum: 10c0/dfefa9218269103b3da3686c4da62849aef15e4347fd21f898fa113d9b4c2b86afab7c662c94d58206257736202647ce96249405c021c4a233712ac34fa3cc1b
-  languageName: node
-  linkType: hard
-
-"ox@npm:0.14.32":
-  version: 0.14.32
-  resolution: "ox@npm:0.14.32"
-  dependencies:
-    "@adraffy/ens-normalize": "npm:^1.11.0"
-    "@noble/ciphers": "npm:^1.3.0"
-    "@noble/curves": "npm:1.9.1"
-    "@noble/hashes": "npm:^1.8.0"
-    "@scure/bip32": "npm:^1.7.0"
-    "@scure/bip39": "npm:^1.6.0"
-    abitype: "npm:^1.2.3"
-    eventemitter3: "npm:5.0.1"
-  peerDependencies:
-    typescript: ">=5.4.0"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10c0/e07c0b18f967f93bf9b52dd5f00cd72db38be435f06cb16e7852c08cc6f05730c031a3ae5dbe058682160ec25b8a8664df334e28fe0677f7848abd0b9a9b59f0
   languageName: node
   linkType: hard
 
@@ -19720,7 +19724,7 @@ __metadata:
   resolution: "seedit@workspace:."
   dependencies:
     "@babel/core": "npm:7.29.7"
-    "@bitsocial/bitsocial-react-hooks": "npm:0.3.6"
+    "@bitsocial/bitsocial-react-hooks": "npm:0.4.0"
     "@bitsocial/bso-resolver": "npm:0.0.10"
     "@capacitor/android": "npm:7.6.9"
     "@capacitor/app": "npm:7.0.1"
@@ -19739,7 +19743,7 @@ __metadata:
     "@floating-ui/react": "npm:0.26.1"
     "@noble/curves": "npm:2.0.1"
     "@noble/hashes": "npm:2.0.1"
-    "@pkcprotocol/pkc-js": "npm:0.0.154"
+    "@pkcprotocol/pkc-js": "npm:0.0.163"
     "@playwright/cli": "npm:0.1.19"
     "@reforged/maker-appimage": "npm:6.0.0"
     "@rolldown/plugin-babel": "npm:0.2.4"
@@ -22175,27 +22179,6 @@ __metadata:
     typescript:
       optional: true
   checksum: 10c0/4747450c511604dc2280b94b6a6eab53638058a559531f7707d31f21de51670449530f9ebc2fbc06d961b8b5a6cfadb920683e701058adc8996619b012bbc56d
-  languageName: node
-  linkType: hard
-
-"viem@npm:2.55.8":
-  version: 2.55.8
-  resolution: "viem@npm:2.55.8"
-  dependencies:
-    "@noble/curves": "npm:1.9.1"
-    "@noble/hashes": "npm:1.8.0"
-    "@scure/bip32": "npm:1.7.0"
-    "@scure/bip39": "npm:1.6.0"
-    abitype: "npm:1.2.3"
-    isows: "npm:1.0.7"
-    ox: "npm:0.14.32"
-    ws: "npm:8.21.0"
-  peerDependencies:
-    typescript: ">=5.0.4"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10c0/30457ab22c174e02680831f841cd27ba806346ea2099e6b091a53bb46f0bcd6406d93704ef1d91be0d21fd367e38fe81573a9a89a84906e469bdb9c12be7a0bb
   languageName: node
   linkType: hard
 

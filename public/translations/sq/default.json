@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Të gjithë ofruesit dështuan",
   "upload_failed_preferred_guidance": "Zgjidhni një ofrues tjetër ose vendosni në rastësishëm.",
   "user_banned_for_this_post": "Përdoruesi u ndalua për këtë postim",
-  "user_banned_for_this_comment": "Përdoruesi u ndalua për këtë koment"
+  "user_banned_for_this_comment": "Përdoruesi u ndalua për këtë koment",
+  "wallet_sign_again": "Nënshkrimi i këtij wallet nuk pranohet më. Kopjo mesazhin e ri, nënshkruaje me këtë wallet dhe ngjit nënshkrimin e ri."
 }

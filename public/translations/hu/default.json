@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Minden szolgáltató sikertelen volt",
   "upload_failed_preferred_guidance": "Válasszon másik szolgáltatót vagy állítsa véletlenszerűre.",
   "user_banned_for_this_post": "A felhasználót letiltották ennek a posztnak a kapcsán",
-  "user_banned_for_this_comment": "A felhasználót letiltották ennek a hozzászólásnak a kapcsán"
+  "user_banned_for_this_comment": "A felhasználót letiltották ennek a hozzászólásnak a kapcsán",
+  "wallet_sign_again": "Ennek a pénztárcának az aláírása már nem elfogadott. Másold ki az új üzenetet, írd alá ezzel a pénztárcával, és illeszd be az új aláírást."
 }

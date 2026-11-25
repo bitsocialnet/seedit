@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Všichni poskytovatelé selhali",
   "upload_failed_preferred_guidance": "Zvolte jiného poskytovatele nebo nastavte náhodné.",
   "user_banned_for_this_post": "Uživatel byl zablokován za tento příspěvek",
-  "user_banned_for_this_comment": "Uživatel byl zablokován za tento komentář"
+  "user_banned_for_this_comment": "Uživatel byl zablokován za tento komentář",
+  "wallet_sign_again": "Podpis této peněženky už není přijímán. Zkopírujte novou zprávu, podepište ji touto peněženkou a vložte nový podpis."
 }

@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Tất cả nhà cung cấp đều thất bại",
   "upload_failed_preferred_guidance": "Chọn nhà cung cấp khác hoặc đặt thành ngẫu nhiên.",
   "user_banned_for_this_post": "Người dùng đã bị cấm vì bài đăng này",
-  "user_banned_for_this_comment": "Người dùng đã bị cấm vì bình luận này"
+  "user_banned_for_this_comment": "Người dùng đã bị cấm vì bình luận này",
+  "wallet_sign_again": "Chữ ký của ví này không còn được chấp nhận. Hãy sao chép tin nhắn mới, ký bằng ví này và dán chữ ký mới."
 }

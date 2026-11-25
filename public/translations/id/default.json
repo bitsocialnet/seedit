@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Semua penyedia gagal",
   "upload_failed_preferred_guidance": "Pilih penyedia lain atau atur ke acak.",
   "user_banned_for_this_post": "Pengguna diblokir untuk pos ini",
-  "user_banned_for_this_comment": "Pengguna diblokir karena komentar ini"
+  "user_banned_for_this_comment": "Pengguna diblokir karena komentar ini",
+  "wallet_sign_again": "Tanda tangan dompet ini tidak lagi diterima. Salin pesan baru, tandatangani dengan dompet ini, lalu tempelkan tanda tangan yang baru."
 }

@@ -467,5 +467,6 @@
   "upload_failed_all_providers": "All providers failed",
   "upload_failed_preferred_guidance": "Choose a different provider or set to random.",
   "user_banned_for_this_post": "User was banned for this post",
-  "user_banned_for_this_comment": "User was banned for this comment"
+  "user_banned_for_this_comment": "User was banned for this comment",
+  "wallet_sign_again": "This wallet's signature is no longer accepted. Copy the new message, sign it with this wallet and paste the new signature."
 }

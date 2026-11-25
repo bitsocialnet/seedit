@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "所有提供商均失败",
   "upload_failed_preferred_guidance": "选择其他提供商或设置为随机。",
   "user_banned_for_this_post": "用户因此帖被封禁",
-  "user_banned_for_this_comment": "用户因此评论被封禁"
+  "user_banned_for_this_comment": "用户因此评论被封禁",
+  "wallet_sign_again": "此钱包的签名已不再被接受。请复制新消息,用此钱包签名,然后粘贴新签名。"
 }

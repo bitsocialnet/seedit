@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "Alla leverantörer misslyckades",
   "upload_failed_preferred_guidance": "Välj en annan leverantör eller sätt till slumpmässig.",
   "user_banned_for_this_post": "Användaren blev blockerad för detta inlägg",
-  "user_banned_for_this_comment": "Användaren blev blockerad för denna kommentar"
+  "user_banned_for_this_comment": "Användaren blev blockerad för denna kommentar",
+  "wallet_sign_again": "Den här plånbokens signatur godtas inte längre. Kopiera det nya meddelandet, signera det med den här plånboken och klistra in den nya signaturen."
 }

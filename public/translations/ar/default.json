@@ -457,5 +457,6 @@
   "upload_failed_all_providers": "فشل جميع مزودي الخدمة",
   "upload_failed_preferred_guidance": "اختر مزود خدمة مختلفًا أو اضبط على عشوائي.",
   "user_banned_for_this_post": "تم حظر المستخدم لهذا المنشور",
-  "user_banned_for_this_comment": "تم حظر المستخدم بسبب هذا التعليق"
+  "user_banned_for_this_comment": "تم حظر المستخدم بسبب هذا التعليق",
+  "wallet_sign_again": "لم يعد توقيع هذه المحفظة مقبولاً. انسخ الرسالة الجديدة ووقّعها بهذه المحفظة والصق التوقيع الجديد."
 }
