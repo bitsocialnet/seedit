@@ -1,7 +1,13 @@
-import { type Comment } from '@bitsocial/bitsocial-react-hooks';
+import { type AccountPublicationsFilter, type Comment } from '@bitsocial/bitsocial-react-hooks';
 import { getCommentCommunityAddress } from './comment-utils';
 
 export const getAccountHistoryOrder = (sortType: string): 'asc' | 'desc' => (sortType === 'new' ? 'desc' : 'asc');
+
+/** Account publications that are posts. */
+export const isAccountPost: AccountPublicationsFilter = (publication) => ('parentCid' in publication ? !publication.parentCid : false);
+
+/** Account publications that are replies. */
+export const isAccountReply: AccountPublicationsFilter = (publication) => ('parentCid' in publication ? Boolean(publication.parentCid) : false);
 
 export const getAccountHistoryPage = (currentPage: number): number => Math.max(currentPage - 1, 0);
 

@@ -3,14 +3,14 @@ import { Trans, useTranslation } from 'react-i18next';
 import { HashLink } from 'react-router-hash-link';
 import { Outlet, useParams } from 'react-router-dom';
 import { StateSnapshot, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { useAccount, useAccountComments, useAccountVotes, useComment, type AccountPublicationsFilter } from '@bitsocial/bitsocial-react-hooks';
+import { useAccount, useAccountComments, useAccountVotes, useComment } from '@bitsocial/bitsocial-react-hooks';
 import useWindowWidth from '../../hooks/use-window-width';
 import AuthorSidebar from '../../components/author-sidebar';
 import Post from '../../components/post';
 import Reply from '../../components/reply';
 import styles from './profile.module.css';
 import ErrorDisplay from '../../components/error-display';
-import { getAccountHistoryOrder, getAccountHistoryPage } from '../../lib/utils/account-history-utils';
+import { getAccountHistoryOrder, getAccountHistoryPage, isAccountPost, isAccountReply } from '../../lib/utils/account-history-utils';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 
@@ -168,8 +168,7 @@ const Overview = () => {
 const Comments = () => {
   const { t } = useTranslation();
   const [sortType, setSortType] = useState('new');
-  const repliesFilter = useCallback<AccountPublicationsFilter>((publication) => ('parentCid' in publication ? Boolean(publication.parentCid) : false), []);
-  const { error, accountComments } = useAccountComments({ filter: repliesFilter, order: getAccountHistoryOrder(sortType) });
+  const { error, accountComments } = useAccountComments({ filter: isAccountReply, order: getAccountHistoryOrder(sortType) });
   const shouldShowErrorToUserComments = Boolean(error?.message && accountComments.length === 0);
 
   const prevErrorMessageRef = useRef<string | undefined>(undefined);
@@ -196,8 +195,7 @@ const Comments = () => {
 const Submitted = () => {
   const { t } = useTranslation();
   const [sortType, setSortType] = useState('new');
-  const submittedFilter = useCallback<AccountPublicationsFilter>((publication) => ('parentCid' in publication ? !publication.parentCid : false), []);
-  const { error, accountComments } = useAccountComments({ filter: submittedFilter, order: getAccountHistoryOrder(sortType) });
+  const { error, accountComments } = useAccountComments({ filter: isAccountPost, order: getAccountHistoryOrder(sortType) });
   const shouldShowErrorToUserSubmitted = Boolean(error?.message && accountComments.length === 0);
 
   const prevErrorMessageRef = useRef<string | undefined>(undefined);

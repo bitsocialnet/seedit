@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { useAuthorComments, useAuthor, type Comment } from '@bitsocial/bitsocial-react-hooks';
+import { useParams } from 'react-router-dom';
+import { useAuthor, type Comment } from '@bitsocial/bitsocial-react-hooks';
 import { StateSnapshot, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { isAuthorCommentsView, isAuthorSubmittedView } from '../../lib/utils/view-utils';
+import useAuthorFeed from '../../hooks/use-author-feed';
 import useWindowWidth from '../../hooks/use-window-width';
 import LoadingEllipsis from '../../components/loading-ellipsis';
 import Post from '../../components/post';
@@ -36,41 +36,16 @@ const renderComment = (index: number, post: Comment | undefined) =>
 
 const Author = () => {
   const { t } = useTranslation();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { authorAddress, commentCid, sortType } = useParams();
+  const { sortType } = useParams();
+  const { authorAddress, commentCid, tab, comments: virtuosoData, totalCount, error, hasMore, loadMore, shouldShowError: shouldShowErrorToUser } = useAuthorFeed();
   const author = useAuthor({ commentCid, authorAddress });
-  const params = useParams();
-  const isInAuthorCommentsView = isAuthorCommentsView(location.pathname, params);
-  const isInAuthorSubmittedView = isAuthorSubmittedView(location.pathname, params);
+  const isInAuthorCommentsView = tab === 'comments';
   const isMobile = useWindowWidth() < 640;
-
-  const { authorComments, error, lastCommentCid, hasMore, loadMore } = useAuthorComments({ commentCid, authorAddress });
-
-  const prevErrorMessageRef = useRef<string | undefined>(undefined);
-  useEffect(() => {
-    if (error && error.message !== prevErrorMessageRef.current) {
-      console.log(error);
-      prevErrorMessageRef.current = error.message;
-    }
-  }, [error]);
-
-  const replyComments = useMemo(() => authorComments?.filter((comment) => comment && comment.parentCid) || [], [authorComments]);
-  const postComments = useMemo(() => authorComments?.filter((comment) => comment && !comment.parentCid) || [], [authorComments]);
 
   const loadingString = isInAuthorCommentsView ? t('downloading_comments') : t('downloading_posts');
   const feedContext = useMemo(() => ({ hasMore, loadingString }), [hasMore, loadingString]);
 
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
-
-  let virtuosoData;
-  if (isInAuthorCommentsView) {
-    virtuosoData = replyComments;
-  } else if (isInAuthorSubmittedView) {
-    virtuosoData = postComments;
-  } else {
-    virtuosoData = authorComments;
-  }
 
   useEffect(() => {
     const setLastVirtuosoState = () =>
@@ -87,22 +62,12 @@ const Author = () => {
   const key = `${authorAddress ?? ''}${sortType ?? ''}`;
   const lastVirtuosoState = lastVirtuosoStates?.[key];
 
-  // always redirect to latest author cid
-  useEffect(() => {
-    if (authorAddress && lastCommentCid && commentCid && lastCommentCid !== commentCid) {
-      navigate(`/u/${authorAddress}/comments/${lastCommentCid}`, { replace: true });
-    }
-  }, [authorAddress, lastCommentCid, commentCid, navigate]);
-
   const displayAddress = getDisplayAddress(author?.author?.shortAddress || '');
   const authorDisplayName = stripTripcodeProof(author?.author?.displayName);
   const profileTitle = authorDisplayName ? `${authorDisplayName} (u/${displayAddress})` : `u/${displayAddress}`;
   useEffect(() => {
     document.title = profileTitle + ' - Seedit';
   }, [t, profileTitle]);
-
-  // only show backend errors if the user gets no data
-  const shouldShowErrorToUser = Boolean(error?.message && virtuosoData?.length === 0);
 
   return (
     <div className={styles.content}>
@@ -116,7 +81,7 @@ const Author = () => {
       )}
       <Virtuoso<Comment | undefined, AuthorFeedContext>
         increaseViewportBy={{ bottom: 1200, top: 600 }}
-        totalCount={authorComments?.length || 0}
+        totalCount={totalCount}
         data={virtuosoData}
         computeItemKey={(index, post) => post?.cid || index}
         itemContent={renderComment}
