@@ -2,6 +2,29 @@
   min-width: 0;
 }
 
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 16px 12px;
+}
+
+.heading {
+  margin: 0;
+  color: var(--m-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.headerDescription {
+  margin: 0;
+  color: var(--m-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .sortBar {
   display: flex;
   flex-wrap: wrap;

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Virtuoso, type StateSnapshot, type VirtuosoHandle } from 'react-virtuoso';
@@ -106,6 +106,15 @@ const Footer = ({ context: { communityAddresses, feedLength, hasMore } }: { cont
   );
 };
 const feedComponents = { Footer };
+
+/** What a feed without a community of its own shows, such as s/mod or a domain, above its sort bar. */
+export const ModernFeedHeader = ({ title, description, children }: { title: ReactNode; description?: ReactNode; children?: ReactNode }) => (
+  <header className={styles.header}>
+    <h1 className={styles.heading}>{title}</h1>
+    {description && <p className={styles.headerDescription}>{description}</p>}
+    {children}
+  </header>
+);
 
 interface ModernFeedProps {
   /** The route the sort tabs append to, such as `/` or `/s/all`. */

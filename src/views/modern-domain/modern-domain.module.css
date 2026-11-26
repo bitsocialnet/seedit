@@ -1,0 +1,25 @@
+.visit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* Two classes outrank the shell's link reset, which inherits the text color. */
+.visit.visit {
+  color: var(--m-link);
+}
+
+.visit:hover {
+  text-decoration: underline;
+}
+
+.empty {
+  margin: 0;
+  padding: 32px 16px;
+  color: var(--m-text-muted);
+  font-size: 14px;
+  text-align: center;
+}

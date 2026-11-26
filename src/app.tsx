@@ -86,6 +86,8 @@ const ModernCommunitySettings = lazyView(() => import('./views/modern-community-
 const ModernCommunityDataEditor = lazyView(() => import('./views/modern-community-data-editor'));
 const ModernDirectories = lazyView(() => import('./views/modern-directories'));
 const ModernStarterSubscriptions = lazyView(() => import('./views/modern-starter-subscriptions'));
+const ModernMod = lazyView(() => import('./views/modern-mod'));
+const ModernDomain = lazyView(() => import('./views/modern-domain'));
 const Communities = lazyView(() => import('./views/communities'));
 const StarterSubscriptions = lazyView(() => import('./views/starter-subscriptions'));
 
@@ -249,6 +251,22 @@ const App = () => {
               />
               <Route path='/communities/create' element={<ModernCommunitySettings />} />
               <Route path='/communities/defaults' element={<ModernStarterSubscriptions />} />
+              <Route
+                path='/s/mod/:sortType?/:timeFilterName?'
+                element={
+                  <ValidFeedRoute>
+                    <ModernMod />
+                  </ValidFeedRoute>
+                }
+              />
+              <Route
+                path='/domain/:domain/:sortType?/:timeFilterName?'
+                element={
+                  <ValidFeedRoute>
+                    <ModernDomain />
+                  </ValidFeedRoute>
+                }
+              />
               <Route path={DIRECTORY_INDEX_PATH} element={<ModernDirectories />} />
               <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<ModernDirectories />} />
             </Route>
@@ -358,14 +376,16 @@ const App = () => {
                 />
               </>
             )}
-            <Route
-              path='/s/mod/:sortType?/:timeFilterName?'
-              element={
-                <ValidFeedRoute>
-                  <Mod />
-                </ValidFeedRoute>
-              }
-            />
+            {!isModern && (
+              <Route
+                path='/s/mod/:sortType?/:timeFilterName?'
+                element={
+                  <ValidFeedRoute>
+                    <Mod />
+                  </ValidFeedRoute>
+                }
+              />
+            )}
 
             {!isModern && (
               <Route
@@ -378,14 +398,16 @@ const App = () => {
               />
             )}
 
-            <Route
-              path='/domain/:domain/:sortType?/:timeFilterName?'
-              element={
-                <ValidFeedRoute>
-                  <Domain />
-                </ValidFeedRoute>
-              }
-            />
+            {!isModern && (
+              <Route
+                path='/domain/:domain/:sortType?/:timeFilterName?'
+                element={
+                  <ValidFeedRoute>
+                    <Domain />
+                  </ValidFeedRoute>
+                }
+              />
+            )}
 
             {!isModern && <Route path='/profile/:accountCommentIndex' element={<PostPage />} />}
 

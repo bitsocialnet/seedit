@@ -1,1 +1,1 @@
-export { default } from './modern-feed';
+export { default, ModernFeedHeader } from './modern-feed';
