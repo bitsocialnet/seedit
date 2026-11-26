@@ -1,0 +1,26 @@
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--m-text-muted);
+  font-size: 13px;
+}
+
+.sort select {
+  height: 32px;
+  padding: 0 8px;
+  border: 1px solid var(--m-border);
+  border-radius: 8px;
+  background: var(--m-surface);
+  color: var(--m-text);
+  font-size: 13px;
+  text-transform: capitalize;
+}
+
+.error {
+  margin: 0 16px 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--m-danger);
+  border-radius: 12px;
+  color: var(--m-text);
+}

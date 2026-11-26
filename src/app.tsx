@@ -17,7 +17,9 @@ import CommunityView from './views/community';
 import ModernAll from './views/modern-all';
 import ModernCommunity from './views/modern-community';
 import ModernHome from './views/modern-home';
+import ModernAuthor from './views/modern-author';
 import ModernPost from './views/modern-post';
+import ModernProfile from './views/modern-profile';
 import ModernSubmit from './views/modern-submit';
 import AccountBar from './components/account-bar/';
 import ChallengeModal from './components/challenge-modal';
@@ -187,6 +189,13 @@ const App = () => {
               <Route path='/s/:communityAddress/comments/:commentCid' element={<ModernPost />} />
               <Route path='/profile/:accountCommentIndex' element={<ModernPost />} />
               <Route path='/submit' element={<ModernSubmit />} />
+              <Route path='/profile' element={<ModernProfile />} />
+              {['submitted', 'comments', 'upvoted', 'downvoted', 'hidden', 'saved'].map((tab) => (
+                <Route key={tab} path={`/profile/${tab}`} element={<ModernProfile />} />
+              ))}
+              <Route path='/u/:authorAddress/comments/:commentCid?/:sortType?/:timeFilterName?' element={<ModernAuthor />} />
+              <Route path='/u/:authorAddress/comments/:commentCid?/comments/:sortType?/:timeFilterName?' element={<ModernAuthor />} />
+              <Route path='/u/:authorAddress/comments/:commentCid?/submitted/:sortType?/:timeFilterName?' element={<ModernAuthor />} />
               <Route
                 path='/s/:communityAddress/submit'
                 element={
@@ -321,19 +330,25 @@ const App = () => {
 
             {!isModern && <Route path='/profile/:accountCommentIndex' element={<PostPage />} />}
 
-            <Route path='/profile' element={<Profile />}>
-              <Route index element={<Profile.Overview />} />
-              <Route path='upvoted' element={<Profile.VotedComments voteType={1} />} />
-              <Route path='downvoted' element={<Profile.VotedComments voteType={-1} />} />
-              <Route path='hidden' element={<Profile.HiddenComments />} />
-              <Route path='saved' element={<Profile.SavedComments />} />
-              <Route path='comments' element={<Profile.Comments />} />
-              <Route path='submitted' element={<Profile.Submitted />} />
-            </Route>
+            {!isModern && (
+              <Route path='/profile' element={<Profile />}>
+                <Route index element={<Profile.Overview />} />
+                <Route path='upvoted' element={<Profile.VotedComments voteType={1} />} />
+                <Route path='downvoted' element={<Profile.VotedComments voteType={-1} />} />
+                <Route path='hidden' element={<Profile.HiddenComments />} />
+                <Route path='saved' element={<Profile.SavedComments />} />
+                <Route path='comments' element={<Profile.Comments />} />
+                <Route path='submitted' element={<Profile.Submitted />} />
+              </Route>
+            )}
 
-            <Route path='/u/:authorAddress/comments/:commentCid?/:sortType?/:timeFilterName?' element={<Author />} />
-            <Route path='/u/:authorAddress/comments/:commentCid?/comments/:sortType?/:timeFilterName?' element={<Author />} />
-            <Route path='/u/:authorAddress/comments/:commentCid?/submitted/:sortType?/:timeFilterName?' element={<Author />} />
+            {!isModern && (
+              <>
+                <Route path='/u/:authorAddress/comments/:commentCid?/:sortType?/:timeFilterName?' element={<Author />} />
+                <Route path='/u/:authorAddress/comments/:commentCid?/comments/:sortType?/:timeFilterName?' element={<Author />} />
+                <Route path='/u/:authorAddress/comments/:commentCid?/submitted/:sortType?/:timeFilterName?' element={<Author />} />
+              </>
+            )}
 
             <Route path='*' element={<NotFound />} />
             <Route path='/not-found' element={<NotFound />} />

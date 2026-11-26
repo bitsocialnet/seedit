@@ -1,0 +1,160 @@
+.card {
+  padding: 12px 16px 8px;
+  border-radius: 16px;
+}
+
+.card:hover {
+  background: var(--m-surface-hover);
+}
+
+.unread {
+  box-shadow: inset 3px 0 0 var(--m-accent);
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  color: var(--m-text-muted);
+  font-size: 12px;
+}
+
+.community {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--m-text);
+  font-weight: 600;
+}
+
+.communityName {
+  overflow-wrap: anywhere;
+}
+
+.community:hover .communityName {
+  text-decoration: underline;
+}
+
+.dot {
+  color: var(--m-text-muted);
+}
+
+.failed {
+  color: var(--m-danger);
+  font-weight: 600;
+}
+
+.badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--m-surface-raised);
+  color: var(--m-text-secondary);
+  font-weight: 600;
+}
+
+.failed::first-letter,
+.badge::first-letter,
+.label::first-letter {
+  text-transform: uppercase;
+}
+
+.parent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 1.35;
+}
+
+.label {
+  display: inline-block;
+  color: var(--m-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.postTitle {
+  min-width: 0;
+  color: var(--m-text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+a.postTitle:hover {
+  text-decoration: underline;
+}
+
+.reply {
+  margin-top: 8px;
+  padding-left: 12px;
+  border-left: 2px solid var(--m-border-strong);
+}
+
+.author {
+  color: var(--m-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.author:hover {
+  text-decoration: underline;
+}
+
+.content {
+  margin-top: 2px;
+  color: var(--m-text);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.content > :first-child {
+  margin-top: 0;
+}
+
+.content > :last-child {
+  margin-bottom: 0;
+}
+
+.placeholder {
+  margin: 0;
+  color: var(--m-text-muted);
+  font-style: italic;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--m-text-secondary);
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: var(--m-surface-raised);
+}
+
+.actionButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
