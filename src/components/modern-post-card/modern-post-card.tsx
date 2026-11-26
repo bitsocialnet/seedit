@@ -39,6 +39,8 @@ export const PostMeta = ({ post, showCommunity, showEdited }: PostMetaProps) => 
   const { shortAuthorAddress } = useAuthorAddress({ comment: post });
   const displayName = stripTripcodeProof(author?.displayName)?.trim();
   const prefetchCommunity = usePrefetchIntent({ communityAddress });
+  // as in the old interface, a link post leads to the other posts linking to its domain
+  const linkHostname = post.link ? getHostname(post.link) : '';
 
   return (
     <div className={styles.meta}>
@@ -59,6 +61,11 @@ export const PostMeta = ({ post, showCommunity, showEdited }: PostMetaProps) => 
       <time dateTime={timestamp ? new Date(timestamp * 1000).toISOString() : undefined} title={formatLocalizedUTCTimestamp(timestamp, i18n.language)}>
         {getFormattedTimeAgo(timestamp)}
       </time>
+      {linkHostname && (
+        <Link to={`/domain/${linkHostname}`} className={`${styles.raised} ${styles.domain}`}>
+          {linkHostname}
+        </Link>
+      )}
       {showEdited && edit?.timestamp && <span className={styles.edited}>{t('last_edited', { timestamp: getFormattedTimeAgo(edit.timestamp) })}</span>}
       {pinned && (
         <span className={styles.pinned}>

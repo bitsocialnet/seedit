@@ -1,13 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
-import { useAccount, useCommunity } from '@bitsocial/bitsocial-react-hooks';
+import { useAccount, useAccountCommunities, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import { getShortDisplayAddress } from '../../lib/utils/address-utils';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
 import { isAllView, isHomeView } from '../../lib/utils/view-utils';
 import useUiModeStore from '../../stores/use-ui-mode-store';
 import ModernCommunityAvatar from '../modern-community-avatar';
-import { ClassicIcon, CompassIcon, GlobeIcon, HomeIcon } from '../modern-icons';
+import { ClassicIcon, CompassIcon, GlobeIcon, HomeIcon, ShieldIcon } from '../modern-icons';
 import styles from './modern-layout.module.css';
 
 const NavCommunity = ({ address, pathname }: { address: string; pathname: string }) => {
@@ -39,6 +39,9 @@ const ModernNav = ({ isOpen, onClose }: ModernNavProps) => {
   const isHome = isHomeView(pathname);
   const isAll = isAllView(pathname);
   const isCommunities = pathname === '/communities' || pathname.startsWith('/communities/');
+  // s/mod is offered once the account moderates a community
+  const moderatesCommunities = Object.keys(useAccountCommunities().accountCommunities ?? {}).length > 0;
+  const isMod = pathname === '/s/mod' || pathname.startsWith('/s/mod/');
 
   return (
     <>
@@ -63,6 +66,19 @@ const ModernNav = ({ isOpen, onClose }: ModernNavProps) => {
               <span className={`${styles.navLabel} ${styles.sentenceCase}`}>{t('communities')}</span>
             </Link>
           </li>
+          {moderatesCommunities && (
+            <li>
+              <Link
+                to='/s/mod'
+                className={`${styles.navItem} ${isMod ? styles.navItemActive : ''}`}
+                aria-current={isMod ? 'page' : undefined}
+                title={t('communities_you_moderate')}
+              >
+                <ShieldIcon />
+                <span className={styles.navLabel}>s/mod</span>
+              </Link>
+            </li>
+          )}
         </ul>
         <div className={styles.navSection}>
           <h2 className={styles.navHeading}>{t('my_communities')}</h2>

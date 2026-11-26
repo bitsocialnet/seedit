@@ -55,6 +55,7 @@ export const CompassIcon = createIcon(
     <path d='m15.5 8.5-2 5-5 2 2-5z' />
   </>,
 );
+export const ShieldIcon = createIcon(<path d='M12 3 5 6v5c0 4.4 3 8.3 7 9.5 4-1.2 7-5.1 7-9.5V6z' />);
 export const UpvoteIcon = createIcon(<path d='M12 4 4.5 12H9v7.5h6V12h4.5z' />);
 export const DownvoteIcon = createIcon(<path d='M12 20l7.5-8H15V4.5H9V12H4.5z' />);
 export const CommentIcon = createIcon(<path d='M20.5 11.5a8 8 0 0 1-11.7 7.1L4 20l1.4-4.4a8 8 0 1 1 15.1-4.1z' />);

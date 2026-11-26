@@ -50,6 +50,21 @@
   color: var(--m-text-muted);
 }
 
+.domain {
+  overflow-wrap: anywhere;
+}
+
+.domain::before {
+  content: '·';
+  /* inline-block keeps the dot out of the link's hover underline */
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.domain:hover {
+  text-decoration: underline;
+}
+
 .pinned {
   display: inline-flex;
   align-items: center;
