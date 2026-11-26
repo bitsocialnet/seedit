@@ -1,6 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
+import { Menu, MenuContent, MenuGroupLabel, MenuItemIndicator, MenuRadioGroup, MenuRadioItem, MenuTrigger } from '@ui-sdk/react/menu';
 import { Virtuoso, type StateSnapshot, type VirtuosoHandle } from 'react-virtuoso';
 import { type Comment, useAccount, useCommunities } from '@bitsocial/bitsocial-react-hooks';
 import { useCommunityIdentifiers } from '../../hooks/use-community-identifier';
@@ -9,10 +10,12 @@ import { setSessionTimeFilterPreference, topTimeFilterNames } from '../../hooks/
 import { sortTypes } from '../../constants/sort-types';
 import { getFeedLoadFailure } from '../../lib/utils/community-load-utils';
 import { getTopTimeFilterPath } from '../../lib/utils/time-filter-utils';
+import useModernFeedViewStore, { type ModernFeedView } from '../../stores/use-modern-feed-view-store';
 import DevelopmentFeedResetButton from '../development-feed-reset-button';
 import { shouldShowEmptyFeed } from '../feed-footer';
+import { CardViewIcon, CheckIcon, ChevronDownIcon, CompactViewIcon } from '../modern-icons';
 import { modernStyles } from '../modern-layout';
-import ModernPostCard from '../modern-post-card';
+import ModernPostCard, { ModernCompactPost } from '../modern-post-card';
 import FeedSkeleton from './feed-skeleton';
 import styles from './modern-feed.module.css';
 
@@ -30,6 +33,42 @@ const isCapturingBones = () => (window as { __BONEYARD_BUILD?: boolean }).__BONE
 
 // Scroll positions per feed, so going back to a feed returns to the same post.
 const lastVirtuosoStates: Record<string, StateSnapshot> = {};
+
+const feedViews: { view: ModernFeedView; labelKey: string; Icon: typeof CardViewIcon }[] = [
+  { view: 'card', labelKey: 'card', Icon: CardViewIcon },
+  { view: 'compact', labelKey: 'compact', Icon: CompactViewIcon },
+];
+
+/** Picks how every modern feed shows its posts: large cards, or compact rows. */
+const FeedViewMenu = () => {
+  const { t } = useTranslation();
+  const feedView = useModernFeedViewStore((state) => state.feedView);
+  const setFeedView = useModernFeedViewStore((state) => state.setFeedView);
+  const CurrentIcon = feedView === 'compact' ? CompactViewIcon : CardViewIcon;
+
+  return (
+    <Menu modal={false}>
+      <MenuTrigger className={styles.viewTrigger} aria-label={t('view')}>
+        <CurrentIcon size={18} />
+        <ChevronDownIcon size={14} />
+      </MenuTrigger>
+      <MenuContent className={`${modernStyles.menu} ${styles.viewMenu}`} align='end' sideOffset={6} collisionPadding={8}>
+        <MenuRadioGroup value={feedView} onValueChange={(value) => setFeedView(value as ModernFeedView)}>
+          <MenuGroupLabel className={`${styles.viewMenuLabel} ${modernStyles.sentenceCase}`}>{t('view')}</MenuGroupLabel>
+          {feedViews.map(({ view, labelKey, Icon }) => (
+            <MenuRadioItem key={view} value={view} className={modernStyles.menuItem} closeOnSelect>
+              <Icon size={18} />
+              <span className={`${modernStyles.menuItemText} ${modernStyles.sentenceCase}`}>{t(labelKey)}</span>
+              <MenuItemIndicator className={styles.viewMenuCheck}>
+                <CheckIcon size={18} />
+              </MenuItemIndicator>
+            </MenuRadioItem>
+          ))}
+        </MenuRadioGroup>
+      </MenuContent>
+    </Menu>
+  );
+};
 
 interface SortBarProps {
   basePath: string;
@@ -60,23 +99,26 @@ const SortBar = ({ basePath, sortType, timeFilterName, sessionKey }: SortBarProp
           </Link>
         ))}
       </nav>
-      {sortType === 'top' && (
-        <select
-          className={styles.timeFilter}
-          value={selectedTimeFilter}
-          aria-label={t('links_from')}
-          onChange={(event) => {
-            setSessionTimeFilterPreference(sessionKey, event.target.value);
-            navigate(getTopTimeFilterPath(location.pathname, params.timeFilterName, event.target.value, location.search));
-          }}
-        >
-          {topTimeFilterNames.map((name) => (
-            <option key={name} value={name}>
-              {t(timeFilterLabelKeys[name])}
-            </option>
-          ))}
-        </select>
-      )}
+      <div className={styles.sortBarEnd}>
+        {sortType === 'top' && (
+          <select
+            className={styles.timeFilter}
+            value={selectedTimeFilter}
+            aria-label={t('links_from')}
+            onChange={(event) => {
+              setSessionTimeFilterPreference(sessionKey, event.target.value);
+              navigate(getTopTimeFilterPath(location.pathname, params.timeFilterName, event.target.value, location.search));
+            }}
+          >
+            {topTimeFilterNames.map((name) => (
+              <option key={name} value={name}>
+                {t(timeFilterLabelKeys[name])}
+              </option>
+            ))}
+          </select>
+        )}
+        <FeedViewMenu />
+      </div>
     </div>
   );
 };
@@ -84,10 +126,11 @@ const SortBar = ({ basePath, sortType, timeFilterName, sessionKey }: SortBarProp
 interface FeedFooterContext {
   communityAddresses: string[];
   feedLength: number;
+  feedView: ModernFeedView;
   hasMore: boolean;
 }
 
-const Footer = ({ context: { communityAddresses, feedLength, hasMore } }: { context: FeedFooterContext }) => {
+const Footer = ({ context: { communityAddresses, feedLength, feedView, hasMore } }: { context: FeedFooterContext }) => {
   const { t } = useTranslation();
   const feedCommunityIdentifiers = useCommunityIdentifiers(communityAddresses);
   const { communities, communityLoadStatuses } = useCommunities({ communities: feedCommunityIdentifiers });
@@ -120,7 +163,14 @@ const Footer = ({ context: { communityAddresses, feedLength, hasMore } }: { cont
             {error.message}
           </p>
         ))}
-        <FeedSkeleton />
+        {isCapturingBones() ? (
+          <>
+            <FeedSkeleton view='card' />
+            <FeedSkeleton view='compact' />
+          </>
+        ) : (
+          <FeedSkeleton view={feedView} />
+        )}
       </div>
     );
   }
@@ -170,7 +220,9 @@ interface ModernFeedProps {
 
 const ModernFeed = ({ basePath, communityAddresses, feed, hasMore, loadMore, reset, sessionKey, showCommunity = true, sortType, timeFilterName }: ModernFeedProps) => {
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
-  const stateKey = `${basePath}|${sortType}|${timeFilterName || ''}`;
+  const feedView = useModernFeedViewStore((state) => state.feedView);
+  // a scroll position measured with cards does not fit rows, so each view keeps its own
+  const stateKey = `${basePath}|${sortType}|${timeFilterName || ''}|${feedView}`;
 
   useEffect(() => {
     const saveState = () => {
@@ -183,8 +235,12 @@ const ModernFeed = ({ basePath, communityAddresses, feed, hasMore, loadMore, res
   }, [stateKey]);
   const lastVirtuosoState = lastVirtuosoStates[stateKey];
 
-  const footerContext = useMemo(() => ({ communityAddresses, feedLength: feed.length, hasMore }), [communityAddresses, feed.length, hasMore]);
-  const renderPost = useCallback((_index: number, post: Comment) => <ModernPostCard post={post} showCommunity={showCommunity} />, [showCommunity]);
+  const footerContext = useMemo(() => ({ communityAddresses, feedLength: feed.length, feedView, hasMore }), [communityAddresses, feed.length, feedView, hasMore]);
+  const renderPost = useCallback(
+    (_index: number, post: Comment) =>
+      feedView === 'compact' ? <ModernCompactPost post={post} showCommunity={showCommunity} /> : <ModernPostCard post={post} showCommunity={showCommunity} />,
+    [feedView, showCommunity],
+  );
 
   return (
     <div className={styles.feed}>

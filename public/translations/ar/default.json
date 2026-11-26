@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "تم حظر المستخدم بسبب هذا التعليق",
   "wallet_sign_again": "لم يعد توقيع هذه المحفظة مقبولاً. انسخ الرسالة الجديدة ووقّعها بهذه المحفظة والصق التوقيع الجديد.",
   "collapse_navigation": "طي التنقل",
-  "expand_navigation": "توسيع التنقل"
+  "expand_navigation": "توسيع التنقل",
+  "view": "العرض",
+  "card": "بطاقات",
+  "compact": "مضغوط",
+  "expand_post": "توسيع المنشور",
+  "collapse_post": "طي المنشور"
 }

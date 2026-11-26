@@ -91,3 +91,28 @@ export const ChevronDownIcon = createIcon(<path d='m6 9 6 6 6-6' />);
 export const ClassicIcon = createIcon(<path d='M3 12a9 9 0 1 0 2.6-6.4L3 8M3 3v5h5' />);
 export const ExternalLinkIcon = createIcon(<path d='M14 3h7v7M10 14 21 3M20 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h5' />);
 export const PinIcon = createIcon(<path d='M9 3h6l-1 6 4 4H6l4-4zM12 13v8' />);
+export const CardViewIcon = createIcon(
+  <>
+    <rect x='4' y='3.5' width='16' height='17' rx='2.5' />
+    <path d='M4 14.5h16' />
+  </>,
+);
+export const CompactViewIcon = createIcon(
+  <>
+    <rect x='4' y='4' width='16' height='16' rx='3' />
+    <path d='M4 9.33h16M4 14.67h16' />
+  </>,
+);
+export const TextPostIcon = createIcon(<path d='M5 6h14M5 10h14M5 14h14M5 18h9' />);
+export const LinkIcon = createIcon(<path d='M10 14a4.5 4.5 0 0 0 6.4 0l3-3a4.5 4.5 0 0 0-6.4-6.4l-1 1M14 10a4.5 4.5 0 0 0-6.4 0l-3 3a4.5 4.5 0 0 0 6.4 6.4l1-1' />);
+export const PlayIcon = createIcon(<path d='M8 5.5v13l10.5-6.5z' />, true);
+export const ImageIcon = createIcon(
+  <>
+    <rect x='3.5' y='4.5' width='17' height='15' rx='2.5' />
+    <circle cx='9' cy='10' r='1.5' />
+    <path d='m20.5 16-5-5-9 8.5' />
+  </>,
+);
+export const ExpandIcon = createIcon(<path d='M14 4h6v6M10 20H4v-6M20 4l-6.5 6.5M4 20l6.5-6.5' />);
+export const CollapseIcon = createIcon(<path d='M20 10h-6V4M4 14h6v6M14 10l6.5-6.5M10 14l-6.5 6.5' />);
+export const CheckIcon = createIcon(<path d='m5 12.5 4.5 4.5L19 7.5' />);

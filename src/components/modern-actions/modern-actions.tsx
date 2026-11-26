@@ -5,6 +5,7 @@ import useDownvote from '../../hooks/use-downvote';
 import useUpvote from '../../hooks/use-upvote';
 import { copyToClipboard } from '../../lib/utils/clipboard-utils';
 import { DownvoteIcon, ShareIcon, UpvoteIcon } from '../modern-icons';
+import { modernStyles } from '../modern-layout';
 import styles from './modern-actions.module.css';
 
 interface ModernVoteButtonsProps {
@@ -55,10 +56,12 @@ interface ModernShareButtonProps {
   iconSize?: number;
   /** The link to copy; the button is disabled until there is one. */
   url: string | undefined;
+  /** Shows only the icon until the link is copied; the label still names the button. */
+  iconOnly?: boolean;
 }
 
 /** Copies a link and confirms it in place. */
-export const ModernShareButton = ({ className, iconSize = 18, url }: ModernShareButtonProps) => {
+export const ModernShareButton = ({ className, iconSize = 18, url, iconOnly }: ModernShareButtonProps) => {
   const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   useEffect(() => {
@@ -80,7 +83,7 @@ export const ModernShareButton = ({ className, iconSize = 18, url }: ModernShare
   return (
     <button type='button' className={className} onClick={share} disabled={!url}>
       <ShareIcon size={iconSize} />
-      <span className={styles.label} aria-live='polite'>
+      <span className={`${styles.label} ${iconOnly && !copied ? modernStyles.visuallyHidden : ''}`} aria-live='polite'>
         {copied ? t('link_copied') : t('share')}
       </span>
     </button>

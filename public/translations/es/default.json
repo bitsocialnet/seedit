@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "El usuario fue baneado por este comentario",
   "wallet_sign_again": "La firma de esta billetera ya no es válida. Copia el nuevo mensaje, fírmalo con esta billetera y pega la nueva firma.",
   "collapse_navigation": "contraer navegación",
-  "expand_navigation": "expandir navegación"
+  "expand_navigation": "expandir navegación",
+  "view": "vista",
+  "card": "tarjetas",
+  "compact": "compacta",
+  "expand_post": "expandir publicación",
+  "collapse_post": "contraer publicación"
 }

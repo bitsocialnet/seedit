@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "L'utente è stato bannato per questo commento",
   "wallet_sign_again": "La firma di questo wallet non è più accettata. Copia il nuovo messaggio, firmalo con questo wallet e incolla la nuova firma.",
   "collapse_navigation": "comprimi navigazione",
-  "expand_navigation": "espandi navigazione"
+  "expand_navigation": "espandi navigazione",
+  "view": "visualizzazione",
+  "card": "schede",
+  "compact": "compatta",
+  "expand_post": "espandi post",
+  "collapse_post": "comprimi post"
 }

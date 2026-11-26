@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "O usuário foi banido por este comentário",
   "wallet_sign_again": "A assinatura desta carteira não é mais aceita. Copie a nova mensagem, assine-a com esta carteira e cole a nova assinatura.",
   "collapse_navigation": "recolher navegação",
-  "expand_navigation": "expandir navegação"
+  "expand_navigation": "expandir navegação",
+  "view": "visualização",
+  "card": "cartões",
+  "compact": "compacta",
+  "expand_post": "expandir publicação",
+  "collapse_post": "recolher publicação"
 }

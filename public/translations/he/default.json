@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "המשתמש נחסם בגלל התגובה הזו",
   "wallet_sign_again": "החתימה של הארנק הזה כבר לא מתקבלת. העתק את ההודעה החדשה, חתום עליה עם הארנק הזה והדבק את החתימה החדשה.",
   "collapse_navigation": "כיווץ הניווט",
-  "expand_navigation": "הרחבת הניווט"
+  "expand_navigation": "הרחבת הניווט",
+  "view": "תצוגה",
+  "card": "כרטיסים",
+  "compact": "דחוס",
+  "expand_post": "הרחב פוסט",
+  "collapse_post": "כווץ פוסט"
 }

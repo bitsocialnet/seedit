@@ -27,6 +27,8 @@ export default {
     { name: 'home-content-options', hash: '/', staticShell: false, storage: { 'content-options': '{"state":{"hideDefaultCommunities":true},"version":1}' } },
     // The shell's navigation is expanded, so a visitor who collapsed it loads without the shell.
     { name: 'home-nav-collapsed', hash: '/', staticShell: false, storage: { modernNavCollapsed: 'true' } },
+    // The shell's feed shows cards, so a visitor who chose compact rows loads without it.
+    { name: 'home-compact', hash: '/', staticShell: false, storage: { modernFeedView: 'compact' } },
     { name: 'community', hash: '/s/seedit.bso', staticShell: false, content: '[class*="_title_"] a' },
     // The shell shows the default interface, so a visitor who chose the old one loads without it.
     { name: 'home-old', hash: '/', staticShell: false, storage: { uiMode: 'old' }, content: '[class*="_title_"] a' },

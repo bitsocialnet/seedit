@@ -4,6 +4,7 @@ import * as React from 'react';
 import { createElement, type ComponentType } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import useModernFeedViewStore from '../../stores/use-modern-feed-view-store';
 import ModernFeed from './modern-feed';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -62,6 +63,7 @@ const render = () =>
 
 describe('ModernFeed footer', () => {
   beforeEach(() => {
+    useModernFeedViewStore.setState({ feedView: 'card' });
     container = document.createElement('div');
     document.body.appendChild(container);
     root = createRoot(container);
@@ -89,6 +91,21 @@ describe('ModernFeed footer', () => {
     expect(footerText()).toBe('loading_feed');
     expect(container.textContent).toContain('Domain resolver did not find the text record');
     expect(container.textContent).toContain('timeout');
+  });
+
+  it('shows placeholder rows in the compact view', async () => {
+    testState.statuses = [{ firstLoadFailed: false, hasCachedData: false, state: 'fetching-ipns' }];
+    useModernFeedViewStore.setState({ feedView: 'compact' });
+    await render();
+    expect(container.querySelector('[data-skeleton="modern-feed-compact"]')).not.toBeNull();
+    expect(container.querySelector('[data-skeleton="modern-feed"]')).toBeNull();
+  });
+
+  it('remembers the chosen view', () => {
+    localStorage.removeItem('modernFeedView');
+    useModernFeedViewStore.getState().setFeedView('compact');
+    expect(localStorage.getItem('modernFeedView')).toBe('compact');
+    expect(useModernFeedViewStore.getState().feedView).toBe('compact');
   });
 
   it('shows no placeholders once the feed has failed', async () => {

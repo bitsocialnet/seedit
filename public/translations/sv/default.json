@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Användaren blev blockerad för denna kommentar",
   "wallet_sign_again": "Den här plånbokens signatur godtas inte längre. Kopiera det nya meddelandet, signera det med den här plånboken och klistra in den nya signaturen.",
   "collapse_navigation": "fäll ihop navigering",
-  "expand_navigation": "fäll ut navigering"
+  "expand_navigation": "fäll ut navigering",
+  "view": "vy",
+  "card": "kort",
+  "compact": "kompakt",
+  "expand_post": "expandera inlägg",
+  "collapse_post": "fäll ihop inlägg"
 }

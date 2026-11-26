@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Benutzer wurde für diesen Kommentar gesperrt",
   "wallet_sign_again": "Die Unterschrift dieser Wallet wird nicht mehr akzeptiert. Kopiere die neue Nachricht, signiere sie mit dieser Wallet und füge die neue Unterschrift ein.",
   "collapse_navigation": "Navigation einklappen",
-  "expand_navigation": "Navigation ausklappen"
+  "expand_navigation": "Navigation ausklappen",
+  "view": "ansicht",
+  "card": "karten",
+  "compact": "kompakt",
+  "expand_post": "beitrag aufklappen",
+  "collapse_post": "beitrag zuklappen"
 }

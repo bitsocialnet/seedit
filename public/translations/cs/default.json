@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Uživatel byl zablokován za tento komentář",
   "wallet_sign_again": "Podpis této peněženky už není přijímán. Zkopírujte novou zprávu, podepište ji touto peněženkou a vložte nový podpis.",
   "collapse_navigation": "sbalit navigaci",
-  "expand_navigation": "rozbalit navigaci"
+  "expand_navigation": "rozbalit navigaci",
+  "view": "zobrazení",
+  "card": "karty",
+  "compact": "kompaktní",
+  "expand_post": "rozbalit příspěvek",
+  "collapse_post": "sbalit příspěvek"
 }

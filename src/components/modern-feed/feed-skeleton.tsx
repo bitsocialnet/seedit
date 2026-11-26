@@ -1,8 +1,10 @@
 import type { Comment } from '@bitsocial/bitsocial-react-hooks';
 import type { ResponsiveBones } from 'boneyard-js';
 import { configureBoneyard, Skeleton } from 'boneyard-js/react';
+import compactFeedBones from '../../data/bones/modern-feed-compact.bones.json';
 import feedBones from '../../data/bones/modern-feed.bones.json';
-import ModernPostCard from '../modern-post-card';
+import type { ModernFeedView } from '../../stores/use-modern-feed-view-store';
+import ModernPostCard, { ModernCompactPost } from '../modern-post-card';
 import styles from './modern-feed.module.css';
 
 // boneyard takes the shimmer highlight only as a global setting; the theme token keeps it right in light and dark.
@@ -61,16 +63,30 @@ const FeedFixture = () => (
   </>
 );
 
+/** The compact view's fixture: rows are short, so it takes the fixture posts twice to fill a screen as the cards do. */
+const CompactFeedFixture = () => (
+  <>
+    {[...getFixturePosts(), ...getFixturePosts().map((post) => ({ ...post, cid: `${post.cid}-again` }))].map((post) => (
+      <ModernCompactPost key={post.cid} post={post} />
+    ))}
+  </>
+);
+
+const skeletons = {
+  card: { name: 'modern-feed', bones: feedBones, fixture: <FeedFixture /> },
+  compact: { name: 'modern-feed-compact', bones: compactFeedBones, fixture: <CompactFeedFixture /> },
+};
+
 /**
- * Placeholder post cards where a feed's first posts will appear. boneyard captured their shapes from real post cards
- * (see FeedFixture); the bones use the modern theme's colors, so they follow light and dark.
+ * Placeholder posts where a feed's first posts will appear, as cards or as compact rows. boneyard captured their
+ * shapes from real posts (see the fixtures); the bones use the modern theme's colors, so they follow light and dark.
  */
-const FeedSkeleton = () => (
+const FeedSkeleton = ({ view = 'card' }: { view?: ModernFeedView }) => (
   <Skeleton
-    name='modern-feed'
+    name={skeletons[view].name}
     loading
-    initialBones={feedBones as ResponsiveBones}
-    fixture={<FeedFixture />}
+    initialBones={skeletons[view].bones as ResponsiveBones}
+    fixture={skeletons[view].fixture}
     // the meta line's separators would otherwise become slivers
     snapshotConfig={{ excludeSelectors: ['[data-skeleton-skip]'] }}
     // the feed is a column of an app shell, so bones are picked by viewport width, as they were captured

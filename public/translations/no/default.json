@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Brukeren ble utestengt for denne kommentaren",
   "wallet_sign_again": "Signaturen til denne lommeboken godtas ikke lenger. Kopier den nye meldingen, signer den med denne lommeboken og lim inn den nye signaturen.",
   "collapse_navigation": "skjul navigasjon",
-  "expand_navigation": "vis navigasjon"
+  "expand_navigation": "vis navigasjon",
+  "view": "visning",
+  "card": "kort",
+  "compact": "kompakt",
+  "expand_post": "utvid innlegg",
+  "collapse_post": "skjul innlegg"
 }

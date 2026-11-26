@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Kullanıcı bu yorum için yasaklandı",
   "wallet_sign_again": "Bu cüzdanın imzası artık kabul edilmiyor. Yeni mesajı kopyalayın, bu cüzdanla imzalayın ve yeni imzayı yapıştırın.",
   "collapse_navigation": "gezinmeyi daralt",
-  "expand_navigation": "gezinmeyi genişlet"
+  "expand_navigation": "gezinmeyi genişlet",
+  "view": "görünüm",
+  "card": "kart",
+  "compact": "kompakt",
+  "expand_post": "gönderiyi genişlet",
+  "collapse_post": "gönderiyi daralt"
 }

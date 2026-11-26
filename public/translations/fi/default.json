@@ -467,5 +467,10 @@
   "user_banned_for_this_comment": "Käyttäjä sai porttikiellon tämän kommentin vuoksi",
   "wallet_sign_again": "Tämän lompakon allekirjoitusta ei enää hyväksytä. Kopioi uusi viesti, allekirjoita se tällä lompakolla ja liitä uusi allekirjoitus.",
   "collapse_navigation": "kutista navigointi",
-  "expand_navigation": "laajenna navigointi"
+  "expand_navigation": "laajenna navigointi",
+  "view": "näkymä",
+  "card": "kortit",
+  "compact": "tiivis",
+  "expand_post": "laajenna julkaisu",
+  "collapse_post": "tiivistä julkaisu"
 }

@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Użytkownik został zablokowany za ten komentarz",
   "wallet_sign_again": "Podpis tego portfela nie jest już akceptowany. Skopiuj nową wiadomość, podpisz ją tym portfelem i wklej nowy podpis.",
   "collapse_navigation": "zwiń nawigację",
-  "expand_navigation": "rozwiń nawigację"
+  "expand_navigation": "rozwiń nawigację",
+  "view": "widok",
+  "card": "karty",
+  "compact": "kompaktowy",
+  "expand_post": "rozwiń post",
+  "collapse_post": "zwiń post"
 }

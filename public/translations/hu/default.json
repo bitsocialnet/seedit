@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "A felhasználót letiltották ennek a hozzászólásnak a kapcsán",
   "wallet_sign_again": "Ennek a pénztárcának az aláírása már nem elfogadott. Másold ki az új üzenetet, írd alá ezzel a pénztárcával, és illeszd be az új aláírást.",
   "collapse_navigation": "navigáció összecsukása",
-  "expand_navigation": "navigáció kibontása"
+  "expand_navigation": "navigáció kibontása",
+  "view": "nézet",
+  "card": "kártyák",
+  "compact": "kompakt",
+  "expand_post": "bejegyzés kibontása",
+  "collapse_post": "bejegyzés összecsukása"
 }

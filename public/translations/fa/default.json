@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "این کاربر برای این نظر مسدود شد",
   "wallet_sign_again": "امضای این کیف پول دیگر پذیرفته نمی‌شود. پیام جدید را کپی کنید، با این کیف پول امضا کنید و امضای جدید را بچسبانید.",
   "collapse_navigation": "جمع کردن ناوبری",
-  "expand_navigation": "باز کردن ناوبری"
+  "expand_navigation": "باز کردن ناوبری",
+  "view": "نما",
+  "card": "کارت",
+  "compact": "فشرده",
+  "expand_post": "باز کردن پست",
+  "collapse_post": "بستن پست"
 }

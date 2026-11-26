@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Përdoruesi u ndalua për këtë koment",
   "wallet_sign_again": "Nënshkrimi i këtij wallet nuk pranohet më. Kopjo mesazhin e ri, nënshkruaje me këtë wallet dhe ngjit nënshkrimin e ri.",
   "collapse_navigation": "palos navigimin",
-  "expand_navigation": "zgjero navigimin"
+  "expand_navigation": "zgjero navigimin",
+  "view": "pamja",
+  "card": "karta",
+  "compact": "kompakte",
+  "expand_post": "zgjero postimin",
+  "collapse_post": "palos postimin"
 }

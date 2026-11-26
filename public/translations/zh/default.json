@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "用户因此评论被封禁",
   "wallet_sign_again": "此钱包的签名已不再被接受。请复制新消息,用此钱包签名,然后粘贴新签名。",
   "collapse_navigation": "收起导航",
-  "expand_navigation": "展开导航"
+  "expand_navigation": "展开导航",
+  "view": "视图",
+  "card": "卡片",
+  "compact": "紧凑",
+  "expand_post": "展开帖子",
+  "collapse_post": "收起帖子"
 }

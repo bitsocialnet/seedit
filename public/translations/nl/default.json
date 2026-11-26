@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Gebruiker is verbannen voor deze reactie",
   "wallet_sign_again": "De handtekening van deze portemonnee wordt niet meer geaccepteerd. Kopieer het nieuwe bericht, onderteken het met deze portemonnee en plak de nieuwe handtekening.",
   "collapse_navigation": "navigatie inklappen",
-  "expand_navigation": "navigatie uitklappen"
+  "expand_navigation": "navigatie uitklappen",
+  "view": "weergave",
+  "card": "kaarten",
+  "compact": "compact",
+  "expand_post": "bericht uitklappen",
+  "collapse_post": "bericht inklappen"
 }

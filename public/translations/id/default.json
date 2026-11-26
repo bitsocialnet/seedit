@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "Pengguna diblokir karena komentar ini",
   "wallet_sign_again": "Tanda tangan dompet ini tidak lagi diterima. Salin pesan baru, tandatangani dengan dompet ini, lalu tempelkan tanda tangan yang baru.",
   "collapse_navigation": "ciutkan navigasi",
-  "expand_navigation": "bentangkan navigasi"
+  "expand_navigation": "bentangkan navigasi",
+  "view": "tampilan",
+  "card": "kartu",
+  "compact": "ringkas",
+  "expand_post": "bentangkan postingan",
+  "collapse_post": "ciutkan postingan"
 }

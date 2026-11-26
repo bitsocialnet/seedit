@@ -65,6 +65,48 @@
   color: var(--m-text);
 }
 
+.sortBarEnd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.viewTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  height: 32px;
+  padding: 0 6px 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--m-text-secondary);
+  cursor: pointer;
+}
+
+.viewTrigger:hover,
+.viewTrigger[data-open] {
+  background: var(--m-surface-hover);
+  color: var(--m-text);
+}
+
+.viewMenu {
+  min-width: 200px;
+}
+
+.viewMenuLabel {
+  padding: 4px 16px 8px;
+  color: var(--m-text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.viewMenuCheck {
+  display: inline-flex;
+  color: var(--m-accent);
+}
+
 .timeFilter {
   height: 32px;
   padding: 0 8px;

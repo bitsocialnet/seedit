@@ -478,5 +478,10 @@
   "user_banned_for_this_comment": "User was banned for this comment",
   "wallet_sign_again": "This wallet's signature is no longer accepted. Copy the new message, sign it with this wallet and paste the new signature.",
   "collapse_navigation": "collapse navigation",
-  "expand_navigation": "expand navigation"
+  "expand_navigation": "expand navigation",
+  "view": "view",
+  "card": "card",
+  "compact": "compact",
+  "expand_post": "expand post",
+  "collapse_post": "collapse post"
 }

@@ -468,5 +468,10 @@
   "user_banned_for_this_comment": "このコメントによりユーザーはBANされました",
   "wallet_sign_again": "このウォレットの署名は無効になりました。新しいメッセージをコピーし、このウォレットで署名して、新しい署名を貼り付けてください。",
   "collapse_navigation": "ナビゲーションを折りたたむ",
-  "expand_navigation": "ナビゲーションを展開する"
+  "expand_navigation": "ナビゲーションを展開する",
+  "view": "表示",
+  "card": "カード",
+  "compact": "コンパクト",
+  "expand_post": "投稿を展開",
+  "collapse_post": "投稿を折りたたむ"
 }
