@@ -243,7 +243,8 @@ const ModernFeed = ({ basePath, communityAddresses, feed, hasMore, loadMore, res
   );
 
   return (
-    <div className={styles.feed}>
+    // the layout widens the column for compact rows (see .columns in modern-layout.module.css)
+    <div className={styles.feed} data-feed-view={feedView}>
       <SortBar basePath={basePath} sortType={sortType} timeFilterName={timeFilterName} sessionKey={sessionKey} />
       <DevelopmentFeedResetButton onReset={reset} />
       <Virtuoso<Comment, FeedFooterContext>

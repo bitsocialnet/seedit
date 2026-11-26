@@ -460,6 +460,16 @@
   max-width: 756px;
 }
 
+/* Compact rows fill the width from the navigation to the rail, as reddit's do: collapsing the navigation widens the
+   feed instead of sliding a centred column across. */
+.columns:has([data-feed-view='compact']) {
+  justify-content: flex-start;
+}
+
+.columns:has([data-feed-view='compact']) .content {
+  max-width: 1280px;
+}
+
 .rail {
   position: sticky;
   top: calc(var(--m-header-height) + 16px);

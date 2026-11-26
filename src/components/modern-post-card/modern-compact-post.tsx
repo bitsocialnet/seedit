@@ -1,7 +1,7 @@
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
-import { type Comment, useBlock, useEditedComment } from '@bitsocial/bitsocial-react-hooks';
+import { type Comment, useBlock, useEditedComment, useSaveComment } from '@bitsocial/bitsocial-react-hooks';
 import { useCommentMediaInfo } from '../../hooks/use-comment-media-info';
 import usePostObscuring from '../../hooks/use-post-obscuring';
 import usePrefetchIntent from '../../hooks/use-prefetch-intent';
@@ -14,6 +14,7 @@ import Markdown from '../markdown';
 import { ModernShareButton, ModernVoteButtons } from '../modern-actions';
 import ModernCommentMenu from '../modern-comment-menu';
 import { CollapseIcon, CommentIcon, ExpandIcon, ImageIcon, LinkIcon, PlayIcon, TextPostIcon } from '../modern-icons';
+import { modernStyles } from '../modern-layout';
 import { PostMedia, PostMeta, PostTags } from './modern-post-card';
 import styles from './modern-post-card.module.css';
 
@@ -45,10 +46,9 @@ const previewIcons = { image: ImageIcon, video: PlayIcon, link: LinkIcon, text: 
 interface CompactPreviewProps {
   preview: Preview;
   obscured: boolean;
-  isExpanded: boolean;
 }
 
-const CompactPreview = ({ preview: { kind, image, video }, obscured, isExpanded }: CompactPreviewProps) => {
+const CompactPreview = ({ preview: { kind, image, video }, obscured }: CompactPreviewProps) => {
   // A still that fails to load gives way to the icon, instead of a broken image.
   const [failedSource, setFailedSource] = useState<string>();
   const Icon = previewIcons[kind];
@@ -72,8 +72,6 @@ const CompactPreview = ({ preview: { kind, image, video }, obscured, isExpanded 
           <PlayIcon size={12} />
         </span>
       )}
-      {/* shown on hover and focus, and while open: the square opens the post in place */}
-      <span className={styles.compactPreviewToggle}>{isExpanded ? <CollapseIcon size={18} /> : <ExpandIcon size={18} />}</span>
     </>
   );
 };
@@ -90,7 +88,7 @@ interface CompactExpandoProps {
   onReveal: () => void;
 }
 
-/** What the preview square opens under the row: the post's text, then its media or link. */
+/** What the expand button opens under the row: the post's text, then its media or link. */
 const CompactExpando = ({ id, kind, bodyText, mediaInfo, link, linkWidth, linkHeight, obscuredLabel, onReveal }: CompactExpandoProps) => (
   <div id={id} className={`${styles.compactExpando} ${styles.raised}`}>
     {bodyText && (
@@ -118,9 +116,10 @@ interface ModernCompactPostProps {
 }
 
 /**
- * A post as one dense row: a preview square, the title, and one line with who posted where and when, the votes and
- * the replies. The preview square opens the post's media or text in place, under the row, as old.reddit's expando
- * did, so reading down a feed does not need a trip to each post.
+ * A post as a compact row, laid out as reddit.com's compact view: a preview, the community and time, the title, and a
+ * row of actions. The expand button opens the post's media, link or text in place, under the row, as old.reddit's
+ * expando did, so reading down a feed does not need a trip to each post. Reddit's repost, award and "show fewer"
+ * actions and its join buttons are left out; save and hide are here, and the rest is in the options menu.
  */
 const ModernCompactPost = ({ post: feedPost, showCommunity = true }: ModernCompactPostProps) => {
   const { t } = useTranslation();
@@ -131,7 +130,8 @@ const ModernCompactPost = ({ post: feedPost, showCommunity = true }: ModernCompa
   const communityAddress = getCommentCommunityAddress(post);
   const { nsfw, obscuredLabel, reveal } = usePostObscuring(post);
   const mediaInfo = useCommentMediaInfo(post);
-  const { blocked, unblock } = useBlock({ cid });
+  const { blocked, block, unblock } = useBlock({ cid });
+  const { saved, saveComment, unsaveComment } = useSaveComment({ commentCid: cid });
   const prefetchPost = usePrefetchIntent({ commentCid: cid, communityAddress });
   const [isExpanded, setIsExpanded] = useState(() => Boolean(cid && expandedPosts.has(cid)));
 
@@ -144,6 +144,7 @@ const ModernCompactPost = ({ post: feedPost, showCommunity = true }: ModernCompa
   const expandoId = `compact-expando-${cid || post.index}`;
   const score = formatScore(getPostScore(upvoteCount, downvoteCount, state));
   const commentLabel = replyCount === 1 ? t('one_comment') : `${replyCount || 0} ${t('comments')}`;
+  const postPath = getPostPagePath(post);
 
   const toggleExpanded = () => {
     const next = !isExpanded;
@@ -166,24 +167,11 @@ const ModernCompactPost = ({ post: feedPost, showCommunity = true }: ModernCompa
   }
 
   return (
-    <article className={`${styles.compactRow} ${isExpanded ? styles.compactRowExpanded : ''}`}>
-      {preview ? (
-        <button
-          type='button'
-          className={`${styles.compactPreview} ${styles.raised}`}
-          aria-label={isExpanded ? t('collapse_post') : t('expand_post')}
-          aria-expanded={isExpanded}
-          aria-controls={isExpanded ? expandoId : undefined}
-          onClick={toggleExpanded}
-        >
-          <CompactPreview preview={preview} obscured={Boolean(obscuredLabel)} isExpanded={isExpanded} />
-        </button>
-      ) : (
-        // Nothing to open in place: the square keeps titles aligned and opens the post like the title does.
-        <Link to={getPostPagePath(post)} className={`${styles.compactPreview} ${styles.raised}`} tabIndex={-1} aria-hidden='true'>
-          <TextPostIcon size={22} />
-        </Link>
-      )}
+    <article className={styles.compactRow}>
+      {/* the preview opens the post, as the title does: a click on it reaches the title link's hit area */}
+      <div className={styles.compactPreview} aria-hidden='true'>
+        {preview ? <CompactPreview preview={preview} obscured={Boolean(obscuredLabel)} /> : <TextPostIcon size={22} />}
+      </div>
 
       <div className={styles.compactBody}>
         <div className={styles.compactMeta}>
@@ -191,23 +179,51 @@ const ModernCompactPost = ({ post: feedPost, showCommunity = true }: ModernCompa
           <PostTags post={post} nsfw={nsfw} />
         </div>
         <h3 className={styles.compactTitle}>
-          <Link to={getPostPagePath(post)} className={styles.titleLink} {...prefetchPost}>
+          <Link to={postPath} className={styles.titleLink} {...prefetchPost}>
             {getPostTitleText(title, contentText)}
           </Link>
         </h3>
         <div className={`${styles.compactActions} ${styles.raised}`}>
-          <ModernVoteButtons comment={post} score={score} variant='plain' />
-          <Link to={getPostPagePath(post)} className={styles.compactActionButton} aria-label={commentLabel}>
+          {/* dimmed, as on reddit, when the post has nothing more to show */}
+          <button
+            type='button'
+            className={styles.compactExpandButton}
+            aria-label={isExpanded ? t('collapse_post') : t('expand_post')}
+            aria-expanded={preview ? isExpanded : undefined}
+            aria-controls={preview && isExpanded ? expandoId : undefined}
+            disabled={!preview}
+            onClick={toggleExpanded}
+          >
+            {isExpanded ? <CollapseIcon size={16} /> : <ExpandIcon size={16} />}
+          </button>
+          <ModernVoteButtons comment={post} score={score} />
+          <Link to={postPath} className={`${styles.compactActionButton} ${styles.compactComments}`} aria-label={commentLabel}>
+            {/* phones show the icon and the count; wider screens spell it out, as reddit does */}
             <CommentIcon size={16} />
-            <span aria-hidden='true'>{replyCount || 0}</span>
+            <span aria-hidden='true' className={styles.compactCount}>
+              {replyCount || 0}
+            </span>
+            <span aria-hidden='true' className={styles.compactLabel}>
+              {commentLabel}
+            </span>
           </Link>
           <ModernShareButton
-            className={styles.compactActionButton}
+            className={`${styles.compactActionButton} ${styles.compactShare}`}
             iconSize={16}
-            iconOnly
             url={cid && communityAddress ? getCommunityPostUrl(communityAddress, cid) : undefined}
           />
-          <ModernCommentMenu comment={post} className={styles.compactActionButton} iconSize={16} />
+          <button
+            type='button'
+            className={`${styles.compactActionButton} ${styles.compactWideOnly}`}
+            disabled={!cid}
+            onClick={() => void (saved ? unsaveComment() : saveComment())}
+          >
+            <span className={modernStyles.sentenceCase}>{saved ? t('unsave') : t('save')}</span>
+          </button>
+          <button type='button' className={`${styles.compactActionButton} ${styles.compactWideOnly}`} disabled={!cid} onClick={block}>
+            <span className={modernStyles.sentenceCase}>{t('hide')}</span>
+          </button>
+          <ModernCommentMenu comment={post} className={`${styles.compactActionButton} ${styles.compactMenu}`} iconSize={16} />
         </div>
       </div>
 

@@ -329,14 +329,14 @@
   cursor: pointer;
 }
 
-/* Compact view: a post per row, with everything but the title and its line of details opened on demand. */
+/* Compact view, laid out as reddit.com's: a preview, then the details, the title and a row of actions. */
 
 .compactRow {
   position: relative;
   display: grid;
-  grid-template-columns: 72px minmax(0, 1fr);
-  column-gap: 12px;
-  padding: 8px 12px;
+  grid-template-columns: 112px minmax(0, 1fr);
+  column-gap: 16px;
+  padding: 10px 12px;
   border-radius: 12px;
 }
 
@@ -344,7 +344,7 @@
   background: var(--m-surface-hover);
 }
 
-/* A hairline between rows keeps dense rows apart without the space cards use. */
+/* A hairline between rows keeps them apart without the space cards use. */
 .compactRow::before {
   content: '';
   position: absolute;
@@ -359,27 +359,20 @@
 }
 
 .compactPreview {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   align-self: start;
   /* landscape, as most pictures are, so less of them is cropped away */
-  width: 72px;
-  height: 54px;
-  padding: 0;
+  width: 112px;
+  height: 84px;
   overflow: hidden;
   border: 1px solid var(--m-border);
   border-radius: 8px;
-  background: var(--m-surface-raised);
+  background: var(--m-media-bg);
   color: var(--m-text-muted);
-  cursor: pointer;
   box-sizing: border-box;
-}
-
-button.compactPreview:hover,
-.compactRowExpanded .compactPreview {
-  border-color: var(--m-border-strong);
-  color: var(--m-text);
 }
 
 .compactPreviewImage {
@@ -390,53 +383,31 @@ button.compactPreview:hover,
 
 .compactPreviewObscured {
   filter: blur(6px);
-  /* the blur would otherwise fade the square's edges */
+  /* the blur would otherwise fade the preview's edges */
   transform: scale(1.15);
-}
-
-.compactPreviewToggle {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--m-overlay);
-  color: var(--m-on-overlay);
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-button.compactPreview:hover .compactPreviewToggle,
-button.compactPreview:focus-visible .compactPreviewToggle,
-.compactRowExpanded .compactPreviewToggle {
-  opacity: 1;
 }
 
 .compactPreviewBadge {
   position: absolute;
-  right: 4px;
-  bottom: 4px;
+  right: 6px;
+  bottom: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
   background: var(--m-overlay);
   color: var(--m-on-overlay);
 }
 
 .compactBody {
-  display: grid;
-  grid-template-areas:
-    'meta actions'
-    'title title';
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-content: center;
-  align-items: center;
-  gap: 2px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
   min-width: 0;
-  min-height: 54px;
+  min-height: 84px;
 }
 
 .compactMeta {
@@ -444,7 +415,6 @@ button.compactPreview:focus-visible .compactPreviewToggle,
   flex-wrap: nowrap;
   align-items: center;
   gap: 2px 8px;
-  grid-area: meta;
   min-width: 0;
 }
 
@@ -453,7 +423,7 @@ button.compactPreview:focus-visible .compactPreviewToggle,
   margin-top: 0;
 }
 
-/* One line of details: the author and the domain give way first, cut short, so a row stays two lines tall. */
+/* One line of details: the author and the domain give way first, cut short. */
 .compactMeta .meta {
   flex-wrap: nowrap;
   min-width: 0;
@@ -475,11 +445,10 @@ button.compactPreview:focus-visible .compactPreviewToggle,
 
 .compactTitle {
   display: -webkit-box;
-  grid-area: title;
   margin: 0;
   overflow: hidden;
   color: var(--m-text);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   line-height: 1.35;
   overflow-wrap: anywhere;
@@ -491,26 +460,51 @@ button.compactPreview:focus-visible .compactPreviewToggle,
 .compactActions {
   display: flex;
   align-items: center;
-  gap: 2px;
-  grid-area: actions;
-  /* the actions keep the meta line's height, so a row is two lines tall */
-  margin: -4px 0;
+  gap: 4px;
+  min-width: 0;
+  margin-top: 2px;
+}
+
+.compactExpandButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: var(--m-surface-raised);
+  color: var(--m-text);
+  cursor: pointer;
+}
+
+.compactExpandButton:hover:not(:disabled) {
+  background: var(--m-border);
+}
+
+.compactExpandButton:disabled {
+  cursor: default;
+  opacity: 0.4;
 }
 
 .compactActionButton {
   display: inline-flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  min-width: 28px;
-  height: 28px;
-  padding: 0 6px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0 10px;
   border: 0;
   border-radius: 999px;
   background: transparent;
   color: var(--m-text-secondary);
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
   cursor: pointer;
   box-sizing: border-box;
 }
@@ -525,6 +519,32 @@ button.compactPreview:focus-visible .compactPreviewToggle,
   opacity: 0.5;
 }
 
+/* Wide screens spell the actions out, as reddit does; phones use icons (see below). */
+.compactComments svg,
+.compactComments .compactCount,
+.compactShare svg {
+  display: none;
+}
+
+/* The options sit at the end of the row and show with the pointer or focus on the row, or on touch screens. */
+.compactMenu {
+  margin-left: auto;
+  padding: 0 8px;
+  opacity: 0;
+}
+
+.compactRow:hover .compactMenu,
+.compactRow:focus-within .compactMenu,
+.compactMenu[data-open] {
+  opacity: 1;
+}
+
+@media (hover: none) {
+  .compactMenu {
+    opacity: 1;
+  }
+}
+
 .compactExpando {
   display: flex;
   flex-direction: column;
@@ -532,7 +552,7 @@ button.compactPreview:focus-visible .compactPreviewToggle,
   gap: 8px;
   grid-column: 2;
   min-width: 0;
-  padding-top: 8px;
+  padding-top: 10px;
 }
 
 .compactExpando > * {
@@ -563,33 +583,54 @@ button.compactPreview:focus-visible .compactPreviewToggle,
   }
 
   .compactRow {
-    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-columns: 72px minmax(0, 1fr);
+    column-gap: 12px;
     border-radius: 0;
   }
 
   .compactPreview {
-    width: 56px;
-    height: 42px;
+    width: 72px;
+    height: 54px;
   }
 
-  /* too narrow for the actions beside the details: they follow the title */
   .compactBody {
-    grid-template-areas:
-      'meta'
-      'title'
-      'actions';
-    grid-template-columns: minmax(0, 1fr);
-    min-height: 42px;
-  }
-
-  .compactActions {
-    margin: 0 0 0 -6px;
+    min-height: 54px;
   }
 
   /* No room for all the details: the community and the time stay, the post shows the rest. */
   .compactMeta .meta > .community ~ .author,
   .compactMeta .meta > .domain {
     display: none;
+  }
+
+  /* Icons and counts instead of words; save and hide stay in the options menu. */
+  .compactComments svg,
+  .compactComments .compactCount,
+  .compactShare svg {
+    display: inline;
+  }
+
+  .compactComments .compactLabel,
+  .compactWideOnly {
+    display: none;
+  }
+
+  /* hidden from sight, still naming the button and announcing a copied link */
+  .compactShare > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .compactActions {
+    gap: 2px;
+  }
+
+  .compactActionButton {
+    padding: 0 8px;
   }
 
   .compactExpando {
