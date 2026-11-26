@@ -20,6 +20,8 @@
   /* Text on upvote, downvote and danger fills. */
   --m-on-strong: #ffffff;
   --m-media-bg: #e9eef0;
+  /* The right rail's cards. */
+  --m-rail-bg: var(--m-surface-raised);
   --m-overlay: rgba(16, 24, 28, 0.45);
   --m-shadow: 0 6px 24px rgba(16, 24, 28, 0.14);
   --m-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
@@ -39,26 +41,29 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* Dark backgrounds follow reddit.com's dark theme: a near-black page, raised controls a step lighter, and the right rail's
+   cards in black. */
 :global(.dark) .shell {
-  --m-bg: #0d1417;
-  --m-surface: #0d1417;
-  --m-surface-raised: #1b272c;
-  --m-surface-hover: #152025;
-  --m-border: #253339;
+  --m-bg: #0e1113;
+  --m-surface: #0e1113;
+  --m-surface-raised: #2a3236;
+  --m-surface-hover: #181c1f;
+  --m-border: #2a3236;
   --m-border-strong: #34464d;
   --m-text: #eef3f4;
   --m-text-secondary: #b3c1c6;
   --m-text-muted: #94a6ad;
   --m-accent: #37bb15;
   --m-accent-hover: #46cc24;
-  --m-on-accent: #0d1417;
+  --m-on-accent: #0e1113;
   --m-link: #79b8ff;
   --m-focus: #79b8ff;
   --m-upvote: #ff6a33;
   --m-downvote: #9a90ff;
   --m-danger: #ff7b72;
-  --m-on-strong: #0d1417;
-  --m-media-bg: #182327;
+  --m-on-strong: #0e1113;
+  --m-media-bg: #181c1f;
+  --m-rail-bg: #000000;
   --m-overlay: rgba(0, 0, 0, 0.6);
   --m-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
 }
@@ -458,7 +463,7 @@
   margin-bottom: 16px;
   padding: 16px;
   border-radius: 16px;
-  background: var(--m-surface-raised);
+  background: var(--m-rail-bg);
   color: var(--m-text-secondary);
   font-size: 14px;
   overflow-wrap: anywhere;

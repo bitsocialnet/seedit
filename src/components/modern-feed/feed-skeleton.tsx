@@ -6,7 +6,7 @@ import ModernPostCard from '../modern-post-card';
 import styles from './modern-feed.module.css';
 
 // boneyard takes the shimmer highlight only as a global setting; the theme token keeps it right in light and dark.
-configureBoneyard({ shimmerColor: 'var(--m-border)', darkShimmerColor: 'var(--m-border)' });
+configureBoneyard({ shimmerColor: 'var(--m-border-strong)', darkShimmerColor: 'var(--m-border-strong)' });
 
 const FIXTURE_TIMESTAMP = 1767225600;
 
