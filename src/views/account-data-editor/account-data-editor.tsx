@@ -1,47 +1,16 @@
 import { useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { setAccount, useAccount } from '@bitsocial/bitsocial-react-hooks';
-import stringify from 'json-stringify-pretty-compact';
 import styles from './account-data-editor.module.css';
 import JsonEditor from '../../components/json-editor';
 import ErrorDisplay from '../../components/error-display';
-import { getEditableAccountData } from '../../lib/utils/account-data-utils';
+import useAccountDataEditor from '../../hooks/use-account-data-editor';
 
 const AccountDataEditor = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const account = useAccount();
   const [showEditor, setShowEditor] = useState(false);
-  const [currentError, setCurrentError] = useState<Error | undefined>(undefined);
-
-  const accountJson = stringify({ account: getEditableAccountData(account) });
-
-  // edits belong to the account JSON they started from; a changed account JSON replaces them
-  const [draft, setDraft] = useState<{ accountJson: string; text: string }>();
-  const text = draft?.accountJson === accountJson ? draft.text : accountJson;
-  const setText = (value: string) => setDraft({ accountJson, text: value });
-
-  const saveAccount = async () => {
-    try {
-      setCurrentError(undefined);
-      const editorAccount = JSON.parse(text).account;
-      await setAccount(editorAccount);
-      alert(`Saved ${editorAccount.name}`);
-      navigate('/settings');
-      window.location.reload();
-    } catch (error) {
-      if (error instanceof Error) {
-        setCurrentError(error);
-        alert(error.message);
-        console.log(error);
-      } else {
-        const unknownError = new Error('An unknown error occurred');
-        setCurrentError(unknownError);
-        console.error('An unknown error occurred:', error);
-      }
-    }
-  };
+  const { text, setText, reset, save: saveAccount, error: currentError } = useAccountDataEditor();
 
   if (!showEditor) {
     return (
@@ -61,16 +30,7 @@ const AccountDataEditor = () => {
 
   return (
     <div className={styles.content}>
-      <JsonEditor
-        name='ACCOUNT_DATA_EDITOR'
-        value={text}
-        onChange={(value) => {
-          setText(value);
-          if (currentError) {
-            setCurrentError(undefined);
-          }
-        }}
-      />
+      <JsonEditor name='ACCOUNT_DATA_EDITOR' value={text} onChange={setText} />
       {currentError && (
         <div className={styles.error}>
           <ErrorDisplay error={currentError} />
@@ -81,7 +41,7 @@ const AccountDataEditor = () => {
           i18nKey='save_reset_changes'
           components={{
             1: <button key='saveAccountButton' onClick={saveAccount} />,
-            2: <button key='resetAccountButton' onClick={() => setText(accountJson)} />,
+            2: <button key='resetAccountButton' onClick={reset} />,
           }}
         />
         <div>

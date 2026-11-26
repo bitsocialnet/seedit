@@ -78,6 +78,7 @@ const Search = lazyView(() => import('./views/search'));
 const Settings = lazyView(() => import('./views/settings'));
 const ModernSettings = lazyView(() => import('./views/modern-settings'));
 const AccountDataEditor = lazyView(() => import('./views/account-data-editor'));
+const ModernAccountDataEditor = lazyView(() => import('./views/modern-account-data-editor'));
 const CommunityDataEditor = lazyView(() => import('./views/community-data-editor'));
 const SubmitPage = lazyView(() => import('./views/submit'));
 const CommunitySettings = lazyView(() => import('./views/community-settings'));
@@ -197,6 +198,7 @@ const App = () => {
               <Route path='/settings/content-options' element={<ModernSettings />} />
               <Route path='/settings/advanced' element={<ModernSettings />} />
               <Route path='/settings/p2p-stats' element={<ModernSettings />} />
+              <Route path='/settings/account-data' element={<ModernAccountDataEditor />} />
               <Route path='/search' element={<ModernSearch />} />
               <Route path='/inbox' element={<ModernInbox />} />
               <Route path='/inbox/unread' element={<ModernInbox />} />
@@ -269,7 +271,7 @@ const App = () => {
             {!isModern && <Route path='/settings/p2p-stats' element={<Settings />} />}
             {!isModern && <Route path='/settings/content-options' element={<Settings />} />}
             {import.meta.env.DEV && <Route path='/settings/debug' element={<Settings />} />}
-            <Route path='/settings/account-data' element={<AccountDataEditor />} />
+            {!isModern && <Route path='/settings/account-data' element={<AccountDataEditor />} />}
 
             <Route path='/profile/about' element={<AboutView />} />
 
