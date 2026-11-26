@@ -133,6 +133,13 @@ const ROUTES: Record<string, Array<[input: string, sent: string]>> = {
   saved: [['/profile/saved', '/profile/saved']],
   comments: [['/profile/comments', '/profile/comments']],
   submitted: [['/profile/submitted', '/profile/submitted']],
+  // The modern interface declares the same profile tabs as absolute paths.
+  '/profile/upvoted': [['/profile/upvoted', '/profile/upvoted']],
+  '/profile/downvoted': [['/profile/downvoted', '/profile/downvoted']],
+  '/profile/hidden': [['/profile/hidden', '/profile/hidden']],
+  '/profile/saved': [['/profile/saved', '/profile/saved']],
+  '/profile/comments': [['/profile/comments', '/profile/comments']],
+  '/profile/submitted': [['/profile/submitted', '/profile/submitted']],
   '/u/:authorAddress/comments/:commentCid?/:sortType?/:timeFilterName?': [
     ['/u/private-author.bso/comments', '/u/author'],
     ['/u/12D3KooWPrivateAuthor/comments/bafyprivatecid/new/1w', '/u/author'],

@@ -194,17 +194,21 @@ const App = () => {
               <Route path='/submit' element={<ModernSubmit />} />
               <Route path='/search' element={<ModernSearch />} />
               <Route path='/inbox' element={<ModernInbox />} />
-              {['unread', 'commentreplies', 'postreplies'].map((tab) => (
-                <Route key={tab} path={`/inbox/${tab}`} element={<ModernInbox />} />
-              ))}
+              <Route path='/inbox/unread' element={<ModernInbox />} />
+              <Route path='/inbox/commentreplies' element={<ModernInbox />} />
+              <Route path='/inbox/postreplies' element={<ModernInbox />} />
               <Route path='/communities' element={<ModernCommunities />} />
-              {['subscriber', 'moderator', 'admin', 'owner'].map((role) => (
-                <Route key={role} path={`/communities/${role}`} element={<ModernCommunities />} />
-              ))}
+              <Route path='/communities/subscriber' element={<ModernCommunities />} />
+              <Route path='/communities/moderator' element={<ModernCommunities />} />
+              <Route path='/communities/admin' element={<ModernCommunities />} />
+              <Route path='/communities/owner' element={<ModernCommunities />} />
               <Route path='/profile' element={<ModernProfile />} />
-              {['submitted', 'comments', 'upvoted', 'downvoted', 'hidden', 'saved'].map((tab) => (
-                <Route key={tab} path={`/profile/${tab}`} element={<ModernProfile />} />
-              ))}
+              <Route path='/profile/submitted' element={<ModernProfile />} />
+              <Route path='/profile/comments' element={<ModernProfile />} />
+              <Route path='/profile/upvoted' element={<ModernProfile />} />
+              <Route path='/profile/downvoted' element={<ModernProfile />} />
+              <Route path='/profile/hidden' element={<ModernProfile />} />
+              <Route path='/profile/saved' element={<ModernProfile />} />
               <Route path='/u/:authorAddress/comments/:commentCid?/:sortType?/:timeFilterName?' element={<ModernAuthor />} />
               <Route path='/u/:authorAddress/comments/:commentCid?/comments/:sortType?/:timeFilterName?' element={<ModernAuthor />} />
               <Route path='/u/:authorAddress/comments/:commentCid?/submitted/:sortType?/:timeFilterName?' element={<ModernAuthor />} />
