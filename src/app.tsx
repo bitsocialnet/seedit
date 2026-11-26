@@ -85,6 +85,7 @@ const CommunitySettings = lazyView(() => import('./views/community-settings'));
 const ModernCommunitySettings = lazyView(() => import('./views/modern-community-settings'));
 const ModernCommunityDataEditor = lazyView(() => import('./views/modern-community-data-editor'));
 const ModernDirectories = lazyView(() => import('./views/modern-directories'));
+const ModernStarterSubscriptions = lazyView(() => import('./views/modern-starter-subscriptions'));
 const Communities = lazyView(() => import('./views/communities'));
 const StarterSubscriptions = lazyView(() => import('./views/starter-subscriptions'));
 
@@ -247,6 +248,7 @@ const App = () => {
                 }
               />
               <Route path='/communities/create' element={<ModernCommunitySettings />} />
+              <Route path='/communities/defaults' element={<ModernStarterSubscriptions />} />
               <Route path={DIRECTORY_INDEX_PATH} element={<ModernDirectories />} />
               <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<ModernDirectories />} />
             </Route>
@@ -321,7 +323,7 @@ const App = () => {
                 <Route path='/communities/owner' element={<Communities />} />
               </>
             )}
-            <Route path='/communities/defaults' element={<StarterSubscriptions />} />
+            {!isModern && <Route path='/communities/defaults' element={<StarterSubscriptions />} />}
             {!isModern && <Route path={DIRECTORY_INDEX_PATH} element={<Communities />} />}
             <Route path={`${DIRECTORY_INDEX_PATH}/about`} element={<DirectoryAboutView />} />
             {!isModern && <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<Communities />} />}

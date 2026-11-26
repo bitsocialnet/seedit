@@ -1,0 +1,152 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 16px 12px;
+}
+
+.heading {
+  margin: 0;
+  color: var(--m-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.explanation {
+  margin: 0;
+  color: var(--m-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.revision {
+  margin: 0;
+  color: var(--m-text-muted);
+  font-size: 12px;
+}
+
+.notice {
+  margin: 0 16px 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--m-border-strong);
+  border-radius: 12px;
+  color: var(--m-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.notice p {
+  margin: 0;
+}
+
+.noticeError {
+  border-color: var(--m-danger);
+}
+
+.removed {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--m-text-secondary);
+}
+
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  cursor: pointer;
+}
+
+.row:has(input:enabled):hover {
+  background: var(--m-surface-hover);
+}
+
+.row:has(input:disabled) {
+  cursor: default;
+}
+
+.row input {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin: 11px 0 0;
+  accent-color: var(--m-accent);
+}
+
+.row input:focus-visible {
+  outline: 2px solid var(--m-focus);
+  outline-offset: 2px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+}
+
+.title {
+  color: var(--m-text);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.title:hover {
+  text-decoration: underline;
+}
+
+.address {
+  color: var(--m-text-muted);
+  font-size: 12px;
+}
+
+.badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--m-accent);
+  color: var(--m-on-accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.description {
+  color: var(--m-text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 16px 8px;
+}
+
+.actions button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.safety {
+  margin: 0;
+  padding: 0 16px 16px;
+  color: var(--m-text-muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
