@@ -17,6 +17,7 @@ import { formatLocalizedUTCTimestamp, getFormattedTimeAgo } from '../../lib/util
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import { getHostname } from '../../lib/utils/url-utils';
 import { ModernShareButton, ModernVoteButtons } from '../modern-actions';
+import ModernCommentMenu from '../modern-comment-menu';
 import ModernCommunityAvatar from '../modern-community-avatar';
 import { CommentIcon, ExternalLinkIcon, PinIcon } from '../modern-icons';
 import { modernStyles } from '../modern-layout';
@@ -155,15 +156,17 @@ interface PostActionsProps {
   onComment?: () => void;
   /** False when the community takes no votes on the post, such as a locked one. */
   canVote?: boolean;
+  /** Opens the edit form on the post page; feed cards offer no edit. */
+  onEdit?: () => void;
 }
 
 // Votes and the copied state change often, so they re-render only the action bar.
-export const PostActions = ({ post, onComment, canVote = true }: PostActionsProps) => {
+export const PostActions = ({ post, onComment, canVote = true, onEdit }: PostActionsProps) => {
   const { t } = useTranslation();
   const { cid, downvoteCount, replyCount, state, upvoteCount } = post;
   const communityAddress = getCommentCommunityAddress(post);
   const score = formatScore(getPostScore(upvoteCount, downvoteCount, state));
-  const commentLabel = `${replyCount || 0} ${t('comments')}`;
+  const commentLabel = replyCount === 1 ? t('one_comment') : `${replyCount || 0} ${t('comments')}`;
 
   return (
     <div className={`${styles.actions} ${styles.raised}`}>
@@ -180,6 +183,7 @@ export const PostActions = ({ post, onComment, canVote = true }: PostActionsProp
         </Link>
       )}
       <ModernShareButton className={styles.actionButton} url={cid && communityAddress ? getCommunityPostUrl(communityAddress, cid) : undefined} />
+      <ModernCommentMenu comment={post} onEdit={onEdit} className={`${styles.actionButton} ${styles.menuButton}`} />
     </div>
   );
 };

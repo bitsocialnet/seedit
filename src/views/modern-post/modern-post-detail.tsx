@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { type Comment, useEditedComment } from '@bitsocial/bitsocial-react-hooks';
 import { useCommentMediaInfo } from '../../hooks/use-comment-media-info';
@@ -6,6 +7,7 @@ import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { getPostTitleText } from '../../lib/utils/post-utils';
 import Markdown from '../../components/markdown';
+import { ModernEditForm } from '../../components/modern-comment-menu';
 import { modernStyles } from '../../components/modern-layout';
 import { PostActions, PostMedia, PostMeta, PostTags } from '../../components/modern-post-card';
 import styles from './modern-post.module.css';
@@ -29,6 +31,7 @@ const ModernPostDetail = ({ post: loadedPost, onComment, canVote }: ModernPostDe
   const mediaInfo = useCommentMediaInfo(post);
   const isRemovedOrDeleted = Boolean(removed || deleted);
   const contentText = (isRemovedOrDeleted ? '' : stripCommentPostOptionMarkers(content, post, communityAddress)) || '';
+  const [isEditing, setIsEditing] = useState(false);
 
   return (
     <article className={styles.post}>
@@ -37,7 +40,9 @@ const ModernPostDetail = ({ post: loadedPost, onComment, canVote }: ModernPostDe
       <h1 className={title ? styles.title : modernStyles.visuallyHidden}>{getPostTitleText(title, contentText)}</h1>
       <PostTags post={post} nsfw={nsfw} />
 
-      {isRemovedOrDeleted ? (
+      {isEditing && post.cid ? (
+        <ModernEditForm cid={post.cid} onClose={() => setIsEditing(false)} />
+      ) : isRemovedOrDeleted ? (
         <p className={styles.placeholder}>[{(removed ? t('removed') : t('deleted')).toLowerCase()}]</p>
       ) : (
         <>
@@ -74,7 +79,7 @@ const ModernPostDetail = ({ post: loadedPost, onComment, canVote }: ModernPostDe
         </p>
       )}
 
-      <PostActions post={post} onComment={onComment} canVote={canVote} />
+      <PostActions post={post} onComment={onComment} canVote={canVote} onEdit={() => setIsEditing(true)} />
     </article>
   );
 };

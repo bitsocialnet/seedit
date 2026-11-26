@@ -1,0 +1,129 @@
+.danger {
+  color: var(--m-danger);
+}
+
+.dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--m-border);
+  border-radius: 16px;
+  background: var(--m-surface);
+  box-shadow: var(--m-shadow);
+  color: var(--m-text);
+  font: 400 14px/1.45 var(--m-font);
+}
+
+.dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.dialogForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px;
+}
+
+.dialogTitle {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.check {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.check input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--m-accent);
+}
+
+.banDays {
+  width: 56px;
+  margin: 0 4px;
+  padding: 4px 6px;
+  border: 1px solid var(--m-border-strong);
+  border-radius: 8px;
+  background: var(--m-surface);
+  color: var(--m-text);
+  font: inherit;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--m-text-muted);
+  font-weight: 400;
+}
+
+.input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--m-border-strong);
+  border-radius: 10px;
+  background: var(--m-surface);
+  color: var(--m-text);
+  font: inherit;
+  font-weight: 400;
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: var(--m-focus);
+  box-shadow: 0 0 0 1px var(--m-focus);
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.editForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 120px;
+  max-height: 60vh;
+  padding: 10px 14px;
+  border: 1px solid var(--m-border-strong);
+  border-radius: 12px;
+  background: var(--m-surface);
+  color: var(--m-text);
+  font: inherit;
+  line-height: 1.5;
+  resize: vertical;
+  field-sizing: content;
+}
+
+.editOptions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 10px 16px;
+}
+
+.editOptions .field {
+  flex: 1 1 220px;
+}

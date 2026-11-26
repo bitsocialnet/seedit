@@ -12,6 +12,7 @@ import { formatLocalizedUTCTimestamp, getFormattedTimeAgo } from '../../lib/util
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import Markdown from '../markdown';
 import { ModernShareButton, ModernVoteButtons } from '../modern-actions';
+import ModernCommentMenu from '../modern-comment-menu';
 import ModernCommunityAvatar from '../modern-community-avatar';
 import { modernStyles } from '../modern-layout';
 import styles from './modern-reply-card.module.css';
@@ -102,6 +103,7 @@ const ModernReplyCard = ({ reply: loadedReply, label, unread }: ModernReplyCardP
           <span className={modernStyles.sentenceCase}>{t('context')}</span>
         </Link>
         <ModernShareButton className={styles.actionButton} iconSize={16} url={cid && communityAddress ? getCommunityPostUrl(communityAddress, cid) : undefined} />
+        <ModernCommentMenu comment={reply} className={styles.actionButton} iconSize={16} />
       </div>
     </article>
   );

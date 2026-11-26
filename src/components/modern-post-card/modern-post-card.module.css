@@ -287,6 +287,10 @@
   background: var(--m-border);
 }
 
+.menuButton {
+  padding: 0 8px;
+}
+
 .actionButton:disabled {
   cursor: default;
   opacity: 0.5;

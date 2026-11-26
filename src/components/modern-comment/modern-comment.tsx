@@ -17,6 +17,7 @@ import { formatLocalizedUTCTimestamp, getFormattedTimeAgo } from '../../lib/util
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import Markdown from '../markdown';
 import { ModernShareButton, ModernVoteButtons } from '../modern-actions';
+import ModernCommentMenu, { ModernEditForm } from '../modern-comment-menu';
 import { CommentIcon, MinusIcon, PinIcon, PlusIcon } from '../modern-icons';
 import { modernStyles } from '../modern-layout';
 import { PostMedia } from '../modern-post-card';
@@ -102,6 +103,7 @@ const ModernComment = ({ reply: loadedReply, depth, canReply, canVote, highlight
   };
 
   const [isReplying, setIsReplying] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const replyButtonRef = useRef<HTMLButtonElement>(null);
   // Focus goes back to the reply button when the form closes, instead of falling to the page.
   const closeReplyForm = useCallback(() => {
@@ -192,7 +194,9 @@ const ModernComment = ({ reply: loadedReply, depth, canReply, canVote, highlight
       {!collapsed && (
         <div className={styles.body}>
           <div className={styles.content}>
-            {isRemovedOrDeleted ? (
+            {isEditing && cid ? (
+              <ModernEditForm cid={cid} onClose={() => setIsEditing(false)} />
+            ) : isRemovedOrDeleted ? (
               <p className={styles.placeholder}>[{(removed ? t('removed') : t('deleted')).toLowerCase()}]</p>
             ) : (
               <>
@@ -237,6 +241,7 @@ const ModernComment = ({ reply: loadedReply, depth, canReply, canVote, highlight
                 </button>
               )}
               <ModernShareButton className={styles.actionButton} iconSize={16} url={cid && communityAddress ? getCommunityPostUrl(communityAddress, cid) : undefined} />
+              <ModernCommentMenu comment={reply} onEdit={() => setIsEditing(true)} className={styles.actionButton} iconSize={16} />
             </div>
           )}
 

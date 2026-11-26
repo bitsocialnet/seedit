@@ -27,6 +27,13 @@ const createIcon = (paths: React.ReactNode, filled = false) => {
 
 export const MenuIcon = createIcon(<path d='M4 6h16M4 12h16M4 18h16' />);
 export const CloseIcon = createIcon(<path d='M18 6 6 18M6 6l12 12' />);
+export const MoreIcon = createIcon(
+  <>
+    <circle cx='5' cy='12' r='1.5' fill='currentColor' />
+    <circle cx='12' cy='12' r='1.5' fill='currentColor' />
+    <circle cx='19' cy='12' r='1.5' fill='currentColor' />
+  </>,
+);
 export const SearchIcon = createIcon(
   <>
     <circle cx='11' cy='11' r='7' />
