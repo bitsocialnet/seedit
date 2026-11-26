@@ -104,6 +104,7 @@
     "perf:install": "node scripts/react-perf/install-browser.mjs",
     "perf:load": "node scripts/load-perf/runner.mjs",
     "perf:startup-bytes": "node scripts/load-perf/startup-bytes.mjs",
+    "bones:build": "node scripts/build-bones.mjs",
     "doctor:check": "node scripts/react-perf/doctor-check.mjs",
     "build:profile": "cross-env REACT_PERF_PROFILE=1 NODE_ENV=production vite build --mode profiling",
     "preview:profile": "vite preview --outDir build-profile"
@@ -145,6 +146,7 @@
     "assert": "2.1.0",
     "babel-plugin-react-compiler": "1.0.0",
     "bippy": "0.7.3",
+    "boneyard-js": "1.10.0",
     "buffer": "6.0.3",
     "concurrently": "8.0.1",
     "conventional-changelog-cli": "4.1.0",

@@ -55,7 +55,7 @@ export const PostMeta = ({ post, showCommunity, showEdited }: PostMetaProps) => 
           {displayName ? `${displayName} ` : ''}u/{getDisplayAddress(shortAuthorAddress || author.shortAddress || '')}
         </Link>
       )}
-      <span className={styles.dot} aria-hidden='true'>
+      <span className={styles.dot} aria-hidden='true' data-skeleton-skip>
         ·
       </span>
       <time dateTime={timestamp ? new Date(timestamp * 1000).toISOString() : undefined} title={formatLocalizedUTCTimestamp(timestamp, i18n.language)}>

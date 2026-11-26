@@ -32,6 +32,11 @@ vi.mock('../../hooks/use-community-identifier', () => ({
 vi.mock('../../hooks/use-state-string', () => ({ useFeedStateString: () => '' }));
 vi.mock('../modern-post-card', () => ({ default: () => null }));
 vi.mock('../development-feed-reset-button', () => ({ default: () => null }));
+// boneyard measures its container, which jsdom cannot; the skeleton's presence is what matters here
+vi.mock('boneyard-js/react', () => ({
+  configureBoneyard: vi.fn(),
+  Skeleton: ({ name, loading }: { name: string; loading: boolean }) => createElement('div', { 'data-skeleton': name, 'aria-busy': loading }),
+}));
 
 let container: HTMLDivElement;
 let root: Root;
@@ -74,12 +79,22 @@ describe('ModernFeed footer', () => {
     expect(footerText()).toBe('No name resolver can handle this addressfailed');
   });
 
-  it('keeps loading, with the reason, while a failed community is still retrying', async () => {
+  it('shows placeholder posts while the first posts load, with the reason a failed community is still retrying', async () => {
     testState.statuses = [
       { firstLoadFailed: true, hasCachedData: false, state: 'fetching-ipns', lastRetriableError: new Error('Domain resolver did not find the text record') },
       { firstLoadFailed: true, hasCachedData: false, state: 'failed', error: new Error('timeout') },
     ];
     await render();
-    expect(footerText()).toBe('Domain resolver did not find the text recordtimeoutloading_feed');
+    expect(container.querySelector('[data-skeleton="modern-feed"]')).not.toBeNull();
+    expect(footerText()).toBe('loading_feed');
+    expect(container.textContent).toContain('Domain resolver did not find the text record');
+    expect(container.textContent).toContain('timeout');
+  });
+
+  it('shows no placeholders once the feed has failed', async () => {
+    const unreachable = { firstLoadFailed: true, hasCachedData: false, state: 'failed', error: new Error('unreachable') };
+    testState.statuses = [unreachable, { ...unreachable }];
+    await render();
+    expect(container.querySelector('[data-skeleton]')).toBeNull();
   });
 });

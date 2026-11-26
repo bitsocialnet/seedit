@@ -98,6 +98,26 @@
   overflow-wrap: anywhere;
 }
 
+.loadingFeed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loadingFeed .footerError {
+  margin: 8px 16px 0;
+}
+
+.skeleton {
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bone {
+    animation: none !important;
+  }
+}
+
 .footerEnd {
   height: 48px;
 }

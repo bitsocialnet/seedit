@@ -11,7 +11,9 @@ import { getFeedLoadFailure } from '../../lib/utils/community-load-utils';
 import { getTopTimeFilterPath } from '../../lib/utils/time-filter-utils';
 import DevelopmentFeedResetButton from '../development-feed-reset-button';
 import { shouldShowEmptyFeed } from '../feed-footer';
+import { modernStyles } from '../modern-layout';
 import ModernPostCard from '../modern-post-card';
+import FeedSkeleton from './feed-skeleton';
 import styles from './modern-feed.module.css';
 
 const timeFilterLabelKeys: Record<string, string> = {
@@ -22,6 +24,9 @@ const timeFilterLabelKeys: Record<string, string> = {
   '1y': 'past_year',
   all: 'all_time',
 };
+
+/** `yarn bones:build` (the boneyard CLI) sets this while it captures skeleton bones from the page. */
+const isCapturingBones = () => (window as { __BONEYARD_BUILD?: boolean }).__BONEYARD_BUILD === true;
 
 // Scroll positions per feed, so going back to a feed returns to the same post.
 const lastVirtuosoStates: Record<string, StateSnapshot> = {};
@@ -102,6 +107,24 @@ const Footer = ({ context: { communityAddresses, feedLength, hasMore } }: { cont
     );
   if (!hasMore && feedLength > 0) return <div className={styles.footerEnd} aria-hidden='true' />;
 
+  // The first posts are on their way: placeholder cards stand where they will appear, and the loading state is
+  // announced to assistive technology. `yarn bones:build` captures the placeholders whatever the feed holds.
+  if ((feedLength === 0 && feedLoadFailure?.state !== 'failed') || isCapturingBones()) {
+    return (
+      <div className={styles.loadingFeed}>
+        <p className={modernStyles.visuallyHidden} role='status'>
+          {feedStateString || t('loading_feed')}
+        </p>
+        {feedLoadFailure?.errors.map((error) => (
+          <p key={error.message} className={styles.footerError}>
+            {error.message}
+          </p>
+        ))}
+        <FeedSkeleton />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.footer} role='status'>
       {feedLoadFailure?.errors.map((error) => (
@@ -114,7 +137,7 @@ const Footer = ({ context: { communityAddresses, feedLength, hasMore } }: { cont
       ) : (
         <>
           <span className={styles.spinner} aria-hidden='true' />
-          <span className={styles.footerText}>{feedStateString || (feedLength === 0 ? t('loading_feed') : t('looking_for_more_posts'))}</span>
+          <span className={styles.footerText}>{feedStateString || t('looking_for_more_posts')}</span>
         </>
       )}
     </div>
