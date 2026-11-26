@@ -6,6 +6,11 @@ const prepare = async ({ page }) => {
     localStorage.setItem('i18nextLng', 'en');
   });
 };
+// The settings scenarios measure the old interface's settings components, so they pin that interface.
+const prepareOldSettings = async ({ page }) => {
+  await prepare({ page });
+  await page.addInitScript(() => localStorage.setItem('uiMode', 'old'));
+};
 const waitForAccount = async (page) => {
   await page.getByRole('textbox', { name: 'My Name', exact: true }).waitFor();
   await page.waitForFunction(() => [...document.querySelectorAll('select option')].some((option) => option.textContent?.startsWith('u/')));
@@ -37,7 +42,7 @@ export default {
         {
           name: 'display-name-draft',
           path: '/#/settings',
-          prepare,
+          prepare: prepareOldSettings,
           async run({ page, measure }) {
             await waitForAccount(page);
             const input = page.getByRole('textbox', { name: 'My Name', exact: true });
@@ -63,7 +68,7 @@ export default {
         {
           name: 'theme-toggle',
           path: '/#/settings',
-          prepare,
+          prepare: prepareOldSettings,
           async run({ page, measure }) {
             await waitForAccount(page);
             const theme = page.getByRole('combobox').nth(1);
