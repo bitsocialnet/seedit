@@ -76,6 +76,7 @@ const Inbox = lazyView(() => import('./views/inbox'));
 const Mod = lazyView(() => import('./views/mod'));
 const Search = lazyView(() => import('./views/search'));
 const Settings = lazyView(() => import('./views/settings'));
+const ModernSettings = lazyView(() => import('./views/modern-settings'));
 const AccountDataEditor = lazyView(() => import('./views/account-data-editor'));
 const CommunityDataEditor = lazyView(() => import('./views/community-data-editor'));
 const SubmitPage = lazyView(() => import('./views/submit'));
@@ -192,6 +193,9 @@ const App = () => {
               <Route path='/s/:communityAddress/comments/:commentCid' element={<ModernPost />} />
               <Route path='/profile/:accountCommentIndex' element={<ModernPost />} />
               <Route path='/submit' element={<ModernSubmit />} />
+              <Route path='/settings' element={<ModernSettings />} />
+              <Route path='/settings/content-options' element={<ModernSettings />} />
+              <Route path='/settings/advanced' element={<ModernSettings />} />
               <Route path='/search' element={<ModernSearch />} />
               <Route path='/inbox' element={<ModernInbox />} />
               <Route path='/inbox/unread' element={<ModernInbox />} />
@@ -243,7 +247,7 @@ const App = () => {
             )}
             <Route path='/s/:communityAddress/about' element={<AboutView />} />
 
-            <Route path='/settings' element={<Settings />} />
+            {!isModern && <Route path='/settings' element={<Settings />} />}
             <Route
               path='/s/:communityAddress/settings'
               element={
@@ -260,9 +264,9 @@ const App = () => {
                 </ExactCommunityActionRoute>
               }
             />
-            <Route path='/settings/advanced' element={<Settings />} />
+            {!isModern && <Route path='/settings/advanced' element={<Settings />} />}
             <Route path='/settings/p2p-stats' element={<Settings />} />
-            <Route path='/settings/content-options' element={<Settings />} />
+            {!isModern && <Route path='/settings/content-options' element={<Settings />} />}
             {import.meta.env.DEV && <Route path='/settings/debug' element={<Settings />} />}
             <Route path='/settings/account-data' element={<AccountDataEditor />} />
 
