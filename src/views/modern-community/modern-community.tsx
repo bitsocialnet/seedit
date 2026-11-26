@@ -9,6 +9,7 @@ import useIsCommunityOffline from '../../hooks/use-is-community-offline';
 import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
+import { getCommunityLoadError } from '../../lib/utils/community-load-utils';
 import { getCommunityPath, isResolvableCommunityAddress } from '../../lib/utils/community-route-utils';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import ErrorDisplay from '../../components/error-display';
@@ -27,7 +28,7 @@ const ModernCommunity = () => {
   const communityAddress = resolvedCommunityAddress || '';
   const canLoadCommunity = isResolvableCommunityAddress(communityAddress);
   const community = useCommunity(canLoadCommunity ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { error, shortAddress, title } = community || {};
+  const { shortAddress, title } = community || {};
   const { isOffline, offlineTitle } = useIsCommunityOffline(community || {});
 
   const communityAddresses = useMemo(() => (canLoadCommunity ? [communityAddress] : []), [canLoadCommunity, communityAddress]);
@@ -44,7 +45,8 @@ const ModernCommunity = () => {
   }, [directoryList?.title, title, displayAddress]);
 
   // A directory published after this build has no bundled list, so a failed list request leaves it without a community.
-  const visibleError = directoryCode && !resolvedCommunityAddress ? directoryListError : error?.message && feed.length === 0 ? error : null;
+  const loadError = getCommunityLoadError(community);
+  const visibleError = directoryCode && !resolvedCommunityAddress ? directoryListError : loadError?.message && feed.length === 0 ? loadError : null;
 
   if (redirectPath) return <Navigate to={redirectPath} replace />;
   if (isHiddenNsfwCommunity) return <Over18Warning />;

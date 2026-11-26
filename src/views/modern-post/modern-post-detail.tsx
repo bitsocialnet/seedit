@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { type Comment, useEditedComment } from '@bitsocial/bitsocial-react-hooks';
 import { useCommentMediaInfo } from '../../hooks/use-comment-media-info';
 import usePostObscuring from '../../hooks/use-post-obscuring';
-import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isAuthorBannedForComment } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { getPostTitleText } from '../../lib/utils/post-utils';
 import Markdown from '../../components/markdown';
@@ -73,6 +73,7 @@ const ModernPostDetail = ({ post: loadedPost, onComment, canVote }: ModernPostDe
           {t('mod_edit_reason')}: {reason}
         </p>
       )}
+      {isAuthorBannedForComment(post) && <p className={styles.reason}>{t('user_banned_for_this_post')}</p>}
       {edit?.reason && !isRemovedOrDeleted && (
         <p className={styles.reason}>
           {t('edit')}: {edit.reason}

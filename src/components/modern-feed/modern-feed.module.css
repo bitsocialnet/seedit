@@ -77,6 +77,7 @@
 
 .footer {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -87,6 +88,14 @@
 
 .footerText::first-letter {
   text-transform: uppercase;
+}
+
+.footerError {
+  flex-basis: 100%;
+  color: var(--m-danger);
+  font-size: 13px;
+  text-align: center;
+  overflow-wrap: anywhere;
 }
 
 .footerEnd {

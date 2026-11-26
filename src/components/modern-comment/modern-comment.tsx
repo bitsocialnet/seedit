@@ -9,7 +9,7 @@ import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
 import useReplies from '../../hooks/use-replies';
 import useStateString from '../../hooks/use-state-string';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
-import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isAuthorBannedForComment } from '../../lib/utils/comment-utils';
 import { getCommunityPostPath, getCommunityPostUrl } from '../../lib/utils/community-route-utils';
 import { getCommentPostOptions } from '../../lib/utils/fivechan-post-options';
 import { formatScore, getReplyScore } from '../../lib/utils/post-utils';
@@ -222,6 +222,7 @@ const ModernComment = ({ reply: loadedReply, depth, canReply, canVote, highlight
                 {t('mod_edit_reason')}: {reason}
               </p>
             )}
+            {isAuthorBannedForComment(reply) && <p className={styles.reason}>{t('user_banned_for_this_comment')}</p>}
             {edit?.reason && !isRemovedOrDeleted && (
               <p className={styles.reason}>
                 {t('edit')}: {edit.reason}

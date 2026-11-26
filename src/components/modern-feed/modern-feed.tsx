@@ -2,11 +2,12 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { Virtuoso, type StateSnapshot, type VirtuosoHandle } from 'react-virtuoso';
-import { type Comment, useCommunities } from '@bitsocial/bitsocial-react-hooks';
+import { type Comment, useAccount, useCommunities } from '@bitsocial/bitsocial-react-hooks';
 import { useCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { useFeedStateString } from '../../hooks/use-state-string';
 import { setSessionTimeFilterPreference, topTimeFilterNames } from '../../hooks/use-time-filter';
 import { sortTypes } from '../../constants/sort-types';
+import { getFeedLoadFailure } from '../../lib/utils/community-load-utils';
 import { getTopTimeFilterPath } from '../../lib/utils/time-filter-utils';
 import DevelopmentFeedResetButton from '../development-feed-reset-button';
 import { shouldShowEmptyFeed } from '../feed-footer';
@@ -84,8 +85,11 @@ interface FeedFooterContext {
 const Footer = ({ context: { communityAddresses, feedLength, hasMore } }: { context: FeedFooterContext }) => {
   const { t } = useTranslation();
   const feedCommunityIdentifiers = useCommunityIdentifiers(communityAddresses);
-  const { communities } = useCommunities({ communities: feedCommunityIdentifiers });
+  const { communities, communityLoadStatuses } = useCommunities({ communities: feedCommunityIdentifiers });
+  const blockedAddresses = useAccount()?.blockedAddresses;
   const feedStateString = useFeedStateString(communityAddresses);
+  // an empty feed whose communities failed to load says so, and why, instead of loading forever
+  const feedLoadFailure = feedLength === 0 ? getFeedLoadFailure(feedCommunityIdentifiers, communityLoadStatuses, blockedAddresses) : undefined;
   const isEmpty =
     !hasMore &&
     shouldShowEmptyFeed({ requestedCommunityCount: feedCommunityIdentifiers.length, communities, feedLength, isLoadingCommunityData: Boolean(feedStateString) });
@@ -100,8 +104,19 @@ const Footer = ({ context: { communityAddresses, feedLength, hasMore } }: { cont
 
   return (
     <div className={styles.footer} role='status'>
-      <span className={styles.spinner} aria-hidden='true' />
-      <span className={styles.footerText}>{feedStateString || (feedLength === 0 ? t('loading_feed') : t('looking_for_more_posts'))}</span>
+      {feedLoadFailure?.errors.map((error) => (
+        <span key={error.message} className={styles.footerError}>
+          {error.message}
+        </span>
+      ))}
+      {feedLoadFailure?.state === 'failed' ? (
+        <span className={styles.footerText}>{t('failed')}</span>
+      ) : (
+        <>
+          <span className={styles.spinner} aria-hidden='true' />
+          <span className={styles.footerText}>{feedStateString || (feedLength === 0 ? t('loading_feed') : t('looking_for_more_posts'))}</span>
+        </>
+      )}
     </div>
   );
 };
