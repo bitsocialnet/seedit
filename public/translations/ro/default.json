@@ -463,5 +463,8 @@
   "dark_mode": "mod întunecat",
   "close": "închide",
   "upvote": "vot pozitiv",
-  "downvote": "vot negativ"
+  "downvote": "vot negativ",
+  "user_banned_for_this_post": "Utilizatorul a fost blocat pentru această postare",
+  "user_banned_for_this_comment": "Utilizatorul a fost blocat pentru acest comentariu",
+  "wallet_sign_again": "Semnătura acestui portofel nu mai este acceptată. Copiază mesajul nou, semnează-l cu acest portofel și lipește semnătura nouă."
 }

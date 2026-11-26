@@ -11,6 +11,7 @@ import styles from './expando.module.css';
 import lowerCase from 'lodash/lowerCase';
 
 interface ExpandoProps {
+  authorBanned?: boolean;
   authorEditReason?: string;
   commentMediaInfo?: CommentMediaInfo;
   content?: string;
@@ -30,6 +31,7 @@ interface ExpandoProps {
 }
 
 const Expando = ({
+  authorBanned,
   authorEditReason,
   commentMediaInfo,
   content,
@@ -126,10 +128,11 @@ const Expando = ({
           </div>
         </div>
       )}
-      {content && showContent && (
+      {(content || authorBanned) && showContent && (
         <div className={styles.usertext}>
           <div className={styles.markdown}>
-            <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} postOptions={postOptions} quotedCids={quotedCids} />
+            {content && <Markdown content={content} enableFivechanQuotes={typeof number === 'number'} postOptions={postOptions} quotedCids={quotedCids} />}
+            {authorBanned && <p className={styles.modReason}>{t('user_banned_for_this_post')}</p>}
             {modEditReason && (
               <p className={styles.modReason}>
                 {lowerCase(t('mod_edit_reason'))}: {modEditReason}

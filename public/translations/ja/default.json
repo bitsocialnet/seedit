@@ -463,5 +463,8 @@
   "dark_mode": "ダークモード",
   "close": "閉じる",
   "upvote": "賛成票",
-  "downvote": "反対票"
+  "downvote": "反対票",
+  "user_banned_for_this_post": "この投稿によりユーザーはBANされました",
+  "user_banned_for_this_comment": "このコメントによりユーザーはBANされました",
+  "wallet_sign_again": "このウォレットの署名は無効になりました。新しいメッセージをコピーし、このウォレットで署名して、新しい署名を貼り付けてください。"
 }

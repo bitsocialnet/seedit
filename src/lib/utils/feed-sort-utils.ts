@@ -1,4 +1,4 @@
-import type { Comment, Community, CommunityIdentifier } from '@bitsocial/bitsocial-react-hooks';
+import type { Comment, Community, CommunityIdentifier, CommunityLoadStatus } from '@bitsocial/bitsocial-react-hooks';
 import feedSorter from '@bitsocial/bitsocial-react-hooks/dist/stores/feeds/feed-sorter.js';
 
 const clientSortablePostSorts = new Set(['hot', 'new', 'active', 'topAll']);
@@ -29,11 +29,15 @@ const firstFetchEndedStates = new Set(['failed', 'succeeded', 'waiting-retry']);
 
 /**
  * Whether any of a feed's communities is still loading its first record. Unlike hasUnresolvedPostSortMetadata, a loaded
- * community does not hide a peer that is still loading. A community with no entry counts as loading even after a failed
- * lookup, because useCommunities does not report errors per community; one that failed or waits to retry does not.
+ * community does not hide a peer that is still loading. A community that failed or waits to retry does not count, nor one
+ * whose `useCommunities().communityLoadStatuses` entry reports a failed first load, which also covers a community that
+ * failed before it reached the store and so has no entry.
  */
-export const hasLoadingFeedCommunities = (communities: Array<Community | undefined>): boolean =>
-  communities.some((community) => !community || (!hasCommunityRecord(community) && !firstFetchEndedStates.has(community.updatingState || '')));
+export const hasLoadingFeedCommunities = (communities: Array<Community | undefined>, loadStatuses: CommunityLoadStatus[] = []): boolean =>
+  communities.some(
+    (community, index) =>
+      !loadStatuses[index]?.firstLoadFailed && (!community || (!hasCommunityRecord(community) && !firstFetchEndedStates.has(community.updatingState || ''))),
+  );
 
 const hasCompletePreloadedPostPage = (community: Community): boolean => {
   const preloadedSorts = Object.keys(community.posts?.pages || {});

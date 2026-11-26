@@ -473,5 +473,8 @@
   "dark_mode": "dark mode",
   "close": "close",
   "upvote": "upvote",
-  "downvote": "downvote"
+  "downvote": "downvote",
+  "user_banned_for_this_post": "User was banned for this post",
+  "user_banned_for_this_comment": "User was banned for this comment",
+  "wallet_sign_again": "This wallet's signature is no longer accepted. Copy the new message, sign it with this wallet and paste the new signature."
 }

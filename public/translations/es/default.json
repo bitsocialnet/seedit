@@ -463,5 +463,8 @@
   "dark_mode": "modo oscuro",
   "close": "cerrar",
   "upvote": "votar a favor",
-  "downvote": "votar en contra"
+  "downvote": "votar en contra",
+  "user_banned_for_this_post": "El usuario fue baneado por esta publicación",
+  "user_banned_for_this_comment": "El usuario fue baneado por este comentario",
+  "wallet_sign_again": "La firma de esta billetera ya no es válida. Copia el nuevo mensaje, fírmalo con esta billetera y pega la nueva firma."
 }

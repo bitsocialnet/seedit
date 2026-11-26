@@ -463,5 +463,8 @@
   "dark_mode": "modalità scura",
   "close": "chiudi",
   "upvote": "vota a favore",
-  "downvote": "vota contro"
+  "downvote": "vota contro",
+  "user_banned_for_this_post": "L'utente è stato bannato per questo post",
+  "user_banned_for_this_comment": "L'utente è stato bannato per questo commento",
+  "wallet_sign_again": "La firma di questo wallet non è più accettata. Copia il nuovo messaggio, firmalo con questo wallet e incolla la nuova firma."
 }

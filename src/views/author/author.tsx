@@ -47,20 +47,20 @@ const Author = () => {
 
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
 
+  // save last virtuoso state on each scroll, keyed by the list it belongs to
+  const virtuosoStateKey = `${authorAddress ?? ''}/${tab}/${sortType ?? ''}`;
   useEffect(() => {
     const setLastVirtuosoState = () =>
       virtuosoRef.current?.getState((snapshot: StateSnapshot) => {
         if (snapshot?.ranges?.length) {
-          const key = `${authorAddress ?? ''}${sortType ?? ''}`;
-          lastVirtuosoStates[key] = snapshot;
+          lastVirtuosoStates[virtuosoStateKey] = snapshot;
         }
       });
     window.addEventListener('scroll', setLastVirtuosoState);
     return () => window.removeEventListener('scroll', setLastVirtuosoState);
-  }, [authorAddress, sortType]);
+  }, [virtuosoStateKey]);
 
-  const key = `${authorAddress ?? ''}${sortType ?? ''}`;
-  const lastVirtuosoState = lastVirtuosoStates?.[key];
+  const lastVirtuosoState = lastVirtuosoStates?.[virtuosoStateKey];
 
   const displayAddress = getDisplayAddress(author?.author?.shortAddress || '');
   const authorDisplayName = stripTripcodeProof(author?.author?.displayName);

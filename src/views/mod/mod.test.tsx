@@ -20,9 +20,11 @@ const testState = vi.hoisted(() => ({
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAccountCommunities: () => ({ accountCommunities: testState.accountCommunities }),
+  // the feed footer reads the communities the account blocked
+  useAccount: () => undefined,
   useCommunities: (options: unknown) => {
     testState.readCommunities(options);
-    return { communities: [{ updatedAt: 1 }] };
+    return { communities: [{ updatedAt: 1 }], communityLoadStatuses: [{ state: 'succeeded', hasCachedData: true, firstLoadFailed: false }] };
   },
 }));
 vi.mock('react-i18next', () => ({ Trans: () => null, useTranslation: () => ({ t: (key: string) => key }) }));

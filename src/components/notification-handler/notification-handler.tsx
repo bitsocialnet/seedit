@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useNotifications } from '@bitsocial/bitsocial-react-hooks';
+import { useAccount, useNotifications } from '@bitsocial/bitsocial-react-hooks';
 import localForageLru from '@bitsocial/bitsocial-react-hooks/dist/lib/localforage-lru/index.js';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import { showLocalNotification } from '../../lib/push';
@@ -11,13 +11,14 @@ import { stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-opt
 // Create LRU storage instance for tracking sent notifications
 const sentNotificationsDb = localForageLru.createInstance({ name: 'seeditSentNotifications', size: 1000 });
 
-const getSentNotificationStatus = async (timestamp: number): Promise<boolean> => {
-  const sent = await sentNotificationsDb.getItem(timestamp.toString());
+// Keyed by reply cid: replies published in the same second must not suppress each other.
+const getSentNotificationStatus = async (cid: string): Promise<boolean> => {
+  const sent = await sentNotificationsDb.getItem(cid);
   return sent === true;
 };
 
-const setSentNotificationStatus = async (timestamp: number): Promise<void> => {
-  await sentNotificationsDb.setItem(timestamp.toString(), true);
+const setSentNotificationStatus = async (cid: string): Promise<void> => {
+  await sentNotificationsDb.setItem(cid, true);
 };
 
 /**
@@ -27,27 +28,36 @@ const setSentNotificationStatus = async (timestamp: number): Promise<void> => {
  */
 const NotificationHandler = () => {
   const { enableLocalNotifications } = useContentOptionsStore();
+  const accountId = useAccount()?.id;
   const { notifications } = useNotifications();
 
   const location = useLocation();
-  const previousNotificationsRef = useRef(notifications);
+  // Every reply observed for the active account, notified or not, so enabling notifications,
+  // leaving the inbox or switching accounts never replays the replies already stored for the account.
+  const seenRepliesRef = useRef<{ accountId: string; cids: Set<string> } | undefined>(undefined);
 
   useEffect(() => {
-    // Only proceed if notifications are enabled in settings
-    if (!enableLocalNotifications) {
+    // useNotifications returns [] until the account is loaded
+    if (!accountId) {
       return;
     }
 
-    // Check for new notifications compared to the previous state
-    const previousCids = new Set(previousNotificationsRef.current?.map((n) => n.cid) || []);
-    const newNotifications = notifications?.filter((n) => !previousCids.has(n.cid)) || [];
+    // The first list for an account is its stored reply history: it becomes the baseline, nothing is notified.
+    const seenReplies = seenRepliesRef.current;
+    if (!seenReplies || seenReplies.accountId !== accountId) {
+      seenRepliesRef.current = { accountId, cids: new Set(notifications.map((notification) => notification.cid)) };
+      return;
+    }
+
+    const newNotifications = notifications.filter((notification) => !seenReplies.cids.has(notification.cid));
+    newNotifications.forEach((notification) => seenReplies.cids.add(notification.cid));
+
+    if (!enableLocalNotifications || location.pathname.startsWith('/inbox')) {
+      return;
+    }
 
     newNotifications.forEach(async (notification) => {
-      if (location.pathname.startsWith('/inbox')) {
-        return;
-      }
-
-      const alreadySent = await getSentNotificationStatus(notification.timestamp);
+      const alreadySent = await getSentNotificationStatus(notification.cid);
       if (alreadySent) {
         return;
       }
@@ -71,14 +81,11 @@ const NotificationHandler = () => {
       showLocalNotification(payload);
 
       // Mark this notification as sent in persistent storage
-      await setSentNotificationStatus(notification.timestamp);
+      await setSentNotificationStatus(notification.cid);
     });
 
-    // Update the reference for the next comparison
-    previousNotificationsRef.current = notifications;
-
-    // Rerun when notifications, setting, or location changes
-  }, [notifications, enableLocalNotifications, location.pathname]);
+    // Rerun when the account, notifications, setting, or location changes
+  }, [accountId, notifications, enableLocalNotifications, location.pathname]);
 
   return null; // This component doesn't render anything
 };

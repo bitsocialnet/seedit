@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Comment, useAuthorAddress, useBlock, useComment, useEditedComment, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import { isInboxView, isPostContextView, isPostPageView } from '../../lib/utils/view-utils';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
-import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isAuthorBannedForComment, isCommentLoadFailed, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import useCommentTripcode from '../../hooks/use-comment-tripcode';
@@ -21,6 +21,7 @@ import useReplies from '../../hooks/use-replies';
 import useStateString from '../../hooks/use-state-string';
 import useUpvote from '../../hooks/use-upvote';
 import CommentEditForm from '../comment-edit-form';
+import ErrorDisplay from '../error-display';
 import LoadingEllipsis from '../loading-ellipsis/';
 import Markdown from '../markdown';
 import CommentTools from '../comment-tools';
@@ -177,17 +178,9 @@ const ReplyMedia = ({ commentMediaInfo, content, expanded, hasThumbnail, link, l
           isPdf={commentMediaInfo?.type === 'pdf'}
         />
       )}
-      {type === 'iframe' ||
-        (type === 'audio' && (
-          <ExpandButton
-            commentMediaInfo={commentMediaInfo}
-            content={content}
-            expanded={expanded}
-            hasThumbnail={hasThumbnail}
-            link={link}
-            toggleExpanded={toggleExpanded}
-          />
-        ))}
+      {(type === 'iframe' || type === 'audio') && (
+        <ExpandButton commentMediaInfo={commentMediaInfo} content={content} expanded={expanded} hasThumbnail={hasThumbnail} link={link} toggleExpanded={toggleExpanded} />
+      )}
       {link && (type === 'iframe' || type === 'webpage' || type === 'audio') && (
         <>
           <a href={link} target='_blank' rel='noopener noreferrer'>
@@ -421,7 +414,11 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
   const formattedScore = formatScore(score);
   const scoreString = score === 1 ? t('reply_score_singular') : t('reply_score_plural', { score: formattedScore });
   const stateString = useStateString(reply);
-  const loadingString = stateString && <span className={styles.stateString}>{stateString !== 'Failed' ? <LoadingEllipsis string={stateString} /> : ''}</span>;
+  const loadingString = stateString && (
+    <span className={styles.stateString}>
+      <LoadingEllipsis string={stateString} />
+    </span>
+  );
 
   const [upvoted, upvote] = useUpvote(reply);
   const [downvoted, downvote] = useDownvote(reply);
@@ -447,10 +444,16 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
     setCollapsed(!collapsed);
   };
 
+  // only the account's own reply, which carries its index, can be pending or fail to publish; a reply that is loading or
+  // failed to load gets neither label and keeps its links
+  const publicationFailed = isCommentPublicationFailed(reply);
+  const publicationPending = cid === undefined && typeof reply?.index === 'number' && !publicationFailed;
+  // a reply that failed to load says why it is empty, unless it is the post page's own comment, whose error the page shows
+  const showLoadFailure = isCommentLoadFailed(reply) && !isSingleComment;
   const stateLabel = (
     <span className={styles.stateLabel}>
-      {state === 'failed' && <Label color='red' text={t('failed')} />}
-      {cid === undefined && state !== 'failed' && <Label color='yellow' text={t('pending')} />}
+      {publicationFailed && <Label color='red' text={t('failed')} />}
+      {publicationPending && <Label color='yellow' text={t('pending')} />}
       {editState === 'failed' && <Label color='red' text={t('failed_edit')} />}
       {editState === 'pending' && <Label color='yellow' text={t('pending_edit')} />}
       {spoiler && <Label color='black' text={t('spoiler')} />}
@@ -593,6 +596,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                           quotedCids={quotedCids}
                         />
                       ))}
+                    {isAuthorBannedForComment(reply) && <p className={styles.modReason}>{t('user_banned_for_this_comment')}</p>}
                     {reason && (
                       <p className={styles.modReason}>
                         {lowerCase(t('mod_edit_reason'))}: {reason}
@@ -603,6 +607,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                         {t('edit')}: {edit.reason}
                       </p>
                     )}
+                    {showLoadFailure && (reply.error?.message ? <ErrorDisplay error={reply.error} /> : <p>{t('failed')}</p>)}
                   </div>
                 )}
               </div>
@@ -614,7 +619,7 @@ const Reply = ({ cidOfReplyWithContext, depth = 0, isSingleComment, isSingleRepl
                 author={author}
                 cid={cid}
                 deleted={deleted}
-                failed={state === 'failed'}
+                failed={publicationFailed}
                 isReply={true}
                 isSingleReply={isSingleReply}
                 index={reply?.index}

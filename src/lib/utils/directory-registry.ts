@@ -12,9 +12,16 @@ const REVALIDATE_INTERVAL_MS = 60 * 60 * 1000;
 const FETCH_RETRY_DELAY_MS = 60 * 1000;
 const FETCH_TIMEOUT_MS = 10 * 1000;
 
+/**
+ * `pending` until this page load's first defaults request finishes; `published` once a request has succeeded;
+ * `fallback` while every request has failed, so only bundled or cached codes are known.
+ */
+export type DirectoryRegistryStatus = 'pending' | 'published' | 'fallback';
+
 export interface DirectoryRegistrySnapshot {
   codes: readonly SeeditDirectoryCode[];
   defaults: DirectoryDefaultsData;
+  status: DirectoryRegistryStatus;
   /** False until this page load's first defaults request finishes, even when a cached copy already supplies codes. */
   settled: boolean;
 }
@@ -62,14 +69,15 @@ const writeCachedDefaults = (defaults: DirectoryDefaultsData) => {
 let publishedDefaults = readCachedDefaults();
 if (publishedDefaults) setPublishedDirectoryCodes(Object.keys(publishedDefaults.directories));
 
-const createSnapshot = (settled: boolean): DirectoryRegistrySnapshot => ({
+const createSnapshot = (status: DirectoryRegistryStatus): DirectoryRegistrySnapshot => ({
   codes: getDirectoryCodes(),
   defaults: mergeWithVendoredDefaults(publishedDefaults),
-  settled,
+  status,
+  settled: status !== 'pending',
 });
 
 // A cached copy can predate a directory published since, so only this page load's request settles the codes.
-let snapshot = createSnapshot(false);
+let snapshot = createSnapshot('pending');
 const listeners = new Set<() => void>();
 let inFlightFetch: Promise<void> | null = null;
 let revalidationTimer: ReturnType<typeof globalThis.setTimeout> | null = null;
@@ -138,9 +146,10 @@ export const revalidateDirectoryRegistry = (): Promise<void> | null => {
     .catch((error) => console.warn('Failed to refresh Seedit directory defaults:', error))
     .finally(() => {
       inFlightFetch = null;
-      // Hourly refreshes usually change nothing; only a change, or the first settle, re-renders subscribers.
-      if (changed || !snapshot.settled) {
-        snapshot = createSnapshot(true);
+      const status = lastFetchSuccessAt > 0 ? 'published' : 'fallback';
+      // Hourly refreshes usually change nothing; only a change of codes or status re-renders subscribers.
+      if (changed || status !== snapshot.status) {
+        snapshot = createSnapshot(status);
         listeners.forEach((listener) => listener());
       }
       scheduleRevalidation();

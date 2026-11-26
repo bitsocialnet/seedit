@@ -12,6 +12,8 @@ export type CommunitySettingsState = {
   roles: Roles | undefined;
   settings: any | undefined;
   communityAddress: string | undefined;
+  // true once the create view initialized the draft, so leaving and reopening it keeps the draft
+  isCreateDraft: boolean;
   publishCommunityEditOptions: PublishCommunityEditOptions;
   setCommunitySettingsStore: (data: Partial<CommunitySettingsState>) => void;
   resetCommunitySettingsStore: () => void;
@@ -27,6 +29,7 @@ const useCommunitySettingsStore = create<CommunitySettingsState>((set) => ({
   roles: undefined,
   settings: undefined,
   communityAddress: undefined,
+  isCreateDraft: false,
   publishCommunityEditOptions: {},
   setCommunitySettingsStore: (props) =>
     set((state) => {
@@ -60,6 +63,7 @@ const useCommunitySettingsStore = create<CommunitySettingsState>((set) => ({
         roles: undefined,
         settings: undefined,
         communityAddress: undefined,
+        isCreateDraft: false,
         publishCommunityEditOptions: {},
       };
     }),

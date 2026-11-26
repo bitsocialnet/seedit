@@ -96,7 +96,7 @@ const usePostPage = (): PostPageState => {
     }
   }, [canonicalPostRedirectPath, isInPendingPostView, locationSearch, navigate]);
 
-  const hasAcceptedWarning = useContentOptionsStore((state) => state.hasAcceptedWarning);
+  const hideNsfwCommunities = useContentOptionsStore((state) => state.hideNsfwCommunities);
   const isNsfwCommunity = useIsNsfwCommunity(communityAddress || '');
 
   useEffect(() => {
@@ -122,7 +122,7 @@ const usePostPage = (): PostPageState => {
     directoryCode,
     isInPendingPostView,
     isInPostContextView,
-    isNsfwGated: Boolean(isNsfwCommunity && !hasAcceptedWarning),
+    isNsfwGated: Boolean(isNsfwCommunity && hideNsfwCommunities),
     // Derive whether to show error directly from current post state
     shouldShowError: Boolean(post?.error && ((post?.replyCount > 0 && post?.replies?.length === 0) || post?.state === 'failed')),
   };

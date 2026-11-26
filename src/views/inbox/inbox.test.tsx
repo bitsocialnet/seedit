@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, useState, type Key, type ReactNode } from 'react';
+import { act, useImperativeHandle, useState, type Key, type ReactNode, type Ref } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -17,10 +17,22 @@ interface NotificationFixture {
   timestamp?: number;
 }
 
-const testState = vi.hoisted(() => ({ notifications: [] as NotificationFixture[], markAsRead: vi.fn(), rowKeys: [] as Key[] }));
+interface SnapshotFixture {
+  ranges: { startIndex: number; endIndex: number; size: number }[];
+  scrollTop: number;
+}
+
+const testState = vi.hoisted(() => ({
+  account: { unreadNotificationCount: 2 } as Record<string, unknown>,
+  notifications: [] as NotificationFixture[],
+  markAsRead: vi.fn(),
+  restoredSnapshots: [] as (SnapshotFixture | undefined)[],
+  rowKeys: [] as Key[],
+  scrollTop: 0,
+}));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
-  useAccount: () => ({ unreadNotificationCount: 2 }),
+  useAccount: () => testState.account,
   useNotifications: () => ({ notifications: testState.notifications, markAsRead: testState.markAsRead }),
 }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
@@ -40,11 +52,18 @@ vi.mock('react-virtuoso', () => ({
     data = [],
     itemContent,
     computeItemKey,
+    ref,
+    restoreStateFrom,
   }: {
     data?: NotificationFixture[];
     itemContent: (index: number, notification: NotificationFixture) => ReactNode;
     computeItemKey?: (index: number, notification: NotificationFixture) => Key;
+    ref?: Ref<{ getState: (callback: (snapshot: SnapshotFixture) => void) => void }>;
+    restoreStateFrom?: SnapshotFixture;
   }) => {
+    // Virtuoso only reads the snapshot to restore when it mounts
+    useState(() => testState.restoredSnapshots.push(restoreStateFrom));
+    useImperativeHandle(ref, () => ({ getState: (callback) => callback({ ranges: [{ startIndex: 0, endIndex: 0, size: 100 }], scrollTop: testState.scrollTop }) }));
     testState.rowKeys = data.map((notification, index) => computeItemKey?.(index, notification) ?? index);
     return (
       <div>
@@ -72,6 +91,9 @@ describe('Inbox virtualized updates', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    testState.account = { unreadNotificationCount: 2 };
+    testState.restoredSnapshots = [];
+    testState.scrollTop = 0;
     testState.notifications = [
       { cid: 'first-reply', parentCid: 'parent-reply', postCid: 'post', markedAsRead: false },
       { cid: 'second-reply', parentCid: 'post', postCid: 'post', markedAsRead: false },
@@ -133,5 +155,28 @@ describe('Inbox virtualized updates', () => {
     expect(container.querySelector('[data-row="pending-one"]')).toBe(firstRow);
     expect(firstRow?.textContent).toBe('1');
     expect(container.querySelector('[data-row="pending-two"]')?.textContent).toBe('0');
+  });
+
+  it('restores a scroll snapshot only into the inbox tab it was saved from, whatever the unread count', async () => {
+    // returning to the inbox from a post mounts it again at the current tab
+    const remountInboxAt = (path: string) =>
+      act(async () =>
+        root.render(
+          <MemoryRouter key={`${path}-${testState.restoredSnapshots.length}`} initialEntries={[path]}>
+            <Inbox />
+          </MemoryRouter>,
+        ),
+      );
+
+    await remountInboxAt('/inbox');
+    testState.scrollTop = 900;
+    await act(async () => window.dispatchEvent(new Event('scroll')));
+
+    await remountInboxAt('/inbox/commentreplies');
+    expect(testState.restoredSnapshots.at(-1)).toBeUndefined();
+
+    testState.account = { unreadNotificationCount: 0 };
+    await remountInboxAt('/inbox');
+    expect(testState.restoredSnapshots.at(-1)?.scrollTop).toBe(900);
   });
 });

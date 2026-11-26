@@ -9,7 +9,6 @@ const Over18Warning = () => {
 
   const handleAcceptWarning = () => {
     contentOptionsStore.setHideNsfwCommunities(false);
-    contentOptionsStore.setHasAcceptedWarning(true);
   };
 
   return (

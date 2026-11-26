@@ -462,5 +462,8 @@
   "dark_mode": "tumma tila",
   "close": "sulje",
   "upvote": "äänestä ylös",
-  "downvote": "äänestä alas"
+  "downvote": "äänestä alas",
+  "user_banned_for_this_post": "Käyttäjä sai porttikiellon tämän viestin vuoksi",
+  "user_banned_for_this_comment": "Käyttäjä sai porttikiellon tämän kommentin vuoksi",
+  "wallet_sign_again": "Tämän lompakon allekirjoitusta ei enää hyväksytä. Kopioi uusi viesti, allekirjoita se tällä lompakolla ja liitä uusi allekirjoitus."
 }

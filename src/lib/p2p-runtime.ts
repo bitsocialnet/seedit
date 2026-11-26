@@ -67,7 +67,10 @@ export const shouldShowP2PSettingsSection = (account?: unknown, targetWindow: Wi
 
 export const isBrowserPureP2PEnabled = (account?: unknown, targetWindow: Window = window) => {
   if (!canConfigureBrowserPureP2P(targetWindow)) return false;
-  if (getP2PRuntimeMode(account, targetWindow) === 'browser-libp2p') return true;
+  const runtimeMode = getP2PRuntimeMode(account, targetWindow);
+  if (runtimeMode === 'browser-libp2p') return true;
+  // An account on a full node RPC is not using the browser P2P node, whatever the stored preference says.
+  if (runtimeMode === 'full-node-rpc') return false;
   return shouldUsePureP2PBrowser(targetWindow);
 };
 

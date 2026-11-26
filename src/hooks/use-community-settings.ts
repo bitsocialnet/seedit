@@ -12,6 +12,7 @@ import {
 } from '@bitsocial/bitsocial-react-hooks';
 import { getDisplayAddress } from '../lib/utils/address-utils';
 import { DEFAULT_CHALLENGE_NAME } from '../lib/utils/challenge-settings-utils';
+import { getCommunityLoadError } from '../lib/utils/community-load-utils';
 import { getCommunityPath } from '../lib/utils/community-route-utils';
 import { isUserOwnerOrAdmin, type Roles } from '../lib/utils/user-utils';
 import { isCommunitySettingsView, isCreateCommunityView } from '../lib/utils/view-utils';
@@ -57,14 +58,12 @@ const useCommunitySettings = ({ onCreated }: { onCreated?: (address: string) => 
   const setDraft = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
   const resetDraft = useCommunitySettingsStore((state) => state.resetCommunitySettingsStore);
 
-  // A new community starts empty, owned by the account and guarded by the default challenge, unless a create draft is
-  // already in progress.
+  // A new community starts empty, owned by the account and guarded by the default challenge, unless the store, which
+  // outlives these pages, already holds a create draft.
   const hasSetDefaultChallenge = useRef(false);
   useEffect(() => {
     if (!isCreating || !account) return;
-    const draft = useCommunitySettingsStore.getState();
-    const hasCreateDraft = draft.communityAddress === undefined && draft.title !== undefined;
-    if (!hasCreateDraft) {
+    if (!useCommunitySettingsStore.getState().isCreateDraft) {
       const ownerAddress = account.author?.address;
       resetDraft();
       setDraft({
@@ -75,6 +74,7 @@ const useCommunitySettings = ({ onCreated }: { onCreated?: (address: string) => 
         roles: (ownerAddress ? { [ownerAddress]: { role: 'owner' } } : {}) as Roles,
         settings: {},
         challenges: [],
+        isCreateDraft: true,
       });
     }
     const draftSettings = useCommunitySettingsStore.getState().settings;
@@ -102,8 +102,17 @@ const useCommunitySettings = ({ onCreated }: { onCreated?: (address: string) => 
     });
   }, [isCreating, hasLoaded, communityAddress, title, description, address, suggested, rules, roles, settings, challenges, resetDraft, setDraft]);
 
-  const { error: publishError, publishCommunityEdit } = usePublishCommunityEdit(publishOptions);
-  const { error: createError, createdCommunity, createCommunity } = useCreateCommunity(publishOptions);
+  // the hooks catch save and create errors and report them only through onError and a later render, so the actions
+  // read the outcome of the call they awaited from this ref
+  const actionErrorRef = useRef<Error | undefined>(undefined);
+  const actionOptions = {
+    ...publishOptions,
+    onError: (actionError: Error) => {
+      actionErrorRef.current = actionError;
+    },
+  };
+  const { error: publishError, publishCommunityEdit } = usePublishCommunityEdit(actionOptions);
+  const { error: createError, createdCommunity, createCommunity } = useCreateCommunity(actionOptions);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<Error | undefined>(publishError || createError);
@@ -115,31 +124,38 @@ const useCommunitySettings = ({ onCreated }: { onCreated?: (address: string) => 
     if (publishError || createError) setError(publishError || createError);
   }
 
-  /** Publishes the draft as an edit of the community; resolves true once it is sent without an error thrown. */
-  const save = async () => {
+  /** Publishes the draft as an edit of the community; resolves the error it failed with, if any. */
+  const save = async (): Promise<Error | undefined> => {
     setIsSaving(true);
     setError(undefined);
-    let saved = true;
+    actionErrorRef.current = undefined;
     try {
       await publishCommunityEdit();
     } catch (caught) {
-      setError(toError(caught));
-      saved = false;
+      actionErrorRef.current = toError(caught);
     }
+    // onError may have set it during the await
+    const saveError = actionErrorRef.current;
+    if (saveError) setError(saveError);
     setIsSaving(false);
-    return saved;
+    return saveError;
   };
 
   /** Creates the draft as a new community on the connected node; the new community then opens. */
-  const create = async () => {
+  const create = async (): Promise<Error | undefined> => {
     setIsSaving(true);
     setError(undefined);
+    actionErrorRef.current = undefined;
     try {
       await createCommunity();
     } catch (caught) {
-      setError(toError(caught));
+      actionErrorRef.current = toError(caught);
     }
+    // onError may have set it during the await
+    const createError = actionErrorRef.current;
+    if (createError) setError(createError);
     setIsSaving(false);
+    return createError;
   };
 
   const { subscribe } = useSubscribe({ communityAddress: createdCommunity?.address });
@@ -153,28 +169,32 @@ const useCommunitySettings = ({ onCreated }: { onCreated?: (address: string) => 
     if (createdCommunity?.address) openCreatedCommunity(createdCommunity.address);
   }, [createdCommunity]);
 
-  /** Deletes the community from the node after two confirmations; resolves true once it is gone. */
-  const remove = async () => {
-    if (!communityAddress) return false;
+  /** Deletes the community from the node after two confirmations; resolves whether it is gone, and why not if it failed. */
+  const remove = async (): Promise<{ deleted: boolean; error?: Error }> => {
+    if (!communityAddress) return { deleted: false };
     const label = `s/${getDisplayAddress(community?.shortAddress || '')}`;
-    if (!window.confirm(t('delete_confirm', { value: label, interpolation: { escapeValue: false } })) || !window.confirm(t('double_confirm'))) return false;
+    if (!window.confirm(t('delete_confirm', { value: label, interpolation: { escapeValue: false } })) || !window.confirm(t('double_confirm'))) return { deleted: false };
     setIsDeleting(true);
     setError(undefined);
-    let deleted = true;
+    let result: { deleted: boolean; error?: Error } = { deleted: true };
     try {
       await deleteCommunity(communityAddress);
     } catch (caught) {
-      setError(toError(caught));
-      deleted = false;
+      result = { deleted: false, error: toError(caught) };
+      setError(result.error);
     }
     setIsDeleting(false);
-    return deleted;
+    return result;
   };
 
   return {
     community,
     communityAddress,
     hasLoaded,
+    /** Why the community has not loaded; pkc-js keeps retrying, so a failed first load reports its last retry's error. */
+    loadError: getCommunityLoadError(community),
+    /** The community's first load failed for good. */
+    hasFailedToLoad: community?.state === 'failed',
     isCreating,
     isConnectedToRpc,
     /** The account's node runs this community, so its private settings are readable. */

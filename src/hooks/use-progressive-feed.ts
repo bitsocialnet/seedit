@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { useAccount, type CommunityIdentifier, type UseFeedOptions, type UseFeedResult } from '@bitsocial/bitsocial-react-hooks';
+import { useAccount, type CommunityIdentifier, type UseFeedOptions } from '@bitsocial/bitsocial-react-hooks';
 import { FEED_POSTS_PER_PAGE } from './use-feed-pagination';
-import useFeedWithCompatibleSort from './use-feed-with-compatible-sort';
+import useFeedWithCompatibleSort, { type UseFeedWithCompatibleSortResult } from './use-feed-with-compatible-sort';
 import useSuggestionFeedLoader from './use-suggestion-feed-loader';
 import {
   getAutomaticProgressiveTimeWindow,
@@ -29,7 +29,7 @@ const getProgressiveFeedKey = (options: UseFeedOptions): string =>
     [...(options.communities || [])].map(getCommunityKey).sort().join(','),
   ].join('|');
 
-const useProgressiveFeed = ({ enabled, feedOptions }: UseProgressiveFeedOptions): UseFeedResult & { requestKey: string } => {
+const useProgressiveFeed = ({ enabled, feedOptions }: UseProgressiveFeedOptions): UseFeedWithCompatibleSortResult & { requestKey: string } => {
   const lastAutomaticExpansionRef = useRef<{ feedKey: string; feedLength: number; hasMore: boolean; state: string } | undefined>(undefined);
   const accountId = useAccount({ accountName: feedOptions.accountName })?.id;
   const feedKey = useMemo(() => JSON.stringify([accountId, getProgressiveFeedKey(feedOptions)]), [accountId, feedOptions]);

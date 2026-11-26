@@ -463,5 +463,8 @@
   "dark_mode": "Dunkelmodus",
   "close": "schließen",
   "upvote": "positiv bewerten",
-  "downvote": "negativ bewerten"
+  "downvote": "negativ bewerten",
+  "user_banned_for_this_post": "Benutzer wurde für diesen Beitrag gesperrt",
+  "user_banned_for_this_comment": "Benutzer wurde für diesen Kommentar gesperrt",
+  "wallet_sign_again": "Die Unterschrift dieser Wallet wird nicht mehr akzeptiert. Kopiere die neue Nachricht, signiere sie mit dieser Wallet und füge die neue Unterschrift ein."
 }

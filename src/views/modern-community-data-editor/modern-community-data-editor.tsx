@@ -13,7 +13,7 @@ import styles from './modern-community-data-editor.module.css';
 /** A community's settings draft as raw JSON, shared with its settings page. */
 const ModernCommunityDataEditor = () => {
   const { t } = useTranslation();
-  const { community, communityAddress, isReady, text, setText, isDirty, reset, save, isSaving, isSaved, error } = useCommunityDataEditor();
+  const { community, communityAddress, loadError, hasFailedToLoad, isReady, text, setText, isDirty, reset, save, isSaving, isSaved, error } = useCommunityDataEditor();
   const loadingState = useStateString(community);
   const settingsPath = communityAddress ? `${getCommunityPath(communityAddress)}/settings` : '/';
   const displayAddress = getDisplayAddress(community?.shortAddress || communityAddress);
@@ -60,7 +60,13 @@ const ModernCommunityDataEditor = () => {
         </div>
       ) : (
         <p className={`${settingsStyles.status} ${styles.loading}`} role='status'>
-          {community?.error?.message ? <span className={settingsStyles.statusError}>{community.error.message}</span> : loadingState || `${t('loading')}…`}
+          {loadError?.message ? (
+            <span className={settingsStyles.statusError}>{loadError.message}</span>
+          ) : hasFailedToLoad ? (
+            t('failed')
+          ) : (
+            loadingState || `${t('loading')}…`
+          )}
         </p>
       )}
     </ModernColumns>

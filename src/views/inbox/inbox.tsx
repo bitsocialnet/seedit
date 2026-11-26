@@ -47,21 +47,22 @@ const Inbox = () => {
   const isInInboxPostRepliesView = tab === 'postreplies';
   const isInInboxUnreadView = tab === 'unread';
 
-  // save last virtuoso state on each scroll
+  // save last virtuoso state on each scroll, keyed by the account and tab it belongs to
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
-  const lastVirtuosoState = lastVirtuosoStates?.[unreadNotificationCount ?? 0];
+  const virtuosoStateKey = `${account?.author?.address}/${tab}`;
+  const lastVirtuosoState = lastVirtuosoStates?.[virtuosoStateKey];
   useEffect(() => {
     const setLastVirtuosoState = () =>
       virtuosoRef.current?.getState((snapshot) => {
         // TODO: not sure if checking for empty snapshot.ranges works for all scenarios
         if (snapshot?.ranges?.length) {
-          lastVirtuosoStates[unreadNotificationCount ?? 0] = snapshot;
+          lastVirtuosoStates[virtuosoStateKey] = snapshot;
         }
       });
     window.addEventListener('scroll', setLastVirtuosoState);
     // clean listener on unmount
     return () => window.removeEventListener('scroll', setLastVirtuosoState);
-  }, [unreadNotificationCount]);
+  }, [virtuosoStateKey]);
 
   const documentTitle = useMemo(() => {
     let title = startCase(t('inbox'));

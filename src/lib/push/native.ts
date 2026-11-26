@@ -1,5 +1,5 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
-import type { LocalNotification } from './common';
+import type { LocalNotification, NotificationPermissionStatus } from './common';
 import type { PermissionState } from '@capacitor/core';
 
 /**
@@ -13,6 +13,16 @@ export async function requestNativeNotificationPermission(): Promise<boolean> {
     console.error('Error requesting native notification permission:', error);
     return false;
   }
+}
+
+/**
+ * Reads the current local notification permission on native platforms without prompting.
+ */
+export async function getNativeNotificationPermissionStatus(): Promise<NotificationPermissionStatus> {
+  const { display }: { display: PermissionState } = await LocalNotifications.checkPermissions();
+  if (display === 'granted') return 'granted';
+  if (display === 'denied') return 'denied';
+  return 'not-determined';
 }
 
 /**

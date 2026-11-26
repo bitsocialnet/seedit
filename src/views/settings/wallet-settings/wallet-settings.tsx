@@ -14,6 +14,8 @@ const CryptoWalletsForm = ({ account }: { account: Account }) => {
     addWallet,
     removeWallet: handleRemove,
     save,
+    isWriting,
+    mustSignAgain,
     copyMessageToSign,
     hasCopied,
   } = useCryptoWallets(account);
@@ -25,9 +27,8 @@ const CryptoWalletsForm = ({ account }: { account: Account }) => {
     setShowWallet(newShowWallet);
   };
 
-  const handleSave = () => {
-    save();
-    alert(t('saved'));
+  const handleSave = async () => {
+    if (await save()) alert(t('saved'));
   };
 
   const walletsInputs = walletsArray.map((wallet, index) => (
@@ -36,10 +37,13 @@ const CryptoWalletsForm = ({ account }: { account: Account }) => {
         <Trans i18nKey='wallet_number' values={{ index: index + 1 }} />
       </div>
       <div key={index} className={styles.walletBox}>
+        {mustSignAgain(wallet) && <div className={styles.signAgain}>{t('wallet_sign_again')}</div>}
         <button className={styles.toggleWallet} onClick={() => toggleShowWallet(index)}>
           {showWallet[index] ? t('hide') : t('show')}
         </button>
-        <button onClick={() => handleRemove(index)}>{t('remove')}</button>
+        <button disabled={isWriting} onClick={() => void handleRemove(index)}>
+          {t('remove')}
+        </button>
         <div className={`${showWallet[index] ? styles.show : styles.hide}`}>
           <div className={styles.walletField}>
             <div className={styles.walletFieldTitle}>{t('chain_ticker')}</div>
@@ -96,7 +100,7 @@ const CryptoWalletsForm = ({ account }: { account: Account }) => {
               value={wallet.signature}
               placeholder='0x...'
             />
-            <button className={styles.save} onClick={handleSave}>
+            <button className={styles.save} disabled={isWriting} onClick={() => void handleSave()}>
               {t('save')}
             </button>
           </div>

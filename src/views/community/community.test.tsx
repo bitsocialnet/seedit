@@ -29,7 +29,7 @@ afterAll(() => vi.unstubAllGlobals());
 
 const testState = vi.hoisted(() => ({
   resolvedAddress: 'first.bso',
-  community: { title: 'First community', updatedAt: 1, createdAt: 1, started: true, settings: {} },
+  community: { title: 'First community', updatedAt: 1, createdAt: 1, started: true, settings: {} } as Record<string, unknown>,
   directoryList: { revision: 1 },
   routeError: null as Error | null,
   accountComments: [] as Comment[],
@@ -183,6 +183,47 @@ describe('Community feed updates', () => {
     await renderCommunity();
 
     expect(container.textContent).toContain('error: Directory list request failed with 404');
+  });
+
+  it('shows a community whose first load failed as failed instead of loading', async () => {
+    testState.community = { state: 'failed', error: new Error('No name resolver can handle this address') };
+    testState.feed = [];
+
+    await renderCommunity();
+
+    expect(container.textContent).toContain('error: No name resolver can handle this address');
+    expect(container.textContent).toContain('failed');
+    expect(container.textContent).not.toContain('loading');
+  });
+
+  it('shows why a community without a record keeps retrying while it still loads', async () => {
+    testState.community = { state: 'fetching-ipns', firstLoadFailed: true, lastRetriableError: new Error('IPNS name could not be resolved') };
+    testState.feed = [];
+
+    await renderCommunity();
+
+    expect(container.textContent).toContain('error: IPNS name could not be resolved');
+    expect(container.textContent).toContain('loading');
+    expect(container.textContent).not.toContain('failed');
+  });
+
+  it('does not show the retriable error of a community that has a record', async () => {
+    testState.community = { state: 'succeeded', updatedAt: 1, firstLoadFailed: false, lastRetriableError: new Error('refresh timed out') };
+    testState.feed = [];
+
+    await renderCommunity();
+
+    expect(container.textContent).not.toContain('refresh timed out');
+  });
+
+  it('keeps showing a community that has not loaded yet as loading', async () => {
+    testState.community = { state: 'fetching-ipns' };
+    testState.feed = [];
+
+    await renderCommunity();
+
+    expect(container.textContent).toContain('loading');
+    expect(container.textContent).not.toContain('failed');
   });
 
   it('preserves pending pagination through feed updates and then uses the latest callback', async () => {

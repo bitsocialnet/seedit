@@ -17,6 +17,12 @@
   text-transform: lowercase;
 }
 
+/* an error message keeps its case, which can matter in addresses and CIDs */
+.error {
+  text-transform: none;
+  padding-bottom: 10px;
+}
+
 .morePostsSuggestion {
   padding-bottom: 15px;
 }

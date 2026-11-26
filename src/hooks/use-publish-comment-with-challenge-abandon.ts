@@ -11,6 +11,8 @@ const publicationAttempts = new WeakMap<object, PostingAnalyticsAttempt>();
 const usePublishCommentWithChallengeAbandon = (publishCommentOptions: PublishCommentOptions, onAbandon?: () => void) => {
   const addChallenge = useChallengesStore((state) => state.addChallenge);
   const abandonPublishRef = useRef<(() => Promise<void>) | undefined>(undefined);
+  // usePublishComment abandons only the form's latest publication, so an older one is stopped on its own
+  const latestPublishedOptionsRef = useRef<PublishCommentOptions | undefined>(undefined);
   const abandonCurrentPublish = useCallback(async () => {
     await abandonPublishRef.current?.();
     onAbandon?.();
@@ -23,6 +25,10 @@ const usePublishCommentWithChallengeAbandon = (publishCommentOptions: PublishCom
         publicationAttempts.get(options)?.challenge();
         addChallenge(args, async () => {
           publicationAttempts.get(options)?.finish('post_cancelled');
+          if (latestPublishedOptionsRef.current && latestPublishedOptionsRef.current !== options) {
+            await args[1]?.stop?.();
+            return;
+          }
           await abandonCurrentPublish();
         });
       },
@@ -47,6 +53,7 @@ const usePublishCommentWithChallengeAbandon = (publishCommentOptions: PublishCom
   // usePublishComment publishes with the options of the render that returned it, which are these.
   const publishComment = useCallback(
     (attempt?: PostingAnalyticsAttempt) => {
+      latestPublishedOptionsRef.current = publishOptionsWithAbandon;
       if (attempt) publicationAttempts.set(publishOptionsWithAbandon, attempt);
       else publicationAttempts.delete(publishOptionsWithAbandon);
       return publish();

@@ -463,5 +463,8 @@
   "dark_mode": "다크 모드",
   "close": "닫기",
   "upvote": "추천",
-  "downvote": "비추천"
+  "downvote": "비추천",
+  "user_banned_for_this_post": "이 게시물로 인해 사용자가 차단되었습니다",
+  "user_banned_for_this_comment": "이 댓글로 인해 사용자가 차단되었습니다",
+  "wallet_sign_again": "이 지갑의 서명은 더 이상 허용되지 않습니다. 새 메시지를 복사하고 이 지갑으로 서명한 다음 새 서명을 붙여넣으세요."
 }

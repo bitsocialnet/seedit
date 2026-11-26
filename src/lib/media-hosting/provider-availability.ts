@@ -6,6 +6,8 @@ export type ProviderAvailabilitySnapshot = Partial<Record<ProviderId, ProviderAv
 
 const PROBE_TIMEOUT_MS = 5_000;
 const PROBE_CACHE_MS = 10 * 60_000;
+// A failed probe is often a passing outage or a slow network, so it is trusted for much less time.
+const UNAVAILABLE_CACHE_MS = 30_000;
 
 type Listener = () => void;
 
@@ -21,6 +23,7 @@ let entries: Record<ProviderId, ProviderAvailabilityEntry> = Object.fromEntries(
 let snapshot: ProviderAvailabilitySnapshot = buildSnapshot();
 const listeners = new Set<Listener>();
 const inFlight = new Map<ProviderId, Promise<ProviderAvailabilityStatus>>();
+const retryTimers = new Map<ProviderId, number>();
 
 function buildSnapshot(): ProviderAvailabilitySnapshot {
   return Object.fromEntries(MEDIA_HOSTING_PROVIDERS.map((provider) => [provider.id, entries[provider.id]?.status ?? 'unknown'])) as ProviderAvailabilitySnapshot;
@@ -47,7 +50,21 @@ function setProviderStatus(provider: ProviderId, status: ProviderAvailabilitySta
 function shouldProbeProvider(provider: ProviderId): boolean {
   if (inFlight.has(provider)) return false;
   const entry = entries[provider];
-  return entry.status === 'unknown' || Date.now() - entry.checkedAt > PROBE_CACHE_MS;
+  const maxAge = entry.status === 'unavailable' ? UNAVAILABLE_CACHE_MS : PROBE_CACHE_MS;
+  return entry.status === 'unknown' || Date.now() - entry.checkedAt > maxAge;
+}
+
+/** Expires an unavailable result after UNAVAILABLE_CACHE_MS and probes it again, for as long as something shows its status. */
+function scheduleRetry(provider: ProviderId) {
+  window.clearTimeout(retryTimers.get(provider));
+  const timeoutId = window.setTimeout(() => {
+    retryTimers.delete(provider);
+    if (entries[provider].status !== 'unavailable') return;
+    // The timer, not Date.now(), ends the result's lifetime: the wall clock can lag the timer clock, and the retries would stop.
+    entries = { ...entries, [provider]: { ...entries[provider], checkedAt: 0 } };
+    if (listeners.size > 0) void probeProviderAvailability(provider);
+  }, UNAVAILABLE_CACHE_MS);
+  retryTimers.set(provider, timeoutId);
 }
 
 function probeImageUrl(url: string): Promise<boolean> {
@@ -103,7 +120,8 @@ export async function probeProviderAvailability(provider: ProviderId): Promise<P
   if (!shouldProbeProvider(provider)) return entries[provider].status;
 
   const promise = (async () => {
-    setProviderStatus(provider, 'checking');
+    // A re-probe keeps the last result, so a provider that is still down does not turn selectable while it runs.
+    if (entries[provider].status === 'unknown') setProviderStatus(provider, 'checking');
 
     if (!definition.availabilityProbeUrls.length) {
       setProviderStatus(provider, 'available');
@@ -117,6 +135,7 @@ export async function probeProviderAvailability(provider: ProviderId): Promise<P
     const results = await Promise.all(definition.availabilityProbeUrls.map((url) => probeImageUrl(url)));
     const status: ProviderAvailabilityStatus = results.every(Boolean) ? 'available' : 'unavailable';
     setProviderStatus(provider, status);
+    if (status === 'unavailable') scheduleRetry(provider);
     return status;
   })();
 
@@ -139,5 +158,7 @@ export function resetProviderAvailabilityForTests() {
     ProviderAvailabilityEntry
   >;
   inFlight.clear();
+  for (const timeoutId of retryTimers.values()) window.clearTimeout(timeoutId);
+  retryTimers.clear();
   emit();
 }

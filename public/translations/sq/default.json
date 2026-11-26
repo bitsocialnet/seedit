@@ -463,5 +463,8 @@
   "dark_mode": "modaliteti i errët",
   "close": "mbyll",
   "upvote": "votë pro",
-  "downvote": "votë kundër"
+  "downvote": "votë kundër",
+  "user_banned_for_this_post": "Përdoruesi u ndalua për këtë postim",
+  "user_banned_for_this_comment": "Përdoruesi u ndalua për këtë koment",
+  "wallet_sign_again": "Nënshkrimi i këtij wallet nuk pranohet më. Kopjo mesazhin e ri, nënshkruaje me këtë wallet dhe ngjit nënshkrimin e ri."
 }

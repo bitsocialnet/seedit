@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import { FloatingFocusManager, useClick, useDismiss, useFloating, useId, useInteractions, useRole } from '@floating-ui/react';
 import { Challenge as ChallengeType, useComment, useAccount } from '@bitsocial/bitsocial-react-hooks';
 import { useTranslation } from 'react-i18next';
@@ -54,11 +54,44 @@ const getIframeSessionId = (challengeUrl: string) => {
   }
 };
 
+type PendingChallenge = { challenge?: string; type?: string; caseInsensitive?: boolean };
+type ChallengeEntries = [challengeIndex: string, challenge: PendingChallenge][];
+
+// A CHALLENGE keys the pending challenges by challenge index (the position in community.challenges)
+// and leaves out pre-answered ones, so keys can be sparse ("1", "3"). Show them in numeric order.
+const getChallengeEntries = (challenges: unknown): ChallengeEntries =>
+  challenges && typeof challenges === 'object' ? (Object.entries(challenges) as ChallengeEntries).sort(([a], [b]) => Number(a) - Number(b)) : [];
+
+// Answer every key of the CHALLENGE; an unanswered challenge gets '' rather than a missing key.
+const getAnswersByChallengeIndex = (challengeEntries: ChallengeEntries, answers: string[]) =>
+  Object.fromEntries(challengeEntries.map(([challengeIndex], position) => [challengeIndex, answers[position] ?? '']));
+
+// The challenges store drops a challenge once its exchange ends, but an answer can still be sent as it ends, for
+// example while pkc-js encrypts it, and pkc-js then rejects it. The publication's own verification or error already
+// reported that outcome, so the rejection is only logged instead of going unhandled.
+const sendChallengeAnswers = async (publication: ChallengeType[1], challengeAnswers: Record<string, string>) => {
+  try {
+    await publication.publishChallengeAnswers(challengeAnswers);
+  } catch (error) {
+    console.error('Failed to publish challenge answers:', error);
+  }
+};
+
+// An iframe posts positional answers: the first answers the challenge shown, further ones the challenges after it.
+const withIframeAnswers = (answers: string[], position: number, iframeAnswers: string[]) => {
+  const updatedAnswers = [...answers];
+  (iframeAnswers.length ? iframeAnswers : ['']).forEach((answer, offset) => {
+    updatedAnswers[position + offset] = answer;
+  });
+  return updatedAnswers;
+};
+
 const RegularChallengeContent = ({ challenge, closeModal, abandonModal }: RegularChallengeContentProps) => {
   const { t } = useTranslation();
   const account = useAccount();
   const [theme] = useTheme();
   const challenges = challenge?.[0]?.challenges;
+  const challengeEntries = useMemo(() => getChallengeEntries(challenges), [challenges]);
   const publicationTarget = challenge?.[2];
   const publicationType = getPublicationType(challenge?.[1]);
   const publicationContent = publicationType === 'vote' ? getPublicationPreview(publicationTarget) : getPublicationPreview(challenge?.[1]);
@@ -76,11 +109,11 @@ const RegularChallengeContent = ({ challenge, closeModal, abandonModal }: Regula
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const handledIframeAutoCompleteRef = useRef(false);
   const onIframeAutoComplete = useEffectEvent((challengeAnswers: string[]) => {
-    challenge[1].publishChallengeAnswers(challengeAnswers.length ? challengeAnswers : ['']);
+    void sendChallengeAnswers(challenge[1], getAnswersByChallengeIndex(challengeEntries, withIframeAnswers(answers, currentChallengeIndex, challengeAnswers)));
     closeModal();
   });
 
-  const currentChallenge = challenges?.[currentChallengeIndex];
+  const currentChallenge = challengeEntries[currentChallengeIndex]?.[1];
   const isTextChallenge = currentChallenge?.type === 'text/plain';
   const isImageChallenge = currentChallenge?.type === 'image/png';
   const isIframeChallenge = currentChallenge?.type === 'url/iframe';
@@ -98,21 +131,21 @@ const RegularChallengeContent = ({ challenge, closeModal, abandonModal }: Regula
   };
 
   const onSubmit = useCallback(() => {
-    challenge[1].publishChallengeAnswers(answers);
+    void sendChallengeAnswers(challenge[1], getAnswersByChallengeIndex(challengeEntries, answers));
     setAnswers([]);
     closeModal();
-  }, [challenge, answers, closeModal]);
+  }, [challenge, challengeEntries, answers, closeModal]);
 
   const onIframeDone = useCallback(() => {
     // Submit empty string as answer for iframe challenges
-    challenge[1].publishChallengeAnswers(['']);
+    void sendChallengeAnswers(challenge[1], getAnswersByChallengeIndex(challengeEntries, withIframeAnswers(answers, currentChallengeIndex, [''])));
     closeModal();
-  }, [challenge, closeModal]);
+  }, [challenge, challengeEntries, answers, currentChallengeIndex, closeModal]);
 
   const onEnterKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== 'Enter') return;
     if (!isValidAnswer(currentChallengeIndex)) return;
-    if (challenges?.[currentChallengeIndex + 1]) {
+    if (challengeEntries[currentChallengeIndex + 1]) {
       setCurrentChallengeIndex((prev) => prev + 1);
     } else {
       onSubmit();
@@ -323,9 +356,9 @@ const RegularChallengeContent = ({ challenge, closeModal, abandonModal }: Regula
         />
       </div>
       <div className={styles.challengeFooter}>
-        <div className={styles.counter}>{t('challenge_counter', { index: currentChallengeIndex + 1, total: challenges?.length })}</div>
+        <div className={styles.counter}>{t('challenge_counter', { index: currentChallengeIndex + 1, total: challengeEntries.length })}</div>
         <span className={styles.buttons}>
-          {!challenges?.[currentChallengeIndex + 1] && (
+          {!challengeEntries[currentChallengeIndex + 1] && (
             <button type='button' onClick={onSubmit} disabled={!isValidAnswer(currentChallengeIndex)}>
               {t('submit')}
             </button>
@@ -333,12 +366,12 @@ const RegularChallengeContent = ({ challenge, closeModal, abandonModal }: Regula
           <button type='button' onClick={abandonModal}>
             {t('cancel')}
           </button>
-          {challenges && challenges.length > 1 && (
-            <button type='button' disabled={!challenges[currentChallengeIndex - 1]} onClick={() => setCurrentChallengeIndex((prev) => prev - 1)}>
+          {challengeEntries.length > 1 && (
+            <button type='button' disabled={!challengeEntries[currentChallengeIndex - 1]} onClick={() => setCurrentChallengeIndex((prev) => prev - 1)}>
               {t('previous')}
             </button>
           )}
-          {challenges?.[currentChallengeIndex + 1] && (
+          {challengeEntries[currentChallengeIndex + 1] && (
             <button type='button' onClick={() => setCurrentChallengeIndex((prev) => prev + 1)}>
               {t('next')}
             </button>

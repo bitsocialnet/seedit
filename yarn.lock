@@ -1395,12 +1395,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@bitsocial/bitsocial-react-hooks@npm:0.2.2":
-  version: 0.2.2
-  resolution: "@bitsocial/bitsocial-react-hooks@npm:0.2.2"
+"@bitsocial/bitsocial-react-hooks@npm:0.4.2":
+  version: 0.4.2
+  resolution: "@bitsocial/bitsocial-react-hooks@npm:0.4.2"
   dependencies:
     "@bitsocial/bso-resolver": "npm:0.0.10"
-    "@pkcprotocol/pkc-js": "npm:0.0.132"
+    "@noble/curves": "npm:2.2.0"
+    "@noble/hashes": "npm:2.2.0"
+    "@pkcprotocol/pkc-js": "npm:0.0.154"
     "@pkcprotocol/pkc-logger": "npm:0.1.0"
     ethers: "npm:5.8.0"
     localforage: "npm:1.10.0"
@@ -1411,11 +1413,10 @@ __metadata:
     typestub-ipfs-only-hash: "npm:4.0.0"
     uint8arrays: "npm:3.1.1"
     uuid: "npm:14.0.3"
-    viem: "npm:2.55.8"
     zustand: "npm:4.5.7"
   peerDependencies:
     react: ">=16.8"
-  checksum: 10c0/f150c514244633307da3444f725be70199f897065c3356bf1bca5d93fe3eea0b3209dc8b26ea0d618031ecd3f0d8d3ef3f7b2b1d1686c13c8c95a47524cec19d
+  checksum: 10c0/66ff7175f2db4ac8073b0d76d7e6d3009d7c8a81c5bb20d797d2743689b22d5ecabd55e5f169e278b2a6a30b4039980b801478f4e009259fbe3bb8386a2953b7
   languageName: node
   linkType: hard
 
@@ -3451,6 +3452,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ipld/dag-cbor@npm:9.2.7":
+  version: 9.2.7
+  resolution: "@ipld/dag-cbor@npm:9.2.7"
+  dependencies:
+    cborg: "npm:^5.0.1"
+    multiformats: "npm:^13.1.0"
+  checksum: 10c0/2f55d0826737256fb473eda30a3352503a4bb76d1a1491933c4e71511539f55e82be63dea43ff032228a7cc7d3cb4a7e64d7aaef189638428d3179e82a692654
+  languageName: node
+  linkType: hard
+
 "@ipld/dag-cbor@npm:^10.0.0":
   version: 10.0.2
   resolution: "@ipld/dag-cbor@npm:10.0.2"
@@ -3491,6 +3502,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@ipld/dag-pb@npm:4.2.0, @ipld/dag-pb@npm:^4.2.0":
+  version: 4.2.0
+  resolution: "@ipld/dag-pb@npm:4.2.0"
+  dependencies:
+    multiformats: "npm:^14.0.0"
+  checksum: 10c0/f65427c32b08e35b0b0c4bb54110b145b492722824f4198d3c18c9983170e6b5d16aa33b033e643681e209c08f6773ef2680cafc8f94ee6ef4f2a54ba373b949
+  languageName: node
+  linkType: hard
+
 "@ipld/dag-pb@npm:^4.0.0":
   version: 4.1.5
   resolution: "@ipld/dag-pb@npm:4.1.5"
@@ -3506,15 +3526,6 @@ __metadata:
   dependencies:
     multiformats: "npm:^14.0.0"
   checksum: 10c0/93c68778c05749f021393c2a98f7966700ab921216ca632c7dded7ae8191e98770dafe15623755d4ea04c690d73d3980ef3b2ca08448fb7950353d071bdad133
-  languageName: node
-  linkType: hard
-
-"@ipld/dag-pb@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "@ipld/dag-pb@npm:4.2.0"
-  dependencies:
-    multiformats: "npm:^14.0.0"
-  checksum: 10c0/f65427c32b08e35b0b0c4bb54110b145b492722824f4198d3c18c9983170e6b5d16aa33b033e643681e209c08f6773ef2680cafc8f94ee6ef4f2a54ba373b949
   languageName: node
   linkType: hard
 
@@ -4358,6 +4369,27 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@libp2p/noise@npm:^17.0.7":
+  version: 17.0.7
+  resolution: "@libp2p/noise@npm:17.0.7"
+  dependencies:
+    "@chainsafe/as-chacha20poly1305": "npm:^0.1.0"
+    "@chainsafe/as-sha256": "npm:^1.2.0"
+    "@libp2p/crypto": "npm:^5.2.0"
+    "@libp2p/interface": "npm:^3.4.0"
+    "@libp2p/peer-id": "npm:^6.0.18"
+    "@libp2p/utils": "npm:^7.4.5"
+    "@noble/ciphers": "npm:^2.0.1"
+    "@noble/curves": "npm:^2.0.1"
+    "@noble/hashes": "npm:^2.0.1"
+    protons-runtime: "npm:^7.0.0"
+    uint8arraylist: "npm:^3.0.2"
+    uint8arrays: "npm:^6.1.1"
+    wherearewe: "npm:^2.0.1"
+  checksum: 10c0/6e3ce7da8ff87436f220e0f2fe9ad68a726f35dc536920d16a763ef9fd2db2bdd800c8a5196feae125f498973afb72d10ab31afc9d6c8c75a156b2ae6535f67a
+  languageName: node
+  linkType: hard
+
 "@libp2p/peer-collections@npm:^7.0.21, @libp2p/peer-collections@npm:^7.0.22":
   version: 7.0.22
   resolution: "@libp2p/peer-collections@npm:7.0.22"
@@ -4639,6 +4671,39 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@libp2p/utils@npm:7.4.5, @libp2p/utils@npm:^7.4.5":
+  version: 7.4.5
+  resolution: "@libp2p/utils@npm:7.4.5"
+  dependencies:
+    "@chainsafe/is-ip": "npm:^2.1.0"
+    "@chainsafe/netmask": "npm:^2.0.0"
+    "@libp2p/interface": "npm:^3.4.0"
+    "@libp2p/logger": "npm:^6.2.16"
+    "@multiformats/multiaddr": "npm:^13.0.3"
+    "@multiformats/multiaddr-matcher": "npm:^3.0.2"
+    "@sindresorhus/fnv1a": "npm:^3.1.0"
+    any-signal: "npm:^4.1.1"
+    cborg: "npm:^6.0.0"
+    delay: "npm:^7.0.0"
+    is-loopback-addr: "npm:^2.0.2"
+    it-length-prefixed: "npm:^11.0.1"
+    it-pipe: "npm:^3.0.1"
+    it-pushable: "npm:^3.2.3"
+    it-stream-types: "npm:^2.0.2"
+    main-event: "npm:^1.0.5"
+    netmask: "npm:^2.0.2"
+    p-defer: "npm:^4.0.1"
+    p-event: "npm:^8.0.1"
+    progress-events: "npm:^1.1.0"
+    protons-runtime: "npm:^7.0.0"
+    race-signal: "npm:^2.0.0"
+    uint8-varint: "npm:^3.0.0"
+    uint8arraylist: "npm:^3.0.2"
+    uint8arrays: "npm:^6.1.1"
+  checksum: 10c0/d351a42b6e962a3b67158dd7997369200c6a71ff46cf81ba98ff9361a2c38c2cd8406e051497752fe429add18b1e45cbd7eba593f8307d2651f29dd685acf972
+  languageName: node
+  linkType: hard
+
 "@libp2p/utils@npm:^7.0.4, @libp2p/utils@npm:^7.0.9":
   version: 7.0.9
   resolution: "@libp2p/utils@npm:7.0.9"
@@ -4735,39 +4800,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@libp2p/utils@npm:^7.4.5":
-  version: 7.4.5
-  resolution: "@libp2p/utils@npm:7.4.5"
-  dependencies:
-    "@chainsafe/is-ip": "npm:^2.1.0"
-    "@chainsafe/netmask": "npm:^2.0.0"
-    "@libp2p/interface": "npm:^3.4.0"
-    "@libp2p/logger": "npm:^6.2.16"
-    "@multiformats/multiaddr": "npm:^13.0.3"
-    "@multiformats/multiaddr-matcher": "npm:^3.0.2"
-    "@sindresorhus/fnv1a": "npm:^3.1.0"
-    any-signal: "npm:^4.1.1"
-    cborg: "npm:^6.0.0"
-    delay: "npm:^7.0.0"
-    is-loopback-addr: "npm:^2.0.2"
-    it-length-prefixed: "npm:^11.0.1"
-    it-pipe: "npm:^3.0.1"
-    it-pushable: "npm:^3.2.3"
-    it-stream-types: "npm:^2.0.2"
-    main-event: "npm:^1.0.5"
-    netmask: "npm:^2.0.2"
-    p-defer: "npm:^4.0.1"
-    p-event: "npm:^8.0.1"
-    progress-events: "npm:^1.1.0"
-    protons-runtime: "npm:^7.0.0"
-    race-signal: "npm:^2.0.0"
-    uint8-varint: "npm:^3.0.0"
-    uint8arraylist: "npm:^3.0.2"
-    uint8arrays: "npm:^6.1.1"
-  checksum: 10c0/d351a42b6e962a3b67158dd7997369200c6a71ff46cf81ba98ff9361a2c38c2cd8406e051497752fe429add18b1e45cbd7eba593f8307d2651f29dd685acf972
-  languageName: node
-  linkType: hard
-
 "@libp2p/webrtc@npm:^6.0.24":
   version: 6.0.32
   resolution: "@libp2p/webrtc@npm:6.0.32"
@@ -4825,6 +4857,25 @@ __metadata:
     uint8arrays: "npm:^6.1.1"
     ws: "npm:^8.18.3"
   checksum: 10c0/445f0c6d062827cdd33752644dedf73a60facc64aa8d1f8fcdc067fa7004e8647aba3b40ac565eb18775017bfa6e652f3f086e595659c03d7b9e9c32902bc115
+  languageName: node
+  linkType: hard
+
+"@libp2p/webtransport@npm:6.0.44":
+  version: 6.0.44
+  resolution: "@libp2p/webtransport@npm:6.0.44"
+  dependencies:
+    "@libp2p/interface": "npm:^3.4.0"
+    "@libp2p/noise": "npm:^17.0.7"
+    "@libp2p/peer-id": "npm:^6.0.18"
+    "@libp2p/utils": "npm:^7.4.5"
+    "@multiformats/multiaddr": "npm:^13.0.3"
+    "@multiformats/multiaddr-matcher": "npm:^3.0.2"
+    multiformats: "npm:^14.0.0"
+    progress-events: "npm:^1.0.1"
+    race-signal: "npm:^2.0.0"
+    uint8arraylist: "npm:^3.0.2"
+    uint8arrays: "npm:^6.1.1"
+  checksum: 10c0/235b3f5f414fbebf527e0d5e2d0e9d8d38d07bc1a44eeb8ec6930a626e048a884c90c588e312fc65811c4f4ecccbf3a7660175dd8d04879fadb827ad42fb018a
   languageName: node
   linkType: hard
 
@@ -4935,6 +4986,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@multiformats/murmur3@npm:2.2.5":
+  version: 2.2.5
+  resolution: "@multiformats/murmur3@npm:2.2.5"
+  dependencies:
+    multiformats: "npm:^14.0.0"
+  checksum: 10c0/f3e081af0ba8da49f719fa5b2608e77aaedf83cd872bf1bf777d60bd96dbb49373b12538d168933f9a6ed5d67684dac1afbdbf0c4cbc1caebc03270a5fa55859
+  languageName: node
+  linkType: hard
+
 "@multiformats/murmur3@npm:^2.2.5":
   version: 2.2.6
   resolution: "@multiformats/murmur3@npm:2.2.6"
@@ -5014,6 +5074,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@noble/curves@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@noble/curves@npm:2.4.0"
+  dependencies:
+    "@noble/hashes": "npm:2.4.0"
+  checksum: 10c0/b60b737f65cc4e128dd94fea467df1ed73c5c0c089ef1bdb61614a0897db1fa7151d7f95bb7205854a9030d3f80a879e00f3bb74990befde061184ae43dfaec6
+  languageName: node
+  linkType: hard
+
 "@noble/curves@npm:~1.9.0":
   version: 1.9.7
   resolution: "@noble/curves@npm:1.9.7"
@@ -5048,6 +5117,13 @@ __metadata:
   version: 2.2.0
   resolution: "@noble/hashes@npm:2.2.0"
   checksum: 10c0/cad8630c504d6b9271984f685cd0af9101b40988fc2dfbe17ccdf068a9941f95cc5c9957d89e9ca4b7ca94c15cb35f93510c5d53a09fbcc83ee503b93d0a1034
+  languageName: node
+  linkType: hard
+
+"@noble/hashes@npm:2.4.0":
+  version: 2.4.0
+  resolution: "@noble/hashes@npm:2.4.0"
+  checksum: 10c0/f5820a38c52886073a69722a030688ad188bbacb822d01554545371259961c2b916266c57c013c2ce5a0d78aec977142fc68fd2a79be4c97b0644fcee9bb35f6
   languageName: node
   linkType: hard
 
@@ -6460,9 +6536,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@pkcprotocol/pkc-js@npm:0.0.132":
-  version: 0.0.132
-  resolution: "@pkcprotocol/pkc-js@npm:0.0.132"
+"@pkcprotocol/pkc-js@npm:0.0.163":
+  version: 0.0.163
+  resolution: "@pkcprotocol/pkc-js@npm:0.0.163"
   dependencies:
     "@enhances/with-resolvers": "npm:0.0.5"
     "@helia/bitswap": "npm:4.0.20"
@@ -6470,16 +6546,21 @@ __metadata:
     "@helia/ipns": "npm:10.2.2"
     "@helia/libp2p": "npm:2.1.5"
     "@helia/unixfs": "npm:8.0.9"
+    "@ipld/dag-cbor": "npm:9.2.7"
+    "@ipld/dag-pb": "npm:4.2.0"
     "@libp2p/crypto": "npm:5.2.0"
     "@libp2p/fetch": "npm:4.1.17"
     "@libp2p/gossipsub": "npm:17.2.1"
     "@libp2p/identify": "npm:4.1.18"
     "@libp2p/interface": "npm:3.4.0"
     "@libp2p/peer-id": "npm:6.0.18"
+    "@libp2p/utils": "npm:7.4.5"
+    "@libp2p/webtransport": "npm:6.0.44"
     "@multiformats/multiaddr": "npm:13.0.3"
-    "@noble/curves": "npm:2.2.0"
+    "@multiformats/murmur3": "npm:2.2.5"
+    "@noble/curves": "npm:2.4.0"
+    "@noble/hashes": "npm:2.4.0"
     "@pkcprotocol/pkc-logger": "npm:0.1.0"
-    "@pkcprotocol/proper-lock-file": "npm:4.2.1"
     "@types/better-sqlite3": "npm:7.6.13"
     assert: "npm:2.1.0"
     better-sqlite3: "npm:12.9.0"
@@ -6493,6 +6574,7 @@ __metadata:
     ext-name: "npm:5.0.0"
     helia: "npm:7.1.16"
     hpagent: "npm:1.2.0"
+    ipfs-unixfs: "npm:13.1.2"
     ipfs-unixfs-importer: "npm:17.0.1"
     ipns: "npm:11.0.1"
     it-all: "npm:3.0.6"
@@ -6505,7 +6587,7 @@ __metadata:
     localforage: "npm:1.10.0"
     lodash.merge: "npm:4.6.2"
     lru-cache: "npm:10.1.0"
-    multiformats: "npm:14.0.5"
+    multiformats: "npm:14.0.7"
     node-forge: "npm:1.4.2"
     open-graph-scraper: "npm:6.11.0"
     p-limit: "npm:7.3.0"
@@ -6526,7 +6608,7 @@ __metadata:
     uuid: "npm:14.0.3"
     ws: "npm:8.22.0"
     zod: "npm:4.6.7"
-  checksum: 10c0/709fbde3d7944a24644e9811fb60910977b8596ebc334c01057c7c7d75cccc98b8394987d148e1e1907260aac54f4cc6c31137b0f684873b5745743f01d8fe7a
+  checksum: 10c0/1c7005129531b402dbcb6c3aad5613ac5b8868374d9560616d23fa97bd9e57c690c2633a87abc53be4366281664012c37ba5907c4f66f140ef246817a2c8d001
   languageName: node
   linkType: hard
 
@@ -6536,17 +6618,6 @@ __metadata:
   dependencies:
     debug: "npm:4.4.3"
   checksum: 10c0/f37dad95e940685d0afa5f3dbecf6dd172bcb9985890807d5d1d09151516e7b8c58f551daaa5c7830e56b9a674fe6b3f4ec4d882d2d9e84a34031a73ed24aa31
-  languageName: node
-  linkType: hard
-
-"@pkcprotocol/proper-lock-file@npm:4.2.1":
-  version: 4.2.1
-  resolution: "@pkcprotocol/proper-lock-file@npm:4.2.1"
-  dependencies:
-    graceful-fs: "npm:4.2.11"
-    retry: "npm:0.13.1"
-    signal-exit: "npm:4.1.0"
-  checksum: 10c0/05e9c4aa7a405a19a5ace80bca87491c5a89a97499e6da15f54a5753b5f6f8038d9f9597df8115f343894b46eb2ea15d662e0bfa2a4a4f5e478a57e7bb88e640
   languageName: node
   linkType: hard
 
@@ -12265,7 +12336,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"graceful-fs@npm:4.2.11, graceful-fs@npm:^4.1.2, graceful-fs@npm:^4.1.6, graceful-fs@npm:^4.2.0, graceful-fs@npm:^4.2.11, graceful-fs@npm:^4.2.6":
+"graceful-fs@npm:^4.1.2, graceful-fs@npm:^4.1.6, graceful-fs@npm:^4.2.0, graceful-fs@npm:^4.2.11, graceful-fs@npm:^4.2.6":
   version: 4.2.11
   resolution: "graceful-fs@npm:4.2.11"
   checksum: 10c0/386d011a553e02bc594ac2ca0bd6d9e4c22d7fa8cfbfc448a6d148c59ea881b092db9dbe3547ae4b88e55f1b01f7c4a2ecc53b310c042793e63aa44cf6c257f2
@@ -13263,7 +13334,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ipfs-unixfs@npm:^13.0.0, ipfs-unixfs@npm:^13.1.1":
+"ipfs-unixfs@npm:13.1.2, ipfs-unixfs@npm:^13.0.0, ipfs-unixfs@npm:^13.1.1":
   version: 13.1.2
   resolution: "ipfs-unixfs@npm:13.1.2"
   dependencies:
@@ -16385,6 +16456,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"modern-web-guidance@npm:1.0.0":
+  version: 1.0.0
+  resolution: "modern-web-guidance@npm:1.0.0"
+  bin:
+    modern-web-guidance: skills/modern-web-guidance/modern-web.mjs
+  checksum: 10c0/227875ba43c9ef9390c5bdc4d98c309930e1a7848b10b3558bf810b650d2a94fb3d0239627f8fe6ed1e921a1e81be417e629883e2d717bb1a641cb60617b3a38
+  languageName: node
+  linkType: hard
+
 "modify-filename@npm:^1.1.0":
   version: 1.1.0
   resolution: "modify-filename@npm:1.1.0"
@@ -16487,6 +16567,13 @@ __metadata:
   version: 14.0.5
   resolution: "multiformats@npm:14.0.5"
   checksum: 10c0/3e3de2da477e51434099636b1d107f1f431dab3441f485665c38e6b33d16db673919c55c2bafc2170295173d84ff78c3ff540e4a62682b20d6cdea8d2ed7fd2b
+  languageName: node
+  linkType: hard
+
+"multiformats@npm:14.0.7":
+  version: 14.0.7
+  resolution: "multiformats@npm:14.0.7"
+  checksum: 10c0/944f2ac1f0b4bfe8c2fccf70f4697222348c53461631ff919a3cb6758ef6032035dc0b9089359ecfe75a52921be428d444b7794115f2e4e2d976ffb7b4d64420
   languageName: node
   linkType: hard
 
@@ -17145,27 +17232,6 @@ __metadata:
     typescript:
       optional: true
   checksum: 10c0/dfefa9218269103b3da3686c4da62849aef15e4347fd21f898fa113d9b4c2b86afab7c662c94d58206257736202647ce96249405c021c4a233712ac34fa3cc1b
-  languageName: node
-  linkType: hard
-
-"ox@npm:0.14.32":
-  version: 0.14.32
-  resolution: "ox@npm:0.14.32"
-  dependencies:
-    "@adraffy/ens-normalize": "npm:^1.11.0"
-    "@noble/ciphers": "npm:^1.3.0"
-    "@noble/curves": "npm:1.9.1"
-    "@noble/hashes": "npm:^1.8.0"
-    "@scure/bip32": "npm:^1.7.0"
-    "@scure/bip39": "npm:^1.6.0"
-    abitype: "npm:^1.2.3"
-    eventemitter3: "npm:5.0.1"
-  peerDependencies:
-    typescript: ">=5.4.0"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10c0/e07c0b18f967f93bf9b52dd5f00cd72db38be435f06cb16e7852c08cc6f05730c031a3ae5dbe058682160ec25b8a8664df334e28fe0677f7848abd0b9a9b59f0
   languageName: node
   linkType: hard
 
@@ -19680,7 +19746,7 @@ __metadata:
   resolution: "seedit@workspace:."
   dependencies:
     "@babel/core": "npm:7.29.7"
-    "@bitsocial/bitsocial-react-hooks": "npm:0.2.2"
+    "@bitsocial/bitsocial-react-hooks": "npm:0.4.2"
     "@bitsocial/bso-resolver": "npm:0.0.10"
     "@capacitor/android": "npm:7.6.9"
     "@capacitor/app": "npm:7.0.1"
@@ -19699,7 +19765,7 @@ __metadata:
     "@floating-ui/react": "npm:0.26.1"
     "@noble/curves": "npm:2.0.1"
     "@noble/hashes": "npm:2.0.1"
-    "@pkcprotocol/pkc-js": "npm:0.0.132"
+    "@pkcprotocol/pkc-js": "npm:0.0.163"
     "@playwright/cli": "npm:0.1.19"
     "@reforged/maker-appimage": "npm:6.0.0"
     "@rolldown/plugin-babel": "npm:0.2.4"
@@ -19746,6 +19812,7 @@ __metadata:
     lint-staged: "npm:12.3.8"
     lodash: "npm:4.18.0"
     memoizee: "npm:0.4.17"
+    modern-web-guidance: "npm:1.0.0"
     node-fetch: "npm:3.3.2"
     oxc-parser: "npm:0.138.0"
     oxfmt: "npm:0.24.0"
@@ -20131,17 +20198,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"signal-exit@npm:4.1.0, signal-exit@npm:^4.0.1, signal-exit@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "signal-exit@npm:4.1.0"
-  checksum: 10c0/41602dce540e46d599edba9d9860193398d135f7ff72cab629db5171516cfae628d21e7bfccde1bbfdf11c48726bc2a6d1a8fb8701125852fbfda7cf19c6aa83
-  languageName: node
-  linkType: hard
-
 "signal-exit@npm:^3.0.0, signal-exit@npm:^3.0.2, signal-exit@npm:^3.0.3, signal-exit@npm:^3.0.7":
   version: 3.0.7
   resolution: "signal-exit@npm:3.0.7"
   checksum: 10c0/25d272fa73e146048565e08f3309d5b942c1979a6f4a58a8c59d5fa299728e9c2fcd1a759ec870863b1fd38653670240cd420dad2ad9330c71f36608a6a1c912
+  languageName: node
+  linkType: hard
+
+"signal-exit@npm:^4.0.1, signal-exit@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "signal-exit@npm:4.1.0"
+  checksum: 10c0/41602dce540e46d599edba9d9860193398d135f7ff72cab629db5171516cfae628d21e7bfccde1bbfdf11c48726bc2a6d1a8fb8701125852fbfda7cf19c6aa83
   languageName: node
   linkType: hard
 
@@ -22136,27 +22203,6 @@ __metadata:
     typescript:
       optional: true
   checksum: 10c0/4747450c511604dc2280b94b6a6eab53638058a559531f7707d31f21de51670449530f9ebc2fbc06d961b8b5a6cfadb920683e701058adc8996619b012bbc56d
-  languageName: node
-  linkType: hard
-
-"viem@npm:2.55.8":
-  version: 2.55.8
-  resolution: "viem@npm:2.55.8"
-  dependencies:
-    "@noble/curves": "npm:1.9.1"
-    "@noble/hashes": "npm:1.8.0"
-    "@scure/bip32": "npm:1.7.0"
-    "@scure/bip39": "npm:1.6.0"
-    abitype: "npm:1.2.3"
-    isows: "npm:1.0.7"
-    ox: "npm:0.14.32"
-    ws: "npm:8.21.0"
-  peerDependencies:
-    typescript: ">=5.0.4"
-  peerDependenciesMeta:
-    typescript:
-      optional: true
-  checksum: 10c0/30457ab22c174e02680831f841cd27ba806346ea2099e6b091a53bb46f0bcd6406d93704ef1d91be0d21fd367e38fe81573a9a89a84906e469bdb9c12be7a0bb
   languageName: node
   linkType: hard
 

@@ -12,12 +12,14 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 
 const testState = vi.hoisted(() => ({
   account: { author: { address: 'owner.bso' } },
+  stateString: '',
   community: {} as Record<string, any>,
   pathname: '/s/example.bso/settings',
   lastEditOptions: undefined as Record<string, any> | undefined,
   lastCreateOptions: undefined as Record<string, any> | undefined,
   publishCommunityEdit: vi.fn().mockResolvedValue(undefined),
   createCommunity: vi.fn().mockResolvedValue(undefined),
+  deleteCommunity: vi.fn().mockResolvedValue(undefined),
   navigate: vi.fn(),
   subscribe: vi.fn(),
   t: vi.fn((key: string) => key),
@@ -36,7 +38,7 @@ const testState = vi.hoisted(() => ({
 }));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
-  deleteCommunity: vi.fn(),
+  deleteCommunity: (...args: unknown[]) => testState.deleteCommunity(...args),
   useAccount: () => testState.account,
   useCommunity: () => testState.community,
   usePkcRpcSettings: () => testState.rpcSettings,
@@ -60,9 +62,10 @@ vi.mock('react-router-dom', () => ({
 }));
 vi.mock('../../hooks/use-resolved-community-route', () => ({ default: () => ({ communityAddress: 'example.bso' }) }));
 vi.mock('../../hooks/use-is-community-offline', () => ({ default: () => ({ isOffline: false, offlineTitle: '' }) }));
-vi.mock('../../hooks/use-state-string', () => ({ default: () => '' }));
-vi.mock('../../components/error-display', () => ({ default: () => null }));
-vi.mock('../../components/loading-ellipsis', () => ({ default: () => null }));
+vi.mock('../../hooks/use-state-string', () => ({ default: () => testState.stateString }));
+vi.mock('../../components/error-display', () => ({ default: ({ error }: { error?: Error }) => (error ? createElement('span', null, `error: ${error.message}`) : null) }));
+// a loading status is an attribute rather than text, so the text of the views stays unchanged
+vi.mock('../../components/loading-ellipsis', () => ({ default: ({ string }: { string: string }) => createElement('span', { 'data-loading-status': string }) }));
 vi.mock('../../components/sidebar', () => ({ default: () => null }));
 vi.mock('../../components/markdown', () => ({ default: ({ content }: { content: string }) => createElement('div', { 'data-testid': 'preview' }, content) }));
 vi.mock('../../components/reply-form', () => ({ FormattingHelpTable: () => null }));
@@ -97,6 +100,7 @@ describe('CommunitySettings field rendering', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     testState.pathname = '/s/example.bso/settings';
+    testState.stateString = '';
     testState.lastEditOptions = undefined;
     testState.lastCreateOptions = undefined;
     testState.community = {
@@ -124,6 +128,21 @@ describe('CommunitySettings field rendering', () => {
     container.remove();
     useCommunitySettingsStore.getState().resetCommunitySettingsStore();
     vi.restoreAllMocks();
+  });
+
+  it('shows a community whose first load failed as failed, and why a retrying one has not loaded', async () => {
+    const loadingStatus = () => container.querySelector('[data-loading-status]')?.getAttribute('data-loading-status') ?? undefined;
+    testState.community = { state: 'failed', firstLoadFailed: true, error: new Error('No name resolver can handle this address') };
+    await render();
+    expect(container.textContent).toBe('error: No name resolver can handle this addressfailed');
+
+    expect(loadingStatus()).toBeUndefined();
+
+    testState.community = { state: 'fetching-ipns', firstLoadFailed: true, lastRetriableError: new Error('Domain resolver did not find the text record') };
+    testState.stateString = 'Waiting retry';
+    await render();
+    expect(container.textContent).toBe('error: Domain resolver did not find the text record');
+    expect(loadingStatus()).toBe('Waiting retry');
   });
 
   it('edits the title without rendering unrelated fields and keeps the complete latest save options', async () => {
@@ -219,5 +238,77 @@ describe('CommunitySettings field rendering', () => {
 
     await act(async () => getButton('create_community').click());
     expect(testState.createCommunity).toHaveBeenCalledOnce();
+  });
+
+  it('starts the create form from a blank draft after the settings of another community were open', async () => {
+    testState.community.roles = { 'other-owner.bso': { role: 'owner' } };
+    await render();
+    expect(useCommunitySettingsStore.getState().communityAddress).toBe('example.bso');
+
+    // the create route mounts a new CommunitySettings instance
+    act(() => root.unmount());
+    root = createRoot(container);
+    testState.pathname = '/communities/create';
+    testState.community = {};
+    await render();
+
+    expect(testState.lastCreateOptions).not.toHaveProperty('address');
+    expect(testState.lastCreateOptions).not.toHaveProperty('communityAddress');
+    expect(testState.lastCreateOptions?.title).toBeUndefined();
+    expect(testState.lastCreateOptions?.rules).toEqual([]);
+    expect(testState.lastCreateOptions?.roles).toEqual({ 'owner.bso': { role: 'owner' } });
+    expect(testState.lastCreateOptions?.settings.challenges).toEqual([{ name: 'captcha-canvas-v3', options: { difficulty: '2' } }]);
+    expect(Array.from(container.querySelectorAll('input')).some((input) => input.value === 'Original title' || input.value === 'Original rule')).toBe(false);
+  });
+
+  it('keeps the create draft when the create form is opened again', async () => {
+    testState.pathname = '/communities/create';
+    testState.community = {};
+    await render();
+    await changeInput(getInput(''), 'Draft community');
+
+    act(() => root.unmount());
+    root = createRoot(container);
+    await render();
+
+    expect(getInput('Draft community')).toBeDefined();
+    expect(testState.lastCreateOptions?.title).toBe('Draft community');
+  });
+
+  it('alerts the outcome of each save rather than the error from before it', async () => {
+    // like the hooks, publishCommunityEdit reports a failure through onError and resolves
+    testState.publishCommunityEdit.mockImplementationOnce(async () => testState.lastEditOptions?.onError?.(new Error('edit failed')));
+    await render();
+
+    await act(async () => getButton('save_options').click());
+    expect(window.alert).toHaveBeenCalledExactlyOnceWith('edit failed');
+
+    vi.mocked(window.alert).mockClear();
+    await act(async () => getButton('save_options').click());
+    expect(window.alert).toHaveBeenCalledExactlyOnceWith('settings_saved');
+  });
+
+  it('alerts a failed create', async () => {
+    testState.pathname = '/communities/create';
+    testState.community = {};
+    testState.createCommunity.mockImplementationOnce(async () => testState.lastCreateOptions?.onError?.(new Error('create failed')));
+    await render();
+
+    await act(async () => getButton('create_community').click());
+    expect(window.alert).toHaveBeenCalledExactlyOnceWith('create failed');
+  });
+
+  it('enables delete and save again after a failed delete', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    testState.deleteCommunity.mockRejectedValueOnce(new Error('delete failed'));
+    await render();
+
+    await act(async () => getButton('delete').click());
+
+    expect(window.alert).toHaveBeenCalledWith('failed deleting community: delete failed');
+    expect(getButton('delete').disabled).toBe(false);
+    expect(getButton('save_options').disabled).toBe(false);
+    expect(testState.navigate).not.toHaveBeenCalled();
   });
 });

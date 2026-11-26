@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { type Comment, type PublishCommentEditOptions, useComment, useEditedComment, usePublishCommentEdit } from '@bitsocial/bitsocial-react-hooks';
 import { alertChallengeVerificationFailed } from '../lib/utils/challenge-utils';
 import { getCommentCommunityAddress } from '../lib/utils/comment-utils';
@@ -13,9 +12,11 @@ const useDeleteComment = (commentCid: string) => {
   const post: Comment | undefined = editedComment || comment;
   const deleted: boolean | undefined = post?.deleted;
 
-  const defaultPublishOptions: PublishCommentEditOptions = {
+  // this only toggles deleted, and usePublishCommentEdit publishes the options of the render that returned it, so
+  // the toggle can publish the flipped value directly
+  const publishOptions: PublishCommentEditOptions = {
     commentCid,
-    deleted,
+    deleted: !deleted,
     communityAddress: getCommentCommunityAddress(post),
     onChallenge: (...args: any) => addChallenge([...args, post]),
     onChallengeVerification: alertChallengeVerificationFailed,
@@ -24,19 +25,9 @@ const useDeleteComment = (commentCid: string) => {
       alert('Comment edit failed. ' + error.message);
     },
   };
-  const [publishOptions, setPublishOptions] = useState(defaultPublishOptions);
   const { publishCommentEdit } = usePublishCommentEdit(publishOptions);
 
-  // usePublishCommentEdit publishes the options of the render it was called in, so the edit goes out once they hold the new state.
-  useEffect(() => {
-    if (publishOptions.deleted !== defaultPublishOptions.deleted) {
-      publishCommentEdit();
-    }
-  }, [publishOptions, publishCommentEdit, defaultPublishOptions.deleted]);
-
-  const toggleDeleted = () => setPublishOptions((options) => ({ ...options, deleted: !deleted }));
-
-  return { deleted, toggleDeleted };
+  return { deleted, toggleDeleted: () => void publishCommentEdit() };
 };
 
 export default useDeleteComment;

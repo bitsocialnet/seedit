@@ -2,7 +2,8 @@ import { useCallback, useMemo } from 'react';
 import { useCommunities, useFeed, type UseFeedOptions, type UseFeedResult } from '@bitsocial/bitsocial-react-hooks';
 import { getFeedCommunityGroups, hasLoadingFeedCommunities, hasUnresolvedPostSortMetadata, mergeAndSortFeeds } from '../lib/utils/feed-sort-utils';
 
-export type UseFeedWithCompatibleSortResult = UseFeedResult & {
+// The merged feed does not provide useFeed's updatedFeed and bufferedFeed, which Seedit does not read.
+export type UseFeedWithCompatibleSortResult = Omit<UseFeedResult, 'updatedFeed' | 'bufferedFeed'> & {
   /** Some of the feed's communities have not loaded their first record yet. */
   isLoadingCommunities: boolean;
 };
@@ -16,6 +17,7 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCom
   const communityIdentifiers = useMemo(() => options.communities || [], [options.communities]);
   const {
     communities,
+    communityLoadStatuses,
     state: communitiesState,
     error: communitiesError,
     errors: communitiesErrors,
@@ -57,6 +59,10 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCom
     () => [...new Set([...requestedSortFeed.communityKeysWithMore, ...preloadedSortFeed.communityKeysWithMore])],
     [preloadedSortFeed.communityKeysWithMore, requestedSortFeed.communityKeysWithMore],
   );
+  const communityKeysWithUnavailableSort = useMemo(
+    () => [...new Set([...requestedSortFeed.communityKeysWithUnavailableSort, ...preloadedSortFeed.communityKeysWithUnavailableSort])],
+    [preloadedSortFeed.communityKeysWithUnavailableSort, requestedSortFeed.communityKeysWithUnavailableSort],
+  );
 
   const loadMore = useCallback(async () => {
     await Promise.all([
@@ -94,7 +100,8 @@ const useFeedWithCompatibleSort = (options: UseFeedOptions = {}): UseFeedWithCom
     reset,
     communityKeysWithNewerPosts,
     communityKeysWithMore,
-    isLoadingCommunities: hasLoadingFeedCommunities(communities),
+    communityKeysWithUnavailableSort,
+    isLoadingCommunities: hasLoadingFeedCommunities(communities, communityLoadStatuses),
     state: communitiesState === 'failed' ? 'failed' : hasMore ? 'fetching-ipns' : 'succeeded',
     error: communitiesError || requestedSortFeed.error || preloadedSortFeed.error,
     errors: [...communitiesErrors, ...requestedSortFeed.errors, ...preloadedSortFeed.errors],

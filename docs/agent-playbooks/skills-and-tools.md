@@ -1,6 +1,6 @@
 # Skills and Tools
 
-Shared skills live in `.agents/skills/`. Edit these sources, then run `yarn ai-workflow:sync` to generate `.claude/skills/` for Claude Code. Codex and Cursor discover `.agents/skills/` directly; do not restore the duplicate `.codex/skills/` or `.cursor/skills/` roots.
+Shared skills live in `.agents/skills/`, where Codex discovers them directly. Edit these sources, then run `yarn ai-workflow:sync` to generate `.claude/skills/` for Claude Code.
 
 Shared role prompts live in `.agents/roles/*.md`. This is a repository-specific source format, not a native agent discovery path. `scripts/ai-workflow-files.mjs` converts these sources into the app-specific files below; `yarn ai-workflow:sync` writes them. Commit the generated files alongside their sources so a fresh checkout has the native configuration without running a generator first. After removing a source, remove its obsolete generated outputs explicitly; the validator reports them rather than silently deleting files.
 
@@ -11,12 +11,11 @@ Verified against official documentation on 2026-09-12:
 | App | Project instructions | Skills used by this repository | Custom agents used by this repository |
 |---|---|---|---|
 | Codex | `AGENTS.md` | `.agents/skills/<name>/SKILL.md` | Generated `.codex/agents/<name>.toml` |
-| Cursor | `AGENTS.md`; `.cursor/rules/*.mdc` remains available for Cursor-specific conditional rules | `.agents/skills/<name>/SKILL.md` | Generated `.cursor/agents/<name>.md` |
 | Claude Code | `CLAUDE.md` imports `@AGENTS.md` | Generated `.claude/skills/<name>/SKILL.md` | Generated `.claude/agents/<name>.md` |
 
-Sources: [Codex skills](https://learn.chatgpt.com/docs/build-skills), [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), [Cursor rules](https://cursor.com/docs/rules), [Cursor skills](https://cursor.com/docs/skills), [Cursor subagents](https://cursor.com/docs/subagents), [Claude memory](https://code.claude.com/docs/en/memory), [Claude skills](https://code.claude.com/docs/en/skills), [Claude subagents](https://code.claude.com/docs/en/sub-agents).
+Sources: [Codex skills](https://learn.chatgpt.com/docs/build-skills), [Codex subagents](https://learn.chatgpt.com/docs/agent-configuration/subagents), [Claude memory](https://code.claude.com/docs/en/memory), [Claude skills](https://code.claude.com/docs/en/skills), [Claude subagents](https://code.claude.com/docs/en/sub-agents).
 
-Do not replace the native agent directories with `.agents/roles` or assume Claude discovers `.agents/skills`. Claude can still read a referenced file there as ordinary project context. Cursor also discovers `.claude/skills` for compatibility; copies remain synchronized, but its published skills guide does not specify deduplication across these roots. Check the installed app's skill catalog rather than promising that duplicate entries cannot appear.
+Keep generated agents in each app’s native agent directory. Claude can read referenced `.agents/skills` files as project context and discovers skills through the generated `.claude/skills/` directory.
 
 The AI directories use LF line endings through `.gitattributes` so generated text stays identical across platforms. Supporting skill assets are copied as bytes.
 
@@ -51,9 +50,9 @@ Keep custom roles for `browser-check`, `profiler`, `test-apk`, `translator`, and
 
 Codex agent files include `name`, `description`, and `developer_instructions`. `.codex/config.toml` caps concurrent children at four using `max_concurrent_threads_per_session`. Shared role metadata contains the name, description, and optional sandbox mode; it deliberately has no model fields.
 
-Leave model and reasoning fields out of committed skills and custom agents in all three apps. This allows runtime invocation choices, user defaults, and parent inheritance according to each app’s documented precedence. Claude family aliases reduce version maintenance but still choose a family; a versioned Cursor model requires future updates. Keep such choices in user/session settings when needed. Inheritance does not promise an automatic choice of the best current model. Do not invent a `latest` alias or add model-catalog research to routine tasks. See [Codex selection](https://learn.chatgpt.com/docs/agent-configuration/subagents), [Claude selection](https://code.claude.com/docs/en/sub-agents#choose-a-model), and [Cursor selection](https://cursor.com/docs/subagents#model-configuration).
+Leave model and reasoning fields out of committed skills and custom agents. Use runtime invocation choices or user settings to override the app’s default or inherited model when needed. Use documented model identifiers. See [Codex selection](https://learn.chatgpt.com/docs/agent-configuration/subagents) and [Claude selection](https://code.claude.com/docs/en/sub-agents#choose-a-model).
 
-`sandbox-mode: read-only` maps to Codex’s sandbox and Cursor’s `readonly`; Claude’s tool list and the role instructions restrict its review workflow, but Bash access is not an OS-level sandbox.
+`sandbox-mode: read-only` enables Codex’s read-only sandbox. In Claude, the generated tool list and role instructions restrict the review workflow, with Bash still able to write files.
 
 Shared skill frontmatter uses `disable-model-invocation: true` for user-invoked workflows where applicable. Codex's corresponding setting lives in `agents/openai.yaml` as `policy.allow_implicit_invocation: false`; the validator requires both. Invocation metadata supplements explicit authorization rules; a review request never authorizes publication merely because a skill includes publishing steps.
 

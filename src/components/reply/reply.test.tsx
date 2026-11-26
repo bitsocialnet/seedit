@@ -11,6 +11,7 @@ const act = (React as { act?: (callback: () => void | Promise<void>) => void | P
 
 const testState = vi.hoisted(() => ({
   blocked: false,
+  mediaInfo: undefined as Record<string, string> | undefined,
   pathname: '/s/example.bso/comments/post-cid',
   repliesByCid: {} as Record<string, Record<string, any>[]>,
 }));
@@ -34,21 +35,24 @@ vi.mock('../../hooks/use-replies', () => ({ default: (comment: { cid?: string })
 vi.mock('../../hooks/use-state-string', () => ({ default: () => '' }));
 vi.mock('../../hooks/use-upvote', () => ({ default: () => [false, vi.fn()] }));
 vi.mock('../../hooks/use-downvote', () => ({ default: () => [false, vi.fn()] }));
-vi.mock('../../hooks/use-comment-media-info', () => ({ useCommentMediaInfo: () => undefined }));
+vi.mock('../../hooks/use-comment-media-info', () => ({ useCommentMediaInfo: () => testState.mediaInfo }));
 vi.mock('../../lib/utils/media-utils', () => ({ getHasThumbnail: () => false }));
 vi.mock('../../lib/utils/time-utils', () => ({ formatLocalizedUTCTimestamp: () => '', getFormattedTimeAgo: () => '' }));
 vi.mock('../comment-edit-form', () => ({ default: () => null }));
 vi.mock('../loading-ellipsis', () => ({ default: () => null }));
 vi.mock('../markdown', () => ({ default: ({ content }: { content: string }) => createElement('p', null, content) }));
-vi.mock('../expand-button', () => ({ default: () => null }));
-vi.mock('../expando', () => ({ default: () => null }));
+vi.mock('../expand-button', () => ({
+  default: ({ toggleExpanded }: { toggleExpanded: () => void }) => createElement('span', { 'data-expand-button': '', onClick: toggleExpanded }),
+}));
+vi.mock('../expando', () => ({ default: () => createElement('div', { 'data-expando': '' }) }));
 vi.mock('../flair', () => ({
   default: ({ flair, author }: { flair: { text: string }; author?: boolean }) => (author ? createElement('span', { 'data-author-flair': '' }, flair.text) : null),
 }));
-vi.mock('../label', () => ({ default: () => null }));
+vi.mock('../label', () => ({ default: ({ text }: { text: string }) => createElement('span', { 'data-label': text }, text) }));
 vi.mock('../thumbnail', () => ({ default: () => null }));
 vi.mock('../comment-tools', () => ({
-  default: ({ cid, showReplyForm }: { cid?: string; showReplyForm: () => void }) => createElement('button', { 'data-reply-button': cid, onClick: showReplyForm }, cid),
+  default: ({ cid, failed, showReplyForm }: { cid?: string; failed?: boolean; showReplyForm: () => void }) =>
+    createElement('button', { 'data-reply-button': cid, 'data-failed': String(failed), onClick: showReplyForm }, cid),
 }));
 vi.mock('../reply-form', () => ({
   default: ({ cid }: { cid?: string }) => createElement('textarea', { 'data-reply-draft': cid, defaultValue: '' }),
@@ -66,6 +70,7 @@ const replyOrder = () => Array.from(container.querySelectorAll('[data-reply-butt
 describe('Nested Reply identity', () => {
   beforeEach(() => {
     testState.blocked = false;
+    testState.mediaInfo = undefined;
     testState.pathname = '/s/example.bso/comments/post-cid';
     testState.repliesByCid = { parent: [child('first'), child('second')], first: [child('grandchild')] };
     container = document.createElement('div');
@@ -125,6 +130,66 @@ describe('Nested Reply identity', () => {
     expect(consoleError.mock.calls.flat().join(' ')).not.toMatch(/same key/);
   });
 
+  it('labels a reply whose publication failed, but not one that only failed to load', async () => {
+    testState.repliesByCid = {};
+    const labels = () => Array.from(container.querySelectorAll('[data-label]')).map((element) => element.textContent);
+    const toolsFailed = () => container.querySelector('[data-failed]')?.getAttribute('data-failed');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, state: 'failed' } as any })));
+    expect(labels()).toEqual([]);
+    expect(toolsFailed()).toBe('false');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'failed', index: 2 } as any })));
+    expect(labels()).toEqual(['failed']);
+    expect(toolsFailed()).toBe('true');
+  });
+
+  it('says the author was banned only on the comment the ban was published on', async () => {
+    testState.repliesByCid = {};
+    const bannedAuthor = { address: 'author.bso', community: { banExpiresAt: 1_900_000_000 } };
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, author: bannedAuthor, authorBanExpiresAt: 1_900_000_000 } as any })));
+    expect(container.textContent).toContain('user_banned_for_this_comment');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: 'other', author: bannedAuthor } as any })));
+    expect(container.textContent).not.toContain('user_banned_for_this_comment');
+  });
+
+  it('shows why a reply that failed to load is empty, unless the post page shows it as its own comment', async () => {
+    testState.repliesByCid = {};
+    const failedLoad = { cid: 'top-parent', communityAddress: 'example.bso', state: 'failed', error: new Error('Invalid signature') };
+
+    await act(async () => root.render(createElement(Reply, { reply: failedLoad as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('error: Invalid signature');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...failedLoad, error: undefined } as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('failed');
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...failedLoad, error: new Error('') } as any, cidOfReplyWithContext: 'context-reply' })));
+    expect(container.textContent).toContain('failed');
+
+    await act(async () => root.render(createElement(Reply, { reply: failedLoad as any, isSingleComment: true })));
+    expect(container.textContent).not.toContain('Invalid signature');
+
+    const failedPublication = { ...parent, cid: undefined, state: 'failed', index: 2, error: new Error('publication rejected') };
+    await act(async () => root.render(createElement(Reply, { reply: failedPublication as any })));
+    expect(container.textContent).not.toContain('publication rejected');
+  });
+
+  it('labels only the account reply without a CID as pending, not one that is loading or failed to load', async () => {
+    testState.repliesByCid = {};
+    const labels = () => Array.from(container.querySelectorAll('[data-label]')).map((element) => element.textContent);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'failed' } as any })));
+    expect(labels()).toEqual([]);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'fetching-ipfs' } as any })));
+    expect(labels()).toEqual([]);
+
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, cid: undefined, state: 'pending', index: 1 } as any })));
+    expect(labels()).toEqual(['pending']);
+  });
+
   it('renders author flairs next to the author and hides them when collapsed', async () => {
     testState.repliesByCid = {};
     const flairedReply = { ...parent, author: { address: 'askwise.bso', flairs: [{ text: 'bot' }, { text: 'helper' }] } };
@@ -153,6 +218,21 @@ describe('Nested Reply identity', () => {
     testState.blocked = true;
     await renderRemovedReply();
     expect(collapseToggle('[+]')).toBeDefined();
+  });
+
+  it.each([
+    ['iframe', 'https://x.com/example/status/1'],
+    ['audio', 'https://example.com/song.mp3'],
+  ])('opens an %s embed without a thumbnail from its expand button', async (type, link) => {
+    testState.repliesByCid = {};
+    testState.mediaInfo = { type, url: link };
+    await act(async () => root.render(createElement(Reply, { reply: { ...parent, link } as any })));
+
+    const expandButton = container.querySelector<HTMLSpanElement>('[data-expand-button]');
+    expect(expandButton).not.toBeNull();
+    expect(container.querySelector('[data-expando]')).toBeNull();
+    await act(async () => expandButton?.click());
+    expect(container.querySelector('[data-expando]')).not.toBeNull();
   });
 
   it('renders author flairs in the inbox byline', async () => {

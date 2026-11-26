@@ -181,14 +181,7 @@ yarn-error.log*
 !.agents/skills/**
 .agents/**/.DS_Store
 
-.cursor/*
-.cursor/.DS_Store
-!.cursor/agents/
-!.cursor/agents/**
-!.cursor/hooks/
-!.cursor/hooks/**
-!.cursor/hooks.json
-.cursor/**/.DS_Store
+/.cursor/
 
 .claude/*
 .claude/.DS_Store

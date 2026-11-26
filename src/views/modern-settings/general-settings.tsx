@@ -185,7 +185,7 @@ const CryptoAddressSection = () => {
 
 const WalletsForm = ({ account }: { account: Account }) => {
   const { t } = useTranslation();
-  const { wallets, setWalletProperty, addWallet, removeWallet, save, copyMessageToSign, hasCopied } = useCryptoWallets(account);
+  const { wallets, setWalletProperty, addWallet, removeWallet, save, isWriting, mustSignAgain, copyMessageToSign, hasCopied } = useCryptoWallets(account);
 
   return (
     <>
@@ -193,10 +193,20 @@ const WalletsForm = ({ account }: { account: Account }) => {
         <div key={index} className={styles.wallet}>
           <div className={styles.walletHeader}>
             <span className={modernStyles.sentenceCase}>{t('wallet_number', { index: index + 1 })}</span>
-            <button type='button' className={`${modernStyles.secondaryButton} ${settingsStyles.button} ${settingsStyles.danger}`} onClick={() => removeWallet(index)}>
+            <button
+              type='button'
+              className={`${modernStyles.secondaryButton} ${settingsStyles.button} ${settingsStyles.danger}`}
+              disabled={isWriting}
+              onClick={() => void removeWallet(index)}
+            >
               {t('remove')}
             </button>
           </div>
+          {mustSignAgain(wallet) && (
+            <p className={`${settingsStyles.status} ${settingsStyles.statusError}`} role='status'>
+              {t('wallet_sign_again')}
+            </p>
+          )}
           <label className={settingsStyles.field}>
             {t('chain_ticker')}
             <input
@@ -253,9 +263,9 @@ const WalletsForm = ({ account }: { account: Account }) => {
             <button
               type='button'
               className={`${modernStyles.primaryButton} ${settingsStyles.button}`}
-              onClick={() => {
-                save();
-                alert(t('saved'));
+              disabled={isWriting}
+              onClick={async () => {
+                if (await save()) alert(t('saved'));
               }}
             >
               <span className={modernStyles.sentenceCase}>{t('save')}</span>

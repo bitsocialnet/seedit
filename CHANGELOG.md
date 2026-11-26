@@ -1,3 +1,39 @@
+## [0.7.1](https://github.com/bitsocialnet/seedit/compare/v0.7.0...v0.7.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **moderation:** ban through commentModeration.author so a ban takes effect ([9b9ebff](https://github.com/bitsocialnet/seedit/commit/9b9ebff665ecdd79ccf5555ba95295115b412d80))
+* **post:** hide the link and media of author-deleted posts ([837bb1b](https://github.com/bitsocialnet/seedit/commit/837bb1be0895d9af490e7685a28c853262c951d2))
+* **publishing:** drop ended challenges and keep the text of a failed edit ([#900](https://github.com/bitsocialnet/seedit/issues/900)) ([0b9b875](https://github.com/bitsocialnet/seedit/commit/0b9b875d8250ed2571394167b48b76f0365f4229))
+* **wallet-settings:** sign wallets as BSIP-22 defines and upgrade to hooks 0.4.0 and pkc-js 0.0.163 ([63047af](https://github.com/bitsocialnet/seedit/commit/63047af732f75c01d93ac5162c8262097a068b5f))
+
+
+### Features
+
+* **moderation:** say when a user was banned for a post or comment ([96f4434](https://github.com/bitsocialnet/seedit/commit/96f44345acde86a80a755fbb6e8c24679e03e881))
+
+
+
+# [0.7.0](https://github.com/bitsocialnet/seedit/compare/v0.6.3...v0.7.0) (2026-11-20)
+
+
+### Bug Fixes
+
+* **accounts:** keep NSFW gating, settings saves, directory routes and default communities consistent ([#887](https://github.com/bitsocialnet/seedit/issues/887)) ([27dac56](https://github.com/bitsocialnet/seedit/commit/27dac5694291ec7619d5bd9c0853db6073acdc70))
+* **agents:** use native paths in workflow tests ([#889](https://github.com/bitsocialnet/seedit/issues/889)) ([41c9af1](https://github.com/bitsocialnet/seedit/commit/41c9af1a62a0937ec4c89307ae864652370e5151))
+* **app state:** fix notification replays, dropped RPC URLs and account recovery ([#874](https://github.com/bitsocialnet/seedit/issues/874)) ([aa78903](https://github.com/bitsocialnet/seedit/commit/aa7890359e8058daf155e1d35b5020670dfef4d3))
+* **challenge-modal:** answer pkc-js 0.0.152 record-shaped challenges ([#896](https://github.com/bitsocialnet/seedit/issues/896)) ([fdd2aa9](https://github.com/bitsocialnet/seedit/commit/fdd2aa9b2512219f63a0df0904b6eb203998dd29)), closes [#895](https://github.com/bitsocialnet/seedit/issues/895)
+* **electron:** repair notification clicks, the app menu, IPFS warnings and instance handling ([#883](https://github.com/bitsocialnet/seedit/issues/883)) ([63dcdb6](https://github.com/bitsocialnet/seedit/commit/63dcdb646bb94c009391ef67b75ac8c744b9b86a))
+* **feed:** isolate author updates from post rows ([#894](https://github.com/bitsocialnet/seedit/issues/894)) ([89d1989](https://github.com/bitsocialnet/seedit/commit/89d198978b9b6850b3b62ee829978dc054ec08ef))
+* **media upload:** hold posts until the upload finishes and re-probe failed hosts ([#881](https://github.com/bitsocialnet/seedit/issues/881)) ([b108ff2](https://github.com/bitsocialnet/seedit/commit/b108ff2ef70ef0798ef701a710aac5dca59bf8e4))
+* **post rendering:** restore reply embeds and thumbnails and keep profile, inbox and author tab state ([#879](https://github.com/bitsocialnet/seedit/issues/879)) ([163dff6](https://github.com/bitsocialnet/seedit/commit/163dff6214071ed431488a49e33e4aa50b613970))
+* **publishing:** act on current state in community settings, moderation and draft forms ([#872](https://github.com/bitsocialnet/seedit/issues/872)) ([68bc886](https://github.com/bitsocialnet/seedit/commit/68bc8862dd4c86bcd17d1d34f0f738a326193128))
+* **scripts:** release browsers, locks and dev servers when runs are interrupted or race ([#877](https://github.com/bitsocialnet/seedit/issues/877)) ([6cbaa92](https://github.com/bitsocialnet/seedit/commit/6cbaa9292cd58ddb7165c4ee92b6d21e1a588fc5))
+* **sidebar, state string:** scope the block confirmation to its community and show client loading states ([#885](https://github.com/bitsocialnet/seedit/issues/885)) ([403e6d7](https://github.com/bitsocialnet/seedit/commit/403e6d7a1638dd979bf89de57b212f47735b7bbf))
+
+
+
 ## [0.6.3](https://github.com/bitsocialnet/seedit/compare/v0.6.2...v0.6.3) (2026-11-07)
 
 

@@ -277,6 +277,8 @@ const CommunitySettings = () => {
     community,
     communityAddress,
     hasLoaded,
+    loadError,
+    hasFailedToLoad,
     isCreating: isInCreateCommunityView,
     isConnectedToRpc,
     isHostedHere,
@@ -292,7 +294,6 @@ const CommunitySettings = () => {
     create,
     remove,
   } = useCommunitySettings({ onCreated: (address) => alert(`community created, address: ${getDisplayAddress(address)}`) });
-  const { error } = community || {};
   const isInCommunitySettingsView = !isInCreateCommunityView;
 
   useEffect(() => {
@@ -304,14 +305,24 @@ const CommunitySettings = () => {
   const { isOffline, offlineTitle } = useIsCommunityOffline(community || {});
 
   const saveCommunity = async () => {
-    if (await save()) alert(t('settings_saved', { communityAddress }));
+    const saveError = await save();
+    alert(saveError ? saveError.message || 'Error: ' + saveError : t('settings_saved', { communityAddress }));
   };
 
   const _deleteCommunity = async () => {
-    if (await remove()) {
+    const { deleted, error: deleteError } = await remove();
+    if (deleted) {
       alert(t('community_deleted'));
       navigate('/', { replace: true });
+    } else if (deleteError) {
+      console.warn(deleteError);
+      alert(`failed deleting community: ${deleteError.message}`);
     }
+  };
+
+  const createCommunity = async () => {
+    const createError = await create();
+    if (createError) alert(createError.message || 'Error: ' + createError);
   };
 
   const documentTitle = useMemo(() => {
@@ -337,14 +348,12 @@ const CommunitySettings = () => {
   if (!hasLoaded && !isInCreateCommunityView) {
     return (
       <>
-        {error?.message && (
+        {loadError?.message && (
           <div className={styles.error}>
-            <ErrorDisplay error={error} />
+            <ErrorDisplay error={loadError} />
           </div>
         )}
-        <div className={styles.loading}>
-          <LoadingEllipsis string={loadingStateString || t('loading')} />
-        </div>
+        <div className={styles.loading}>{hasFailedToLoad ? t('failed') : <LoadingEllipsis string={loadingStateString || t('loading')} />}</div>
       </>
     );
   }
@@ -383,7 +392,7 @@ const CommunitySettings = () => {
           </div>
         )}
         {!isReadOnly && (
-          <button onClick={() => (isInCreateCommunityView ? create() : saveCommunity())} disabled={showSaving || showDeleting}>
+          <button onClick={() => (isInCreateCommunityView ? createCommunity() : saveCommunity())} disabled={showSaving || showDeleting}>
             {isInCreateCommunityView ? t('create_community') : t('save_options')}
           </button>
         )}

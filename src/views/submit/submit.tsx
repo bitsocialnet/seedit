@@ -324,6 +324,8 @@ const RulesInfo = memo(function RulesInfo({ shortAddress, rules }: { shortAddres
 
 const SubmitOptions = memo(function SubmitOptions() {
   const { t } = useTranslation();
+  const spoiler = usePublishPostStore((state) => state.spoiler);
+  const nsfw = usePublishPostStore((state) => state.nsfw);
   const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
 
   return (
@@ -333,13 +335,13 @@ const SubmitOptions = memo(function SubmitOptions() {
         <div className={styles.options}>
           <div className={styles.option}>
             <label>
-              <input type='checkbox' onChange={(e) => setPublishPostStore({ spoiler: e.target.checked })} />
+              <input type='checkbox' checked={!!spoiler} onChange={(e) => setPublishPostStore({ spoiler: e.target.checked })} />
               {t('spoiler')}
             </label>
           </div>
           <div className={styles.option}>
             <label>
-              <input type='checkbox' onChange={(e) => setPublishPostStore({ nsfw: e.target.checked })} />
+              <input type='checkbox' checked={!!nsfw} onChange={(e) => setPublishPostStore({ nsfw: e.target.checked })} />
               {t('nsfw')}
             </label>
           </div>
@@ -379,6 +381,7 @@ const SubmitPage = () => {
   const { t } = useTranslation();
   const crosspost = usePublishPostStore((state) => state.crosspost);
   const link = usePublishPostStore((state) => state.link);
+  const isUploadingMedia = usePublishPostStore((state) => state.isUploadingMedia);
   const { communityAddress, community, shortAddress, isOffline, offlineTitle, submitPost } = useSubmitPost();
   const { rules, title: communityTitle } = community;
 
@@ -429,7 +432,7 @@ const SubmitPage = () => {
           <div className={`${styles.box} ${styles.notice}`}>{t('submit_notice')}</div>
           <div>*{t('required')}</div>
           <div className={styles.submit}>
-            <button className={styles.submitButton} onClick={submitPost}>
+            <button className={styles.submitButton} onClick={submitPost} disabled={isUploadingMedia}>
               {t('submit')}
             </button>
           </div>

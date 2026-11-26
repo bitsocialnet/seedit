@@ -244,10 +244,12 @@ const Sidebar = ({ comment, communityAddress, directoryCode, directoryRevision, 
 
   const { blocked, unblock, block } = useBlock({ address });
 
-  const [showBlockConfirm, setShowBlockConfirm] = useState(false);
+  // the sidebar stays mounted while its route switches communities, so the confirmation belongs to the address it was opened for
+  const [blockConfirmAddress, setBlockConfirmAddress] = useState<string>();
+  const showBlockConfirm = !!address && blockConfirmAddress === address;
 
   const blockConfirm = () => {
-    setShowBlockConfirm(true);
+    setBlockConfirmAddress(address);
   };
 
   const handleBlock = () => {
@@ -256,12 +258,12 @@ const Sidebar = ({ comment, communityAddress, directoryCode, directoryRevision, 
     } else {
       block();
     }
-    setShowBlockConfirm(false);
+    setBlockConfirmAddress(undefined);
     reset?.();
   };
 
   const cancelBlock = () => {
-    setShowBlockConfirm(false);
+    setBlockConfirmAddress(undefined);
   };
 
   const account = useAccount();

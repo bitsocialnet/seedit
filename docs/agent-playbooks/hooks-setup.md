@@ -7,14 +7,13 @@ The only automatic lifecycle action is formatting edited JavaScript and TypeScri
 | Harness | Entry point | Event |
 |---|---|---|
 | Claude Code | `hooks` in `.claude/settings.json` | `PostToolUse`, matcher `Edit\|Write\|MultiEdit` |
-| Cursor | `.cursor/hooks.json`, version 1 | `afterFileEdit` |
 | Codex | `.codex/hooks.json` | `PostToolUse`, matcher `apply_patch` |
 
 Keep these application-specific schemas separate. Codex hooks also need to be trusted in the contributor's Codex settings before they run; a committed configuration does not establish that trust.
 
 ## Formatting behavior
 
-- Claude sends `tool_input.file_path`; Cursor sends `file_path`.
+- Claude sends `tool_input.file_path`.
 - Codex sends `apply_patch` text in `tool_input.command`. The formatter collects added and updated files, uses the destination of a move, and ignores deleted files.
 - Relative paths use the payload's working directory when supplied, falling back to the repository root.
 - Known read-only tool calls, non-edit events, reported tool failures, malformed input, missing paths, and unsupported extensions are skipped.

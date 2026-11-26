@@ -153,8 +153,26 @@ export function openInBrowser(url) {
   spawn(opener.cmd, opener.args, { stdio: 'ignore', detached: true }).unref();
 }
 
+// A signal sent only to the launcher (an agent stopping the PID it recorded) would otherwise leave
+// the server and its Portless route running. Portless removes its route on SIGINT and SIGTERM only.
+const forwardedSignals = { SIGINT: 'SIGINT', SIGTERM: 'SIGTERM', SIGHUP: 'SIGTERM' };
+
 export function forwardChildExit(child) {
+  const forwardSignal = (signal) => {
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill(forwardedSignals[signal]);
+    }
+  };
+
+  for (const signal of Object.keys(forwardedSignals)) {
+    process.on(signal, forwardSignal);
+  }
+
   child.on('exit', (code, signal) => {
+    for (const forwarded of Object.keys(forwardedSignals)) {
+      process.off(forwarded, forwardSignal);
+    }
+
     if (signal) {
       process.kill(process.pid, signal);
       return;

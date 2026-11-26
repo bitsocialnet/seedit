@@ -1,4 +1,4 @@
-import type { LocalNotification } from './common';
+import type { LocalNotification, NotificationPermissionStatus } from './common';
 
 /**
  * Requests permission to display notifications.
@@ -17,6 +17,16 @@ export async function requestWebNotificationPermission(): Promise<boolean> {
     console.error('Error requesting notification permission:', error);
     return false;
   }
+}
+
+/**
+ * Reads the current notification permission without prompting.
+ */
+export function getWebNotificationPermissionStatus(): NotificationPermissionStatus {
+  if (!('Notification' in window) || !navigator.serviceWorker) return 'not-supported';
+  if (Notification.permission === 'granted') return 'granted';
+  if (Notification.permission === 'denied') return 'denied';
+  return 'not-determined';
 }
 
 /**

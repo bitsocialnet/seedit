@@ -297,7 +297,8 @@ export async function runBrowserPlan(planInput, { driver, client, baseline = fal
               advisory: true,
               verdict: answer.probabilities[answer.choice] >= plan.limits.minProbability ? answer.choice : 'uncertain',
             });
-          } catch {
+          } catch (error) {
+            if (error instanceof JevError && error.code === 'interrupted') throw error;
             report.semantic.push({ id: check.id, advisory: true, verdict: 'unavailable' });
           }
         }

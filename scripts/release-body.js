@@ -117,7 +117,7 @@ const htmlSection = section('Static HTML build', [htmlZip && `- seedit-html (zip
 
 const downloads = [macSection, winSection, linuxSection, androidSection, htmlSection].filter(Boolean).join('\n\n');
 
-const releaseBody = `This release fixes memory growth in feeds left open, shows 5chan posts' verified tripcodes and fortune and dice results, recognizes directories published after the release, and strips addresses and search text from seedit.app's analytics, which now also count failed post attempts.
+const releaseBody = `This release makes moderator bans take effect and labels the post or comment a user was banned for, shows why a community, feed or post failed to load instead of loading forever, keeps the text of a failed edit, hides the link and media of author-deleted posts, and signs wallets the way updated communities require, so saved wallets must be signed again.
 
 - Web app: https://seedit.app
 - Decentralized web app via IPFS/IPNS gateways (works on any browser): [seedit.eth.limo](https://seedit.eth.limo), [seedit.eth.link](https://seedit.eth.link), [dweb.link/ipfs.io](https://dweb.link/ipns/seedit.eth)

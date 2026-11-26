@@ -22,6 +22,7 @@ const testState = vi.hoisted(() => ({
   uploadRender: vi.fn(),
   dropzoneOptions: undefined as { onDrop: (files: File[], rejections?: FileRejection[]) => void; accept: Record<string, string[]> } | undefined,
   openPicker: vi.fn(),
+  platform: 'web',
   mediaUpload: {
     uploadPhase: null as 'uploading' | 'checking' | null,
     fileKinds: ['image', 'video'] as string[],
@@ -54,7 +55,7 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
 }));
 
 vi.mock('@capacitor/core', () => ({
-  Capacitor: { getPlatform: () => 'web', isNativePlatform: () => false },
+  Capacitor: { getPlatform: () => testState.platform, isNativePlatform: () => false },
   registerPlugin: vi.fn(),
 }));
 
@@ -118,6 +119,7 @@ describe('SubmitPage', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     testState.lastOptions = undefined;
+    testState.platform = 'web';
     testState.mediaUpload.fileKinds = ['image', 'video'];
     testState.mediaUpload.uploadPhase = null;
     useChallengesStore.setState({ challenges: [] });
@@ -208,6 +210,27 @@ describe('SubmitPage', () => {
     const submitButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'submit');
     await act(async () => submitButton?.click());
     expect(testState.publishComment).toHaveBeenCalledOnce();
+  });
+
+  it('shows the spoiler and nsfw options kept in the draft when the page is opened again', async () => {
+    await act(async () => {
+      usePublishPostStore.getState().setPublishPostStore({ spoiler: true, nsfw: true } as any);
+    });
+    // leaving and returning to the page keeps the draft store but mounts new inputs
+    act(() => root.unmount());
+    root = createRoot(container);
+    await act(async () => {
+      root.render(createElement(SubmitPage));
+    });
+
+    const [spoiler, nsfw] = Array.from(container.querySelectorAll<HTMLInputElement>('input[type="checkbox"]'));
+    expect(spoiler.checked).toBe(true);
+    expect(nsfw.checked).toBe(true);
+
+    await act(async () => spoiler.click());
+    expect(spoiler.checked).toBe(false);
+    expect(usePublishPostStore.getState().spoiler).toBe(undefined);
+    expect(testState.lastOptions?.spoiler).toBe(undefined);
   });
 
   it('routes challenge cancellation to the current usePublishComment abandonPublish', async () => {
@@ -351,6 +374,85 @@ describe('SubmitPage', () => {
       testState.dropzoneOptions?.onDrop([new File(['png'], 'photo.png', { type: 'image/png' })]);
     });
     expect(usePublishPostStore.getState().link).toBeUndefined();
+  });
+
+  it('holds the post until its media upload has filled in the link', async () => {
+    let finishUpload: (url: string | null) => void = () => {};
+    testState.mediaUpload.uploadMedia.mockImplementation(() => new Promise((resolve) => (finishUpload = resolve)));
+    await act(async () => {
+      usePublishPostStore.getState().setPublishPostStore({ title: 'Photo post' });
+    });
+    await act(async () => {
+      testState.dropzoneOptions?.onDrop([new File(['png'], 'photo.png', { type: 'image/png' })]);
+    });
+
+    const submitButton = () => Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'submit');
+    await act(async () => submitButton()?.click());
+    expect(testState.publishComment).not.toHaveBeenCalled();
+    expect(submitButton()?.disabled).toBe(true);
+
+    await act(async () => finishUpload('https://forgeimg.net/abc/photo.png'));
+    expect(submitButton()?.disabled).toBe(false);
+    await act(async () => submitButton()?.click());
+    expect(testState.publishComment).toHaveBeenCalledOnce();
+    expect(testState.lastOptions?.link).toBe('https://forgeimg.net/abc/photo.png');
+  });
+
+  it('lets the post through once its upload failed or was replaced by a typed link', async () => {
+    const uploads: ((url: string | null) => void)[] = [];
+    testState.mediaUpload.uploadMedia.mockImplementation(() => new Promise((resolve) => uploads.push(resolve)));
+    const submitButton = () => Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'submit');
+    const dropFile = () => act(async () => testState.dropzoneOptions?.onDrop([new File(['png'], 'photo.png', { type: 'image/png' })]));
+
+    await dropFile();
+    await act(async () => uploads[0](null));
+    expect(submitButton()?.disabled).toBe(false);
+
+    // Typing a link removes the upload form, and the hook drops the upload's late result.
+    await dropFile();
+    await act(async () => {
+      usePublishPostStore.getState().setPublishPostStore({ link: 'https://example.com/typed' });
+    });
+    expect(submitButton()?.disabled).toBe(false);
+
+    // A new upload from the form shown again after clearing the link is not released by the dropped one.
+    await act(async () => {
+      usePublishPostStore.getState().setPublishPostStore({ link: '' });
+    });
+    await dropFile();
+    await act(async () => uploads[1](null));
+    expect(submitButton()?.disabled).toBe(true);
+    await act(async () => uploads[2]('https://forgeimg.net/abc/photo.png'));
+    expect(submitButton()?.disabled).toBe(false);
+    expect(usePublishPostStore.getState().link).toBe('https://forgeimg.net/abc/photo.png');
+  });
+
+  it('drops a file the Android picker returns after the page is gone, without holding later posts', async () => {
+    // The platform is read when the page module loads, so load a fresh copy as Android.
+    testState.platform = 'android';
+    vi.resetModules();
+    const AndroidSubmitPage = (await import('./submit')).default;
+    const androidPublishPostStore = (await import('../../stores/use-publish-post-store')).default;
+    let finishPick: (media: unknown) => void = () => {};
+    testState.mediaUpload.pickAndroidMedia.mockImplementation(() => new Promise((resolve) => (finishPick = resolve)));
+    testState.mediaUpload.uploadMedia.mockResolvedValue('https://forgeimg.net/abc/photo.png');
+    const renderPage = () => act(async () => root.render(createElement(AndroidSubmitPage)));
+    await renderPage();
+
+    const chooseFile = Array.from(container.querySelectorAll('label')).find((label) => label.textContent === 'choose_file');
+    await act(async () => chooseFile?.click());
+    expect(testState.mediaUpload.pickAndroidMedia).toHaveBeenCalledOnce();
+
+    // The page goes away (a post submitted just before navigates to the profile) while the native picker is open.
+    act(() => root.unmount());
+    await act(async () => finishPick({ kind: 'picked', id: 'pick-1', name: 'photo.png', mimeType: 'image/png', webPath: 'blob:photo' }));
+    expect(testState.mediaUpload.uploadMedia).not.toHaveBeenCalled();
+    expect(androidPublishPostStore.getState().isUploadingMedia).toBe(false);
+
+    root = createRoot(container);
+    await renderPage();
+    const submitButton = Array.from(container.querySelectorAll('button')).find((button) => button.textContent === 'submit');
+    expect(submitButton?.disabled).toBe(false);
   });
 
   it('counts a failed upload as a failed post attempt', async () => {

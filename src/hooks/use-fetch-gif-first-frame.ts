@@ -1,20 +1,9 @@
 import { useEffect, useState } from 'react';
 import { decompressFrames, parseGIF } from 'gifuct-js';
-import localForageLru from '@bitsocial/bitsocial-react-hooks/dist/lib/localforage-lru/index.js';
-
-const gifFrameDb = localForageLru.createInstance({ name: 'seeditGifFrames', size: 500 });
 
 const isChromium = () => {
   const ua = navigator.userAgent;
   return (ua.includes('Chrome') || ua.includes('Chromium') || ua.includes('Edge')) && !ua.includes('Firefox');
-};
-
-const getCachedGifFrame = async (url: string): Promise<string | null> => {
-  return await gifFrameDb.getItem(url);
-};
-
-const setCachedGifFrame = async (url: string, frameUrl: string): Promise<void> => {
-  await gifFrameDb.setItem(url, frameUrl);
 };
 
 export const fetchImage = (url: string): Promise<ArrayBuffer> => {
@@ -255,10 +244,72 @@ export const createStaticImageFromGif = async (url: string): Promise<string> => 
   });
 };
 
+const extractGifFirstFrame = async (url: string): Promise<string | null> => {
+  try {
+    // For Chrome CORS compatibility, try the simple image approach first
+    try {
+      console.log('Trying simple image approach first...');
+      return await createStaticImageFromGif(url);
+    } catch (simpleError) {
+      console.log('Simple image approach failed, trying advanced extraction:', simpleError);
+    }
+
+    // Fallback to advanced frame extraction (gifuct-js)
+    const buffer = await fetchImage(url);
+    const blob = await extractFirstFrame(buffer);
+    return URL.createObjectURL(blob);
+  } catch (error) {
+    console.error('Failed to load GIF frame:', error);
+
+    // Final fallback attempts (keep the existing fallback logic)
+    if (error instanceof Error && error.message.includes('XMLHttpRequest')) {
+      try {
+        console.log('Trying fallback fetch method...');
+        const buffer = await fetchImageWithFetch(url);
+        const blob = await extractFirstFrame(buffer);
+        return URL.createObjectURL(blob);
+      } catch (fallbackError) {
+        console.error('All methods failed:', fallbackError);
+      }
+    }
+    return null;
+  }
+};
+
+// Frames are object URLs, which die with the page, so they are cached for this session only. Every thumbnail of a gif
+// shares one extraction, including one that unmounts before it finishes, and the oldest frame is released past the limit.
+const MAX_CACHED_GIF_FRAMES = 500;
+const gifFrames = new Map<string, Promise<string | null>>();
+
+const getGifFirstFrame = (url: string): Promise<string | null> => {
+  const cachedFrame = gifFrames.get(url);
+  if (cachedFrame) {
+    gifFrames.delete(url);
+    gifFrames.set(url, cachedFrame);
+    return cachedFrame;
+  }
+
+  const frame = extractGifFirstFrame(url);
+  gifFrames.set(url, frame);
+  // a failed extraction is tried again on the next mount
+  frame.then((frameUrl) => {
+    if (!frameUrl && gifFrames.get(url) === frame) gifFrames.delete(url);
+  });
+
+  if (gifFrames.size > MAX_CACHED_GIF_FRAMES) {
+    const [oldestUrl, oldestFrame] = gifFrames.entries().next().value!;
+    gifFrames.delete(oldestUrl);
+    oldestFrame.then((frameUrl) => {
+      if (frameUrl) URL.revokeObjectURL(frameUrl);
+    });
+  }
+  return frame;
+};
+
 const useFetchGifFirstFrame = (url: string | undefined) => {
   // keyed by url so a result from a previous url is never shown as the current one
   const [frameResult, setFrameResult] = useState<{ url: string; frameUrl: string | null } | null>(null);
-  // every url change starts a new extraction, so a url that comes back loads again instead of reusing its old result
+  // every url change looks the frame up again, so a url that comes back never reuses its old result
   const [prevUrl, setPrevUrl] = useState(url);
   if (url !== prevUrl) {
     setPrevUrl(url);
@@ -276,76 +327,11 @@ const useFetchGifFirstFrame = (url: string | undefined) => {
     }
 
     let isActive = true;
-
-    const fetchFrame = async () => {
-      try {
-        // Check cache first
-        const cachedFrame = await getCachedGifFrame(url);
-        if (cachedFrame && isActive) {
-          try {
-            const response = await fetch(cachedFrame);
-            if (response.ok && isActive) {
-              setFrameResult({ url, frameUrl: cachedFrame });
-              return;
-            }
-          } catch {
-            // Cache entry is invalid, continue with fresh extraction
-          }
-        }
-
-        // For Chrome CORS compatibility, try the simple image approach first
-        if (typeof url === 'string') {
-          try {
-            console.log('Trying simple image approach first...');
-            const objectUrl = await createStaticImageFromGif(url);
-
-            if (isActive) {
-              setFrameResult({ url, frameUrl: objectUrl });
-              await setCachedGifFrame(url, objectUrl);
-            }
-            return; // Success with simple approach
-          } catch (simpleError) {
-            console.log('Simple image approach failed, trying advanced extraction:', simpleError);
-          }
-        }
-
-        // Fallback to advanced frame extraction (gifuct-js)
-        const buffer = typeof url === 'string' ? await fetchImage(url) : await readImage(url as File);
-        const blob = await extractFirstFrame(buffer);
-        const objectUrl = URL.createObjectURL(blob);
-
-        if (isActive) {
-          setFrameResult({ url, frameUrl: objectUrl });
-          await setCachedGifFrame(url, objectUrl);
-        }
-      } catch (error) {
-        console.error('Failed to load GIF frame:', error);
-
-        // Final fallback attempts (keep the existing fallback logic)
-        if (typeof url === 'string' && error instanceof Error && error.message.includes('XMLHttpRequest')) {
-          try {
-            console.log('Trying fallback fetch method...');
-            const buffer = await fetchImageWithFetch(url);
-            const blob = await extractFirstFrame(buffer);
-            const objectUrl = URL.createObjectURL(blob);
-
-            if (isActive) {
-              setFrameResult({ url, frameUrl: objectUrl });
-              await setCachedGifFrame(url, objectUrl);
-            }
-            return; // Success with fallback
-          } catch (fallbackError) {
-            console.error('All methods failed:', fallbackError);
-          }
-        }
-
-        if (isActive) {
-          setFrameResult({ url, frameUrl: null });
-        }
+    getGifFirstFrame(url).then((frameUrl) => {
+      if (isActive) {
+        setFrameResult({ url, frameUrl });
       }
-    };
-
-    fetchFrame();
+    });
 
     return () => {
       isActive = false;

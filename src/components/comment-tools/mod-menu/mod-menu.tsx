@@ -11,7 +11,7 @@ type ModMenuProps = {
 
 const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   const { t } = useTranslation();
-  const { post, moderation, banDays: banDuration, setFlag, setBanned, setBanDays, setReason, save } = useCommentModeration(cid);
+  const { post, moderation, isBanned, banDays: banDuration, setFlag, setBanned, setBanDays, setReason, save, reset } = useCommentModeration(cid);
   const isReply = post?.parentCid;
   const [isModMenuOpen, setIsModMenuOpen] = useState(false);
 
@@ -23,10 +23,16 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   const onBanDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => setBanDays(parseInt(e.target.value, 10) || 1);
   const onReason = (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value);
 
+  // the menu mounts with the comment, long before it opens, so the form starts from the comment's current flags on open
+  const setModMenuOpen = (open: boolean) => {
+    if (open && !isModMenuOpen) reset();
+    setIsModMenuOpen(open);
+  };
+
   const { refs, floatingStyles, context } = useFloating({
     placement: 'bottom-start',
     open: isModMenuOpen,
-    onOpenChange: setIsModMenuOpen,
+    onOpenChange: setModMenuOpen,
     middleware: [offset(2), flip({ fallbackAxisSideDirection: 'end' }), shift()],
     whileElementsMounted: autoUpdate,
   });
@@ -46,7 +52,7 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   return (
     <>
       <li className={styles.button} ref={refs.setReference} {...(cid && getReferenceProps())}>
-        <span onClick={() => cid && setIsModMenuOpen(!isModMenuOpen)}>{t('moderation')}</span>
+        <span onClick={() => cid && setModMenuOpen(!isModMenuOpen)}>{t('moderation')}</span>
       </li>
       {isModMenuOpen && (
         <FloatingFocusManager context={context} modal={false}>
@@ -93,7 +99,7 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
               {!isCommentAuthorMod && (
                 <div className={styles.menuItem}>
                   <label>
-                    <input onChange={onCheckbox} checked={!!moderation.banExpiresAt} type='checkbox' id='banUser' />
+                    <input onChange={onCheckbox} checked={isBanned} type='checkbox' id='banUser' />
                     <Trans
                       i18nKey='ban_user_for'
                       shouldUnescape={true}

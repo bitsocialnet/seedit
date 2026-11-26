@@ -17,14 +17,16 @@ interface ModerationDialogProps {
   cid: string;
   /** Moderators cannot ban each other. */
   isCommentAuthorMod: boolean;
+  /** When the dialog opened, in seconds; a ban that ended before then does not start checked. */
+  openedAt: number;
   onClose: () => void;
 }
 
 /** A moderator's flags, ban, and reason for one comment, in a modal dialog. */
-const ModerationDialog = ({ cid, isCommentAuthorMod, onClose }: ModerationDialogProps) => {
+const ModerationDialog = ({ cid, isCommentAuthorMod, openedAt, onClose }: ModerationDialogProps) => {
   const { t } = useTranslation();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const { post, moderation, banDays, setFlag, setBanned, setBanDays, setReason, save } = useCommentModeration(cid);
+  const { post, moderation, isBanned, banDays, setFlag, setBanned, setBanDays, setReason, save } = useCommentModeration(cid, openedAt);
   const isReply = Boolean(post?.parentCid);
 
   useEffect(() => {
@@ -61,7 +63,7 @@ const ModerationDialog = ({ cid, isCommentAuthorMod, onClose }: ModerationDialog
         ))}
         {!isCommentAuthorMod && (
           <label className={styles.check}>
-            <input type='checkbox' checked={Boolean(moderation.banExpiresAt)} onChange={(event) => setBanned(event.target.checked)} />
+            <input type='checkbox' checked={isBanned} onChange={(event) => setBanned(event.target.checked)} />
             <span>
               <Trans
                 i18nKey='ban_user_for'
@@ -176,7 +178,8 @@ const ModernCommentMenu = ({ comment, onEdit, className, iconSize = 18 }: Modern
   const blockedAuthor = useBlock({ address: author?.address });
   const blockedCommunity = useBlock({ address: communityAddress });
   const { deleted, toggleDeleted } = useDeleteComment(cid ?? '');
-  const [isModerating, setIsModerating] = useState(false);
+  // when the moderation form opened, so it starts from the comment's ban as it was then
+  const [moderationOpenedAt, setModerationOpenedAt] = useState<number>();
 
   // A comment still publishing has no cid, so nothing can act on it yet.
   if (!cid) return null;
@@ -234,13 +237,15 @@ const ModernCommentMenu = ({ comment, onEdit, className, iconSize = 18 }: Modern
             </MenuItem>
           )}
           {isAccountMod && (
-            <MenuItem className={modernStyles.menuItem} render={<button type='button' />} onSelect={() => setIsModerating(true)}>
+            <MenuItem className={modernStyles.menuItem} render={<button type='button' />} onSelect={() => setModerationOpenedAt(Math.floor(Date.now() / 1000))}>
               <span className={`${modernStyles.menuItemText} ${modernStyles.sentenceCase}`}>{t('moderation')}</span>
             </MenuItem>
           )}
         </MenuContent>
       </Menu>
-      {isModerating && <ModerationDialog cid={cid} isCommentAuthorMod={isCommentAuthorMod} onClose={() => setIsModerating(false)} />}
+      {moderationOpenedAt !== undefined && (
+        <ModerationDialog cid={cid} openedAt={moderationOpenedAt} isCommentAuthorMod={isCommentAuthorMod} onClose={() => setModerationOpenedAt(undefined)} />
+      )}
     </>
   );
 };

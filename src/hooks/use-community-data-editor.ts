@@ -14,7 +14,7 @@ const toDraftJson = ({ title, description, address, suggested, rules, roles, set
  * use it. Valid JSON goes into the draft as it is typed, so saving publishes what the editor shows.
  */
 const useCommunityDataEditor = () => {
-  const { community, communityAddress, hasLoaded, isSaving, error, save } = useCommunitySettings();
+  const { community, communityAddress, hasLoaded, loadError, hasFailedToLoad, isSaving, error, save } = useCommunitySettings();
   const title = useCommunitySettingsStore((state) => state.title);
   const description = useCommunitySettingsStore((state) => state.description);
   const address = useCommunitySettingsStore((state) => state.address);
@@ -68,23 +68,25 @@ const useCommunityDataEditor = () => {
   // invalid JSON is reported when a save is tried, not while it is being typed
   const [rejectedText, setRejectedText] = useState<string>();
 
-  /** Publishes the draft; resolves true once it is sent without an error thrown. */
-  const saveDraft = async () => {
+  /** Publishes the draft; resolves the error it failed with, if any, including text that is not valid JSON. */
+  const saveDraft = async (): Promise<Error | undefined> => {
     if (parseError) {
       setRejectedText(text);
-      return false;
+      return parseError;
     }
-    const saved = await save();
-    if (saved) {
+    const saveError = await save();
+    if (!saveError) {
       setSavedText(text);
       setOriginal(undefined);
     }
-    return saved;
+    return saveError;
   };
 
   return {
     community,
     communityAddress,
+    loadError,
+    hasFailedToLoad,
     isReady,
     text,
     setText,

@@ -21,6 +21,11 @@
   display: inline-block;
 }
 
+.signAgain {
+  margin-bottom: 7px;
+  max-width: 300px;
+}
+
 .walletFieldTitle {
   margin-top: 10px;
   font-style: italic;

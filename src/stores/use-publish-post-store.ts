@@ -12,7 +12,10 @@ type SubmitState = {
   nsfw: boolean | undefined;
   crosspost: Crosspost | undefined;
   publishCommentOptions: PublishCommentOptions;
+  /** True while the upload form waits for the media upload that fills in the link. Not part of the draft, so a reset keeps it. */
+  isUploadingMedia: boolean;
   setPublishPostStore: (comment: Comment) => void;
+  setIsUploadingMedia: (isUploadingMedia: boolean) => void;
   resetPublishPostStore: () => void;
 };
 
@@ -25,6 +28,7 @@ const usePublishPostStore = create<SubmitState>((set) => ({
   nsfw: undefined,
   crosspost: undefined,
   publishCommentOptions: {},
+  isUploadingMedia: false,
   setPublishPostStore: (comment) =>
     set((state) => {
       const nextState = { ...state };
@@ -56,6 +60,7 @@ const usePublishPostStore = create<SubmitState>((set) => ({
 
       return nextState;
     }),
+  setIsUploadingMedia: (isUploadingMedia) => set({ isUploadingMedia }),
   resetPublishPostStore: () =>
     set({
       communityAddress: undefined,

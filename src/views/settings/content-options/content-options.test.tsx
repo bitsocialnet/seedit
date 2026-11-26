@@ -28,6 +28,7 @@ afterAll(() => vi.unstubAllGlobals());
 const mocks = vi.hoisted(() => ({
   translate: vi.fn((key: string) => key),
   requestNotificationPermission: vi.fn(),
+  getNotificationPermissionStatus: vi.fn(),
 }));
 
 // A fresh `t` on every render stops the React Compiler from caching translations, so `t` calls keep tracking renders.
@@ -35,7 +36,11 @@ vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (...args: Paramete
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({ useAccount: () => undefined, setAccount: vi.fn() }));
 vi.mock('../../../hooks/use-default-subscriptions', () => ({ useDefaultSubscriptions: () => [] }));
 vi.mock('../../../hooks/use-is-mobile', () => ({ default: () => false }));
-vi.mock('../../../lib/push', () => ({ requestNotificationPermission: mocks.requestNotificationPermission, showLocalNotification: vi.fn() }));
+vi.mock('../../../lib/push', () => ({
+  getNotificationPermissionStatus: mocks.getNotificationPermissionStatus,
+  requestNotificationPermission: mocks.requestNotificationPermission,
+  showLocalNotification: vi.fn(),
+}));
 
 const initialState = useContentOptionsStore.getState();
 const initialStorage = localStorage.getItem('content-options');
@@ -57,6 +62,7 @@ describe('Settings content-option subscriptions', () => {
     vi.clearAllMocks();
     window.electronApi = undefined;
     mocks.requestNotificationPermission.mockResolvedValue(true);
+    mocks.getNotificationPermissionStatus.mockResolvedValue('granted');
     useContentOptionsStore.setState({ ...initialState, infiniteFeedEnabled: false, autoHideTopbar: false });
     container = document.createElement('div');
     document.body.appendChild(container);

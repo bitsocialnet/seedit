@@ -273,7 +273,9 @@ const ModernSubmit = () => {
   const { communityAddress, community, shortAddress, isOffline, offlineTitle, submitPost } = useSubmitPost();
   const title = usePublishPostStore((state) => state.title);
   const link = usePublishPostStore((state) => state.link);
-  const canSubmit = Boolean(title?.trim() && communityAddress && !(link && !isValidURL(link)));
+  // the post waits for a media upload to finish and fill in its link
+  const isUploadingMedia = usePublishPostStore((state) => state.isUploadingMedia);
+  const canSubmit = Boolean(title?.trim() && communityAddress && !(link && !isValidURL(link)) && !isUploadingMedia);
 
   const documentTitle = t('submit_to_string', { string: community?.title || shortAddress || 'Seedit', interpolation: { escapeValue: false } });
   useEffect(() => {
@@ -282,7 +284,7 @@ const ModernSubmit = () => {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    submitPost();
+    if (canSubmit) submitPost();
   };
 
   return (

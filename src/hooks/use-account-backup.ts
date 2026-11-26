@@ -1,9 +1,10 @@
 import { useTranslation } from 'react-i18next';
-import { deleteAccount, exportAccount, importAccount, setActiveAccount, useAccount, useAccounts } from '@bitsocial/bitsocial-react-hooks';
+import { exportAccount, importAccount, setActiveAccount, useAccount, useAccounts } from '@bitsocial/bitsocial-react-hooks';
 import { isElectronRuntime } from '../lib/p2p-browser-config';
 import { getEditableAccountData } from '../lib/utils/account-data-utils';
 import { getImportedAccountActiveName, processImportedAccount, rememberImportedAccountAddress } from '../lib/utils/account-import-utils';
 import { exportFile } from '../lib/utils/file-export-utils';
+import { deleteAccountAfterStarterWrites } from '../lib/utils/starter-account-persistence';
 
 export interface AccountExportOptions {
   includePkcOptions: boolean;
@@ -95,7 +96,11 @@ const useAccountBackup = () => {
   const deleteAccountWithConfirmation = (accountName: string | undefined) => {
     if (!accountName) return;
     if (window.confirm(t('delete_confirm', { value: accountName, interpolation: { escapeValue: false } })) && window.confirm(t('double_confirm'))) {
-      deleteAccount(accountName);
+      // waits for pending starter subscription writes, which would otherwise recreate the deleted account
+      deleteAccountAfterStarterWrites(accountName).catch((error) => {
+        console.error('Failed to delete account:', error);
+        alert(error instanceof Error ? error.message : String(error));
+      });
     }
   };
 

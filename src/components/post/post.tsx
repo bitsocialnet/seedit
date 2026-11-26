@@ -13,7 +13,7 @@ import { useCommentMediaInfo } from '../../hooks/use-comment-media-info';
 import useDownvote from '../../hooks/use-downvote';
 import useIsMobile from '../../hooks/use-is-mobile';
 import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
-import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
+import { getCommentCommunityAddress, isAuthorBannedForComment, isCommentPublicationFailed } from '../../lib/utils/comment-utils';
 import { getCommentPostOptions, stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import useCommentTripcode from '../../hooks/use-comment-tripcode';
@@ -36,33 +36,16 @@ import usePrefetchIntent from '../../hooks/use-prefetch-intent';
 import { loadMarkdown } from '../markdown';
 
 interface PostAuthorProps {
-  authorAddress: string;
+  post: Comment;
   authorRole: string;
-  cid: string;
-  displayName: string;
-  flairs?: FlairData[];
-  index?: number;
-  pinned?: boolean;
-  shortAddress: string;
-  shortAuthorAddress: string | undefined;
-  authorAddressChanged: boolean;
-  /** The verified 5chan tripcode (`!trip`), shown after the name as on 5chan. */
-  trip?: string;
 }
 
-const PostAuthor = ({
-  authorAddress,
-  authorRole,
-  cid,
-  displayName,
-  flairs,
-  index,
-  pinned,
-  shortAddress,
-  shortAuthorAddress,
-  authorAddressChanged,
-  trip,
-}: PostAuthorProps) => {
+const PostAuthor = ({ post, authorRole }: PostAuthorProps) => {
+  const { author, cid, index, pinned } = post || {};
+  const { address: authorAddress, shortAddress, flairs } = author || {};
+  const displayName = stripTripcodeProof(author?.displayName);
+  const trip = useCommentTripcode(post);
+  const { shortAuthorAddress, authorAddressChanged } = useAuthorAddress({ comment: post });
   // TODO: implement comment.highlightRole once implemented in API
   const isAuthorOwner = authorRole === 'owner';
   const isAuthorAdmin = authorRole === 'admin';
@@ -92,7 +75,7 @@ const PostAuthor = ({
           <span className={`${styles.authorAddressVisible} ${authorAddressChanged && styles.authorAddressChanged}`}>u/{getDisplayAddress(shortAuthorAddress || '')}</span>
         </span>
       </Link>
-      {flairs?.map((flair, index) => (
+      {flairs?.map((flair: FlairData, index: number) => (
         <React.Fragment key={index}>
           {' '}
           <Flair flair={flair} author />
@@ -141,9 +124,9 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
     downvoteCount,
     edit,
     flair,
-    link,
-    linkHeight,
-    linkWidth,
+    link: postLink,
+    linkHeight: postLinkHeight,
+    linkWidth: postLinkWidth,
     number,
     pinned,
     quotedCids,
@@ -157,15 +140,14 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
     upvoteCount,
   } = post || {};
   const communityAddress = getCommentCommunityAddress(post);
+  // Like Reddit, an author-deleted post keeps its title and replies but stops showing the link or media its author shared.
+  const link = deleted ? undefined : postLink;
+  const linkHeight = deleted ? undefined : postLinkHeight;
+  const linkWidth = deleted ? undefined : postLinkWidth;
 
   // Check if the community is NSFW based on its tags
   const isNsfwCommunity = useIsNsfwCommunity(communityAddress || '');
   const nsfw = post?.nsfw || isNsfwCommunity;
-
-  const shortAddress = author?.shortAddress;
-  const displayName = stripTripcodeProof(author?.displayName);
-  const trip = useCommentTripcode(post);
-  const { shortAuthorAddress, authorAddressChanged } = useAuthorAddress({ comment: post });
 
   const { t, i18n } = useTranslation();
   const { language } = i18n;
@@ -185,7 +167,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
   const isInProfileHiddenView = isProfileHiddenView(location.pathname);
   const isInCommunityView = isCommunityView(location.pathname, params);
 
-  const commentMediaInfo = useCommentMediaInfo(post);
+  const commentMediaInfo = useCommentMediaInfo(deleted ? EMPTY_POST : post);
 
   const { mediaPreviewOption, thumbnailDisplayOption } = useContentOptionsStore();
 
@@ -343,19 +325,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                   {t('submitted')} <span title={postDate}>{getFormattedTimeAgo(timestamp)}</span>{' '}
                   {edit && isInPostPageView && <span className={styles.timeEdit}>{t('last_edited', { timestamp: getFormattedTimeAgo(edit.timestamp) })}</span>}{' '}
                   {t('post_by')}
-                  <PostAuthor
-                    authorAddress={author?.address}
-                    authorRole={authorRole}
-                    cid={cid}
-                    displayName={displayName}
-                    flairs={author?.flairs}
-                    index={post?.index}
-                    pinned={pinned}
-                    shortAddress={shortAddress}
-                    shortAuthorAddress={shortAuthorAddress}
-                    authorAddressChanged={authorAddressChanged}
-                    trip={trip}
-                  />
+                  <PostAuthor post={post} authorRole={authorRole} />
                   {!isInCommunityView && (
                     <>
                        {t('post_to')}
@@ -388,7 +358,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                   cid={cid}
                   comment={post}
                   deleted={deleted}
-                  failed={state === 'failed'}
+                  failed={isCommentPublicationFailed(post)}
                   editState={editState}
                   index={post?.index}
                   nsfw={nsfw}
@@ -406,6 +376,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                     <CommentEditForm commentCid={cid} hideCommentEditForm={hideCommentEditForm} />
                   ) : (
                     <Expando
+                      authorBanned={isAuthorBannedForComment(post)}
                       authorEditReason={edit?.reason}
                       commentMediaInfo={commentMediaInfo}
                       content={removed ? `[${lowerCase(t('removed'))}]` : deleted ? `[${lowerCase(t('deleted'))}]` : content}
@@ -432,6 +403,7 @@ const Post = ({ index, post = EMPTY_POST }: PostProps) => {
                 <CommentEditForm commentCid={cid} hideCommentEditForm={hideCommentEditForm} />
               ) : (
                 <Expando
+                  authorBanned={isAuthorBannedForComment(post)}
                   authorEditReason={edit?.reason}
                   commentMediaInfo={commentMediaInfo}
                   content={removed ? `[${lowerCase(t('removed'))}]` : deleted ? `[${lowerCase(t('deleted'))}]` : content}

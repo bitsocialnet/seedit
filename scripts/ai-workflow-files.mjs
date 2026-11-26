@@ -57,17 +57,12 @@ export function generatedFiles(root) {
     const codex = { name, description, developer_instructions: body };
     if (metadata['sandbox-mode']) codex.sandbox_mode = metadata['sandbox-mode'];
     files.set(`.codex/agents/${name}.toml`, `# Generated from ${source}; run yarn ai-workflow:sync.\n${stringifyToml(codex)}`);
-    for (const harness of ['claude', 'cursor']) {
-      const frontmatter = { name, description };
-      if (metadata['sandbox-mode'] === 'read-only') {
-        if (harness === 'cursor') frontmatter.readonly = true;
-        else frontmatter.tools = 'Bash, Read, Grep, Glob';
-      }
-      files.set(
-        `.${harness}/agents/${name}.md`,
-        `---\n${dumpYaml(frontmatter, { lineWidth: -1 }).trimEnd()}\n---\n\n<!-- Generated from ${source}; run yarn ai-workflow:sync. -->\n\n${body}\n`,
-      );
-    }
+    const frontmatter = { name, description };
+    if (metadata['sandbox-mode'] === 'read-only') frontmatter.tools = 'Bash, Read, Grep, Glob';
+    files.set(
+      `.claude/agents/${name}.md`,
+      `---\n${dumpYaml(frontmatter, { lineWidth: -1 }).trimEnd()}\n---\n\n<!-- Generated from ${source}; run yarn ai-workflow:sync. -->\n\n${body}\n`,
+    );
   }
   return files;
 }

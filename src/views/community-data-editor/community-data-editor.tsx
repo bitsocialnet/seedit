@@ -11,23 +11,22 @@ import styles from './community-data-editor.module.css';
 const CommunityDataEditor = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { community, communityAddress, isReady, text, setText, reset, save, isSaving, error } = useCommunityDataEditor();
+  const { community, communityAddress, loadError, hasFailedToLoad, isReady, text, setText, reset, save, isSaving, error } = useCommunityDataEditor();
   const saveCommunitySettings = async () => {
-    if (await save()) alert(t('settings_saved', { communityAddress }));
+    const saveError = await save();
+    alert(saveError ? saveError.message || 'Error: ' + saveError : t('settings_saved', { communityAddress }));
   };
   const loadingStateString = useStateString(community);
 
   if (!isReady) {
     return (
       <>
-        {community?.error?.message && (
+        {loadError?.message && (
           <div className={styles.error}>
-            <ErrorDisplay error={community.error} />
+            <ErrorDisplay error={loadError} />
           </div>
         )}
-        <div className={styles.loading}>
-          <LoadingEllipsis string={loadingStateString || t('loading')} />
-        </div>
+        <div className={styles.loading}>{hasFailedToLoad ? t('failed') : <LoadingEllipsis string={loadingStateString || t('loading')} />}</div>
       </>
     );
   }

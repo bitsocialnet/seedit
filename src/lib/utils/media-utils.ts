@@ -65,7 +65,7 @@ const getPatternThumbnailUrl = (url: URL): string | undefined => {
 // some sites don't show thumbnails, so the backend-side thumbnail fetching needs to be  disabled, or it might fetch non-thumbnails such as emojis
 const THUMBNAIL_BLACKLISTED_DOMAINS = ['twitter.com', 'x.com'];
 
-const isThumbnailDomainBlacklisted = (link: string | undefined): boolean => {
+export const isThumbnailDomainBlacklisted = (link: string | undefined): boolean => {
   if (!link) {
     return false;
   }

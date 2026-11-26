@@ -137,6 +137,22 @@ describe('directory registry', () => {
     expect(getDirectoryRegistrySnapshot()).toMatchObject({ codes: VENDORED_DIRECTORY_CODES, settled: true });
   });
 
+  it('marks codes settled by a failed request as a fallback until a request succeeds', async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('localStorage', createStorage({ [CACHE_KEY]: JSON.stringify(dogsDefaults) }));
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce({ ok: false, status: 503 }).mockResolvedValue(okJson(dogsDefaults)));
+    const { getDirectoryRegistrySnapshot, revalidateDirectoryRegistry } = await loadModules();
+    expect(getDirectoryRegistrySnapshot().status).toBe('pending');
+
+    await revalidateDirectoryRegistry();
+    expect(getDirectoryRegistrySnapshot()).toMatchObject({ status: 'fallback', settled: true });
+
+    // The retry returns the cached file, so only the status changes.
+    vi.setSystemTime(Date.now() + 60 * 1000);
+    await revalidateDirectoryRegistry();
+    expect(getDirectoryRegistrySnapshot()).toMatchObject({ status: 'published', settled: true });
+  });
+
   it('ignores a published file older than the cached one', async () => {
     vi.stubGlobal('localStorage', createStorage({ [CACHE_KEY]: JSON.stringify(dogsDefaults) }));
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(okJson(publishedDefaults(100, { funny: { directoryCode: 'funny' } }))));

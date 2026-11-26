@@ -10,6 +10,7 @@ interface CommunitySyncInfo {
   syncState?: string;
   lastSuccessfulFetchAt?: number;
   lastRetriableError?: unknown;
+  firstLoadFailed?: boolean;
 }
 
 /**
@@ -51,10 +52,16 @@ const useIsCommunityOffline = (community: Community) => {
   const loadingStartTimestamp = communitiesLoadingStartTimestamps[0] || 0;
   const nowSeconds = Date.now() / 1000;
   const freshnessNowSeconds = getCommunityFreshnessNowSeconds(syncInfo || {}, nowSeconds);
+  // a community without a record whose load failed, including one pkc-js keeps retrying because it cannot reach it, is
+  // offline at once rather than after the initial load; one that is only slow still gets the initial load. A useCommunity
+  // result carries the flag itself, also for a community whose load failed before it had an address to read the cache by.
+  const firstLoadFailed = !updatedAt && Boolean(community?.firstLoadFailed || syncInfo?.firstLoadFailed);
 
-  const isLoading = communityOfflineStore.initialLoad && (!updatedAt || freshnessNowSeconds - updatedAt >= 120 * 60) && nowSeconds - loadingStartTimestamp < 30;
+  const isLoading =
+    !firstLoadFailed && communityOfflineStore.initialLoad && (!updatedAt || freshnessNowSeconds - updatedAt >= 120 * 60) && nowSeconds - loadingStartTimestamp < 30;
 
-  const isOffline = !isLoading && ((updatedAt && updatedAt < freshnessNowSeconds - 120 * 60) || (!updatedAt && nowSeconds - loadingStartTimestamp >= 30));
+  const isOffline =
+    !isLoading && ((updatedAt && updatedAt < freshnessNowSeconds - 120 * 60) || (!updatedAt && (firstLoadFailed || nowSeconds - loadingStartTimestamp >= 30)));
 
   const isOnline = updatedAt && freshnessNowSeconds - updatedAt < 120 * 60;
 
@@ -65,7 +72,7 @@ const useIsCommunityOffline = (community: Community) => {
       : t('community_offline_info');
 
   // ensure isOffline is false until we have enough information
-  const hasEnoughInfo = communityOfflineStore.initialLoad === false || updatedAt !== undefined;
+  const hasEnoughInfo = firstLoadFailed || communityOfflineStore.initialLoad === false || updatedAt !== undefined;
 
   return {
     isOffline: hasEnoughInfo && !isOnline && isOffline,

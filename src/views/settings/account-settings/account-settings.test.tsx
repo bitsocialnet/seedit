@@ -19,6 +19,7 @@ const hookMocks = vi.hoisted(() => ({
 }));
 
 const fileReaderState = vi.hoisted(() => ({ result: '' as unknown }));
+const persistenceMocks = vi.hoisted(() => ({ deleteAccountAfterStarterWrites: vi.fn() }));
 
 vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   deleteAccount: hookMocks.deleteAccount,
@@ -28,6 +29,8 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
   useAccount: hookMocks.useAccount,
   useAccounts: hookMocks.useAccounts,
 }));
+
+vi.mock('../../../lib/utils/starter-account-persistence', () => persistenceMocks);
 
 vi.mock('react-i18next', async () => {
   const ReactModule = await import('react');
@@ -210,5 +213,51 @@ describe('AccountSettings account import', () => {
     expect(hookMocks.setActiveAccount).not.toHaveBeenCalled();
     expect(localStorage.getItem('importedAccountAddress')).toBeNull();
     expect(reloadMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('AccountSettings account deletion', () => {
+  let confirmSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    hookMocks.useAccount.mockReturnValue({ id: 'current-id', name: 'Account current', author: { shortAddress: 'current' } });
+    hookMocks.useAccounts.mockReturnValue({ accounts: [{ id: 'current-id', name: 'Account current', author: { shortAddress: 'current' } }], state: 'succeeded' });
+    confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => undefined);
+    persistenceMocks.deleteAccountAfterStarterWrites.mockResolvedValue(undefined);
+    container = document.createElement('div');
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    confirmSpy.mockRestore();
+    alertSpy.mockRestore();
+  });
+
+  const getDeleteButton = () => Array.from(container.querySelectorAll('button')).find((candidate) => candidate.textContent === 'delete_this_account');
+
+  it('deletes the account through the helper that waits for its default-community writes', () => {
+    render();
+
+    act(() => getDeleteButton()?.click());
+
+    expect(confirmSpy).toHaveBeenCalledTimes(2);
+    expect(persistenceMocks.deleteAccountAfterStarterWrites).toHaveBeenCalledWith('Account current');
+    expect(hookMocks.deleteAccount).not.toHaveBeenCalled();
+  });
+
+  it('alerts when deleting the account fails', async () => {
+    persistenceMocks.deleteAccountAfterStarterWrites.mockRejectedValue(new Error('account delete failed'));
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    render();
+
+    await act(async () => getDeleteButton()?.click());
+
+    expect(alertSpy).toHaveBeenCalledWith('account delete failed');
+    consoleErrorSpy.mockRestore();
   });
 });

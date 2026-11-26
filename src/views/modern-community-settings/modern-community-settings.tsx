@@ -291,6 +291,8 @@ const ModernCommunitySettings = () => {
     community,
     communityAddress,
     hasLoaded,
+    loadError,
+    hasFailedToLoad,
     isCreating,
     isConnectedToRpc,
     isHostedHere,
@@ -348,7 +350,13 @@ const ModernCommunitySettings = () => {
       <ModernColumns>
         {header}
         <p className={`${settingsStyles.status} ${styles.loading}`} role='status'>
-          {community?.error?.message ? <span className={settingsStyles.statusError}>{community.error.message}</span> : loadingState || `${t('loading')}…`}
+          {loadError?.message ? (
+            <span className={settingsStyles.statusError}>{loadError.message}</span>
+          ) : hasFailedToLoad ? (
+            t('failed')
+          ) : (
+            loadingState || `${t('loading')}…`
+          )}
         </p>
       </ModernColumns>
     );
@@ -358,13 +366,14 @@ const ModernCommunitySettings = () => {
     event.preventDefault();
     if (isCreating) {
       await create();
-    } else if (await save()) {
+    } else if (!(await save())) {
       setSavedOptions(publishOptions);
     }
   };
 
   const handleDelete = async () => {
-    if (await remove()) navigate('/', { replace: true });
+    // a failed delete shows its error in the save bar
+    if ((await remove()).deleted) navigate('/', { replace: true });
   };
 
   return (

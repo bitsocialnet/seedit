@@ -104,8 +104,32 @@ const spawnAsync = (...args) =>
       // Drain to avoid backpressure without logging
       spawnedProcess.stdout.on('data', () => {});
     }
-    spawnedProcess.on('error', (data) => console.error(data.toString?.() || String(data)));
+    // a failed spawn (e.g. EACCES) emits 'error' and never 'exit'
+    spawnedProcess.on('error', (error) => {
+      console.error(error.toString?.() || String(error));
+      reject(error);
+    });
   });
+
+// daemons that are still running, killed when the app exits
+const runningIpfsProcesses = new Set();
+process.on('exit', () => {
+  for (const ipfsProcess of runningIpfsProcesses) {
+    try {
+      ps.kill(ipfsProcess.pid);
+    } catch (e) {
+      console.log(e);
+    }
+    try {
+      // sometimes ipfs doesnt exit unless we kill pid +1
+      ps.kill(ipfsProcess.pid + 1);
+    } catch (e) {
+      console.log(e);
+    }
+  }
+});
+
+let devProxyStarted = false;
 
 const startIpfs = async () => {
   const ipfsPath = await getKuboPath();
@@ -140,7 +164,11 @@ const startIpfs = async () => {
   let apiAddress = '/ip4/127.0.0.1/tcp/50019';
   if (isDev) {
     apiAddress = apiAddress.replace('50019', '50029');
-    proxyServer.start({ proxyPort: 50019, targetPort: 50029 });
+    // the proxy outlives daemon restarts
+    if (!devProxyStarted) {
+      devProxyStarted = true;
+      proxyServer.start({ proxyPort: 50019, targetPort: 50029 });
+    }
   }
   await spawnAsync(ipfsPath, ['config', 'Addresses.API', apiAddress], { env, hideWindows: true });
 
@@ -160,23 +188,16 @@ const startIpfs = async () => {
           resolve();
         }
       });
-      ipfsProcess.on('error', (err) => console.error(err?.toString?.() || String(err)));
+      ipfsProcess.on('spawn', () => runningIpfsProcesses.add(ipfsProcess));
+      // a failed spawn (e.g. EACCES) emits 'error' and never 'exit'
+      ipfsProcess.on('error', (err) => {
+        console.error(err?.toString?.() || String(err));
+        reject(err);
+      });
       ipfsProcess.on('exit', () => {
+        runningIpfsProcesses.delete(ipfsProcess);
         console.error(`ipfs process with pid ${ipfsProcess.pid} exited`);
         reject(Error(lastError));
-      });
-      process.on('exit', () => {
-        try {
-          ps.kill(ipfsProcess.pid);
-        } catch (e) {
-          console.log(e);
-        }
-        try {
-          // sometimes ipfs doesnt exit unless we kill pid +1
-          ps.kill(ipfsProcess.pid + 1);
-        } catch (e) {
-          console.log(e);
-        }
       });
     });
   await startIpfsDaemon();
@@ -197,6 +218,8 @@ const startIpfsAutoRestart = async () => {
       if (!started) {
         await startIpfs();
       }
+      // ipfs is running, started here or by another client. Try to run exported onStarted callback, can be undefined
+      DefaultExport.onStarted?.();
     } catch (e) {
       console.log('failed starting ipfs', e);
       try {
