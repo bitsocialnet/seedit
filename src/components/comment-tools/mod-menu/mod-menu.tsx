@@ -1,13 +1,8 @@
 import { useState } from 'react';
 import { autoUpdate, flip, FloatingFocusManager, offset, shift, useClick, useDismiss, useFloating, useId, useInteractions, useRole } from '@floating-ui/react';
 import { Trans, useTranslation } from 'react-i18next';
-import { PublishCommentModerationOptions, useComment, useEditedComment, usePublishCommentModeration } from '@bitsocial/bitsocial-react-hooks';
 import styles from './mod-menu.module.css';
-import { alertChallengeVerificationFailed } from '../../../lib/utils/challenge-utils';
-import { getCommentCommunityAddress } from '../../../lib/utils/comment-utils';
-import challengesStore from '../../../stores/use-challenges-store';
-
-const { addChallenge } = challengesStore.getState();
+import useCommentModeration, { type ModerationFlag } from '../../../hooks/use-comment-moderation';
 
 type ModMenuProps = {
   cid: string;
@@ -16,89 +11,17 @@ type ModMenuProps = {
 
 const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   const { t } = useTranslation();
-  let post: any;
-  const comment = useComment({ commentCid: cid });
-  const { editedComment } = useEditedComment({ comment });
-  if (editedComment) {
-    post = editedComment;
-  } else if (comment) {
-    post = comment;
-  }
+  const { post, moderation, banDays: banDuration, setFlag, setBanned, setBanDays, setReason, save } = useCommentModeration(cid);
   const isReply = post?.parentCid;
   const [isModMenuOpen, setIsModMenuOpen] = useState(false);
 
-  const { removed, locked, spoiler, nsfw, pinned, banExpiresAt, purged } = post || {};
-  const communityAddress = getCommentCommunityAddress(post);
-
-  const defaultPublishOptions: PublishCommentModerationOptions = {
-    commentCid: cid,
-    communityAddress,
-    commentModeration: {
-      removed: removed ?? false,
-      purged: purged ?? false,
-      locked: locked ?? false,
-      spoiler: spoiler ?? false,
-      nsfw: nsfw ?? false,
-      pinned: pinned ?? false,
-      banExpiresAt,
-    },
-    onChallenge: (...args: any) => addChallenge([...args, post]),
-    onChallengeVerification: alertChallengeVerificationFailed,
-    onError: (error: Error) => {
-      console.warn(error);
-      alert(error.message);
-    },
-  };
-
-  const [publishCommentModerationOptions, setPublishCommentModerationOptions] = useState(defaultPublishOptions);
-  const { publishCommentModeration } = usePublishCommentModeration(publishCommentModerationOptions);
-
-  const [banDuration, setBanDuration] = useState(1);
-
-  const daysToTimestampInSeconds = (days: number) => {
-    const now = new Date();
-    now.setDate(now.getDate() + days);
-    return Math.floor(now.getTime() / 1000);
-  };
-
   const onCheckbox = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, checked } = e.target;
-    if (id === 'banUser') {
-      setPublishCommentModerationOptions((state) => ({
-        ...state,
-        commentModeration: {
-          ...state.commentModeration,
-          banExpiresAt: checked ? daysToTimestampInSeconds(banDuration) : undefined,
-        },
-      }));
-    } else {
-      setPublishCommentModerationOptions((state) => ({
-        ...state,
-        commentModeration: { ...state.commentModeration, [id]: checked },
-      }));
-    }
+    if (id === 'banUser') setBanned(checked);
+    else setFlag(id as ModerationFlag, checked);
   };
-
-  const onBanDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const days = parseInt(e.target.value, 10) || 1;
-    setBanDuration(days);
-    setPublishCommentModerationOptions((state) => ({
-      ...state,
-      commentModeration: {
-        ...state.commentModeration,
-        banExpiresAt: daysToTimestampInSeconds(days),
-      },
-    }));
-  };
-
-  const onReason = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setPublishCommentModerationOptions((state) => ({
-      ...state,
-      commentModeration: {
-        ...state.commentModeration,
-        reason: e.target.value || '',
-      },
-    }));
+  const onBanDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => setBanDays(parseInt(e.target.value, 10) || 1);
+  const onReason = (e: React.ChangeEvent<HTMLInputElement>) => setReason(e.target.value);
 
   const { refs, floatingStyles, context } = useFloating({
     placement: 'bottom-start',
@@ -117,18 +40,7 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
   const headingId = useId();
 
   const handleSaveClick = async () => {
-    if (publishCommentModerationOptions.commentModeration.purged) {
-      const confirmed = window.confirm(
-        'You are purging this comment. Are you sure you want to continue?\n\n' +
-          "The comment will be completely removed from this community's database. This action is irreversible.",
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
-    await publishCommentModeration();
-    setIsModMenuOpen(false);
+    if (await save()) setIsModMenuOpen(false);
   };
 
   return (
@@ -142,46 +54,46 @@ const ModMenu = ({ cid, isCommentAuthorMod }: ModMenuProps) => {
             <div className={styles.ModMenu}>
               <div className={styles.menuItem}>
                 <label>
-                  <input onChange={onCheckbox} checked={publishCommentModerationOptions.commentModeration.removed} type='checkbox' id='removed' />
+                  <input onChange={onCheckbox} checked={moderation.removed} type='checkbox' id='removed' />
                   {t('removed')}
                 </label>
               </div>
               <div className={styles.menuItem}>
                 <label>
-                  <input onChange={onCheckbox} checked={publishCommentModerationOptions.commentModeration.purged} type='checkbox' id='purged' />
+                  <input onChange={onCheckbox} checked={moderation.purged} type='checkbox' id='purged' />
                   <span className={styles.purged}>{t('purged')}</span> <span className={styles.optional}>({t('irreversible')})</span>
                 </label>
               </div>
               {!isReply && (
                 <div className={styles.menuItem}>
                   <label>
-                    <input onChange={onCheckbox} checked={publishCommentModerationOptions.commentModeration.locked} type='checkbox' id='locked' />
+                    <input onChange={onCheckbox} checked={moderation.locked} type='checkbox' id='locked' />
                     {t('locked')}
                   </label>
                 </div>
               )}
               <div className={styles.menuItem}>
                 <label>
-                  <input onChange={onCheckbox} checked={publishCommentModerationOptions.commentModeration.spoiler} type='checkbox' id='spoiler' />
+                  <input onChange={onCheckbox} checked={moderation.spoiler} type='checkbox' id='spoiler' />
                   {t('spoiler')}
                 </label>
               </div>
               <div className={styles.menuItem}>
                 <label>
-                  <input onChange={onCheckbox} checked={publishCommentModerationOptions.commentModeration.nsfw} type='checkbox' id='nsfw' />
+                  <input onChange={onCheckbox} checked={moderation.nsfw} type='checkbox' id='nsfw' />
                   {t('nsfw')}
                 </label>
               </div>
               <div className={styles.menuItem}>
                 <label>
-                  <input onChange={onCheckbox} checked={publishCommentModerationOptions.commentModeration.pinned} type='checkbox' id='pinned' />
+                  <input onChange={onCheckbox} checked={moderation.pinned} type='checkbox' id='pinned' />
                   {isReply ? t('stickied_comment') : t('announcement')}
                 </label>
               </div>
               {!isCommentAuthorMod && (
                 <div className={styles.menuItem}>
                   <label>
-                    <input onChange={onCheckbox} checked={!!publishCommentModerationOptions.commentModeration.banExpiresAt} type='checkbox' id='banUser' />
+                    <input onChange={onCheckbox} checked={!!moderation.banExpiresAt} type='checkbox' id='banUser' />
                     <Trans
                       i18nKey='ban_user_for'
                       shouldUnescape={true}

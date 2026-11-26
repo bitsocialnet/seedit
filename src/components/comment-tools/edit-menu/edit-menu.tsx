@@ -1,12 +1,7 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { PublishCommentEditOptions, useComment, useEditedComment, usePublishCommentEdit } from '@bitsocial/bitsocial-react-hooks';
 import styles from './edit-menu.module.css';
-import { alertChallengeVerificationFailed } from '../../../lib/utils/challenge-utils';
-import { getCommentCommunityAddress } from '../../../lib/utils/comment-utils';
-import challengesStore from '../../../stores/use-challenges-store';
-
-const { addChallenge } = challengesStore.getState();
+import useDeleteComment from '../../../hooks/use-delete-comment';
 
 type EditMenuProps = {
   commentCid: string;
@@ -16,32 +11,7 @@ type EditMenuProps = {
 const EditMenu = ({ commentCid, showCommentEditForm }: EditMenuProps) => {
   const { t } = useTranslation();
 
-  let post: any;
-  const comment = useComment({ commentCid });
-  const { editedComment } = useEditedComment({ comment });
-  if (editedComment) {
-    post = editedComment;
-  } else if (comment) {
-    post = comment;
-  }
-
-  const { deleted } = post || {};
-  const communityAddress = getCommentCommunityAddress(post);
-
-  const defaultPublishOptions: PublishCommentEditOptions = {
-    commentCid,
-    deleted,
-    communityAddress,
-    onChallenge: (...args: any) => addChallenge([...args, post]),
-    onChallengeVerification: alertChallengeVerificationFailed,
-    onError: (error: Error) => {
-      console.warn(error);
-      alert('Comment edit failed. ' + error.message);
-    },
-  };
-
-  const [publishOptions, setPublishOptions] = useState(defaultPublishOptions);
-  const { publishCommentEdit } = usePublishCommentEdit(publishOptions);
+  const { deleted, toggleDeleted } = useDeleteComment(commentCid);
 
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -50,23 +20,13 @@ const EditMenu = ({ commentCid, showCommentEditForm }: EditMenuProps) => {
   }, []);
 
   const confirmDelete = () => {
-    const newDeletedState = !deleted;
-    setPublishOptions((prevOptions) => ({
-      ...prevOptions,
-      deleted: newDeletedState,
-    }));
+    toggleDeleted();
     setShowDeleteConfirm(false);
   };
 
   const cancelDelete = () => {
     setShowDeleteConfirm(false);
   };
-
-  useEffect(() => {
-    if (publishOptions.deleted !== defaultPublishOptions.deleted) {
-      publishCommentEdit();
-    }
-  }, [publishOptions, publishCommentEdit, defaultPublishOptions.deleted]);
 
   return (
     <>
