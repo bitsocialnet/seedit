@@ -1,0 +1,297 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 16px 0;
+}
+
+.heading {
+  margin: 0;
+  color: var(--m-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.label {
+  color: var(--m-text);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.required {
+  margin-left: 2px;
+  color: var(--m-danger);
+}
+
+.optional {
+  color: var(--m-text-muted);
+  font-weight: 400;
+}
+
+.hint {
+  margin: 0;
+  color: var(--m-text-muted);
+  font-size: 13px;
+}
+
+.error {
+  color: var(--m-danger);
+}
+
+.input {
+  box-sizing: border-box;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--m-border-strong);
+  border-radius: 12px;
+  background: var(--m-surface);
+  line-height: 1.45;
+}
+
+.input::placeholder {
+  color: var(--m-text-muted);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--m-focus);
+  box-shadow: 0 0 0 1px var(--m-focus);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--m-danger);
+}
+
+.titleInput {
+  font-size: 16px;
+  font-weight: 600;
+  resize: none;
+  field-sizing: content;
+  min-height: 44px;
+}
+
+.bodyInput {
+  min-height: 140px;
+  max-height: 60vh;
+  resize: vertical;
+  field-sizing: content;
+}
+
+.inputWithIcon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preview {
+  min-height: 140px;
+  padding: 10px 14px;
+  border: 1px dashed var(--m-border-strong);
+  border-radius: 12px;
+  color: var(--m-text);
+  font-size: 15px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.labelRow .textButton {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--m-link);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.textButton:hover:not(:disabled),
+.textButton[aria-pressed='true'] {
+  background: var(--m-surface-raised);
+}
+
+.labelRow .textButton:disabled {
+  color: var(--m-text-muted);
+  cursor: default;
+}
+
+.iconButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background: var(--m-surface-raised);
+}
+
+.suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.chips,
+.toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--m-border);
+  border-radius: 999px;
+  background: var(--m-surface-raised);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip:has(> span[aria-hidden='true']) {
+  padding-left: 4px;
+}
+
+.chip:hover {
+  border-color: var(--m-border-strong);
+}
+
+/* Two classes outrank the shell's control reset, which makes buttons inherit their text color. */
+.chip.chipSelected {
+  border-color: var(--m-accent);
+  background: var(--m-accent);
+  color: var(--m-on-accent);
+}
+
+.chipLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dropzone {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 12px;
+  min-height: 96px;
+  padding: 16px;
+  border: 1px dashed var(--m-border-strong);
+  border-radius: 12px;
+  color: var(--m-text-secondary);
+  text-align: center;
+}
+
+.dragging {
+  border-color: var(--m-accent);
+  background: var(--m-surface-raised);
+}
+
+.smallButton {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.spinner {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--m-border-strong);
+  border-top-color: var(--m-accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.mediaPreview {
+  min-width: 0;
+}
+
+.crosspost {
+  padding: 8px;
+  border: 1px solid var(--m-border);
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+
+.notice {
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--m-danger);
+  border-radius: 12px;
+  color: var(--m-text);
+  font-size: 13px;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+  border-top: 1px solid var(--m-border);
+}
+
+.footer button {
+  margin-top: 12px;
+}
+
+.footer button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* On a phone the suggestions scroll sideways instead of filling the screen. */
+@media (max-width: 639px) {
+  .chips {
+    flex-wrap: nowrap;
+    margin: 0 -16px;
+    padding: 0 16px 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .chip {
+    flex: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}

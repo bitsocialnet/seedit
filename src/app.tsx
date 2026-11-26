@@ -18,6 +18,7 @@ import ModernAll from './views/modern-all';
 import ModernCommunity from './views/modern-community';
 import ModernHome from './views/modern-home';
 import ModernPost from './views/modern-post';
+import ModernSubmit from './views/modern-submit';
 import AccountBar from './components/account-bar/';
 import ChallengeModal from './components/challenge-modal';
 import Header from './components/header';
@@ -185,25 +186,36 @@ const App = () => {
               />
               <Route path='/s/:communityAddress/comments/:commentCid' element={<ModernPost />} />
               <Route path='/profile/:accountCommentIndex' element={<ModernPost />} />
+              <Route path='/submit' element={<ModernSubmit />} />
+              <Route
+                path='/s/:communityAddress/submit'
+                element={
+                  <ExactCommunityActionRoute>
+                    <ModernSubmit />
+                  </ExactCommunityActionRoute>
+                }
+              />
             </Route>
           )}
           <Route element={pagesLayout}>
             <Route path='/about' element={<AboutView />} />
             <Route path='/changelog' element={<Changelog />} />
             <Route path='/gold' element={<Gold />} />
-            <Route path='/submit' element={<SubmitPage />} />
+            {!isModern && <Route path='/submit' element={<SubmitPage />} />}
 
             {!isModern && <Route path='/s/:communityAddress/comments/:commentCid' element={<PostPage />} />}
             <Route path='/s/:communityAddress/comments/:commentCid/about' element={<AboutView />} />
 
-            <Route
-              path='/s/:communityAddress/submit'
-              element={
-                <ExactCommunityActionRoute>
-                  <SubmitPage />
-                </ExactCommunityActionRoute>
-              }
-            />
+            {!isModern && (
+              <Route
+                path='/s/:communityAddress/submit'
+                element={
+                  <ExactCommunityActionRoute>
+                    <SubmitPage />
+                  </ExactCommunityActionRoute>
+                }
+              />
+            )}
             <Route path='/s/:communityAddress/about' element={<AboutView />} />
 
             <Route path='/settings' element={<Settings />} />

@@ -1,22 +1,15 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ErrorCode, useDropzone, type FileRejection } from 'react-dropzone';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Trans, useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
-import { type Comment, useAccount, useCommunity } from '@bitsocial/bitsocial-react-hooks';
-import { Capacitor } from '@capacitor/core';
+import { Link } from 'react-router-dom';
+import { useAccount } from '@bitsocial/bitsocial-react-hooks';
 import { getLinkMediaInfo } from '../../lib/utils/media-utils';
-import type { AttachedMedia } from '../../lib/media-hosting';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
 import { isValidURL } from '../../lib/utils/url-utils';
 import { getCommunityPath } from '../../lib/utils/community-route-utils';
 import usePublishPostStore from '../../stores/use-publish-post-store';
 import { useDefaultSubscriptionAddresses } from '../../hooks/use-default-subscriptions';
-import useIsCommunityOffline from '../../hooks/use-is-community-offline';
-import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
-import { useMediaUpload } from '../../hooks/use-media-upload';
-import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
-import usePublishCommentWithChallengeAbandon from '../../hooks/use-publish-comment-with-challenge-abandon';
-import { startPostingAnalytics } from '../../lib/posting-analytics';
+import usePostMediaDropzone from '../../hooks/use-post-media-dropzone';
+import useSubmitPost from '../../hooks/use-submit-post';
 import LoadingEllipsis from '../../components/loading-ellipsis';
 import Markdown from '../../components/markdown';
 import Embed from '../../components/embed';
@@ -24,8 +17,6 @@ import { FormattingHelpTable } from '../../components/reply-form';
 import styles from './submit.module.css';
 import InfoTooltip from '../../components/info-tooltip';
 import CrosspostPreview from '../../components/crosspost-preview';
-
-const isAndroid = Capacitor.getPlatform() === 'android';
 
 const UrlField = memo(function UrlField() {
   const { t } = useTranslation();
@@ -97,48 +88,7 @@ const UrlField = memo(function UrlField() {
 
 const UploadMediaForm = memo(function UploadMediaForm() {
   const { t } = useTranslation();
-  const setPublishPostStore = usePublishPostStore((state) => state.setPublishPostStore);
-  const { uploadPhase, fileKinds, accept, pickAndroidMedia, rejectMedia, uploadMedia } = useMediaUpload();
-  const [isChoosingFile, setIsChoosingFile] = useState(false);
-
-  // Uploads to the media hosting provider set in the preferences (Forge Images by default) and fills in the link.
-  // A failed upload is a failed post attempt of its own: the post cannot carry the file.
-  const upload = async (media: AttachedMedia) => {
-    const url = await uploadMedia(media, () => startPostingAnalytics({ kind: 'post' }).finish('post_upload_failed'));
-    if (url) setPublishPostStore({ link: url });
-  };
-
-  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
-    onDrop: (acceptedFiles: File[], fileRejections: FileRejection[]) => {
-      // A drop of several files rejects them all as too many; the first supported one still uploads.
-      const file = acceptedFiles[0] ?? fileRejections.find(({ errors }) => errors.every((error) => error.code === ErrorCode.TooManyFiles))?.file;
-      if (file) {
-        void upload({ kind: 'file', file, name: file.name, mimeType: file.type });
-        return;
-      }
-      // A format no enabled provider takes: say so rather than ignore the drop.
-      const rejected = fileRejections[0]?.file;
-      if (rejected) rejectMedia({ kind: 'file', file: rejected, name: rejected.name, mimeType: rejected.type });
-    },
-    noClick: true,
-    multiple: false,
-    disabled: uploadPhase !== null,
-    // Only the formats the enabled providers host.
-    accept,
-  });
-
-  const handleChooseFile = async () => {
-    if (uploadPhase || isChoosingFile) return;
-    if (!isAndroid) {
-      open();
-      return;
-    }
-    // The native picker keeps the file native-side, so a video never crosses the bridge as base64.
-    setIsChoosingFile(true);
-    const media = await pickAndroidMedia();
-    setIsChoosingFile(false);
-    if (media) await upload(media);
-  };
+  const { fileKinds, uploadPhase, getRootProps, getInputProps, isDragActive, chooseFile } = usePostMediaDropzone();
 
   // Uploads are turned off in the preferences.
   if (fileKinds.length === 0) return null;
@@ -156,7 +106,7 @@ const UploadMediaForm = memo(function UploadMediaForm() {
             <input {...getInputProps()} />
             <div className={styles.cameraIcon} />
             <div className={styles.dropText}>{t('drop_here_or')}</div>
-            <label onClick={handleChooseFile}>
+            <label onClick={chooseFile}>
               <div className={styles.fileUploadIcon} />
               {t('choose_file')}
             </label>
@@ -427,66 +377,10 @@ const CrosspostField = memo(function CrosspostField() {
 
 const SubmitPage = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  const { crosspost, content, link, nsfw, spoiler, title, communityAddress, publishCommentOptions, setPublishPostStore, resetPublishPostStore } = usePublishPostStore();
-  const { communityAddress: routeCommunityAddress } = useResolvedCommunityRoute();
-
-  useEffect(() => {
-    setPublishPostStore({ communityAddress: routeCommunityAddress || '' } as any);
-  }, [routeCommunityAddress, setPublishPostStore]);
-
-  const selectedCommunityData = useCommunity(communityAddress ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { rules, title: communityTitle } = selectedCommunityData;
-  const shortAddress = communityAddress && getShortDisplayAddress(communityAddress);
-  const { isOffline, offlineTitle } = useIsCommunityOffline(selectedCommunityData);
-
-  // the store is cleared when the pending post is created, so the published draft is kept aside to
-  // put back in the form when the user abandons the challenge instead of publishing
-  const publishedDraftRef = useRef<Comment | undefined>(undefined);
-  const restorePublishedDraft = () => {
-    const publishedDraft = publishedDraftRef.current;
-    publishedDraftRef.current = undefined;
-    if (publishedDraft) {
-      setPublishPostStore(publishedDraft);
-    }
-  };
-
-  const { index, publishComment } = usePublishCommentWithChallengeAbandon(publishCommentOptions, restorePublishedDraft);
-
-  const onPublish = () => {
-    const attempt = startPostingAnalytics({ kind: 'post' });
-    if (!title) {
-      attempt.finish('post_validation_failed');
-      alert(`Missing title`);
-      return;
-    }
-    if (link && !isValidURL(link)) {
-      attempt.finish('post_validation_failed');
-      alert(`Invalid URL`);
-      return;
-    }
-    if (!communityAddress) {
-      attempt.finish('post_validation_failed');
-      alert(`Missing community address`);
-      return;
-    }
-
-    publishedDraftRef.current = { communityAddress, title, content, link, spoiler, nsfw, crosspost } as Comment;
-    publishComment(attempt);
-  };
-
-  // redirect to pending page when pending comment is created
-  useEffect(() => {
-    if (typeof index === 'number') {
-      resetPublishPostStore();
-      navigate(`/profile/${index}`);
-    }
-  }, [index, resetPublishPostStore, navigate]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  const crosspost = usePublishPostStore((state) => state.crosspost);
+  const link = usePublishPostStore((state) => state.link);
+  const { communityAddress, community, shortAddress, isOffline, offlineTitle, submitPost } = useSubmitPost();
+  const { rules, title: communityTitle } = community;
 
   const documentTitle = t('submit_to_string', {
     string: communityTitle || shortAddress || 'Seedit',
@@ -507,7 +401,12 @@ const SubmitPage = () => {
             link: communityTitle || shortAddress || 'seedit',
           }}
           components={{
-            1: shortAddress ? <Link key='submit_to_link' to={getCommunityPath(communityAddress)} className={styles.location} /> : <span key='submit_to_span' />,
+            1:
+              communityAddress && shortAddress ? (
+                <Link key='submit_to_link' to={getCommunityPath(communityAddress)} className={styles.location} />
+              ) : (
+                <span key='submit_to_span' />
+              ),
           }}
         />
       </h1>
@@ -530,7 +429,7 @@ const SubmitPage = () => {
           <div className={`${styles.box} ${styles.notice}`}>{t('submit_notice')}</div>
           <div>*{t('required')}</div>
           <div className={styles.submit}>
-            <button className={styles.submitButton} onClick={onPublish}>
+            <button className={styles.submitButton} onClick={submitPost}>
               {t('submit')}
             </button>
           </div>
