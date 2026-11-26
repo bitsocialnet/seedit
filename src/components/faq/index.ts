@@ -1,1 +1,1 @@
-export { default } from './faq';
+export { default, type FAQClasses } from './faq';

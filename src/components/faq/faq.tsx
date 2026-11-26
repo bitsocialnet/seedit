@@ -11,17 +11,25 @@ import styles from './faq.module.css';
 
 const isAndroid = Capacitor.getPlatform() === 'android';
 
-// the sidebar passes its Footer here on the mobile home about page so the version links render below the FAQ
-type FAQProps = { footer?: ReactNode };
+/** Class names for the FAQ's page, contents box and getting-started list; each interface styles the same text. */
+export interface FAQClasses {
+  page: string;
+  toc: string;
+  list: string;
+}
 
-const FAQ = ({ footer }: FAQProps) => {
+// the sidebar passes its Footer here on the mobile home about page so the version links render below the FAQ
+type FAQProps = { footer?: ReactNode; classes?: FAQClasses };
+
+const FAQ = ({ footer, classes }: FAQProps) => {
   const account = useAccount();
   const isMobile = useIsMobile();
+  const { page, toc, list } = classes ?? { page: pageStyles.about, toc: isMobile ? pageStyles.tocMobile : pageStyles.toc, list: styles.gettingStartedList };
 
   return (
     <>
-      <div className={pageStyles.about}>
-        <nav className={isMobile ? pageStyles.tocMobile : pageStyles.toc} aria-label='About page contents'>
+      <div className={page}>
+        <nav className={toc} aria-label='About page contents'>
           <strong>On this page</strong>
           <ul>
             <li>
@@ -61,7 +69,7 @@ const FAQ = ({ footer }: FAQProps) => {
           central account server. <Link to='/settings#exportAccount'>Back up your account</Link> so you can restore it if you change devices or lose this app's local
           data.
         </p>
-        <ul className={styles.gettingStartedList}>
+        <ul className={list}>
           <li>Browse the communities in the top bar, or enter an exact community address in the search box.</li>
           <li>Join the communities you want to see in your home feed.</li>
           <li>Read each community's rules before posting. Communities are independently operated and can set their own rules and moderators.</li>
