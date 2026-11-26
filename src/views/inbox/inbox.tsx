@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { StateSnapshot, Virtuoso, VirtuosoHandle } from 'react-virtuoso';
-import { useAccount, useNotifications } from '@bitsocial/bitsocial-react-hooks';
 import styles from './inbox.module.css';
 import Reply from '../../components/reply';
+import useInbox from '../../hooks/use-inbox';
 import { isInboxCommentRepliesView, isInboxPostRepliesView, isInboxUnreadView } from '../../lib/utils/view-utils';
 import { useTranslation } from 'react-i18next';
 import startCase from 'lodash/startCase';
@@ -42,39 +42,20 @@ const InboxTabs = () => {
 
 const Inbox = () => {
   const { t } = useTranslation();
-  const account = useAccount();
-  const { unreadNotificationCount } = account || {};
-  const { error, notifications, markAsRead } = useNotifications();
-
-  const location = useLocation();
-  const isInInboxCommentRepliesView = isInboxCommentRepliesView(location.pathname);
-  const isInInboxPostRepliesView = isInboxPostRepliesView(location.pathname);
-  const isInInboxUnreadView = isInboxUnreadView(location.pathname);
-
-  const filteredRepliesToUserReplies = useMemo(() => notifications?.filter((comment) => comment.parentCid !== comment.postCid) || [], [notifications]);
-  const filteredRepliesToUserPosts = useMemo(() => notifications?.filter((comment) => comment.parentCid === comment.postCid) || [], [notifications]);
-  const filteredUnreadNotifications = useMemo(() => notifications?.filter((comment) => !comment.markedAsRead) || [], [notifications]);
-
-  let comments;
-  if (isInInboxCommentRepliesView) {
-    comments = filteredRepliesToUserReplies;
-  } else if (isInInboxPostRepliesView) {
-    comments = filteredRepliesToUserPosts;
-  } else if (isInInboxUnreadView) {
-    comments = filteredUnreadNotifications;
-  } else {
-    comments = notifications;
-  }
+  const { account, tab, notifications, comments, unreadNotificationCount, markAsRead, error, shouldShowError: shouldShowErrorToUser } = useInbox();
+  const isInInboxCommentRepliesView = tab === 'commentreplies';
+  const isInInboxPostRepliesView = tab === 'postreplies';
+  const isInInboxUnreadView = tab === 'unread';
 
   // save last virtuoso state on each scroll
   const virtuosoRef = useRef<VirtuosoHandle | null>(null);
-  const lastVirtuosoState = lastVirtuosoStates?.[unreadNotificationCount];
+  const lastVirtuosoState = lastVirtuosoStates?.[unreadNotificationCount ?? 0];
   useEffect(() => {
     const setLastVirtuosoState = () =>
       virtuosoRef.current?.getState((snapshot) => {
         // TODO: not sure if checking for empty snapshot.ranges works for all scenarios
         if (snapshot?.ranges?.length) {
-          lastVirtuosoStates[unreadNotificationCount] = snapshot;
+          lastVirtuosoStates[unreadNotificationCount ?? 0] = snapshot;
         }
       });
     window.addEventListener('scroll', setLastVirtuosoState);
@@ -97,8 +78,6 @@ const Inbox = () => {
   useEffect(() => {
     document.title = documentTitle;
   }, [documentTitle]);
-
-  const shouldShowErrorToUser = Boolean(error?.message && comments.length === 0);
 
   return (
     <div className={styles.content}>

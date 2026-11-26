@@ -19,6 +19,7 @@ import ModernCommunity from './views/modern-community';
 import ModernHome from './views/modern-home';
 import ModernAuthor from './views/modern-author';
 import ModernCommunities from './views/modern-communities';
+import ModernInbox from './views/modern-inbox';
 import ModernPost from './views/modern-post';
 import ModernProfile from './views/modern-profile';
 import ModernSubmit from './views/modern-submit';
@@ -190,6 +191,10 @@ const App = () => {
               <Route path='/s/:communityAddress/comments/:commentCid' element={<ModernPost />} />
               <Route path='/profile/:accountCommentIndex' element={<ModernPost />} />
               <Route path='/submit' element={<ModernSubmit />} />
+              <Route path='/inbox' element={<ModernInbox />} />
+              {['unread', 'commentreplies', 'postreplies'].map((tab) => (
+                <Route key={tab} path={`/inbox/${tab}`} element={<ModernInbox />} />
+              ))}
               <Route path='/communities' element={<ModernCommunities />} />
               {['subscriber', 'moderator', 'admin', 'owner'].map((role) => (
                 <Route key={role} path={`/communities/${role}`} element={<ModernCommunities />} />
@@ -259,10 +264,14 @@ const App = () => {
 
             <Route path='/u/:authorAddress/comments/:commentCid/about' element={<AboutView />} />
 
-            <Route path='/inbox' element={<Inbox />} />
-            <Route path='/inbox/unread' element={<Inbox />} />
-            <Route path='/inbox/commentreplies' element={<Inbox />} />
-            <Route path='/inbox/postreplies' element={<Inbox />} />
+            {!isModern && (
+              <>
+                <Route path='/inbox' element={<Inbox />} />
+                <Route path='/inbox/unread' element={<Inbox />} />
+                <Route path='/inbox/commentreplies' element={<Inbox />} />
+                <Route path='/inbox/postreplies' element={<Inbox />} />
+              </>
+            )}
 
             {!isModern && (
               <>
