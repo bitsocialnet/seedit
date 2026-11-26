@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useCallback } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
 import { Community as CommunityType, useAccount, useAccountCommunities, useCommunities } from '@bitsocial/bitsocial-react-hooks';
 import styles from './communities.module.css';
@@ -11,8 +11,7 @@ import {
   isCommunitiesOwnerView,
   isCommunitiesDirectoryView,
 } from '../../lib/utils/view-utils';
-import { isDirectoryCode, isWellFormedDirectoryCode } from '../../lib/utils/directory-codes';
-import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
+import { useDirectoryRoute } from '../../hooks/use-directories';
 import useErrorStore from '../../stores/use-error-store';
 import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import { useDefaultSubscriptions } from '../../hooks/use-default-subscriptions';
@@ -343,11 +342,8 @@ const CommunitiesErrors = () => {
 const Communities = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { directoryCode } = useParams();
-  const { codes: directoryCodes, settled: directoryCodesSettled } = useDirectoryRegistry();
-  const isKnownDirectory = isDirectoryCode(directoryCode, directoryCodes);
-  // A code may belong to a directory published after this build; wait for the published codes before calling it unknown.
-  const isUnknownDirectory = Boolean(directoryCode) && !isKnownDirectory && (directoryCodesSettled || !isWellFormedDirectoryCode(directoryCode));
+  const { directoryCode, knownDirectoryCode, isUnknownDirectory } = useDirectoryRoute();
+  const isKnownDirectory = Boolean(knownDirectoryCode);
   const clearAllErrors = useErrorStore((state) => state.clearAllErrors);
 
   useEffect(() => {

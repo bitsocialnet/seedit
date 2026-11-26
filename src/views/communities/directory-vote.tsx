@@ -1,14 +1,8 @@
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useCommunities, type Community as CommunityType } from '@bitsocial/bitsocial-react-hooks';
-import { isDirectoryCode, type SeeditDirectoryCode } from '../../lib/utils/directory-codes';
-import { useDirectoryList } from '../../hooks/use-directory-list';
-import { useDirectoryRegistry } from '../../hooks/use-directory-registry';
-import { pickDirectoryWinner, sortDirectoryCommunitiesByRank, type DirectoryListCommunity } from '../../lib/utils/directory-list-utils';
+import type { SeeditDirectoryCode } from '../../lib/utils/directory-codes';
 import { deriveCommunityNsfw } from '../../lib/utils/nsfw-utils';
-import type { DirectoryDefaultsData, DirectoryDefaultsEntry } from '../../lib/utils/directory-list-utils';
-import { getVendoredDirectoryList } from '../../lib/utils/vendored-directory-lists';
-import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
+import { useDirectoryCandidates, useDirectoryEntry, useDirectoryIndex, useDirectoryRoute, useDirectorySearchQuery } from '../../hooks/use-directories';
 import { DIRECTORY_INDEX_PATH, getCommunityPath, getDirectoryCandidatesPath, getDirectoryPath } from '../../lib/utils/community-route-utils';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 import ErrorDisplay from '../../components/error-display';
@@ -18,25 +12,6 @@ import CommunityItem, { NoCommunitiesMessage } from './community-item';
 import DirectorySearch from './directory-search';
 import communityStyles from './communities.module.css';
 import styles from './directory-vote.module.css';
-
-const getDirectoryMetadata = (directoryCode: SeeditDirectoryCode, defaults: DirectoryDefaultsData): DirectoryDefaultsEntry => defaults.directories[directoryCode] ?? {};
-
-// Bundled list tags for bundled directories; published metadata tags for directories added after this build.
-const getDirectorySearchTags = (directoryCode: SeeditDirectoryCode, defaults: DirectoryDefaultsData) =>
-  getVendoredDirectoryList(directoryCode)?.tags ?? defaults.directories[directoryCode]?.tags;
-
-const useDirectorySearchQuery = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const query = searchParams.get('q') ?? '';
-  const setQuery = (nextQuery: string) => {
-    const nextSearchParams = new URLSearchParams(searchParams);
-    if (nextQuery) nextSearchParams.set('q', nextQuery);
-    else nextSearchParams.delete('q');
-    setSearchParams(nextSearchParams, { replace: true });
-  };
-
-  return { query, setQuery };
-};
 
 const DirectoryTags = ({ tags, onSelect }: { tags: string[] | undefined; onSelect?: (tag: string) => void }) =>
   tags?.length ? (
@@ -53,28 +28,11 @@ const DirectoryTags = ({ tags, onSelect }: { tags: string[] | undefined; onSelec
     </div>
   ) : null;
 
-const directoryMatchesSearch = (
-  query: string,
-  directoryCode: SeeditDirectoryCode,
-  metadata: { title?: string; description?: string },
-  tags: string[] | undefined,
-): boolean => {
-  const normalizedQuery = query.trim().toLowerCase();
-  if (!normalizedQuery) return true;
-
-  return [directoryCode, metadata.title, metadata.description, ...(tags ?? [])].some((value) => value?.toLowerCase().includes(normalizedQuery));
-};
-
 const DirectoryIndexRow = ({ directoryCode, query, onTagSelect }: { directoryCode: SeeditDirectoryCode; query: string; onTagSelect: (tag: string) => void }) => {
   const { t } = useTranslation();
-  const { list, error } = useDirectoryList(directoryCode);
-  const { defaults } = useDirectoryRegistry();
-  const winner = list && pickDirectoryWinner(list.communities);
-  const metadata = getDirectoryMetadata(directoryCode, defaults);
-  const { title, description } = metadata;
-  const tags = getDirectorySearchTags(directoryCode, defaults);
+  const { list, error, title, description, tags, winner, matchesSearch } = useDirectoryEntry(directoryCode, query);
 
-  if (!directoryMatchesSearch(query, directoryCode, metadata, tags)) return null;
+  if (!matchesSearch) return null;
 
   return (
     <li className={styles.directoryRow}>
@@ -120,10 +78,7 @@ const DirectoryIndexRow = ({ directoryCode, query, onTagSelect }: { directoryCod
 export const DirectoryIndex = () => {
   const { t } = useTranslation();
   const { query, setQuery } = useDirectorySearchQuery();
-  const { codes, defaults } = useDirectoryRegistry();
-  const hasMatch = codes.some((directoryCode) =>
-    directoryMatchesSearch(query, directoryCode, getDirectoryMetadata(directoryCode, defaults), getDirectorySearchTags(directoryCode, defaults)),
-  );
+  const { codes, hasMatch } = useDirectoryIndex(query);
 
   return (
     <>
@@ -138,36 +93,10 @@ export const DirectoryIndex = () => {
   );
 };
 
-const communityMatchesSearch = (query: string, candidate: DirectoryListCommunity, community: CommunityType): boolean => {
-  const normalizedQuery = query.trim().toLowerCase();
-  if (!normalizedQuery) return true;
-
-  return [candidate.address, candidate.owner, ...(candidate.tags ?? []), community.shortAddress, community.title, community.description].some((value) =>
-    value?.toLowerCase().includes(normalizedQuery),
-  );
-};
-
 const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirectoryCode }) => {
   const { t } = useTranslation();
   const { query, setQuery } = useDirectorySearchQuery();
-  const { list, error } = useDirectoryList(directoryCode);
-  const { defaults } = useDirectoryRegistry();
-  const ranked = list ? sortDirectoryCommunitiesByRank(list.communities) : [];
-
-  const { communities } = useCommunities({ communities: getCommunityIdentifiers(ranked.map(({ address }) => address)) });
-  // Index by address rather than by request position: a candidate that has not loaded yet must keep
-  // its rank instead of dropping out of the competition, and must never inherit a neighbour's data.
-  const loadedCommunities = new Map(
-    Object.values(communities ?? {})
-      .filter((community): community is CommunityType => Boolean(community?.address))
-      .map((community) => [community.address, community]),
-  );
-  const { title, description } = getDirectoryMetadata(directoryCode, defaults);
-  const visibleCandidates = ranked.reduce<{ candidate: DirectoryListCommunity; community: CommunityType; rankIndex: number }[]>((matches, candidate, rankIndex) => {
-    const community = loadedCommunities.get(candidate.address) ?? ({ address: candidate.address } as CommunityType);
-    if (communityMatchesSearch(query, candidate, community)) matches.push({ candidate, community, rankIndex });
-    return matches;
-  }, []);
+  const { list, error, title, description, ranked, visibleCandidates } = useDirectoryCandidates(directoryCode, query);
 
   return (
     <>
@@ -219,11 +148,10 @@ const DirectoryCandidateList = ({ directoryCode }: { directoryCode: SeeditDirect
 
 /** Ranked candidates competing for one reserved /s/ route. */
 export const DirectoryCandidates = () => {
-  const { directoryCode } = useParams();
-  const { codes } = useDirectoryRegistry();
+  const { knownDirectoryCode: directoryCode } = useDirectoryRoute();
 
   // Communities renders not found for an unknown code
-  if (!directoryCode || !isDirectoryCode(directoryCode, codes)) {
+  if (!directoryCode) {
     return null;
   }
 
