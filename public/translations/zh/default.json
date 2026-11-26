@@ -466,5 +466,7 @@
   "downvote": "反对",
   "user_banned_for_this_post": "用户因此帖被封禁",
   "user_banned_for_this_comment": "用户因此评论被封禁",
-  "wallet_sign_again": "此钱包的签名已不再被接受。请复制新消息,用此钱包签名,然后粘贴新签名。"
+  "wallet_sign_again": "此钱包的签名已不再被接受。请复制新消息,用此钱包签名,然后粘贴新签名。",
+  "collapse_navigation": "收起导航",
+  "expand_navigation": "展开导航"
 }

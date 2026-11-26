@@ -466,5 +466,7 @@
   "downvote": "stem ned",
   "user_banned_for_this_post": "Brugeren blev blokeret for dette indlæg",
   "user_banned_for_this_comment": "Brugeren blev blokeret for denne kommentar",
-  "wallet_sign_again": "Denne wallets underskrift accepteres ikke længere. Kopier den nye besked, underskriv den med denne wallet, og indsæt den nye underskrift."
+  "wallet_sign_again": "Denne wallets underskrift accepteres ikke længere. Kopier den nye besked, underskriv den med denne wallet, og indsæt den nye underskrift.",
+  "collapse_navigation": "skjul navigation",
+  "expand_navigation": "vis navigation"
 }

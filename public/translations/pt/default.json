@@ -466,5 +466,7 @@
   "downvote": "votar contra",
   "user_banned_for_this_post": "O usuário foi banido por este post",
   "user_banned_for_this_comment": "O usuário foi banido por este comentário",
-  "wallet_sign_again": "A assinatura desta carteira não é mais aceita. Copie a nova mensagem, assine-a com esta carteira e cole a nova assinatura."
+  "wallet_sign_again": "A assinatura desta carteira não é mais aceita. Copie a nova mensagem, assine-a com esta carteira e cole a nova assinatura.",
+  "collapse_navigation": "recolher navegação",
+  "expand_navigation": "expandir navegação"
 }

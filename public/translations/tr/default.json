@@ -466,5 +466,7 @@
   "downvote": "olumsuz oy",
   "user_banned_for_this_post": "Kullanıcı bu gönderi için yasaklandı",
   "user_banned_for_this_comment": "Kullanıcı bu yorum için yasaklandı",
-  "wallet_sign_again": "Bu cüzdanın imzası artık kabul edilmiyor. Yeni mesajı kopyalayın, bu cüzdanla imzalayın ve yeni imzayı yapıştırın."
+  "wallet_sign_again": "Bu cüzdanın imzası artık kabul edilmiyor. Yeni mesajı kopyalayın, bu cüzdanla imzalayın ve yeni imzayı yapıştırın.",
+  "collapse_navigation": "gezinmeyi daralt",
+  "expand_navigation": "gezinmeyi genişlet"
 }

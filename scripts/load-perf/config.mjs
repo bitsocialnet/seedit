@@ -25,6 +25,8 @@ export default {
     { name: 'home-mobile', hash: '/', staticShell: true, viewport: { width: 375, height: 812 } },
     { name: 'home-german', hash: '/', staticShell: false, locale: 'de-DE' },
     { name: 'home-content-options', hash: '/', staticShell: false, storage: { 'content-options': '{"state":{"hideDefaultCommunities":true},"version":1}' } },
+    // The shell's navigation is expanded, so a visitor who collapsed it loads without the shell.
+    { name: 'home-nav-collapsed', hash: '/', staticShell: false, storage: { modernNavCollapsed: 'true' } },
     { name: 'community', hash: '/s/seedit.bso', staticShell: false, content: '[class*="_title_"] a' },
     // The shell shows the default interface, so a visitor who chose the old one loads without it.
     { name: 'home-old', hash: '/', staticShell: false, storage: { uiMode: 'old' }, content: '[class*="_title_"] a' },

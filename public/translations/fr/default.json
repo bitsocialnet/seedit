@@ -466,5 +466,7 @@
   "downvote": "voter contre",
   "user_banned_for_this_post": "L'utilisateur a été banni pour ce post",
   "user_banned_for_this_comment": "L'utilisateur a été banni pour ce commentaire",
-  "wallet_sign_again": "La signature de ce portefeuille n'est plus acceptée. Copiez le nouveau message, signez-le avec ce portefeuille et collez la nouvelle signature."
+  "wallet_sign_again": "La signature de ce portefeuille n'est plus acceptée. Copiez le nouveau message, signez-le avec ce portefeuille et collez la nouvelle signature.",
+  "collapse_navigation": "réduire la navigation",
+  "expand_navigation": "développer la navigation"
 }

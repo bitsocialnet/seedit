@@ -63,6 +63,8 @@ test('shows the shell variant matching the visitor on the home page', () => {
   assert.equal(loadWithShell({ storage: { i18nextLng: 'en' }, languages: ['fr-FR'] }), 'desktop light / body light');
   assert.equal(loadWithShell({ storage: { uiMode: 'modern' } }), 'desktop light / body light');
   assert.equal(loadWithShell({ uiMode: 'old', storage: { uiMode: 'old' } }), 'desktop light / body light');
+  assert.equal(loadWithShell({ storage: { modernNavCollapsed: 'false' } }), 'desktop light / body light');
+  assert.equal(loadWithShell({ uiMode: 'old', storage: { uiMode: 'old', modernNavCollapsed: 'true' } }), 'desktop light / body light');
 });
 
 test('skips the shell when the first frame would differ', () => {
@@ -74,6 +76,7 @@ test('skips the shell when the first frame would differ', () => {
   assert.equal(loadWithShell({ uiMode: 'old', storage: { uiMode: 'modern' } }), 'no shell');
   assert.equal(loadWithShell({ search: '?ui=old' }), 'no shell');
   assert.equal(loadWithShell({ storage: { 'content-options': '{"state":{"hideDefaultCommunities":true},"version":0}' } }), 'no shell');
+  assert.equal(loadWithShell({ storage: { modernNavCollapsed: 'true' } }), 'no shell');
 });
 
 test('renders the shell in a build:profile environment', () => {

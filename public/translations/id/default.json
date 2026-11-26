@@ -466,5 +466,7 @@
   "downvote": "downvote",
   "user_banned_for_this_post": "Pengguna diblokir untuk pos ini",
   "user_banned_for_this_comment": "Pengguna diblokir karena komentar ini",
-  "wallet_sign_again": "Tanda tangan dompet ini tidak lagi diterima. Salin pesan baru, tandatangani dengan dompet ini, lalu tempelkan tanda tangan yang baru."
+  "wallet_sign_again": "Tanda tangan dompet ini tidak lagi diterima. Salin pesan baru, tandatangani dengan dompet ini, lalu tempelkan tanda tangan yang baru.",
+  "collapse_navigation": "ciutkan navigasi",
+  "expand_navigation": "bentangkan navigasi"
 }

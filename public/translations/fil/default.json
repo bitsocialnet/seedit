@@ -466,5 +466,7 @@
   "downvote": "downvote",
   "user_banned_for_this_post": "Na-ban ang user dahil sa post na ito",
   "user_banned_for_this_comment": "Na-ban ang user dahil sa komentong ito",
-  "wallet_sign_again": "Hindi na tinatanggap ang lagda ng wallet na ito. Kopyahin ang bagong mensahe, pirmahan ito gamit ang wallet na ito at i-paste ang bagong lagda."
+  "wallet_sign_again": "Hindi na tinatanggap ang lagda ng wallet na ito. Kopyahin ang bagong mensahe, pirmahan ito gamit ang wallet na ito at i-paste ang bagong lagda.",
+  "collapse_navigation": "itiklop ang nabigasyon",
+  "expand_navigation": "palawakin ang nabigasyon"
 }

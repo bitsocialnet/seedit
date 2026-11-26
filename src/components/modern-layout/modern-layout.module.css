@@ -27,6 +27,7 @@
   --m-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
   --m-header-height: 56px;
   --m-nav-width: 256px;
+  --m-nav-collapsed-width: 24px;
   /* The shared Markdown component reads the old theme's variables; inside the shell they follow the modern tokens. */
   --markdown-link: var(--m-link);
   --markdown-blockquote: var(--m-text-secondary);
@@ -427,6 +428,15 @@
   display: none;
 }
 
+/* Below 1024px the navigation is a drawer, so its rail takes no room and has no collapse button. */
+.navRail {
+  display: contents;
+}
+
+.navCollapseButton {
+  display: none;
+}
+
 .main {
   flex: 1;
   min-width: 0;
@@ -546,6 +556,75 @@
   .navToggle {
     display: none;
   }
+
+  .navRail {
+    position: sticky;
+    top: var(--m-header-height);
+    z-index: 20;
+    display: block;
+    flex: none;
+    width: var(--m-nav-width);
+    height: calc(100vh - var(--m-header-height));
+    transition: width 0.2s ease;
+  }
+
+  .navRail .nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: var(--m-nav-width);
+    height: 100%;
+  }
+
+  .navCollapseButton {
+    position: absolute;
+    top: 12px;
+    /* centred on the navigation's right edge */
+    right: -16px;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--m-border-strong);
+    border-radius: 50%;
+    background: var(--m-surface);
+    color: var(--m-text);
+    cursor: pointer;
+  }
+
+  .navCollapseButton:hover {
+    background: var(--m-surface-hover);
+  }
+
+  .navRailCollapsed {
+    width: var(--m-nav-collapsed-width);
+    border-right: 1px solid var(--m-border);
+    box-sizing: border-box;
+  }
+
+  /* Collapsed, the navigation waits off-screen, out of the tab order; it closes a moment after the pointer leaves,
+     so a pointer that overshoots its edge does not shut it. Its items start below the button, which stays put. */
+  .navRailCollapsed .nav {
+    padding-top: 56px;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition:
+      transform 0.2s ease 0.2s,
+      visibility 0s linear 0.4s;
+  }
+
+  /* The pointer over the strip, or over the navigation it opened, keeps it open above the page. */
+  .navRailCollapsed:hover .nav {
+    transform: none;
+    visibility: visible;
+    box-shadow: var(--m-shadow);
+    transition:
+      transform 0.2s ease 0.08s,
+      visibility 0s linear 0.08s;
+  }
 }
 
 @media (min-width: 1200px) {
@@ -562,7 +641,9 @@
     z-index: 30;
     transform: translateX(-100%);
     visibility: hidden;
-    transition: transform 0.2s ease, visibility 0s linear 0.2s;
+    transition:
+      transform 0.2s ease,
+      visibility 0s linear 0.2s;
   }
 
   .navOpen {
@@ -611,6 +692,10 @@
 @media (prefers-reduced-motion: reduce) {
   .nav,
   .navOpen,
+  .navRail,
+  .navRail .nav,
+  .navRailCollapsed .nav,
+  .navRailCollapsed:hover .nav,
   .switch,
   .switch::after {
     transition: none;

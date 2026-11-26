@@ -466,5 +466,7 @@
   "downvote": "phản đối",
   "user_banned_for_this_post": "Người dùng đã bị cấm vì bài đăng này",
   "user_banned_for_this_comment": "Người dùng đã bị cấm vì bình luận này",
-  "wallet_sign_again": "Chữ ký của ví này không còn được chấp nhận. Hãy sao chép tin nhắn mới, ký bằng ví này và dán chữ ký mới."
+  "wallet_sign_again": "Chữ ký của ví này không còn được chấp nhận. Hãy sao chép tin nhắn mới, ký bằng ví này và dán chữ ký mới.",
+  "collapse_navigation": "thu gọn điều hướng",
+  "expand_navigation": "mở rộng điều hướng"
 }

@@ -27,7 +27,9 @@ export const STATIC_SHELL_VARIANTS = {
 // cached i18nextLng values before the browser languages, and the persisted content options store
 // ("content-options", written only once a user changes an option) filters the top bar's links.
 // src/stores/use-ui-mode-store.ts reads ?ui= and then localStorage "uiMode"; the shell shows the
-// interface it was rendered with, which is the default one for visitors who never chose.
+// interface it was rendered with, which is the default one for visitors who never chose. The shell's
+// modern navigation is expanded, as src/stores/use-modern-nav-store.ts starts it unless
+// localStorage "modernNavCollapsed" says otherwise.
 const getInsertShellScript = (uiMode) => `(function () {
   try {
     if (location.hash && location.hash !== '#' && location.hash !== '#/') return;
@@ -37,6 +39,7 @@ const getInsertShellScript = (uiMode) => `(function () {
     var theme = localStorage.getItem('theme') || 'light';
     if (theme !== 'light' && theme !== 'dark') return;
     if (localStorage.getItem('content-options') !== null) return;
+    ${uiMode === 'modern' ? "if (localStorage.getItem('modernNavCollapsed') === 'true') return;" : ''}
     var cookie = document.cookie.match(/(?:^|;\\s*)i18next=([^;]*)/);
     var language =
       new URLSearchParams(location.search).get('lng') ||
