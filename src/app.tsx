@@ -18,6 +18,7 @@ import ModernAll from './views/modern-all';
 import ModernCommunity from './views/modern-community';
 import ModernHome from './views/modern-home';
 import ModernAuthor from './views/modern-author';
+import ModernCommunities from './views/modern-communities';
 import ModernPost from './views/modern-post';
 import ModernProfile from './views/modern-profile';
 import ModernSubmit from './views/modern-submit';
@@ -189,6 +190,10 @@ const App = () => {
               <Route path='/s/:communityAddress/comments/:commentCid' element={<ModernPost />} />
               <Route path='/profile/:accountCommentIndex' element={<ModernPost />} />
               <Route path='/submit' element={<ModernSubmit />} />
+              <Route path='/communities' element={<ModernCommunities />} />
+              {['subscriber', 'moderator', 'admin', 'owner'].map((role) => (
+                <Route key={role} path={`/communities/${role}`} element={<ModernCommunities />} />
+              ))}
               <Route path='/profile' element={<ModernProfile />} />
               {['submitted', 'comments', 'upvoted', 'downvoted', 'hidden', 'saved'].map((tab) => (
                 <Route key={tab} path={`/profile/${tab}`} element={<ModernProfile />} />
@@ -259,12 +264,16 @@ const App = () => {
             <Route path='/inbox/commentreplies' element={<Inbox />} />
             <Route path='/inbox/postreplies' element={<Inbox />} />
 
-            <Route path='/communities' element={<Communities />} />
+            {!isModern && (
+              <>
+                <Route path='/communities' element={<Communities />} />
+                <Route path='/communities/subscriber' element={<Communities />} />
+                <Route path='/communities/moderator' element={<Communities />} />
+                <Route path='/communities/admin' element={<Communities />} />
+                <Route path='/communities/owner' element={<Communities />} />
+              </>
+            )}
             <Route path='/communities/defaults' element={<StarterSubscriptions />} />
-            <Route path='/communities/subscriber' element={<Communities />} />
-            <Route path='/communities/moderator' element={<Communities />} />
-            <Route path='/communities/admin' element={<Communities />} />
-            <Route path='/communities/owner' element={<Communities />} />
             <Route path={DIRECTORY_INDEX_PATH} element={<Communities />} />
             <Route path={`${DIRECTORY_INDEX_PATH}/about`} element={<DirectoryAboutView />} />
             <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<Communities />} />

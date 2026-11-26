@@ -1,0 +1,90 @@
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px 12px;
+}
+
+.heading {
+  margin: 0;
+  color: var(--m-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@media (min-width: 1200px) {
+  .headerActions {
+    display: none;
+  }
+}
+
+.notice {
+  margin: 0 16px 8px;
+  color: var(--m-text-secondary);
+  font-size: 14px;
+}
+
+.textLink {
+  color: var(--m-link);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.textLink:hover {
+  text-decoration: underline;
+}
+
+.empty {
+  margin: 0;
+  padding: 24px 16px;
+  color: var(--m-text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.error {
+  margin: 0 16px 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--m-danger);
+  border-radius: 12px;
+  color: var(--m-text);
+}
+
+.section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid var(--m-border);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 16px 4px;
+}
+
+.sectionTitle {
+  margin: 0;
+  color: var(--m-text);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.railButton {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.railButton + .railButton {
+  margin-top: 8px;
+}
