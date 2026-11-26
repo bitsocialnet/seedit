@@ -22,16 +22,15 @@ vi.mock('@bitsocial/bitsocial-react-hooks', () => ({
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key }) }));
 vi.mock('../../hooks/use-submit-post', async () => {
   const { default: useStore } = await import('../../stores/use-publish-post-store');
-  return {
-    default: () => ({
-      communityAddress: useStore((state) => state.communityAddress),
-      community: undefined,
-      shortAddress: undefined,
-      isOffline: false,
-      offlineTitle: '',
-      submitPost: testState.submitPost,
-    }),
-  };
+  const useSubmitPostMock = () => ({
+    communityAddress: useStore((state) => state.communityAddress),
+    community: undefined,
+    shortAddress: undefined,
+    isOffline: false,
+    offlineTitle: '',
+    submitPost: testState.submitPost,
+  });
+  return { default: useSubmitPostMock };
 });
 vi.mock('../../hooks/use-post-media-dropzone', () => ({
   default: () => ({ fileKinds: ['image'], uploadPhase: null, getRootProps: () => ({}), getInputProps: () => ({}), isDragActive: false, chooseFile: vi.fn() }),
