@@ -1,0 +1,269 @@
+.comment {
+  padding-top: 8px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  min-height: 24px;
+  color: var(--m-text-muted);
+  font-size: 12px;
+}
+
+.collapseButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--m-border-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--m-text-secondary);
+  cursor: pointer;
+}
+
+.collapseButton:hover {
+  border-color: var(--m-text-secondary);
+  color: var(--m-text);
+}
+
+.author {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Long display names are cut short, as in the old interface, so the metadata stays on one line. */
+.authorName {
+  max-width: 200px;
+  overflow: hidden;
+  color: var(--m-text);
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.authorAddress {
+  color: var(--m-text-muted);
+}
+
+.author:hover .authorName {
+  text-decoration: underline;
+}
+
+.trip {
+  color: var(--m-accent);
+  font-weight: 400;
+}
+
+.removedAuthor {
+  color: var(--m-text-muted);
+  font-style: italic;
+}
+
+.badge,
+.flair {
+  display: inline-block;
+  height: 18px;
+  line-height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: var(--m-surface-raised);
+  color: var(--m-text-secondary);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.flair {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.submitter {
+  color: var(--m-link);
+}
+
+.role {
+  color: var(--m-accent);
+}
+
+.nsfw {
+  background: var(--m-danger);
+  color: var(--m-on-strong);
+}
+
+.dot {
+  color: var(--m-text-muted);
+}
+
+.edited {
+  font-style: italic;
+}
+
+.pinned {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--m-accent);
+  font-weight: 600;
+}
+
+.failed {
+  color: var(--m-danger);
+  font-weight: 600;
+}
+
+/* Translated labels are lowercase in the locale files. */
+.badge::first-letter,
+.failed::first-letter,
+.reason::first-letter,
+.continueThread::first-letter {
+  text-transform: uppercase;
+}
+
+.childrenCount {
+  color: var(--m-text-muted);
+}
+
+/* The body lines up with the author, after the collapse button. */
+.body {
+  padding-left: 30px;
+}
+
+.content {
+  margin-top: 2px;
+  color: var(--m-text);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.highlighted > .body > .content {
+  margin: 4px 0 0 -10px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--m-accent) 12%, transparent);
+  box-shadow: inset 3px 0 0 var(--m-accent);
+}
+
+.placeholder,
+.reason,
+.stateString {
+  margin: 0;
+  color: var(--m-text-muted);
+}
+
+.placeholder {
+  font-style: italic;
+}
+
+.reason,
+.stateString {
+  margin-top: 4px;
+  font-size: 12px;
+}
+
+.obscured {
+  position: relative;
+  width: fit-content;
+  min-width: 160px;
+  max-width: 100%;
+  min-height: 44px;
+}
+
+.obscuredText {
+  filter: blur(6px);
+  user-select: none;
+}
+
+/* At the top of the covered text, so it stays in view however long the text is. */
+.revealButton {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 28px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--m-overlay);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  margin: 2px 0 0 -6px;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--m-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.actionButton:hover:not(:disabled) {
+  background: var(--m-surface-raised);
+  color: var(--m-text);
+}
+
+.actionButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.replyForm {
+  margin: 6px 0 8px;
+}
+
+/* Replies hang from a line under the parent's collapse button. */
+.children {
+  margin-left: -18px;
+  padding-left: 8px;
+  border-left: 2px solid var(--m-border);
+}
+
+.continueThread {
+  display: inline-block;
+  margin: 6px 0 4px;
+  color: var(--m-link);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.continueThread:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 639px) {
+  /* Narrower indentation keeps deep threads readable on phones. */
+  .children {
+    margin-left: -24px;
+    padding-left: 4px;
+  }
+}

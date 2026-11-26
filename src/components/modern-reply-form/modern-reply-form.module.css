@@ -1,0 +1,55 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--m-border-strong);
+  border-radius: 16px;
+  background: var(--m-surface);
+}
+
+.form:has(.textarea:focus) {
+  border-color: var(--m-focus);
+  box-shadow: 0 0 0 1px var(--m-focus);
+}
+
+.notice {
+  margin: 0;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--m-border);
+  color: var(--m-text-secondary);
+  font-size: 13px;
+}
+
+.textarea {
+  min-height: 72px;
+  padding: 10px 14px;
+  border: 0;
+  border-radius: 16px 16px 0 0;
+  background: transparent;
+  line-height: 1.5;
+  resize: vertical;
+  field-sizing: content;
+  max-height: 60vh;
+}
+
+/* The form shows focus on its border, which the textarea fills. */
+.textarea:focus {
+  outline: none;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 8px 8px;
+}
+
+.button {
+  height: 32px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}

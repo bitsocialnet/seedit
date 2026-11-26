@@ -1,1 +1,1 @@
-export { default } from './modern-post-card';
+export { default, PostActions, PostMedia, PostMeta, PostTags } from './modern-post-card';

@@ -1,102 +1,24 @@
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { type Community, useBlock, useCommunity } from '@bitsocial/bitsocial-react-hooks';
+import { useBlock, useCommunity } from '@bitsocial/bitsocial-react-hooks';
 import useCommunityFeedWithAccountPosts from '../../hooks/use-community-feed-with-account-posts';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
-import useCommunitySubscription from '../../hooks/use-community-subscription';
 import useFeedRoute from '../../hooks/use-feed-route';
 import useIsCommunityOffline from '../../hooks/use-is-community-offline';
 import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
 import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 import { getCommunityPath, isResolvableCommunityAddress } from '../../lib/utils/community-route-utils';
-import type { SeeditDirectoryCode } from '../../lib/utils/directory-codes';
-import { getFormattedTimeDuration } from '../../lib/utils/time-utils';
 import useContentOptionsStore from '../../stores/use-content-options-store';
 import ErrorDisplay from '../../components/error-display';
-import Markdown from '../../components/markdown';
+import ModernCommunityAbout, { ModernJoinButton } from '../../components/modern-community-about';
 import ModernCommunityAvatar from '../../components/modern-community-avatar';
 import ModernFeed from '../../components/modern-feed';
 import { PlusIcon } from '../../components/modern-icons';
-import { ModernColumns, ModernRailSection, modernStyles } from '../../components/modern-layout';
+import { ModernColumns, modernStyles } from '../../components/modern-layout';
 import Over18Warning from '../../components/over-18-warning';
 import styles from './modern-community.module.css';
-
-interface JoinButtonProps {
-  address: string;
-  directoryCode?: SeeditDirectoryCode;
-  directoryRevision?: number;
-}
-
-const JoinButton = ({ address, directoryCode, directoryRevision }: JoinButtonProps) => {
-  const { t } = useTranslation();
-  const { subscribed, toggleSubscription } = useCommunitySubscription({ address, directoryCode, directoryRevision });
-  if (subscribed === undefined) return null;
-
-  return (
-    <button
-      type='button'
-      className={subscribed ? modernStyles.secondaryButton : modernStyles.primaryButton}
-      aria-pressed={subscribed}
-      onClick={() => void toggleSubscription()}
-    >
-      <span className={modernStyles.sentenceCase}>{subscribed ? t('leave') : t('join')}</span>
-    </button>
-  );
-};
-
-const AboutRail = ({ community, communityAddress }: { community: Community | undefined; communityAddress: string }) => {
-  const { t } = useTranslation();
-  const { createdAt, description, roles, rules, title } = community || {};
-  const moderators = Object.entries(roles || {}) as [string, { role?: string }][];
-
-  return (
-    <>
-      <ModernRailSection title={title || `s/${getDisplayAddress(community?.shortAddress || communityAddress)}`}>
-        {description && (
-          <div className={styles.description}>
-            <Markdown content={description} />
-          </div>
-        )}
-        <dl className={styles.facts}>
-          <div>
-            <dt>{t('address')}</dt>
-            <dd className={styles.address}>{communityAddress}</dd>
-          </div>
-        </dl>
-        {createdAt && <p className={styles.age}>{t('community_for', { date: getFormattedTimeDuration(createdAt) })}</p>}
-        <Link to={`${getCommunityPath(communityAddress)}/settings`} className={styles.settingsLink}>
-          {t('community_settings')}
-        </Link>
-      </ModernRailSection>
-      {rules && rules.length > 0 && (
-        <ModernRailSection title={t('rules')}>
-          <ol className={styles.rules}>
-            {rules.map((rule: string, index: number) => (
-              <li key={index}>{rule}</li>
-            ))}
-          </ol>
-        </ModernRailSection>
-      )}
-      {moderators.length > 0 && (
-        <ModernRailSection title={<span className={modernStyles.sentenceCase}>{t('moderators')}</span>}>
-          <ul className={styles.moderators}>
-            {moderators.map(([address, { role }]) => (
-              <li key={address}>
-                {/* Author pages need a comment to open from, so a moderator is shown without a link, as in the old sidebar. */}
-                <span className={styles.moderator} title={address}>
-                  u/{getDisplayAddress(address)}
-                </span>
-                {role && <span className={styles.role}>{role}</span>}
-              </li>
-            ))}
-          </ul>
-        </ModernRailSection>
-      )}
-    </>
-  );
-};
 
 const ModernCommunity = () => {
   const { t } = useTranslation();
@@ -149,11 +71,11 @@ const ModernCommunity = () => {
               <PlusIcon size={18} />
               <span className={styles.createLabel}>{t('create')}</span>
             </Link>
-            <JoinButton address={communityAddress} directoryCode={directoryCode} directoryRevision={directoryList?.revision} />
+            <ModernJoinButton address={communityAddress} directoryCode={directoryCode} directoryRevision={directoryList?.revision} />
           </div>
         )}
       </header>
-      <ModernColumns rail={canLoadCommunity && <AboutRail community={community} communityAddress={communityAddress} />}>
+      <ModernColumns rail={canLoadCommunity && <ModernCommunityAbout community={community} communityAddress={communityAddress} />}>
         {visibleError && (
           <div className={styles.error}>
             <ErrorDisplay error={visibleError} />

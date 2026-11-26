@@ -1,30 +1,96 @@
-import { memo, useEffect, useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { type Comment, useAuthorAddress, useBlock, useCommunity, useEditedComment } from '@bitsocial/bitsocial-react-hooks';
 import { useCommentMediaInfo } from '../../hooks/use-comment-media-info';
 import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
-import useDownvote from '../../hooks/use-downvote';
-import { useIsNsfwCommunity } from '../../hooks/use-is-nsfw-community';
+import usePostObscuring from '../../hooks/use-post-obscuring';
 import usePrefetchIntent from '../../hooks/use-prefetch-intent';
-import useUpvote from '../../hooks/use-upvote';
 import { getDisplayAddress, getShortDisplayAddress } from '../../lib/utils/address-utils';
-import { copyToClipboard } from '../../lib/utils/clipboard-utils';
 import { getCommentCommunityAddress } from '../../lib/utils/comment-utils';
-import { getCommunityPath, getCommunityPostPath, getCommunityPostUrl } from '../../lib/utils/community-route-utils';
+import { getCommunityPath, getCommunityPostUrl } from '../../lib/utils/community-route-utils';
 import { stripCommentPostOptionMarkers } from '../../lib/utils/fivechan-post-options';
 import { type CommentMediaInfo } from '../../lib/utils/media-utils';
 import { getPlainTextPreview } from '../../lib/utils/plain-text-preview';
-import { formatScore, getPostScore } from '../../lib/utils/post-utils';
+import { formatScore, getPostPagePath, getPostScore, getPostTitleText } from '../../lib/utils/post-utils';
 import { formatLocalizedUTCTimestamp, getFormattedTimeAgo } from '../../lib/utils/time-utils';
 import { stripTripcodeProof } from '../../lib/utils/tripcode-utils';
 import { getHostname } from '../../lib/utils/url-utils';
-import useContentOptionsStore from '../../stores/use-content-options-store';
+import { ModernShareButton, ModernVoteButtons } from '../modern-actions';
 import ModernCommunityAvatar from '../modern-community-avatar';
-import { CommentIcon, DownvoteIcon, ExternalLinkIcon, PinIcon, ShareIcon, UpvoteIcon } from '../modern-icons';
+import { CommentIcon, ExternalLinkIcon, PinIcon } from '../modern-icons';
+import { modernStyles } from '../modern-layout';
 import styles from './modern-post-card.module.css';
 
-const TITLE_MAX_LENGTH = 300;
+interface PostMetaProps {
+  post: Comment;
+  showCommunity: boolean;
+  /** Post pages show when the author last edited the post. */
+  showEdited?: boolean;
+}
+
+export const PostMeta = ({ post, showCommunity, showEdited }: PostMetaProps) => {
+  const { t, i18n } = useTranslation();
+  const { author, cid, edit, pinned, state, timestamp } = post;
+  const communityAddress = getCommentCommunityAddress(post);
+  const community = useCommunity(communityAddress ? { community: getCommunityIdentifier(communityAddress), onlyIfCached: true } : undefined);
+  const communityName = getDisplayAddress(community?.shortAddress || '') || getShortDisplayAddress(communityAddress);
+  const { shortAuthorAddress } = useAuthorAddress({ comment: post });
+  const displayName = stripTripcodeProof(author?.displayName)?.trim();
+  const prefetchCommunity = usePrefetchIntent({ communityAddress });
+
+  return (
+    <div className={styles.meta}>
+      {showCommunity && communityAddress && (
+        <Link to={getCommunityPath(communityAddress)} className={`${styles.raised} ${styles.community}`} title={communityAddress} {...prefetchCommunity}>
+          <ModernCommunityAvatar address={communityAddress} avatarUrl={community?.suggested?.avatarUrl} />
+          <span className={styles.communityName}>s/{communityName}</span>
+        </Link>
+      )}
+      {author?.address && (
+        <Link to={cid ? `/u/${author.address}/comments/${cid}` : `/profile/${post.index}`} className={`${styles.raised} ${styles.author}`} title={author.address}>
+          {displayName ? `${displayName} ` : ''}u/{getDisplayAddress(shortAuthorAddress || author.shortAddress || '')}
+        </Link>
+      )}
+      <span className={styles.dot} aria-hidden='true'>
+        ·
+      </span>
+      <time dateTime={timestamp ? new Date(timestamp * 1000).toISOString() : undefined} title={formatLocalizedUTCTimestamp(timestamp, i18n.language)}>
+        {getFormattedTimeAgo(timestamp)}
+      </time>
+      {showEdited && edit?.timestamp && <span className={styles.edited}>{t('last_edited', { timestamp: getFormattedTimeAgo(edit.timestamp) })}</span>}
+      {pinned && (
+        <span className={styles.pinned}>
+          <PinIcon size={14} /> {t('announcement')}
+        </span>
+      )}
+      {state === 'failed' && <span className={styles.failed}>{t('failed')}</span>}
+      {!cid && state !== 'failed' && <span className={styles.badge}>{t('pending')}</span>}
+    </div>
+  );
+};
+
+interface PostTagsProps {
+  post: Comment;
+  nsfw: boolean;
+}
+
+export const PostTags = ({ post: { flair, spoiler }, nsfw }: PostTagsProps) => {
+  const { t } = useTranslation();
+  if (!flair?.text && !nsfw && !spoiler) return null;
+
+  return (
+    <div className={styles.tags}>
+      {nsfw && <span className={`${styles.badge} ${styles.nsfwBadge}`}>{t('nsfw')}</span>}
+      {spoiler && <span className={styles.badge}>{t('spoiler')}</span>}
+      {flair?.text && (
+        <span className={styles.flair} style={{ backgroundColor: flair.backgroundColor, color: flair.textColor }}>
+          {flair.text}
+        </span>
+      )}
+    </div>
+  );
+};
 
 interface PostMediaProps {
   mediaInfo: CommentMediaInfo | undefined;
@@ -33,9 +99,11 @@ interface PostMediaProps {
   linkHeight?: number;
   obscuredLabel?: string;
   onReveal: () => void;
+  /** Comments show media smaller than posts do. */
+  compact?: boolean;
 }
 
-const PostMedia = ({ mediaInfo, link, linkWidth, linkHeight, obscuredLabel, onReveal }: PostMediaProps) => {
+export const PostMedia = ({ mediaInfo, link, linkWidth, linkHeight, obscuredLabel, onReveal, compact }: PostMediaProps) => {
   // Media that fails to load falls back to its link, instead of leaving an empty frame.
   const [failedUrl, setFailedUrl] = useState<string>();
   const type = mediaInfo?.url && mediaInfo.url === failedUrl ? 'failed' : mediaInfo?.type;
@@ -54,7 +122,7 @@ const PostMedia = ({ mediaInfo, link, linkWidth, linkHeight, obscuredLabel, onRe
     const thumbnail = mediaInfo?.patternThumbnailUrl || mediaInfo?.thumbnail;
     const hostname = getHostname(link);
     return (
-      <a className={styles.linkPreview} href={link} target='_blank' rel='noopener noreferrer'>
+      <a className={`${styles.linkPreview} ${compact ? styles.compact : ''}`} href={link} target='_blank' rel='noopener noreferrer'>
         <span className={styles.linkPreviewText}>
           <span className={styles.linkHost}>{hostname}</span>
           <span className={styles.linkUrl}>{link}</span>
@@ -67,14 +135,14 @@ const PostMedia = ({ mediaInfo, link, linkWidth, linkHeight, obscuredLabel, onRe
   }
 
   return (
-    <div className={styles.media}>
+    <div className={`${styles.media} ${compact ? styles.compact : ''}`}>
       {/* inert keeps hidden video controls out of the tab order until the media is revealed. */}
       <div className={obscuredLabel ? styles.obscured : undefined} inert={obscuredLabel ? true : undefined}>
         {media}
       </div>
       {obscuredLabel && (
         <button type='button' className={styles.revealButton} onClick={onReveal}>
-          {obscuredLabel}
+          <span className={modernStyles.sentenceCase}>{obscuredLabel}</span>
         </button>
       )}
     </div>
@@ -83,69 +151,35 @@ const PostMedia = ({ mediaInfo, link, linkWidth, linkHeight, obscuredLabel, onRe
 
 interface PostActionsProps {
   post: Comment;
-  postPath: string;
-  communityAddress: string | undefined;
+  /** On a post page the comment button goes to the reply form instead of opening the post. */
+  onComment?: () => void;
+  /** False when the community takes no votes on the post, such as a locked one. */
+  canVote?: boolean;
 }
 
 // Votes and the copied state change often, so they re-render only the action bar.
-const PostActions = ({ post, postPath, communityAddress }: PostActionsProps) => {
+export const PostActions = ({ post, onComment, canVote = true }: PostActionsProps) => {
   const { t } = useTranslation();
   const { cid, downvoteCount, replyCount, state, upvoteCount } = post;
-  const [upvoted, upvote] = useUpvote(post);
-  const [downvoted, downvote] = useDownvote(post);
+  const communityAddress = getCommentCommunityAddress(post);
   const score = formatScore(getPostScore(upvoteCount, downvoteCount, state));
-
-  const [copied, setCopied] = useState(false);
-  useEffect(() => {
-    if (!copied) return;
-    const timeout = setTimeout(() => setCopied(false), 2000);
-    return () => clearTimeout(timeout);
-  }, [copied]);
-  const share = async () => {
-    if (!cid || !communityAddress) return;
-    try {
-      await copyToClipboard(getCommunityPostUrl(communityAddress, cid));
-      setCopied(true);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  const commentLabel = `${replyCount || 0} ${t('comments')}`;
 
   return (
     <div className={`${styles.actions} ${styles.raised}`}>
-      <div className={`${styles.votes} ${upvoted ? styles.upvoted : ''} ${downvoted ? styles.downvoted : ''}`}>
-        <button
-          type='button'
-          className={`${styles.voteButton} ${styles.upvoteButton}`}
-          aria-label={t('upvote')}
-          aria-pressed={upvoted}
-          disabled={!cid}
-          onClick={() => upvote()}
-        >
-          <UpvoteIcon size={18} />
+      <ModernVoteButtons comment={post} score={score} disabled={!canVote} />
+      {onComment ? (
+        <button type='button' className={styles.actionButton} aria-label={commentLabel} onClick={onComment}>
+          <CommentIcon size={18} />
+          <span aria-hidden='true'>{replyCount || 0}</span>
         </button>
-        <span className={styles.score}>{score}</span>
-        <button
-          type='button'
-          className={`${styles.voteButton} ${styles.downvoteButton}`}
-          aria-label={t('downvote')}
-          aria-pressed={downvoted}
-          disabled={!cid}
-          onClick={() => downvote()}
-        >
-          <DownvoteIcon size={18} />
-        </button>
-      </div>
-      <Link to={postPath} className={styles.actionButton} aria-label={`${replyCount || 0} ${t('comments')}`}>
-        <CommentIcon size={18} />
-        <span aria-hidden='true'>{replyCount || 0}</span>
-      </Link>
-      <button type='button' className={styles.actionButton} onClick={share} disabled={!cid}>
-        <ShareIcon size={18} />
-        <span className={styles.actionLabel} aria-live='polite'>
-          {copied ? t('link_copied') : t('share')}
-        </span>
-      </button>
+      ) : (
+        <Link to={getPostPagePath(post)} className={styles.actionButton} aria-label={commentLabel}>
+          <CommentIcon size={18} />
+          <span aria-hidden='true'>{replyCount || 0}</span>
+        </Link>
+      )}
+      <ModernShareButton className={styles.actionButton} url={cid && communityAddress ? getCommunityPostUrl(communityAddress, cid) : undefined} />
     </div>
   );
 };
@@ -157,33 +191,19 @@ interface ModernPostCardProps {
 }
 
 const ModernPostCard = ({ post: feedPost, showCommunity = true }: ModernPostCardProps) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   // A pending mod or author edit replaces what the feed has.
   const { editedComment } = useEditedComment({ comment: feedPost });
   const post: Comment = editedComment || feedPost;
-  const { author, cid, content, deleted, flair, link, linkHeight, linkWidth, nsfw: postNsfw, pinned, removed, spoiler, state, timestamp, title } = post;
+  const { cid, content, deleted, link, linkHeight, linkWidth, removed, title } = post;
 
   const communityAddress = getCommentCommunityAddress(post);
-  const community = useCommunity(communityAddress ? { community: getCommunityIdentifier(communityAddress), onlyIfCached: true } : undefined);
-  const communityName = getDisplayAddress(community?.shortAddress || '') || getShortDisplayAddress(communityAddress);
-  const { shortAuthorAddress } = useAuthorAddress({ comment: post });
-  const displayName = stripTripcodeProof(author?.displayName)?.trim();
-
-  const isNsfwCommunity = useIsNsfwCommunity(communityAddress || '');
-  const blurNsfwThumbnails = useContentOptionsStore((options) => options.blurNsfwThumbnails);
-  const nsfw = Boolean(postNsfw || isNsfwCommunity);
-  const [isRevealed, setIsRevealed] = useState(false);
-  const obscuredLabel = isRevealed ? undefined : nsfw && blurNsfwThumbnails ? t('see_nsfw') : spoiler ? t('view_spoiler') : undefined;
-
+  const { nsfw, obscuredLabel, reveal } = usePostObscuring(post);
   const mediaInfo = useCommentMediaInfo(post);
   const { blocked, unblock } = useBlock({ cid });
-
-  const postPath = cid && communityAddress ? getCommunityPostPath(communityAddress, cid) : `/profile/${post.index}`;
   const prefetchPost = usePrefetchIntent({ commentCid: cid, communityAddress });
-  const prefetchCommunity = usePrefetchIntent({ communityAddress });
 
   const contentText = removed || deleted ? '' : stripCommentPostOptionMarkers(content, post, communityAddress);
-  const titleText = (title || getPlainTextPreview(contentText, TITLE_MAX_LENGTH) || '-').slice(0, TITLE_MAX_LENGTH);
   // A post without a title already shows its text as the title.
   const previewText = title ? getPlainTextPreview(contentText) : '';
 
@@ -200,50 +220,15 @@ const ModernPostCard = ({ post: feedPost, showCommunity = true }: ModernPostCard
 
   return (
     <article className={styles.card}>
-      <div className={styles.meta}>
-        {showCommunity && communityAddress && (
-          <Link to={getCommunityPath(communityAddress)} className={`${styles.raised} ${styles.community}`} title={communityAddress} {...prefetchCommunity}>
-            <ModernCommunityAvatar address={communityAddress} avatarUrl={community?.suggested?.avatarUrl} />
-            <span className={styles.communityName}>s/{communityName}</span>
-          </Link>
-        )}
-        {author?.address && (
-          <Link to={cid ? `/u/${author.address}/comments/${cid}` : `/profile/${post.index}`} className={`${styles.raised} ${styles.author}`} title={author.address}>
-            {displayName ? `${displayName} ` : ''}u/{getDisplayAddress(shortAuthorAddress || author.shortAddress || '')}
-          </Link>
-        )}
-        <span className={styles.dot} aria-hidden='true'>
-          ·
-        </span>
-        <time dateTime={timestamp ? new Date(timestamp * 1000).toISOString() : undefined} title={formatLocalizedUTCTimestamp(timestamp, i18n.language)}>
-          {getFormattedTimeAgo(timestamp)}
-        </time>
-        {pinned && (
-          <span className={styles.pinned}>
-            <PinIcon size={14} /> {t('announcement')}
-          </span>
-        )}
-        {state === 'failed' && <span className={styles.failed}>{t('failed')}</span>}
-        {!cid && state !== 'failed' && <span className={styles.badge}>{t('pending')}</span>}
-      </div>
+      <PostMeta post={post} showCommunity={showCommunity} />
 
       <h3 className={styles.title}>
-        <Link to={postPath} className={styles.titleLink} {...prefetchPost}>
-          {titleText}
+        <Link to={getPostPagePath(post)} className={styles.titleLink} {...prefetchPost}>
+          {getPostTitleText(title, contentText)}
         </Link>
       </h3>
 
-      {(flair || nsfw || spoiler) && (
-        <div className={styles.tags}>
-          {nsfw && <span className={`${styles.badge} ${styles.nsfwBadge}`}>{t('nsfw')}</span>}
-          {spoiler && <span className={styles.badge}>{t('spoiler')}</span>}
-          {flair?.text && (
-            <span className={styles.flair} style={{ backgroundColor: flair.backgroundColor, color: flair.textColor }}>
-              {flair.text}
-            </span>
-          )}
-        </div>
-      )}
+      <PostTags post={post} nsfw={nsfw} />
 
       {removed || deleted ? (
         <p className={styles.preview}>[{(removed ? t('removed') : t('deleted')).toLowerCase()}]</p>
@@ -251,19 +236,12 @@ const ModernPostCard = ({ post: feedPost, showCommunity = true }: ModernPostCard
         <>
           {previewText && <p className={`${styles.preview} ${obscuredLabel ? styles.previewObscured : ''}`}>{previewText}</p>}
           <div className={styles.raised}>
-            <PostMedia
-              mediaInfo={mediaInfo}
-              link={link}
-              linkWidth={linkWidth}
-              linkHeight={linkHeight}
-              obscuredLabel={obscuredLabel}
-              onReveal={() => setIsRevealed(true)}
-            />
+            <PostMedia mediaInfo={mediaInfo} link={link} linkWidth={linkWidth} linkHeight={linkHeight} obscuredLabel={obscuredLabel} onReveal={reveal} />
           </div>
         </>
       )}
 
-      <PostActions post={post} postPath={postPath} communityAddress={communityAddress} />
+      <PostActions post={post} />
     </article>
   );
 };

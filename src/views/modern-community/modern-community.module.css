@@ -61,75 +61,6 @@
   color: var(--m-text);
 }
 
-.description {
-  margin-bottom: 12px;
-  color: var(--m-text-secondary);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-.facts {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  font-size: 13px;
-}
-
-.facts dt {
-  color: var(--m-text-muted);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.facts dd {
-  margin: 0;
-  color: var(--m-text);
-}
-
-.age {
-  margin: 12px 0 0;
-  color: var(--m-text-muted);
-  font-size: 13px;
-}
-
-.address {
-  word-break: break-all;
-}
-
-.rules {
-  display: grid;
-  gap: 8px;
-  margin: 0;
-  padding-left: 20px;
-  color: var(--m-text);
-}
-
-.moderators {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.moderator {
-  color: var(--m-text);
-  overflow-wrap: anywhere;
-}
-
-.settingsLink {
-  display: inline-block;
-  margin-top: 12px;
-  color: var(--m-link);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.settingsLink:hover {
-  text-decoration: underline;
-}
-
 .blocked {
   display: flex;
   flex-direction: column;
@@ -142,12 +73,6 @@
 
 .blocked p {
   margin: 0;
-}
-
-.role {
-  margin-left: 6px;
-  color: var(--m-text-muted);
-  font-size: 12px;
 }
 
 @media (max-width: 639px) {

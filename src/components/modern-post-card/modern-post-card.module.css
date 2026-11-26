@@ -63,6 +63,16 @@
   font-weight: 600;
 }
 
+.edited {
+  font-style: italic;
+}
+
+/* Translated labels are lowercase in the locale files. */
+.edited::first-letter,
+.failed::first-letter {
+  text-transform: uppercase;
+}
+
 .title {
   margin: 6px 0 0;
   color: var(--m-text);
@@ -185,6 +195,21 @@
   cursor: pointer;
 }
 
+/* Comments keep media to a thumbnail-sized frame. */
+.media.compact {
+  justify-content: flex-start;
+  width: fit-content;
+  max-width: min(100%, 420px);
+}
+
+.compact .mediaElement {
+  max-height: 320px;
+}
+
+.linkPreview.compact {
+  max-width: 420px;
+}
+
 .audio {
   width: 100%;
   margin-top: 10px;
@@ -243,22 +268,18 @@
   margin-top: 10px;
 }
 
-.votes,
 .actionButton {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   height: 32px;
+  padding: 0 12px;
+  border: 0;
   border-radius: 999px;
   background: var(--m-surface-raised);
   color: var(--m-text);
   font-size: 12px;
   font-weight: 600;
-}
-
-.actionButton {
-  gap: 6px;
-  padding: 0 12px;
-  border: 0;
   cursor: pointer;
 }
 
@@ -266,71 +287,9 @@
   background: var(--m-border);
 }
 
-.actionButton:disabled,
-.voteButton:disabled {
+.actionButton:disabled {
   cursor: default;
   opacity: 0.5;
-}
-
-.voteButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-
-.upvoteButton:hover:not(:disabled) {
-  background: var(--m-border);
-  color: var(--m-upvote);
-}
-
-.downvoteButton:hover:not(:disabled) {
-  background: var(--m-border);
-  color: var(--m-downvote);
-}
-
-.score {
-  min-width: 16px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
-.upvoted {
-  background: var(--m-upvote);
-  color: var(--m-on-strong);
-}
-
-.downvoted {
-  background: var(--m-downvote);
-  color: var(--m-on-strong);
-}
-
-.upvoted .voteButton,
-.downvoted .voteButton {
-  color: var(--m-on-strong);
-}
-
-.upvoted .upvoteButton:hover:not(:disabled),
-.downvoted .downvoteButton:hover:not(:disabled),
-.upvoted .downvoteButton:hover:not(:disabled),
-.downvoted .upvoteButton:hover:not(:disabled) {
-  background: rgba(0, 0, 0, 0.15);
-  color: var(--m-on-strong);
-}
-
-.upvoted .upvoteButton svg,
-.downvoted .downvoteButton svg {
-  fill: currentColor;
-}
-
-.actionLabel::first-letter {
-  text-transform: uppercase;
 }
 
 .hiddenRow {

@@ -1,0 +1,103 @@
+.votes {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  color: var(--m-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.voteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.voteButton:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.score {
+  min-width: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.upvoted .upvoteButton svg,
+.downvoted .downvoteButton svg {
+  fill: currentColor;
+}
+
+/* Posts: a filled pill that takes the vote's color. */
+.pill {
+  height: 32px;
+  background: var(--m-surface-raised);
+}
+
+.pill .voteButton {
+  width: 32px;
+  height: 32px;
+}
+
+.pill .upvoteButton:hover:not(:disabled) {
+  background: var(--m-border);
+  color: var(--m-upvote);
+}
+
+.pill .downvoteButton:hover:not(:disabled) {
+  background: var(--m-border);
+  color: var(--m-downvote);
+}
+
+.pill.upvoted {
+  background: var(--m-upvote);
+  color: var(--m-on-strong);
+}
+
+.pill.downvoted {
+  background: var(--m-downvote);
+  color: var(--m-on-strong);
+}
+
+.pill.upvoted .voteButton:hover:not(:disabled),
+.pill.downvoted .voteButton:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.15);
+  color: var(--m-on-strong);
+}
+
+/* Comments: no fill; a vote colors its arrow and the score. */
+.plain {
+  height: 28px;
+  color: var(--m-text-secondary);
+}
+
+.plain .voteButton {
+  width: 28px;
+  height: 28px;
+}
+
+.plain .voteButton:hover:not(:disabled) {
+  background: var(--m-surface-raised);
+}
+
+.plain .upvoteButton:hover:not(:disabled),
+.plain.upvoted .upvoteButton,
+.plain.upvoted .score {
+  color: var(--m-upvote);
+}
+
+.plain .downvoteButton:hover:not(:disabled),
+.plain.downvoted .downvoteButton,
+.plain.downvoted .score {
+  color: var(--m-downvote);
+}
+
+.label::first-letter {
+  text-transform: uppercase;
+}

@@ -17,6 +17,7 @@ import CommunityView from './views/community';
 import ModernAll from './views/modern-all';
 import ModernCommunity from './views/modern-community';
 import ModernHome from './views/modern-home';
+import ModernPost from './views/modern-post';
 import AccountBar from './components/account-bar/';
 import ChallengeModal from './components/challenge-modal';
 import Header from './components/header';
@@ -182,6 +183,8 @@ const App = () => {
                   </ValidFeedRoute>
                 }
               />
+              <Route path='/s/:communityAddress/comments/:commentCid' element={<ModernPost />} />
+              <Route path='/profile/:accountCommentIndex' element={<ModernPost />} />
             </Route>
           )}
           <Route element={pagesLayout}>
@@ -190,7 +193,7 @@ const App = () => {
             <Route path='/gold' element={<Gold />} />
             <Route path='/submit' element={<SubmitPage />} />
 
-            <Route path='/s/:communityAddress/comments/:commentCid' element={<PostPage />} />
+            {!isModern && <Route path='/s/:communityAddress/comments/:commentCid' element={<PostPage />} />}
             <Route path='/s/:communityAddress/comments/:commentCid/about' element={<AboutView />} />
 
             <Route
@@ -304,7 +307,7 @@ const App = () => {
               }
             />
 
-            <Route path='/profile/:accountCommentIndex' element={<PostPage />} />
+            {!isModern && <Route path='/profile/:accountCommentIndex' element={<PostPage />} />}
 
             <Route path='/profile' element={<Profile />}>
               <Route index element={<Profile.Overview />} />

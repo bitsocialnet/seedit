@@ -34,6 +34,7 @@ export const SearchIcon = createIcon(
   </>,
 );
 export const PlusIcon = createIcon(<path d='M12 5v14M5 12h14' />);
+export const MinusIcon = createIcon(<path d='M5 12h14' />);
 export const HomeIcon = createIcon(<path d='M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' />);
 export const GlobeIcon = createIcon(
   <>
