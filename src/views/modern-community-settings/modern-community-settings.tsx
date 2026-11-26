@@ -314,7 +314,7 @@ const ModernCommunitySettings = () => {
   const [savedOptions, setSavedOptions] = useState<unknown>();
   const isSaved = savedOptions === publishOptions && !error && !isSaving;
 
-  const heading = capitalize(t(isCreating ? 'create_community' : 'community_settings', { interpolation: { escapeValue: false } }).toLowerCase());
+  const heading = capitalize(t(isCreating ? 'create_community' : 'community_settings', { interpolation: { escapeValue: false } }));
   useEffect(() => {
     document.title = `${heading} - Seedit`;
   }, [heading]);

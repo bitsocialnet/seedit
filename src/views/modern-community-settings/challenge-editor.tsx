@@ -239,6 +239,8 @@ const ChallengeCard = ({
 }) => {
   const id = `community-challenge-${index}`;
   const groups = challenge.exclude ?? [];
+  // opens where groups exist, then stays as the user leaves it, even after the last group is removed
+  const [showGroups, setShowGroups] = useState(groups.length > 0);
   const description = info?.description || challenge.description;
   // A name the node does not offer still shows, so a saved choice is never silently replaced.
   const names = challenge.name && !challengeNames.includes(challenge.name) ? [challenge.name, ...challengeNames] : challengeNames;
@@ -313,7 +315,7 @@ const ChallengeCard = ({
           </div>
         )
       ) : (
-        <details className={styles.groups} open={groups.length > 0}>
+        <details className={styles.groups} open={showGroups} onToggle={(event) => setShowGroups(event.currentTarget.open)}>
           <summary>Skip this challenge for some authors{groups.length > 0 ? ` (${groups.length})` : ''}</summary>
           <p className={styles.hint}>An author who matches everything a group sets skips this challenge.</p>
           {groups.map((group, groupIndex) => (
