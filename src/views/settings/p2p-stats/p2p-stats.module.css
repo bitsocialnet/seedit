@@ -129,15 +129,6 @@
   overflow-wrap: anywhere;
 }
 
-.peerFlag {
-  flex-shrink: 0;
-  width: 16px;
-  height: 11px;
-  background-image: url('/assets/flags-1.png');
-  background-repeat: no-repeat;
-  image-rendering: pixelated;
-}
-
 .connectionAddress {
   flex: 1;
   min-width: 0;
@@ -154,36 +145,8 @@
   opacity: 0.7;
 }
 
-.peerWorldMap {
+.peerWorldMapFrame {
   max-width: var(--peer-panel-max-width);
-  border: 1px solid rgba(127, 127, 127, 0.28);
-  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-}
-
-.peerWorldMapSvg {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.landDot {
-  fill: currentColor;
-  opacity: 0.28;
-}
-
-.peerMarker {
-  fill: #3fb950;
-}
-
-.peerMarker[data-peer-role='leecher'] {
-  fill: red;
-}
-
-.peerWorldMapCaption {
-  padding: 1px 4px 2px;
-  font-size: 0.8em;
-  font-style: italic;
-  opacity: 0.6;
 }
 
 .statsMeta {

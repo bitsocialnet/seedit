@@ -1,6 +1,8 @@
-import { WORLD_MAP_DOTS } from '../../../data/world-map-dots';
-import { getApproximateLatLon, type PeerMapLocation } from '../../../lib/peer-geo';
-import styles from './p2p-stats.module.css';
+import { WORLD_MAP_DOTS } from '../../data/world-map-dots';
+import { getCountryFlagPosition, getCountryLabel, normalizeCountryCode } from '../../lib/country-flags';
+import { getApproximateLatLon, type PeerMapLocation } from '../../lib/peer-geo';
+import { transparentPixelSrc } from '../../lib/p2p-stats';
+import styles from './peer-world-map.module.css';
 
 type MapPeer = {
   address: string;
@@ -66,6 +68,23 @@ const PeerWorldMap = ({ peers }: { peers: MapPeer[] }) => {
       </svg>
       <div className={styles.peerWorldMapCaption}>approximate IP locations</div>
     </div>
+  );
+};
+
+/** A country's flag from the sprite sheet, named for assistive technology; nothing for an unknown country. */
+export const CountryFlag = ({ countryCode }: { countryCode: string | undefined }) => {
+  const flagPosition = getCountryFlagPosition(normalizeCountryCode(countryCode));
+  if (!flagPosition) return null;
+  const countryLabel = getCountryLabel(countryCode);
+  return (
+    <img
+      alt={countryLabel}
+      aria-label={countryLabel}
+      className={styles.peerFlag}
+      src={transparentPixelSrc}
+      style={{ backgroundPosition: `-${flagPosition.x}px -${flagPosition.y}px` }}
+      title={countryLabel}
+    />
   );
 };
 
