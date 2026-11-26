@@ -42,7 +42,7 @@ type OptionInput = {
 const ExcludeAddressesFromChallengeInput = ({ exclude, onChange, isReadOnly }: { exclude: ChallengeExclude; onChange: (value: string) => void; isReadOnly: boolean }) => {
   const addresses = getExcludeAddresses(exclude).map((address) => getDisplayAddress(address));
   // the typed text is kept as typed, so commas and spaces survive until the next address
-  const [addressInput, setAddressInput] = useState(addresses.join(', '));
+  const [addressInput, setAddressInput] = useState(() => addresses.join(', '));
 
   return isReadOnly ? (
     <span>{addresses.join(', ')}</span>

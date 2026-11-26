@@ -37,10 +37,7 @@ export const useCommunityModeratorsDraft = () => {
       setDraft({ roles: Object.fromEntries(entries) as Roles });
     },
     setModeratorRole: (address: string, role: Role['role']) => setDraft({ roles: { ...roles, [address]: { role } } }),
-    removeModerator: (address: string) => {
-      const { [address]: _removed, ...rest } = roles ?? {};
-      setDraft({ roles: rest });
-    },
+    removeModerator: (address: string) => setDraft({ roles: Object.fromEntries(Object.entries(roles ?? {}).filter(([current]) => current !== address)) as Roles }),
   };
 };
 
