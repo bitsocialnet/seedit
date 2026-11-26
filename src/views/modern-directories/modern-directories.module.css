@@ -1,0 +1,255 @@
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 16px 12px;
+}
+
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0;
+  color: var(--m-text);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.headingTitle {
+  color: var(--m-text-secondary);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+@media (min-width: 1200px) {
+  .headerAction {
+    display: none;
+  }
+}
+
+.backLink,
+.textLink,
+.factLink {
+  font-weight: 600;
+}
+
+/* Two classes outrank the shell's link reset, which inherits the text color. */
+.backLink.backLink,
+.textLink.textLink,
+.factLink.factLink {
+  color: var(--m-link);
+}
+
+.backLink {
+  width: fit-content;
+  font-size: 13px;
+}
+
+.backLink:hover,
+.textLink:hover,
+.factLink:hover {
+  text-decoration: underline;
+}
+
+.revision {
+  margin: 0;
+  color: var(--m-text-muted);
+  font-size: 12px;
+}
+
+.notice {
+  margin: 0 16px 12px;
+  color: var(--m-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 16px 12px;
+  padding: 0 14px;
+  border: 1px solid var(--m-border-strong);
+  border-radius: 999px;
+  background: var(--m-surface-raised);
+  color: var(--m-text-muted);
+}
+
+.search:focus-within {
+  border-color: var(--m-focus);
+  box-shadow: 0 0 0 1px var(--m-focus);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--m-text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.cards,
+.candidates {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 16px;
+}
+
+.card:hover {
+  background: var(--m-surface-hover);
+}
+
+.cardBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.identity {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  width: fit-content;
+}
+
+.identity:hover .title {
+  text-decoration: underline;
+}
+
+.title {
+  color: var(--m-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.subtitle {
+  color: var(--m-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.description {
+  margin: 4px 0 0;
+  color: var(--m-text-secondary);
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border: 1px solid var(--m-border);
+  border-radius: 999px;
+  background: var(--m-surface-raised);
+  color: var(--m-text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+button.tag {
+  cursor: pointer;
+}
+
+button.tag:hover {
+  border-color: var(--m-border-strong);
+  color: var(--m-text);
+}
+
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin-top: 8px;
+  color: var(--m-text-muted);
+  font-size: 12px;
+}
+
+.action {
+  flex: none;
+}
+
+.candidate {
+  display: flex;
+  align-items: flex-start;
+}
+
+.candidate > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.rank {
+  flex: none;
+  width: 28px;
+  padding: 22px 0 0 8px;
+  color: var(--m-text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.badge {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--m-accent);
+  color: var(--m-on-accent);
+  font-weight: 700;
+}
+
+.empty {
+  margin: 0;
+  padding: 24px 16px;
+  color: var(--m-text-muted);
+  font-size: 14px;
+  text-align: center;
+}
+
+.error {
+  margin: 0 16px 12px;
+  padding: 12px 16px;
+  border: 1px solid var(--m-danger);
+  border-radius: 12px;
+  color: var(--m-text);
+}
+
+.railActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

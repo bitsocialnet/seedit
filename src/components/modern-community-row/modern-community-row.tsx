@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { type Community, useCommunity, useCommunityStats } from '@bitsocial/bitsocial-react-hooks';
@@ -45,6 +46,8 @@ interface ModernCommunityRowProps {
   role?: string;
   directoryCode?: SeeditDirectoryCode;
   directoryRevision?: number;
+  /** Facts the list adds about the community, such as its place in a directory. */
+  facts?: ReactNode;
 }
 
 /** A community in a list: identity, description, facts, and a join button. */
@@ -58,6 +61,7 @@ const ModernCommunityRow = ({
   role,
   directoryCode,
   directoryRevision,
+  facts,
 }: ModernCommunityRowProps) => {
   const { t } = useTranslation();
   // Only what is already cached, for the avatar and a title the list entry lacks.
@@ -78,6 +82,7 @@ const ModernCommunityRow = ({
         </Link>
         {description && <p className={styles.description}>{description}</p>}
         <div className={styles.facts}>
+          {facts}
           {community && <CommunityFacts community={community} />}
           {nsfw && <span className={`${styles.badge} ${styles.nsfw}`}>{t('nsfw')}</span>}
           {role && (

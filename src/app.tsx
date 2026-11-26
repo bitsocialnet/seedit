@@ -84,6 +84,7 @@ const SubmitPage = lazyView(() => import('./views/submit'));
 const CommunitySettings = lazyView(() => import('./views/community-settings'));
 const ModernCommunitySettings = lazyView(() => import('./views/modern-community-settings'));
 const ModernCommunityDataEditor = lazyView(() => import('./views/modern-community-data-editor'));
+const ModernDirectories = lazyView(() => import('./views/modern-directories'));
 const Communities = lazyView(() => import('./views/communities'));
 const StarterSubscriptions = lazyView(() => import('./views/starter-subscriptions'));
 
@@ -246,6 +247,8 @@ const App = () => {
                 }
               />
               <Route path='/communities/create' element={<ModernCommunitySettings />} />
+              <Route path={DIRECTORY_INDEX_PATH} element={<ModernDirectories />} />
+              <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<ModernDirectories />} />
             </Route>
           )}
           <Route element={pagesLayout}>
@@ -319,9 +322,9 @@ const App = () => {
               </>
             )}
             <Route path='/communities/defaults' element={<StarterSubscriptions />} />
-            <Route path={DIRECTORY_INDEX_PATH} element={<Communities />} />
+            {!isModern && <Route path={DIRECTORY_INDEX_PATH} element={<Communities />} />}
             <Route path={`${DIRECTORY_INDEX_PATH}/about`} element={<DirectoryAboutView />} />
-            <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<Communities />} />
+            {!isModern && <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<Communities />} />}
             <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode/about`} element={<DirectoryAboutView />} />
             <Route path='/communities/vote' element={<LegacyDirectoryRouteRedirect />} />
             <Route path='/communities/vote/passing' element={<LegacyDirectoryRouteRedirect />} />
