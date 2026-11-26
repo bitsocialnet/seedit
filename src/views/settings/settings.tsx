@@ -1,10 +1,11 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Trans, useTranslation } from 'react-i18next';
-import { Capacitor } from '@capacitor/core';
-import { setAccount, useAccount, usePkcRpcSettings } from '@bitsocial/bitsocial-react-hooks';
+import { useAccount, usePkcRpcSettings } from '@bitsocial/bitsocial-react-hooks';
 import { isSettingsAdvancedView, isSettingsP2pStatsView, isSettingsContentOptionsView, isSettingsDebugView } from '../../lib/utils/view-utils';
 import { getReviewableSettingsUpgrades, getSettingsUpgradeKey, type SettingsUpgradeAccount } from '../../lib/settings-upgrades';
+import useCheckForUpdates from '../../hooks/use-check-for-updates';
+import useDisplayNameSetting from '../../hooks/use-display-name-setting';
 import useTheme from '../../hooks/use-theme';
 import useUiModeStore from '../../stores/use-ui-mode-store';
 import { isUiMode } from '../../lib/utils/ui-mode-utils';
@@ -19,68 +20,12 @@ import WalletSettings from './wallet-settings';
 import NotificationsSettings from './notifications-settings';
 import MediaHostingSettings from './media-hosting-settings';
 import styles from './settings.module.css';
-import { version as packageVersion } from '../../../package.json';
 import startCase from 'lodash/startCase';
 
-const commitRef = import.meta.env.VITE_COMMIT_REF;
-const isAndroid = Capacitor.getPlatform() === 'android';
 const DebugSettings = import.meta.env.DEV ? lazy(() => import('./debug-settings')) : null;
 
 const CheckForUpdates = () => {
-  const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
-
-  const checkForUpdates = async () => {
-    try {
-      setLoading(true);
-      const packageRes = await fetch('https://raw.githubusercontent.com/bitsocialnet/seedit/master/package.json', { cache: 'no-cache' });
-      const packageData = await packageRes.json();
-      let updateAvailable = false;
-
-      if (packageVersion !== packageData.version) {
-        const newVersionText = t('new_stable_version', { newVersion: packageData.version, oldVersion: packageVersion });
-        const updateActionText = window.electronApi?.isElectron
-          ? t('download_latest_desktop', { link: 'https://github.com/bitsocialnet/seedit/releases/latest', interpolation: { escapeValue: false } })
-          : isAndroid
-            ? t('download_latest_android')
-            : t('refresh_to_update');
-        if (isAndroid) {
-          if (window.confirm(newVersionText + ' ' + updateActionText)) {
-            window.open(`https://github.com/bitsocialnet/seedit/releases/download/v${packageData.version}/seedit-${packageData.version}.apk`, '_blank', 'noreferrer');
-          }
-        } else {
-          alert(newVersionText + ' ' + updateActionText);
-        }
-        updateAvailable = true;
-      }
-
-      if (commitRef && commitRef.length > 0) {
-        const commitRes = await fetch('https://api.github.com/repos/bitsocialnet/seedit/commits?per_page=1&sha=development', { cache: 'no-cache' });
-        const commitData = await commitRes.json();
-
-        const latestCommitHash = commitData[0].sha;
-
-        if (latestCommitHash.trim() !== commitRef.trim()) {
-          const newVersionText =
-            t('new_development_version', { newCommit: latestCommitHash.slice(0, 7), oldCommit: commitRef.slice(0, 7) }) + ' ' + t('refresh_to_update');
-          alert(newVersionText);
-          updateAvailable = true;
-        }
-      }
-
-      if (!updateAvailable) {
-        alert(
-          commitRef
-            ? `${t('latest_development_version', { commit: commitRef.slice(0, 7), link: 'https://seedit.eth.limo/#/', interpolation: { escapeValue: false } })}`
-            : `${t('latest_stable_version', { version: packageVersion })}`,
-        );
-      }
-    } catch (error) {
-      alert('Failed to fetch latest version info: ' + error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { checkForUpdates, loading } = useCheckForUpdates();
 
   return (
     <div className={styles.checkForUpdates}>
@@ -147,28 +92,12 @@ const UiModeSettings = () => {
 
 const DisplayNameSetting = () => {
   const { t } = useTranslation();
-  const account = useAccount();
-  const [displayName, setDisplayName] = useState(account?.author?.displayName || '');
-  const [savedDisplayName, setSavedDisplayName] = useState(false);
-
-  const saveUsername = async () => {
-    try {
-      await setAccount({ ...account, author: { ...account?.author, displayName } });
-      setSavedDisplayName(true);
-    } catch (error) {
-      if (error instanceof Error) {
-        alert(error.message);
-        console.log(error);
-      } else {
-        console.error('An unknown error occurred:', error);
-      }
-    }
-  };
+  const { displayName, setDisplayName, save: saveUsername, saved: savedDisplayName } = useDisplayNameSetting();
 
   return (
     <div className={styles.displayNameSetting}>
       <div className={styles.usernameInput}>
-        <input type='text' placeholder='My Name' value={displayName || account?.author?.displayName || ''} onChange={(e) => setDisplayName(e.target.value)} />
+        <input type='text' placeholder='My Name' value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
         <button className={styles.button} onClick={saveUsername}>
           {t('save')}
         </button>

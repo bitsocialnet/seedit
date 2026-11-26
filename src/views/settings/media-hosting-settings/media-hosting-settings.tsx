@@ -1,35 +1,25 @@
 import { useTranslation } from 'react-i18next';
-import { getMediaHostingRuntime, getRuntimeProviders, resolveUploadSettings } from '../../../lib/media-hosting';
-import { useProviderAvailability } from '../../../hooks/use-provider-availability';
-import useMediaHostingStore from '../../../stores/use-media-hosting-store';
+import useMediaHostingOptions from '../../../hooks/use-media-hosting-options';
 import styles from './media-hosting-settings.module.css';
 
 const RADIO_NAME = 'mediaHostingProvider';
 
 const MediaHostingSettings = () => {
   const { t } = useTranslation();
-  const storedUploadMode = useMediaHostingStore((state) => state.uploadMode);
-  const storedPreferredProvider = useMediaHostingStore((state) => state.preferredProvider);
-  const setUploadMode = useMediaHostingStore((state) => state.setUploadMode);
-  const setPreferredProvider = useMediaHostingStore((state) => state.setPreferredProvider);
-  const runtime = getMediaHostingRuntime();
-  // Only the providers this runtime can upload to: the web app has no CORS-free route to the others.
-  const providers = getRuntimeProviders(runtime);
-  const { mode, preferredProvider } = resolveUploadSettings({ mode: storedUploadMode, preferredProvider: storedPreferredProvider, runtime });
-  const availability = useProviderAvailability(runtime);
+  const { runtime, providers, mode, preferredProvider, isUnavailable, isSelectable, selectRandom, selectNone, selectProvider } = useMediaHostingOptions();
 
   return (
     <div className={styles.mediaHostingSettings} role='radiogroup' aria-label={t('media_hosting_providers')}>
       {providers.length > 1 && (
         <div>
           <label>
-            <input type='radio' name={RADIO_NAME} value='random' checked={mode === 'random'} onChange={() => setUploadMode('random')} />
+            <input type='radio' name={RADIO_NAME} value='random' checked={mode === 'random'} onChange={selectRandom} />
             {t('media_hosting_random')}
           </label>
         </div>
       )}
       {providers.map((provider) => {
-        const unavailable = availability[provider.id] === 'unavailable';
+        const unavailable = isUnavailable(provider.id);
         return (
           <div key={provider.id}>
             <label>
@@ -38,13 +28,8 @@ const MediaHostingSettings = () => {
                 name={RADIO_NAME}
                 value={provider.id}
                 checked={mode === 'preferred' && preferredProvider === provider.id}
-                // A lone provider stays selectable: a probe that failed on a slow network or behind a blocker
-                // would otherwise leave no way back from None, and uploads try it regardless.
-                disabled={unavailable && providers.length > 1}
-                onChange={() => {
-                  setPreferredProvider(provider.id);
-                  setUploadMode('preferred');
-                }}
+                disabled={!isSelectable(provider.id)}
+                onChange={() => selectProvider(provider.id)}
               />
               <span className={styles.providerLabel}>{provider.label}</span>
             </label>
@@ -57,7 +42,7 @@ const MediaHostingSettings = () => {
       })}
       <div>
         <label>
-          <input type='radio' name={RADIO_NAME} value='none' checked={mode === 'none'} onChange={() => setUploadMode('none')} />
+          <input type='radio' name={RADIO_NAME} value='none' checked={mode === 'none'} onChange={selectNone} />
           {t('media_hosting_none')}
         </label>
         <span className={styles.info}>{t('media_hosting_none_tip')}</span>

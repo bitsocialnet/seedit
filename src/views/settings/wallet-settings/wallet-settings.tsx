@@ -1,72 +1,22 @@
 import { Fragment, useState } from 'react';
-import { Account, setAccount, useAccount } from '@bitsocial/bitsocial-react-hooks';
+import { Account, useAccount } from '@bitsocial/bitsocial-react-hooks';
+import useCryptoWallets from '../../../hooks/use-crypto-wallets';
 import styles from './wallet-settings.module.css';
 import { Trans, useTranslation } from 'react-i18next';
 import InfoTooltip from '../../../components/info-tooltip';
 
-interface Wallet {
-  chainTicker: string;
-  address: string;
-  timestamp: number;
-  signature: string;
-}
-
-const getWalletMessageToSign = (authorAddress: string, timestamp: number): string => {
-  const messageToSign = {
-    domainSeparator: 'pkc-author-wallet',
-    authorAddress,
-    timestamp,
-  };
-  return JSON.stringify(messageToSign);
-};
-
-const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
+const CryptoWalletsForm = ({ account }: { account: Account }) => {
   const { t } = useTranslation();
 
-  if (!account) {
-    throw Error('CryptoWalletsForm account prop must be defined');
-  }
-  const authorAddress = account?.author?.address;
-  const defaultWalletObject: Wallet = { chainTicker: '', address: '', timestamp: 0, signature: '' };
-
-  const walletsFromAccount = Object.keys(account?.author?.wallets || {}).map(
-    (chainTicker): Wallet => ({
-      chainTicker,
-      address: account.author.wallets[chainTicker].address,
-      timestamp: account.author.wallets[chainTicker].timestamp,
-      signature: account.author.wallets[chainTicker].signature.signature,
-    }),
-  );
-
-  const defaultWalletsArray: Wallet[] = walletsFromAccount.length ? walletsFromAccount : [];
-
-  const [walletsArray, setWalletsArray] = useState<Wallet[]>(defaultWalletsArray);
-  const setWalletsArrayProperty = (index: number, property: keyof Wallet, value: string | number) => {
-    const newArray = [...walletsArray];
-    newArray[index] = { ...newArray[index], [property]: value };
-    setWalletsArray(newArray);
-  };
-
-  const [hasCopied, setHasCopied] = useState(false);
-
-  const copyMessageToSign = (wallet: any, index: number) => {
-    if (!wallet.chainTicker) {
-      return alert('missing chain ticker');
-    }
-    if (!wallet.address) {
-      return alert('missing address');
-    }
-    const timestamp = wallet.timestamp || Math.floor(Date.now() / 1000);
-    const messageToSign = getWalletMessageToSign(authorAddress, timestamp);
-    if (timestamp !== wallet.timestamp) {
-      setWalletsArrayProperty(index, 'timestamp', timestamp);
-    }
-    navigator.clipboard.writeText(messageToSign);
-    setHasCopied(true);
-    setTimeout(() => {
-      setHasCopied(false);
-    }, 2000);
-  };
+  const {
+    wallets: walletsArray,
+    setWalletProperty: setWalletsArrayProperty,
+    addWallet,
+    removeWallet: handleRemove,
+    save,
+    copyMessageToSign,
+    hasCopied,
+  } = useCryptoWallets(account);
 
   const [showWallet, setShowWallet] = useState<boolean[]>(walletsArray.map(() => false));
   const toggleShowWallet = (index: number) => {
@@ -75,31 +25,8 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
     setShowWallet(newShowWallet);
   };
 
-  const updateWallets = (walletsToUpdate: Wallet[]) => {
-    const wallets: { [key: string]: { address: string; timestamp: number; signature: { signature: string; type: string } } } = {};
-    walletsToUpdate.forEach((wallet) => {
-      if (wallet.chainTicker && wallet.address && wallet.signature && wallet.timestamp) {
-        wallets[wallet.chainTicker] = {
-          address: wallet.address,
-          timestamp: wallet.timestamp,
-          signature: {
-            signature: wallet.signature,
-            type: 'eip191',
-          },
-        };
-      }
-    });
-    setAccount({ ...account, author: { ...account.author, wallets } });
-  };
-
-  const handleRemove = (index: number) => {
-    const newWalletsArray = walletsArray.filter((_, i) => i !== index);
-    setWalletsArray(newWalletsArray);
-    updateWallets(newWalletsArray);
-  };
-
   const handleSave = () => {
-    updateWallets(walletsArray);
+    save();
     alert(t('saved'));
   };
 
@@ -141,7 +68,7 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
               i18nKey='copy_message_etherscan'
               values={{ copy: hasCopied ? t('copied') : t('copy') }}
               components={{
-                1: <button key={`copyMessageEtherscanButton-${index}`} onClick={() => copyMessageToSign(wallet, index)} />,
+                1: <button key={`copyMessageEtherscanButton-${index}`} onClick={() => copyMessageToSign(index)} />,
                 // eslint-disable-next-line
                 2: <a key={`etherscanLink-${index}`} href='https://etherscan.io/verifiedSignatures' target='_blank' rel='noopener noreferrer' />,
               }}
@@ -181,10 +108,7 @@ const CryptoWalletsForm = ({ account }: { account: Account | undefined }) => {
   return (
     <>
       <div className={styles.addWallet}>
-        <Trans
-          i18nKey='add_wallet'
-          components={{ 1: <button key={`addWalletButton-${walletsArray.length}`} onClick={() => setWalletsArray([...walletsArray, defaultWalletObject])} /> }}
-        />
+        <Trans i18nKey='add_wallet' components={{ 1: <button key={`addWalletButton-${walletsArray.length}`} onClick={addWallet} /> }} />
         <InfoTooltip
           content={`Link crypto wallets to your account by proving ownership through signed messages. Communities can verify your token/NFT holdings to grant posting privileges or special access.`}
         />

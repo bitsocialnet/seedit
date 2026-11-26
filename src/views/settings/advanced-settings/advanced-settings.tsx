@@ -1,10 +1,9 @@
-import { RefObject, useRef, useState } from 'react';
+import { RefObject, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLocation } from 'react-router-dom';
-import { setAccount, useAccount, usePkcRpcSettings } from '@bitsocial/bitsocial-react-hooks';
-import { getBrowserGatewayPkcOptions, getBrowserPureP2PPkcOptions, setPureP2PBrowserPreference } from '../../../lib/p2p-browser-config';
-import { canConfigureBrowserPureP2P, isBrowserPureP2PEnabled } from '../../../lib/p2p-runtime';
-import { getSupportedChainProviders } from '../../../lib/utils/chain-provider-utils';
+import { useAccount, usePkcRpcSettings } from '@bitsocial/bitsocial-react-hooks';
+import useAdvancedSettings, { getChainProviders } from '../../../hooks/use-advanced-settings';
+import { isBrowserPureP2PEnabled } from '../../../lib/p2p-runtime';
 import styles from './advanced-settings.module.css';
 
 interface SettingsProps {
@@ -18,25 +17,6 @@ interface SettingsProps {
   onPureP2PBrowserChange?: (enabled: boolean) => void;
   pureP2PBrowserEnabled?: boolean;
 }
-
-type AccountProtocolOptions = {
-  chainProviders?: Record<string, { urls?: string[]; chainId: number }>;
-  dataPath?: string;
-  httpRoutersOptions?: string[];
-  ipfsGatewayUrls?: string[];
-  kuboRpcClientsOptions?: unknown[];
-  libp2pJsClientsOptions?: unknown[];
-  pkcRpcClientsOptions?: string[];
-  pubsubHttpClientsOptions?: string[];
-  pubsubKuboRpcClientsOptions?: string[];
-};
-
-// chainProviders live on the account top-level since bitsocial-react-hooks 0.1.27;
-// fall back to the legacy pkcOptions location for accounts saved by older versions
-const getChainProviders = (account: unknown) => {
-  const accountShape = account as { chainProviders?: AccountProtocolOptions['chainProviders']; pkcOptions?: AccountProtocolOptions } | undefined;
-  return accountShape?.chainProviders ?? accountShape?.pkcOptions?.chainProviders;
-};
 
 const IPFSGatewaysSettings = ({ ipfsGatewayUrlsRef, mediaIpfsGatewayUrlRef }: SettingsProps) => {
   const account = useAccount();
@@ -217,41 +197,11 @@ const PureP2PBrowserSettings = ({ onPureP2PBrowserChange, pureP2PBrowserEnabled 
 
 const isElectron = window.electronApi?.isElectron === true;
 
-const getTrimmedLines = (value: string | undefined): string[] | undefined => {
-  return value?.split('\n').reduce<string[]>((lines, line) => {
-    const trimmedLine = line.trim();
-    if (trimmedLine) lines.push(trimmedLine);
-    return lines;
-  }, []);
-};
-
-const applyBrowserGatewayPkcOptions = (
-  pkcOptions: AccountProtocolOptions,
-  ipfsGatewayUrls: string[] | undefined,
-  pubsubKuboRpcClientsOptions: string[] | undefined,
-  httpRoutersOptions: string[] | undefined,
-) => {
-  const gatewayOptions = getBrowserGatewayPkcOptions();
-
-  return {
-    ...pkcOptions,
-    ...gatewayOptions,
-    ipfsGatewayUrls: ipfsGatewayUrls?.length ? ipfsGatewayUrls : gatewayOptions.ipfsGatewayUrls,
-    pubsubKuboRpcClientsOptions: pubsubKuboRpcClientsOptions?.length ? pubsubKuboRpcClientsOptions : gatewayOptions.pubsubKuboRpcClientsOptions,
-    httpRoutersOptions: httpRoutersOptions?.length ? httpRoutersOptions : gatewayOptions.httpRoutersOptions,
-  };
-};
-
 const AdvancedSettings = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const account = useAccount();
-  const protocolOptions: AccountProtocolOptions | undefined = account?.pkcOptions;
-  const canConfigurePureP2PBrowser = canConfigureBrowserPureP2P();
-  const activeBrowserPureP2PEnabled = canConfigurePureP2PBrowser && isBrowserPureP2PEnabled(account);
-  const [browserPureP2PSelection, setBrowserPureP2PSelection] = useState<boolean | undefined>(undefined);
-  const browserPureP2PEnabled = browserPureP2PSelection ?? activeBrowserPureP2PEnabled;
-  const shouldShowGatewayModeSettings = !canConfigurePureP2PBrowser || !activeBrowserPureP2PEnabled;
+  const { canConfigurePureP2PBrowser, browserPureP2PEnabled, setBrowserPureP2PEnabled, showsGatewaySettings, save } = useAdvancedSettings();
+  const shouldShowGatewayModeSettings = showsGatewaySettings;
 
   const ipfsGatewayUrlsRef = useRef<HTMLTextAreaElement>(null);
   const mediaIpfsGatewayUrlRef = useRef<HTMLInputElement>(null);
@@ -261,68 +211,17 @@ const AdvancedSettings = () => {
   const fullNodeRpcRef = useRef<HTMLInputElement>(null);
   const p2pDataPathRef = useRef<HTMLInputElement>(null);
 
-  const handleSave = async () => {
-    // refs are null for fields hidden in pure p2p mode, fall back to the saved account values
-    const ipfsGatewayUrls = ipfsGatewayUrlsRef.current ? getTrimmedLines(ipfsGatewayUrlsRef.current.value) : protocolOptions?.ipfsGatewayUrls;
-
-    const mediaIpfsGatewayUrl = mediaIpfsGatewayUrlRef.current ? mediaIpfsGatewayUrlRef.current.value.trim() || undefined : account?.mediaIpfsGatewayUrl;
-
-    const pubsubKuboRpcClientsOptions = pubsubProvidersRef.current ? getTrimmedLines(pubsubProvidersRef.current.value) : protocolOptions?.pubsubKuboRpcClientsOptions;
-
-    const ethRpcUrls = getTrimmedLines(ethRpcRef.current?.value);
-
-    const httpRoutersOptions = httpRoutersRef.current ? getTrimmedLines(httpRoutersRef.current.value) : protocolOptions?.httpRoutersOptions;
-
-    const pkcRpcClientsOptions = fullNodeRpcRef.current?.value.trim() ? [fullNodeRpcRef.current.value.trim()] : undefined;
-    const dataPath = p2pDataPathRef.current?.value.trim() || undefined;
-    const pureP2PBrowserPreference = canConfigurePureP2PBrowser ? browserPureP2PEnabled : undefined;
-
-    const chainProviders: NonNullable<AccountProtocolOptions['chainProviders']> = getSupportedChainProviders(getChainProviders(account)) ?? {};
-    if (ethRpcUrls?.length) chainProviders.eth = { urls: ethRpcUrls, chainId: 1 };
-
-    let pkcOptions: AccountProtocolOptions = {
-      ...protocolOptions,
-      ipfsGatewayUrls,
-      pubsubKuboRpcClientsOptions,
-      httpRoutersOptions,
-      pkcRpcClientsOptions,
-      dataPath,
-      chainProviders: getSupportedChainProviders(protocolOptions?.chainProviders),
-    };
-
-    if (pureP2PBrowserPreference !== undefined) {
-      if (pureP2PBrowserPreference) {
-        const pureP2POptions = getBrowserPureP2PPkcOptions();
-        pkcOptions = {
-          ...pkcOptions,
-          ...pureP2POptions,
-          httpRoutersOptions: httpRoutersOptions?.length ? httpRoutersOptions : pureP2POptions.httpRoutersOptions,
-          pkcRpcClientsOptions: undefined,
-        };
-      } else {
-        pkcOptions = applyBrowserGatewayPkcOptions(pkcOptions, ipfsGatewayUrls, pubsubKuboRpcClientsOptions, httpRoutersOptions);
-      }
-    }
-
-    try {
-      await setAccount({
-        ...account,
-        mediaIpfsGatewayUrl,
-        chainProviders,
-        pkcOptions,
-      });
-      if (pureP2PBrowserPreference !== undefined) setPureP2PBrowserPreference(pureP2PBrowserPreference);
-      alert('Options saved, reloading...');
-      window.location.reload();
-    } catch (e) {
-      if (e instanceof Error) {
-        alert('Error saving options: ' + e.message);
-        console.log(e);
-      } else {
-        alert('Error');
-      }
-    }
-  };
+  // refs are null for fields hidden in pure p2p mode, which keeps their saved values
+  const handleSave = () =>
+    save({
+      ipfsGatewayUrls: ipfsGatewayUrlsRef.current?.value,
+      mediaIpfsGatewayUrl: mediaIpfsGatewayUrlRef.current?.value,
+      pubsubProviders: pubsubProvidersRef.current?.value,
+      httpRouters: httpRoutersRef.current?.value,
+      ethRpcUrls: ethRpcRef.current?.value,
+      fullNodeRpc: fullNodeRpcRef.current?.value,
+      dataPath: p2pDataPathRef.current?.value,
+    });
 
   return (
     <div className={styles.content}>
@@ -330,7 +229,7 @@ const AdvancedSettings = () => {
         <div className={styles.category}>
           <span className={styles.categoryTitle}>pure p2p</span>
           <span className={styles.categorySettings}>
-            <PureP2PBrowserSettings pureP2PBrowserEnabled={browserPureP2PEnabled} onPureP2PBrowserChange={setBrowserPureP2PSelection} />
+            <PureP2PBrowserSettings pureP2PBrowserEnabled={browserPureP2PEnabled} onPureP2PBrowserChange={setBrowserPureP2PEnabled} />
           </span>
         </div>
       )}
