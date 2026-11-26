@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isSeeditLink, isValidCommunityPattern, preprocessSeeditPatterns, transformSeeditLinkToInternal } from './url-utils';
+import { isSeeditLink, isValidCommunityPattern, linkMatchesDomain, preprocessSeeditPatterns, transformSeeditLinkToInternal } from './url-utils';
 import { VENDORED_DIRECTORY_CODES } from './directory-codes';
 
 const CID = 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3fteh2v6q2f6x2w4g3q';
@@ -66,5 +66,15 @@ describe('links to directories published after this build', () => {
     expect(preprocessSeeditPatterns('See s/dogs.', published)).toBe('See [s/dogs](/s/dogs).');
     expect(preprocessSeeditPatterns('See s/dogs.', settled)).toBe('See [s/dogs](/s/dogs.bso).');
     expect(preprocessSeeditPatterns(`See s/dogs/comments/${CID}`, unsettled)).toBe(`See [s/dogs/comments/${CID}](/s/dogs/comments/${CID})`);
+  });
+});
+
+describe('linkMatchesDomain', () => {
+  it('matches the domain and its subdomains, and nothing that only ends with the same letters', () => {
+    expect(linkMatchesDomain('https://example.com/a', 'example.com')).toBe(true);
+    expect(linkMatchesDomain('https://www.example.com/a', 'example.com')).toBe(true);
+    expect(linkMatchesDomain('https://notexample.com/a', 'example.com')).toBe(false);
+    expect(linkMatchesDomain('not a url', 'example.com')).toBe(false);
+    expect(linkMatchesDomain(undefined, 'example.com')).toBe(false);
   });
 });

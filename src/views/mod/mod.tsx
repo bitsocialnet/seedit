@@ -1,19 +1,15 @@
 import { memo, useEffect, useRef, useMemo, type ComponentProps } from 'react';
-import { Navigate, useParams, useLocation } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
-import { useAccountCommunities, type Comment } from '@bitsocial/bitsocial-react-hooks';
+import type { Comment } from '@bitsocial/bitsocial-react-hooks';
 import { useTranslation } from 'react-i18next';
-import useTimeFilter from '../../hooks/use-time-filter';
-import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
+import { useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
+import useModFeed from '../../hooks/use-mod-feed';
 import FeedFooter from '../../components/feed-footer';
 import DevelopmentFeedResetButton from '../../components/development-feed-reset-button';
 import TopTimeFilter from '../../components/top-time-filter';
-import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
-import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
-import useProgressiveFeed from '../../hooks/use-progressive-feed';
-import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 import layoutStyles from '../../components/feed-layout';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
@@ -27,32 +23,12 @@ const ModSidebar = memo(Sidebar);
 const renderPost = (index: number, post: Comment) => <Post key={post?.cid} index={index} post={post} />;
 
 const Mod = () => {
-  const { accountCommunities } = useAccountCommunities();
-  const communityAddresses = useMemo(() => Object.keys(accountCommunities ?? {}), [accountCommunities]);
   const params = useParams<{ sortType?: string; timeFilterName?: string }>();
-  const location = useLocation();
-
-  const { timeFilterName, timeFilterSeconds, sessionKey, preferredTopTimeFilterPath } = useTimeFilter();
-
-  const sortType = getRouteSortType(params.sortType);
-  const feedSortType = getFeedSortType(sortType);
-
+  const { feed, hasMore, loadMore, reset, requestKey, communityAddresses, sortType, timeFilterName, sessionKey, redirectPath } = useModFeed();
   const currentTimeFilterName = params.timeFilterName || timeFilterName || (sortType === 'top' ? 'all' : '24h');
 
   const infiniteFeedEnabled = useInfiniteFeedEnabled();
   const { t } = useTranslation();
-
-  const feedOptions = useMemo(
-    () => ({
-      newerThan: timeFilterSeconds,
-      postsPerPage: FEED_POSTS_PER_PAGE,
-      sortType: feedSortType,
-      communities: getCommunityIdentifiers(communityAddresses),
-    }),
-    [communityAddresses, feedSortType, timeFilterSeconds],
-  );
-
-  const { feed, hasMore, loadMore, reset, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
 
   const documentTitle = 'seedit: ' + t('communities_you_moderate');
   useEffect(() => {
@@ -87,16 +63,8 @@ const Mod = () => {
     [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
-  if (isLegacyTopRoute(params.sortType)) {
-    return <Navigate to={getCanonicalTopPath(location.pathname, location.search)} replace />;
-  }
-
-  if (preferredTopTimeFilterPath) {
-    return <Navigate to={preferredTopTimeFilterPath} replace />;
-  }
-
-  if (sortType !== 'top' && params.timeFilterName) {
-    return <Navigate to={getPathWithoutTimeFilter(location.pathname, params.timeFilterName, location.search)} replace />;
+  if (redirectPath) {
+    return <Navigate to={redirectPath} replace />;
   }
 
   return (

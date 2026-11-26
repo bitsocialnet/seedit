@@ -1,19 +1,14 @@
-import { memo, useEffect, useRef, useState, useMemo, useCallback, type ComponentProps } from 'react';
-import { Navigate, useLocation, useParams } from 'react-router-dom';
+import { memo, useEffect, useRef, useMemo, type ComponentProps } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
 import { Virtuoso, VirtuosoHandle, StateSnapshot } from 'react-virtuoso';
-import { Comment, CommentsFilter } from '@bitsocial/bitsocial-react-hooks';
-import { useDefaultSubscriptionAddresses } from '../../hooks/use-default-subscriptions';
-import useTimeFilter from '../../hooks/use-time-filter';
-import { FEED_POSTS_PER_PAGE, useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
+import type { Comment } from '@bitsocial/bitsocial-react-hooks';
+import useDomainFeed from '../../hooks/use-domain-feed';
+import { useInfiniteFeedEnabled } from '../../hooks/use-feed-pagination';
 import FeedFooter from '../../components/feed-footer';
 import TopTimeFilter from '../../components/top-time-filter';
-import { getCommunityIdentifiers } from '../../hooks/use-community-identifier';
 import Post from '../../components/post';
 import Sidebar from '../../components/sidebar';
 import layoutStyles from '../../components/feed-layout';
-import { getCanonicalTopPath, getFeedSortType, getRouteSortType, isLegacyTopRoute } from '../../constants/sort-types';
-import useProgressiveFeed from '../../hooks/use-progressive-feed';
-import { getPathWithoutTimeFilter } from '../../lib/utils/time-filter-utils';
 
 const lastVirtuosoStates: { [key: string]: StateSnapshot } = {};
 
@@ -26,65 +21,12 @@ const DomainSidebar = memo(Sidebar);
 const renderPost = (index: number, post: Comment) => <Post index={index} post={post} />;
 
 const Domain = () => {
-  const communityAddresses = useDefaultSubscriptionAddresses();
   const params = useParams<{ domain?: string; sortType?: string; timeFilterName?: string }>();
-  const location = useLocation();
   const domain = params?.domain;
-  const sortType = getRouteSortType(params.sortType);
-  const feedSortType = getFeedSortType(sortType);
-  const { timeFilterName, timeFilterSeconds, sessionKey, preferredTopTimeFilterPath } = useTimeFilter();
+  const { feed, hasMore, loadMore, requestKey, communityAddresses, sortType, timeFilterName, sessionKey, redirectPath, showNoResults } = useDomainFeed(domain);
   const currentTimeFilterName = params.timeFilterName || timeFilterName || 'all';
 
   const infiniteFeedEnabled = useInfiniteFeedEnabled();
-  const [noResultsRequestKey, setNoResultsRequestKey] = useState<string>();
-
-  const matchesDomain = useCallback(
-    (comment: Comment) => {
-      if (!domain || !comment?.link) return false;
-      try {
-        const url = new URL(comment.link);
-        const hostname = url.hostname;
-
-        if (hostname === domain) return true;
-
-        return hostname.endsWith(`.${domain}`) || hostname === domain;
-      } catch {
-        return false;
-      }
-    },
-    [domain],
-  );
-
-  const feedOptions = useMemo(() => {
-    const options: {
-      newerThan: number | undefined;
-      postsPerPage: number;
-      sortType: string;
-      communities: ReturnType<typeof getCommunityIdentifiers>;
-      filter: CommentsFilter;
-    } = {
-      newerThan: timeFilterSeconds,
-      postsPerPage: FEED_POSTS_PER_PAGE,
-      sortType: feedSortType,
-      communities: getCommunityIdentifiers(communityAddresses),
-      filter: { filter: matchesDomain, key: `domain-filter-${domain}` },
-    };
-
-    return options;
-  }, [communityAddresses, feedSortType, timeFilterSeconds, matchesDomain, domain]);
-
-  const { feed, hasMore, loadMore, requestKey } = useProgressiveFeed({ enabled: sortType !== 'top', feedOptions });
-
-  // show "no posts found" once this feed request has stayed empty for 2 seconds
-  const isFeedEmpty = Boolean(domain) && feed?.length === 0;
-  useEffect(() => {
-    if (!isFeedEmpty) return;
-    const timer = setTimeout(() => setNoResultsRequestKey(requestKey), 2000);
-    return () => clearTimeout(timer);
-  }, [isFeedEmpty, requestKey]);
-  const showNoResults = isFeedEmpty && noResultsRequestKey === requestKey;
-  // forget a finished delay once its request is replaced or its feed fills, so the next empty feed waits again
-  if (noResultsRequestKey !== undefined && !showNoResults) setNoResultsRequestKey(undefined);
 
   const documentTitle = domain + ' - Seedit';
   useEffect(() => {
@@ -119,16 +61,8 @@ const Domain = () => {
     [feed, hasMore, communityAddresses, loadMore, requestKey],
   );
 
-  if (isLegacyTopRoute(params.sortType)) {
-    return <Navigate to={getCanonicalTopPath(location.pathname, location.search)} replace />;
-  }
-
-  if (preferredTopTimeFilterPath) {
-    return <Navigate to={preferredTopTimeFilterPath} replace />;
-  }
-
-  if (sortType !== 'top' && params.timeFilterName) {
-    return <Navigate to={getPathWithoutTimeFilter(location.pathname, params.timeFilterName, location.search)} replace />;
+  if (redirectPath) {
+    return <Navigate to={redirectPath} replace />;
   }
 
   return (

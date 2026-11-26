@@ -16,6 +16,17 @@ export const getHostname = (url: string) => {
   }
 };
 
+/** Whether a link points at a domain or one of its subdomains, as the domain feeds filter posts. */
+export const linkMatchesDomain = (link: string | undefined, domain: string | undefined) => {
+  if (!domain || !link) return false;
+  try {
+    const { hostname } = new URL(link);
+    return hostname === domain || hostname.endsWith(`.${domain}`);
+  } catch {
+    return false;
+  }
+};
+
 export const isValidURL = (url: string) => {
   try {
     new URL(url);
