@@ -82,6 +82,7 @@ const ModernAccountDataEditor = lazyView(() => import('./views/modern-account-da
 const CommunityDataEditor = lazyView(() => import('./views/community-data-editor'));
 const SubmitPage = lazyView(() => import('./views/submit'));
 const CommunitySettings = lazyView(() => import('./views/community-settings'));
+const ModernCommunitySettings = lazyView(() => import('./views/modern-community-settings'));
 const Communities = lazyView(() => import('./views/communities'));
 const StarterSubscriptions = lazyView(() => import('./views/starter-subscriptions'));
 
@@ -227,6 +228,15 @@ const App = () => {
                   </ExactCommunityActionRoute>
                 }
               />
+              <Route
+                path='/s/:communityAddress/settings'
+                element={
+                  <ExactCommunityActionRoute>
+                    <ModernCommunitySettings />
+                  </ExactCommunityActionRoute>
+                }
+              />
+              <Route path='/communities/create' element={<ModernCommunitySettings />} />
             </Route>
           )}
           <Route element={pagesLayout}>
@@ -251,14 +261,16 @@ const App = () => {
             <Route path='/s/:communityAddress/about' element={<AboutView />} />
 
             {!isModern && <Route path='/settings' element={<Settings />} />}
-            <Route
-              path='/s/:communityAddress/settings'
-              element={
-                <ExactCommunityActionRoute>
-                  <CommunitySettings />
-                </ExactCommunityActionRoute>
-              }
-            />
+            {!isModern && (
+              <Route
+                path='/s/:communityAddress/settings'
+                element={
+                  <ExactCommunityActionRoute>
+                    <CommunitySettings />
+                  </ExactCommunityActionRoute>
+                }
+              />
+            )}
             <Route
               path='/s/:communityAddress/settings/editor'
               element={
@@ -304,7 +316,7 @@ const App = () => {
             <Route path='/communities/vote/passing' element={<LegacyDirectoryRouteRedirect />} />
             <Route path='/communities/vote/rejecting' element={<LegacyDirectoryRouteRedirect />} />
             <Route path='/communities/vote/:directoryCode' element={<LegacyDirectoryRouteRedirect />} />
-            <Route path='/communities/create' element={<CommunitySettings />} />
+            {!isModern && <Route path='/communities/create' element={<CommunitySettings />} />}
           </Route>
           <Route element={feedLayout}>
             {!isModern && <Route path='/search' element={<Search />} />}

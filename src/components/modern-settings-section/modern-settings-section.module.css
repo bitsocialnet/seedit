@@ -45,6 +45,11 @@
   line-height: 1.45;
 }
 
+/* Translated descriptions are lowercase in the locale files. */
+.description::first-letter {
+  text-transform: uppercase;
+}
+
 .rows {
   display: flex;
   flex-direction: column;
