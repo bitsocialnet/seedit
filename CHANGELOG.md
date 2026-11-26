@@ -1,3 +1,20 @@
+## [0.7.1](https://github.com/bitsocialnet/seedit/compare/v0.7.0...v0.7.1) (2026-11-26)
+
+
+### Bug Fixes
+
+* **moderation:** ban through commentModeration.author so a ban takes effect ([9b9ebff](https://github.com/bitsocialnet/seedit/commit/9b9ebff665ecdd79ccf5555ba95295115b412d80))
+* **post:** hide the link and media of author-deleted posts ([837bb1b](https://github.com/bitsocialnet/seedit/commit/837bb1be0895d9af490e7685a28c853262c951d2))
+* **publishing:** drop ended challenges and keep the text of a failed edit ([#900](https://github.com/bitsocialnet/seedit/issues/900)) ([0b9b875](https://github.com/bitsocialnet/seedit/commit/0b9b875d8250ed2571394167b48b76f0365f4229))
+* **wallet-settings:** sign wallets as BSIP-22 defines and upgrade to hooks 0.4.0 and pkc-js 0.0.163 ([63047af](https://github.com/bitsocialnet/seedit/commit/63047af732f75c01d93ac5162c8262097a068b5f))
+
+
+### Features
+
+* **moderation:** say when a user was banned for a post or comment ([96f4434](https://github.com/bitsocialnet/seedit/commit/96f44345acde86a80a755fbb6e8c24679e03e881))
+
+
+
 # [0.7.0](https://github.com/bitsocialnet/seedit/compare/v0.6.3...v0.7.0) (2026-11-20)
 
 
