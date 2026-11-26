@@ -22,6 +22,7 @@ import ModernCommunities from './views/modern-communities';
 import ModernInbox from './views/modern-inbox';
 import ModernPost from './views/modern-post';
 import ModernProfile from './views/modern-profile';
+import ModernSearch from './views/modern-search';
 import ModernSubmit from './views/modern-submit';
 import AccountBar from './components/account-bar/';
 import ChallengeModal from './components/challenge-modal';
@@ -191,6 +192,7 @@ const App = () => {
               <Route path='/s/:communityAddress/comments/:commentCid' element={<ModernPost />} />
               <Route path='/profile/:accountCommentIndex' element={<ModernPost />} />
               <Route path='/submit' element={<ModernSubmit />} />
+              <Route path='/search' element={<ModernSearch />} />
               <Route path='/inbox' element={<ModernInbox />} />
               {['unread', 'commentreplies', 'postreplies'].map((tab) => (
                 <Route key={tab} path={`/inbox/${tab}`} element={<ModernInbox />} />
@@ -294,7 +296,7 @@ const App = () => {
             <Route path='/communities/create' element={<CommunitySettings />} />
           </Route>
           <Route element={feedLayout}>
-            <Route path='/search' element={<Search />} />
+            {!isModern && <Route path='/search' element={<Search />} />}
 
             {!isModern && (
               <>
