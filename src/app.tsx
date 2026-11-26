@@ -83,6 +83,7 @@ const CommunityDataEditor = lazyView(() => import('./views/community-data-editor
 const SubmitPage = lazyView(() => import('./views/submit'));
 const CommunitySettings = lazyView(() => import('./views/community-settings'));
 const ModernCommunitySettings = lazyView(() => import('./views/modern-community-settings'));
+const ModernCommunityDataEditor = lazyView(() => import('./views/modern-community-data-editor'));
 const Communities = lazyView(() => import('./views/communities'));
 const StarterSubscriptions = lazyView(() => import('./views/starter-subscriptions'));
 
@@ -236,6 +237,14 @@ const App = () => {
                   </ExactCommunityActionRoute>
                 }
               />
+              <Route
+                path='/s/:communityAddress/settings/editor'
+                element={
+                  <ExactCommunityActionRoute>
+                    <ModernCommunityDataEditor />
+                  </ExactCommunityActionRoute>
+                }
+              />
               <Route path='/communities/create' element={<ModernCommunitySettings />} />
             </Route>
           )}
@@ -271,14 +280,16 @@ const App = () => {
                 }
               />
             )}
-            <Route
-              path='/s/:communityAddress/settings/editor'
-              element={
-                <ExactCommunityActionRoute>
-                  <CommunityDataEditor />
-                </ExactCommunityActionRoute>
-              }
-            />
+            {!isModern && (
+              <Route
+                path='/s/:communityAddress/settings/editor'
+                element={
+                  <ExactCommunityActionRoute>
+                    <CommunityDataEditor />
+                  </ExactCommunityActionRoute>
+                }
+              />
+            )}
             {!isModern && <Route path='/settings/advanced' element={<Settings />} />}
             {!isModern && <Route path='/settings/p2p-stats' element={<Settings />} />}
             {!isModern && <Route path='/settings/content-options' element={<Settings />} />}

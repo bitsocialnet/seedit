@@ -1,0 +1,44 @@
+.subheading {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+/* Two classes outrank the shell's link reset, which inherits the text color. */
+.subheading.subheading {
+  color: var(--m-text-muted);
+}
+
+.subheading:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  padding: 8px 16px;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.editor > p {
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.actions > p {
+  flex: 1 1 200px;
+  margin: 0;
+}

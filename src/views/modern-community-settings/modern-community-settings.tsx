@@ -386,7 +386,7 @@ const ModernCommunitySettings = () => {
           isReadOnly={isChallengesReadOnly}
           isCreating={isCreating}
         />
-        {!isCreating && communityAddress && (
+        {!isCreating && !isReadOnly && communityAddress && (
           <SettingsSection id='json' title={t('json_settings')} description={t('json_settings_info')}>
             <Link
               to={`${getCommunityPath(communityAddress)}/settings/editor`}
