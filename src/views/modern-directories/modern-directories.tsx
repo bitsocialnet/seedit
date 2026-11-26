@@ -10,6 +10,7 @@ import { deriveCommunityNsfw } from '../../lib/utils/nsfw-utils';
 import ErrorDisplay from '../../components/error-display';
 import { ModernJoinButton } from '../../components/modern-community-about';
 import ModernCommunityRow from '../../components/modern-community-row';
+import ModernNotFound from '../../components/modern-not-found';
 import { ExternalLinkIcon, PlusIcon, SearchIcon } from '../../components/modern-icons';
 import { ModernColumns, ModernRailSection, modernStyles } from '../../components/modern-layout';
 import styles from './modern-directories.module.css';
@@ -231,20 +232,7 @@ const ModernDirectories = () => {
     window.scrollTo(0, 0);
   }, [directoryCode]);
 
-  if (isUnknownDirectory) {
-    return (
-      <ModernColumns>
-        <header className={styles.header}>
-          <h1 className={styles.heading}>{t('page_not_found')}</h1>
-        </header>
-        <p className={styles.notice}>
-          <Link to={DIRECTORY_INDEX_PATH} className={styles.textLink}>
-            ← {capitalize(t('back_to_all_directories'))}
-          </Link>
-        </p>
-      </ModernColumns>
-    );
-  }
+  if (isUnknownDirectory) return <ModernNotFound backTo={DIRECTORY_INDEX_PATH} backLabel={capitalize(t('back_to_all_directories'))} />;
 
   return (
     <ModernColumns rail={<ProposalRail directoryCode={knownDirectoryCode} />}>

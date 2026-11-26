@@ -1,0 +1,90 @@
+.index {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 10px;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.index ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.indexLabel {
+  color: var(--m-text-muted);
+}
+
+.release {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--m-border);
+}
+
+.releaseHeading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.releaseVersion {
+  font-size: 20px;
+}
+
+.releaseDate {
+  color: var(--m-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.runningTag {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--m-accent);
+  color: var(--m-on-accent);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.compareLink {
+  font-size: 13px;
+}
+
+.section {
+  margin-top: 8px;
+}
+
+.sectionHeading {
+  font-size: 15px;
+}
+
+/* Two classes outrank the page's heading size. */
+.section .sectionHeading {
+  margin: 12px 0 4px;
+  color: var(--m-text-secondary);
+  font-size: 14px;
+}
+
+.commits {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.scope {
+  font-weight: 700;
+}
+
+.hash {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+}

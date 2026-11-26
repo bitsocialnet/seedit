@@ -88,6 +88,10 @@ const ModernDirectories = lazyView(() => import('./views/modern-directories'));
 const ModernStarterSubscriptions = lazyView(() => import('./views/modern-starter-subscriptions'));
 const ModernMod = lazyView(() => import('./views/modern-mod'));
 const ModernDomain = lazyView(() => import('./views/modern-domain'));
+const ModernAbout = lazyView(() => import('./views/modern-about'));
+const ModernChangelog = lazyView(() => import('./views/modern-changelog'));
+const ModernGold = lazyView(() => import('./views/modern-gold'));
+const ModernNotFound = lazyView(() => import('./views/modern-not-found'));
 const Communities = lazyView(() => import('./views/communities'));
 const StarterSubscriptions = lazyView(() => import('./views/starter-subscriptions'));
 
@@ -267,18 +271,29 @@ const App = () => {
                   </ValidFeedRoute>
                 }
               />
+              <Route path='/about' element={<ModernAbout />} />
+              <Route path='/changelog' element={<ModernChangelog />} />
+              <Route path='/gold' element={<ModernGold />} />
+              <Route path='/s/:communityAddress/about' element={<ModernAbout />} />
+              <Route path='/s/:communityAddress/comments/:commentCid/about' element={<ModernAbout />} />
+              <Route path='/profile/about' element={<ModernAbout />} />
+              <Route path='/u/:authorAddress/comments/:commentCid/about' element={<ModernAbout />} />
+              <Route path={`${DIRECTORY_INDEX_PATH}/about`} element={<ModernAbout />} />
+              <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode/about`} element={<ModernAbout />} />
+              <Route path='*' element={<ModernNotFound />} />
+              <Route path='/not-found' element={<ModernNotFound />} />
               <Route path={DIRECTORY_INDEX_PATH} element={<ModernDirectories />} />
               <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<ModernDirectories />} />
             </Route>
           )}
           <Route element={pagesLayout}>
-            <Route path='/about' element={<AboutView />} />
-            <Route path='/changelog' element={<Changelog />} />
-            <Route path='/gold' element={<Gold />} />
+            {!isModern && <Route path='/about' element={<AboutView />} />}
+            {!isModern && <Route path='/changelog' element={<Changelog />} />}
+            {!isModern && <Route path='/gold' element={<Gold />} />}
             {!isModern && <Route path='/submit' element={<SubmitPage />} />}
 
             {!isModern && <Route path='/s/:communityAddress/comments/:commentCid' element={<PostPage />} />}
-            <Route path='/s/:communityAddress/comments/:commentCid/about' element={<AboutView />} />
+            {!isModern && <Route path='/s/:communityAddress/comments/:commentCid/about' element={<AboutView />} />}
 
             {!isModern && (
               <Route
@@ -290,7 +305,7 @@ const App = () => {
                 }
               />
             )}
-            <Route path='/s/:communityAddress/about' element={<AboutView />} />
+            {!isModern && <Route path='/s/:communityAddress/about' element={<AboutView />} />}
 
             {!isModern && <Route path='/settings' element={<Settings />} />}
             {!isModern && (
@@ -319,9 +334,9 @@ const App = () => {
             {import.meta.env.DEV && <Route path='/settings/debug' element={<Settings />} />}
             {!isModern && <Route path='/settings/account-data' element={<AccountDataEditor />} />}
 
-            <Route path='/profile/about' element={<AboutView />} />
+            {!isModern && <Route path='/profile/about' element={<AboutView />} />}
 
-            <Route path='/u/:authorAddress/comments/:commentCid/about' element={<AboutView />} />
+            {!isModern && <Route path='/u/:authorAddress/comments/:commentCid/about' element={<AboutView />} />}
 
             {!isModern && (
               <>
@@ -343,9 +358,9 @@ const App = () => {
             )}
             {!isModern && <Route path='/communities/defaults' element={<StarterSubscriptions />} />}
             {!isModern && <Route path={DIRECTORY_INDEX_PATH} element={<Communities />} />}
-            <Route path={`${DIRECTORY_INDEX_PATH}/about`} element={<DirectoryAboutView />} />
+            {!isModern && <Route path={`${DIRECTORY_INDEX_PATH}/about`} element={<DirectoryAboutView />} />}
             {!isModern && <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode`} element={<Communities />} />}
-            <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode/about`} element={<DirectoryAboutView />} />
+            {!isModern && <Route path={`${DIRECTORY_INDEX_PATH}/:directoryCode/about`} element={<DirectoryAboutView />} />}
             <Route path='/communities/vote' element={<LegacyDirectoryRouteRedirect />} />
             <Route path='/communities/vote/passing' element={<LegacyDirectoryRouteRedirect />} />
             <Route path='/communities/vote/rejecting' element={<LegacyDirectoryRouteRedirect />} />
@@ -431,8 +446,8 @@ const App = () => {
               </>
             )}
 
-            <Route path='*' element={<NotFound />} />
-            <Route path='/not-found' element={<NotFound />} />
+            {!isModern && <Route path='*' element={<NotFound />} />}
+            {!isModern && <Route path='/not-found' element={<NotFound />} />}
           </Route>
         </Route>
       </Routes>
