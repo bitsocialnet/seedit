@@ -1,5 +1,5 @@
 import type { Role } from '@bitsocial/bitsocial-react-hooks';
-import { DEFAULT_CHALLENGE_NAME, type ChallengeExclude, type ChallengeSetting } from '../lib/utils/challenge-settings-utils';
+import { DEFAULT_CHALLENGE_NAME, removeChallengeAt, type ChallengeExclude, type ChallengeSetting } from '../lib/utils/challenge-settings-utils';
 import type { Roles } from '../lib/utils/user-utils';
 import useCommunitySettingsStore from '../stores/use-community-settings-store';
 import useChallengesOptions from './use-challenges-options';
@@ -64,7 +64,7 @@ export const useCommunityChallengesDraft = (publishedChallenges?: ChallengeSetti
   return {
     challenges,
     addChallenge: () => updateChallenges((current) => [...current, { name: DEFAULT_CHALLENGE_NAME, options: challengeOptions[DEFAULT_CHALLENGE_NAME] || {} }]),
-    removeChallenge: (index: number) => updateChallenges((current) => current.filter((_, challengeIndex) => challengeIndex !== index)),
+    removeChallenge: (index: number) => updateChallenges((current) => removeChallengeAt(current, index)),
     /** Switches a challenge to another one, starting from that challenge's default options. */
     setChallengeName: (index: number, name: string) => updateChallenge(index, (challenge) => ({ ...challenge, name, options: challengeOptions[name] || {} })),
     setChallengeOption: (index: number, option: string, value: string) =>

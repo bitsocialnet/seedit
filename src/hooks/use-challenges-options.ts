@@ -1,20 +1,15 @@
 import { usePkcRpcSettings } from '@bitsocial/bitsocial-react-hooks';
 
+/** Each challenge the node offers, mapped to its options' default values. */
 const useChallengesOptions = () => {
-  const { challenges } = usePkcRpcSettings().pkcRpcSettings || {};
+  const challenges = usePkcRpcSettings().pkcRpcSettings?.challenges;
 
-  const options = Object.entries(challenges ?? {}).reduce(
-    (acc, [challengeName, challengeSettings]) => {
-      acc[challengeName] = (challengeSettings.optionInputs ?? []).reduce((optionsAcc: any, input: any) => {
-        optionsAcc[input.option] = input.default || '';
-        return optionsAcc;
-      }, {});
-      return acc;
-    },
-    {} as Record<string, Record<string, string>>,
-  );
-
-  return options;
+  return Object.fromEntries(
+    Object.entries(challenges ?? {}).map(([challengeName, challengeSettings]) => [
+      challengeName,
+      Object.fromEntries((challengeSettings.optionInputs ?? []).map((input: any) => [input.option, input.default || ''])),
+    ]),
+  ) as Record<string, Record<string, string>>;
 };
 
 export default useChallengesOptions;

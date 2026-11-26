@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { getExcludeAddresses, setExcludeAddresses, setExcludeNumber, toggleExcludePublicationType, toggleExcludeRole } from './challenge-settings-utils';
+import {
+  getExcludeAddresses,
+  removeChallengeAt,
+  setExcludeAddresses,
+  setExcludeNumber,
+  toggleExcludeChallenge,
+  toggleExcludePublicationType,
+  toggleExcludeRole,
+} from './challenge-settings-utils';
 
 describe('challenge exclude edits', () => {
   it('splits addresses into names and public keys the way pkc-js does, dropping empty lists', () => {
@@ -27,5 +35,22 @@ describe('challenge exclude edits', () => {
   it('removes a number field that is cleared', () => {
     expect(setExcludeNumber({ postScore: 5, replyScore: 1 }, 'postScore', undefined)).toEqual({ replyScore: 1 });
     expect(setExcludeNumber({}, 'rateLimit', 0)).toEqual({ rateLimit: 0 });
+  });
+
+  it('keeps challenge references sorted and removes the list once empty', () => {
+    const exclude = toggleExcludeChallenge(toggleExcludeChallenge({}, 2), 0);
+    expect(exclude).toEqual({ challenges: [0, 2] });
+    expect(toggleExcludeChallenge(toggleExcludeChallenge(exclude, 0), 2)).toEqual({});
+  });
+});
+
+describe('removeChallengeAt', () => {
+  it('drops references to the removed challenge and shifts later ones down', () => {
+    const challenges = [
+      { name: 'a', exclude: [{ challenges: [1] }, { challenges: [2] }, { roles: ['owner'] }] },
+      { name: 'b', exclude: [{ challenges: [0, 2] }] },
+      { name: 'c' },
+    ];
+    expect(removeChallengeAt(challenges, 1)).toEqual([{ name: 'a', exclude: [{}, { challenges: [1] }, { roles: ['owner'] }] }, { name: 'c' }]);
   });
 });
