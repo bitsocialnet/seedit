@@ -37,6 +37,9 @@ export const renderStaticShell = async ({ theme, width, height }: StaticShellVar
   useThemeStore.setState({ theme });
   useUiModeStore.setState({ uiMode: STATIC_SHELL_UI_MODE });
   useWindowDimensionsStore.setState({ width, height, isMobile: width < 640 });
+  // Components that read the viewport directly, such as the feed skeleton picking its bones, see the variant's size.
+  Object.defineProperty(window, 'innerWidth', { value: width, configurable: true });
+  Object.defineProperty(window, 'innerHeight', { value: height, configurable: true });
   const container = document.createElement('div');
   document.body.appendChild(container);
   const root = createRoot(container);

@@ -10,6 +10,24 @@ const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '
 const variants = JSON.parse(process.argv[2] || '{}');
 
 const dom = new JSDOM('<!doctype html><html><head></head><body><div id="root"></div></body></html>', { url: 'http://localhost/#/', pretendToBeVisual: true });
+// jsdom has neither matchMedia nor ResizeObserver, and components use them on mount (boneyard-js's skeleton
+// listens for OS theme changes and measures its container). No media query matches, as for a visitor with no
+// reduced-motion or color-scheme preference, and nothing resizes during the render.
+dom.window.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+};
+dom.window.matchMedia = (media) => ({
+  matches: false,
+  media,
+  onchange: null,
+  addEventListener() {},
+  removeEventListener() {},
+  addListener() {},
+  removeListener() {},
+  dispatchEvent: () => false,
+});
 for (const key of Object.getOwnPropertyNames(dom.window)) {
   if (!(key in globalThis)) globalThis[key] = dom.window[key];
 }

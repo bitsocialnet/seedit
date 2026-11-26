@@ -84,6 +84,8 @@ export function inlineStartupStylesheets(html, preloadAttribute, base, readAsset
 export function injectStaticShell(html, variants, uiMode) {
   if (!html.includes('<div id="root"></div>')) throw new Error('static shell: index.html has no empty <div id="root"></div>');
   if (uiMode !== 'modern' && uiMode !== 'old') throw new Error(`static shell: unknown ui mode ${uiMode}`);
+  // A render that threw leaves its variant empty, which would quietly ship without a first frame.
+  for (const [name, markup] of Object.entries(variants)) if (!markup) throw new Error(`static shell: the ${name} variant rendered nothing`);
   const templates = Object.entries(variants)
     .map(([name, markup]) => `<template id="static-shell-${name}">${markup}</template>`)
     .join('');

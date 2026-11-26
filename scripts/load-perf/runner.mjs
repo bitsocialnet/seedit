@@ -257,7 +257,17 @@ async function loadOnce(browser, origin, route) {
         template.innerHTML = html;
         template.content.firstElementChild?.removeAttribute('data-static-shell');
         for (const element of template.content.querySelectorAll('[style]')) element.setAttribute('style', element.style.cssText);
-        return template.innerHTML;
+        // React appends an attribute that a re-render adds, such as the style boneyard-js's skeleton sets once
+        // mounted, so the same element can list its attributes in another order. The order does not render.
+        for (const element of template.content.querySelectorAll('*')) {
+          const attributes = [...element.attributes].map(({ name, value }) => [name, value]).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
+          for (const [name] of attributes) element.removeAttribute(name);
+          for (const [name, value] of attributes) element.setAttribute(name, value);
+        }
+        // useId values (boneyard-js names its keyframes with them) count the ids a page has generated so far,
+        // which differs between the build-time render and the browser. React replaces the shell's markup, so
+        // the two trees never share ids.
+        return template.innerHTML.replace(/_r_[0-9a-z]+_/g, '_r_id_');
       };
       let handoff = null;
       const { shellHtml, commitHtml } = window.__LOAD_PERF__;

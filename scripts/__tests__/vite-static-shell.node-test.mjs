@@ -38,6 +38,7 @@ test('adds the shell templates and insertion script after an empty root', () => 
   assert.match(output, /<div id="root"><\/div><template id="static-shell-desktop-light"><div class="app">shell<\/div><\/template><script>/);
   assert.throws(() => injectStaticShell('<body><div id="root">x</div></body>', {}, 'modern'), /no empty/);
   assert.throws(() => injectStaticShell('<body><div id="root"></div></body>', {}, undefined), /unknown ui mode/);
+  assert.throws(() => injectStaticShell('<body><div id="root"></div></body>', { 'desktop-light': '' }, 'modern'), /desktop-light variant rendered nothing/);
 });
 
 const variants = { 'desktop-light': 'desktop light', 'desktop-dark': 'desktop dark', 'mobile-light': 'mobile light', 'mobile-dark': 'mobile dark' };
