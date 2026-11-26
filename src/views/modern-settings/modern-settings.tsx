@@ -6,12 +6,12 @@ import { getReviewableSettingsUpgrades, getSettingsUpgradeKey, type SettingsUpgr
 import { isSettingsAdvancedView, isSettingsContentOptionsView, isSettingsP2pStatsView } from '../../lib/utils/view-utils';
 import useSettingsUpgradeReviewStore from '../../stores/use-settings-upgrade-review-store';
 import { ModernColumns, modernStyles } from '../../components/modern-layout';
+import { settingsStyles } from '../../components/modern-settings-section';
 import { ModernUserTabs } from '../../components/modern-user-profile';
 import AdvancedSettings from './advanced-settings';
 import ContentSettings from './content-settings';
 import GeneralSettings from './general-settings';
 import P2pStats from './p2p-stats';
-import styles from './modern-settings.module.css';
 
 /** Offers to review settings that changed defaults since the account saved them, unless a full node manages them. */
 const SettingsUpgradeNotice = () => {
@@ -25,9 +25,9 @@ const SettingsUpgradeNotice = () => {
   if (visibleUpgradeKeys.length === 0) return null;
 
   return (
-    <output className={styles.notice} aria-live='polite' data-testid='settings-upgrade-review-banner'>
+    <output className={settingsStyles.notice} aria-live='polite' data-testid='settings-upgrade-review-banner'>
       <span className={modernStyles.sentenceCase}>{t('settings_upgrade_review_notice')}</span>
-      <button type='button' className={`${modernStyles.primaryButton} ${styles.button}`} onClick={() => reviewUpgradeKeys(visibleUpgradeKeys)}>
+      <button type='button' className={`${modernStyles.primaryButton} ${settingsStyles.button}`} onClick={() => reviewUpgradeKeys(visibleUpgradeKeys)}>
         <span className={modernStyles.sentenceCase}>{t('settings_upgrade_review_button')}</span>
       </button>
     </output>
@@ -60,8 +60,8 @@ const ModernSettings = () => {
 
   return (
     <ModernColumns>
-      <header className={styles.header}>
-        <h1 className={styles.heading}>{title}</h1>
+      <header className={settingsStyles.header}>
+        <h1 className={settingsStyles.heading}>{title}</h1>
       </header>
       <ModernUserTabs tabs={tabs} label={title} />
       <SettingsUpgradeNotice />
@@ -69,7 +69,7 @@ const ModernSettings = () => {
       {page === 'advanced' ? (
         <AdvancedSettings key={accountId} />
       ) : (
-        <div className={styles.sections} key={accountId}>
+        <div className={settingsStyles.sections} key={accountId}>
           {page === 'content' ? <ContentSettings /> : page === 'p2p' ? <P2pStats /> : <GeneralSettings />}
         </div>
       )}

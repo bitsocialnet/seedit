@@ -4,23 +4,23 @@ import { getApproximateCountryCode } from '../../lib/peer-geo';
 import { getP2PRuntimeMode } from '../../lib/p2p-runtime';
 import { SEEDER_REPO_URL, formatCount, formatPeerTransferBytes, type AccountShape, type ConnectedPeersStatRow, type StatRow } from '../../lib/p2p-stats';
 import PeerWorldMap, { CountryFlag } from '../../components/peer-world-map';
-import { SettingsRow, SettingsSection } from './settings-section';
+import { SettingsRow, SettingsSection, settingsStyles } from '../../components/modern-settings-section';
 import styles from './modern-settings.module.css';
 
 const StatValue = ({ row }: { row: Exclude<StatRow, ConnectedPeersStatRow> }) => {
   if (row.type === 'nodeEndpoint') {
     return (
-      <span className={styles.controls}>
+      <span className={settingsStyles.controls}>
         <CountryFlag countryCode={row.countryCode} />
-        <span className={styles.mono}>{row.ip}</span>
+        <span className={settingsStyles.mono}>{row.ip}</span>
       </span>
     );
   }
   if (row.name === 'Mode' && row.value === 'Leeching') {
     return (
-      <span className={styles.controls}>
+      <span className={settingsStyles.controls}>
         Leeching
-        <a className={styles.link} href={SEEDER_REPO_URL} rel='noopener noreferrer' target='_blank'>
+        <a className={settingsStyles.link} href={SEEDER_REPO_URL} rel='noopener noreferrer' target='_blank'>
           want to seed?
         </a>
       </span>
@@ -36,7 +36,7 @@ const ConnectedPeers = ({ row, updatedAt }: { row: ConnectedPeersStatRow; update
   >
     <PeerWorldMap peers={row.mapEntries ?? row.entries} />
     <ul className={styles.peerList}>
-      {row.entries.length === 0 && <li className={styles.status}>No active peer addresses</li>}
+      {row.entries.length === 0 && <li className={settingsStyles.status}>No active peer addresses</li>}
       {row.entries.map((entry) => (
         <li key={entry.id} className={styles.peer}>
           <div className={styles.peerMeta}>
@@ -47,13 +47,15 @@ const ConnectedPeers = ({ row, updatedAt }: { row: ConnectedPeersStatRow; update
               </span>
             )}
             {entry.role && (
-              <span className={entry.role === 'leecher' ? styles.statusError : styles.statusSuccess}>{entry.role === 'leecher' ? 'Leeching' : 'Seeding'}</span>
+              <span className={entry.role === 'leecher' ? settingsStyles.statusError : settingsStyles.statusSuccess}>
+                {entry.role === 'leecher' ? 'Leeching' : 'Seeding'}
+              </span>
             )}
           </div>
-          <div className={`${styles.mono} ${styles.truncate}`} title={entry.peerId}>
+          <div className={`${settingsStyles.mono} ${styles.truncate}`} title={entry.peerId}>
             {entry.peerId}
           </div>
-          <div className={styles.controls}>
+          <div className={`${settingsStyles.controls} ${styles.peerAddress}`}>
             <CountryFlag countryCode={entry.countryCode ?? getApproximateCountryCode(entry.address)} />
             <code className={`${styles.muted} ${styles.truncate}`} title={entry.address}>
               {entry.address}
@@ -76,7 +78,7 @@ const P2pStats = () => {
   if (!mode) {
     return (
       <SettingsSection title='p2p'>
-        <p className={styles.status}>P2P stats appear after the P2P client starts.</p>
+        <p className={settingsStyles.status}>P2P stats appear after the P2P client starts.</p>
       </SettingsSection>
     );
   }
@@ -87,7 +89,7 @@ const P2pStats = () => {
   return (
     <>
       <SettingsSection title='node'>
-        <div className={styles.rows}>
+        <div className={settingsStyles.rows}>
           {statRows.map((row) => (
             <SettingsRow key={row.name} label={row.name}>
               <StatValue row={row} />
@@ -95,12 +97,12 @@ const P2pStats = () => {
           ))}
         </div>
         {loading && (
-          <p className={styles.status} role='status'>
+          <p className={settingsStyles.status} role='status'>
             Loading p2p stats…
           </p>
         )}
         {error && (
-          <p className={`${styles.status} ${styles.statusError}`} role='alert'>
+          <p className={`${settingsStyles.status} ${settingsStyles.statusError}`} role='alert'>
             {error}
           </p>
         )}

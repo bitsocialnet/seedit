@@ -1,7 +1,7 @@
 import { type ReactNode, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { modernStyles } from '../../components/modern-layout';
-import styles from './modern-settings.module.css';
+import { modernStyles } from '../modern-layout';
+import styles from './modern-settings-section.module.css';
 
 interface SettingsSectionProps {
   /** Links such as /settings#displayName point at a section by this id. */

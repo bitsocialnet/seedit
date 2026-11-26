@@ -15,7 +15,7 @@ import { isUiMode } from '../../lib/utils/ui-mode-utils';
 import useUiModeStore from '../../stores/use-ui-mode-store';
 import { modernStyles } from '../../components/modern-layout';
 import { VersionWithCommit } from '../../components/version';
-import { SettingsRow, SettingsSection, SettingsSwitch } from './settings-section';
+import { SettingsRow, SettingsSection, SettingsSwitch, settingsStyles } from '../../components/modern-settings-section';
 import styles from './modern-settings.module.css';
 
 // prettier-ignore
@@ -33,15 +33,15 @@ const AppSection = () => {
 
   return (
     <SettingsSection title={t('general')}>
-      <div className={styles.rows}>
+      <div className={settingsStyles.rows}>
         <SettingsRow label={t('version')}>
           <VersionWithCommit />
           {window.electronApi?.isElectron && (
-            <a className={styles.link} href='http://localhost:50019/webui/' target='_blank' rel='noreferrer'>
+            <a className={settingsStyles.link} href='http://localhost:50019/webui/' target='_blank' rel='noreferrer'>
               {t('node_stats')}
             </a>
           )}
-          <button type='button' className={`${modernStyles.secondaryButton} ${styles.button}`} onClick={() => void checkForUpdates()} disabled={loading}>
+          <button type='button' className={`${modernStyles.secondaryButton} ${settingsStyles.button}`} onClick={() => void checkForUpdates()} disabled={loading}>
             <TransLabel i18nKey='check_for_updates' />
           </button>
         </SettingsRow>
@@ -49,14 +49,14 @@ const AppSection = () => {
           label={t('interface_language')}
           htmlFor='modern-settings-language'
           hint={
-            <a className={styles.link} href='https://github.com/bitsocialnet/seedit/tree/master/public/translations' target='_blank' rel='noopener noreferrer'>
+            <a className={settingsStyles.link} href='https://github.com/bitsocialnet/seedit/tree/master/public/translations' target='_blank' rel='noopener noreferrer'>
               {t('contribute_on_github')}
             </a>
           }
         >
           <select
             id='modern-settings-language'
-            className={styles.select}
+            className={settingsStyles.select}
             value={i18n.language}
             onChange={(event) => {
               i18n.changeLanguage(event.target.value);
@@ -101,24 +101,24 @@ const DisplayNameSection = () => {
   return (
     <SettingsSection id='displayName' title={t('display_name')}>
       <form
-        className={styles.controls}
+        className={settingsStyles.controls}
         onSubmit={(event) => {
           event.preventDefault();
           void save();
         }}
       >
         <input
-          className={styles.input}
+          className={settingsStyles.input}
           aria-label={t('display_name')}
           placeholder='My Name'
           value={displayName}
           onChange={(event) => setDisplayName(event.target.value)}
         />
-        <button type='submit' className={`${modernStyles.primaryButton} ${styles.button}`}>
+        <button type='submit' className={`${modernStyles.primaryButton} ${settingsStyles.button}`}>
           <span className={modernStyles.sentenceCase}>{t('save')}</span>
         </button>
         {saved && (
-          <span className={`${styles.status} ${styles.statusSuccess} ${modernStyles.sentenceCase}`} role='status'>
+          <span className={`${settingsStyles.status} ${settingsStyles.statusSuccess} ${modernStyles.sentenceCase}`} role='status'>
             {t('saved')}
           </span>
         )}
@@ -127,16 +127,16 @@ const DisplayNameSection = () => {
   );
 };
 
-const STATUS_CLASSES = { error: styles.statusError, pending: styles.statusPending, success: styles.statusSuccess, neutral: '' };
+const STATUS_CLASSES = { error: settingsStyles.statusError, pending: settingsStyles.statusPending, success: settingsStyles.statusSuccess, neutral: '' };
 
 const CryptoAddressSection = () => {
   const { t } = useTranslation();
   const { cryptoAddress, setCryptoAddress, status, check, save, saved, signerAddress } = useCryptoAddressSetting();
   return (
     <SettingsSection id='cryptoAddress' title={t('crypto_address')}>
-      <div className={styles.controls}>
+      <div className={settingsStyles.controls}>
         <input
-          className={styles.input}
+          className={settingsStyles.input}
           aria-label={t('crypto_address')}
           placeholder='myaddress.bso'
           autoCorrect='off'
@@ -145,15 +145,15 @@ const CryptoAddressSection = () => {
           value={getDisplayAddress(cryptoAddress)}
           onChange={(event) => setCryptoAddress(event.target.value)}
         />
-        <button type='button' className={`${modernStyles.secondaryButton} ${styles.button}`} onClick={check}>
+        <button type='button' className={`${modernStyles.secondaryButton} ${settingsStyles.button}`} onClick={check}>
           <span className={modernStyles.sentenceCase}>{t('check')}</span>
         </button>
-        <button type='button' className={`${modernStyles.primaryButton} ${styles.button}`} onClick={() => void save()}>
+        <button type='button' className={`${modernStyles.primaryButton} ${settingsStyles.button}`} onClick={() => void save()}>
           <span className={modernStyles.sentenceCase}>{t('save')}</span>
         </button>
-        {saved && <span className={`${styles.status} ${styles.statusSuccess} ${modernStyles.sentenceCase}`}>{t('saved')}</span>}
+        {saved && <span className={`${settingsStyles.status} ${settingsStyles.statusSuccess} ${modernStyles.sentenceCase}`}>{t('saved')}</span>}
       </div>
-      <p className={`${styles.status} ${STATUS_CLASSES[status.tone]}`} role='status'>
+      <p className={`${settingsStyles.status} ${STATUS_CLASSES[status.tone]}`} role='status'>
         <span className={modernStyles.sentenceCase}>{status.text}</span>
       </p>
       <details className={styles.help}>
@@ -162,7 +162,7 @@ const CryptoAddressSection = () => {
         <ol>
           <li>
             Register a name (e.g. <code>yourname.eth</code>) at{' '}
-            <a className={styles.link} href='https://app.ens.domains/' target='_blank' rel='noopener noreferrer'>
+            <a className={settingsStyles.link} href='https://app.ens.domains/' target='_blank' rel='noopener noreferrer'>
               app.ens.domains
             </a>
             .
@@ -193,14 +193,14 @@ const WalletsForm = ({ account }: { account: Account }) => {
         <div key={index} className={styles.wallet}>
           <div className={styles.walletHeader}>
             <span className={modernStyles.sentenceCase}>{t('wallet_number', { index: index + 1 })}</span>
-            <button type='button' className={`${modernStyles.secondaryButton} ${styles.button} ${styles.danger}`} onClick={() => removeWallet(index)}>
+            <button type='button' className={`${modernStyles.secondaryButton} ${settingsStyles.button} ${settingsStyles.danger}`} onClick={() => removeWallet(index)}>
               {t('remove')}
             </button>
           </div>
-          <label className={styles.field}>
+          <label className={settingsStyles.field}>
             {t('chain_ticker')}
             <input
-              className={styles.input}
+              className={settingsStyles.input}
               autoCapitalize='off'
               spellCheck={false}
               placeholder='eth'
@@ -208,10 +208,10 @@ const WalletsForm = ({ account }: { account: Account }) => {
               onChange={(event) => setWalletProperty(index, 'chainTicker', event.target.value)}
             />
           </label>
-          <label className={styles.field}>
+          <label className={settingsStyles.field}>
             {t('wallet_address')}
             <input
-              className={styles.input}
+              className={settingsStyles.input}
               autoCapitalize='off'
               spellCheck={false}
               placeholder='0x...'
@@ -219,29 +219,29 @@ const WalletsForm = ({ account }: { account: Account }) => {
               onChange={(event) => setWalletProperty(index, 'address', event.target.value)}
             />
           </label>
-          <p className={styles.status}>
+          <p className={settingsStyles.status}>
             <Trans
               i18nKey='copy_message_etherscan'
               values={{ copy: hasCopied ? t('copied') : t('copy') }}
               components={{
-                1: <button key='copy' type='button' className={`${styles.textButton} ${styles.link}`} onClick={() => copyMessageToSign(index)} />,
-                2: <a key='etherscan' className={styles.link} href='https://etherscan.io/verifiedSignatures' target='_blank' rel='noopener noreferrer' />,
+                1: <button key='copy' type='button' className={`${settingsStyles.textButton} ${settingsStyles.link}`} onClick={() => copyMessageToSign(index)} />,
+                2: <a key='etherscan' className={settingsStyles.link} href='https://etherscan.io/verifiedSignatures' target='_blank' rel='noopener noreferrer' />,
               }}
             />
           </p>
-          <label className={styles.field}>
+          <label className={settingsStyles.field}>
             Timestamp
             <input
-              className={styles.input}
+              className={settingsStyles.input}
               autoComplete='off'
               value={wallet.timestamp || ''}
               onChange={(event) => setWalletProperty(index, 'timestamp', Number(event.target.value))}
             />
           </label>
-          <label className={styles.field}>
+          <label className={settingsStyles.field}>
             <span className={modernStyles.sentenceCase}>{t('paste_signature')}</span>
             <input
-              className={styles.input}
+              className={settingsStyles.input}
               autoCapitalize='off'
               spellCheck={false}
               placeholder='0x...'
@@ -249,10 +249,10 @@ const WalletsForm = ({ account }: { account: Account }) => {
               onChange={(event) => setWalletProperty(index, 'signature', event.target.value)}
             />
           </label>
-          <div className={styles.controls}>
+          <div className={settingsStyles.controls}>
             <button
               type='button'
-              className={`${modernStyles.primaryButton} ${styles.button}`}
+              className={`${modernStyles.primaryButton} ${settingsStyles.button}`}
               onClick={() => {
                 save();
                 alert(t('saved'));
@@ -263,8 +263,8 @@ const WalletsForm = ({ account }: { account: Account }) => {
           </div>
         </div>
       ))}
-      <div className={styles.controls}>
-        <button type='button' className={`${modernStyles.secondaryButton} ${styles.button}`} onClick={addWallet}>
+      <div className={settingsStyles.controls}>
+        <button type='button' className={`${modernStyles.secondaryButton} ${settingsStyles.button}`} onClick={addWallet}>
           <span className={modernStyles.sentenceCase}>
             <TransLabel i18nKey='add_wallet' />
           </span>
@@ -294,7 +294,7 @@ const NotificationsSection = () => {
     useLocalNotificationsSetting();
   return (
     <SettingsSection title={t('notifications')}>
-      <div className={styles.rows}>
+      <div className={settingsStyles.rows}>
         <SettingsSwitch
           id='modern-settings-notifications'
           label={t('new_replies_received')}
@@ -303,14 +303,14 @@ const NotificationsSection = () => {
           onChange={(checked) => void setNotificationsEnabled(checked)}
         />
       </div>
-      <p className={styles.status} role='status'>
-        {isNotSupported && <span className={styles.statusError}>Notifications are not supported on this system.</span>}
-        {showDenied && <span className={styles.statusError}>{deniedMessage}</span>}
-        {isRequesting && <span className={styles.statusPending}>Click "Allow" to enable notifications</span>}
+      <p className={settingsStyles.status} role='status'>
+        {isNotSupported && <span className={settingsStyles.statusError}>Notifications are not supported on this system.</span>}
+        {showDenied && <span className={settingsStyles.statusError}>{deniedMessage}</span>}
+        {isRequesting && <span className={settingsStyles.statusPending}>Click "Allow" to enable notifications</span>}
         {showSuccess && (
-          <span className={styles.statusSuccess}>
+          <span className={settingsStyles.statusSuccess}>
             Success! You're done.{' '}
-            <button type='button' className={`${styles.textButton} ${styles.link}`} onClick={showTestNotification}>
+            <button type='button' className={`${settingsStyles.textButton} ${settingsStyles.link}`} onClick={showTestNotification}>
               Test
             </button>
           </span>
@@ -343,10 +343,10 @@ const MediaHostingSection = () => {
             />
             <span className={styles.optionText}>
               {provider.label}{' '}
-              <a className={styles.link} href={provider.homepageUrl} target='_blank' rel='noopener noreferrer'>
+              <a className={settingsStyles.link} href={provider.homepageUrl} target='_blank' rel='noopener noreferrer'>
                 {new URL(provider.homepageUrl).host}
               </a>
-              <span className={styles.rowHint}>{isUnavailable(provider.id) ? t('media_hosting_provider_unavailable') : provider.fileKinds.join(', ')}</span>
+              <span className={settingsStyles.rowHint}>{isUnavailable(provider.id) ? t('media_hosting_provider_unavailable') : provider.fileKinds.join(', ')}</span>
             </span>
           </label>
         ))}
@@ -354,7 +354,7 @@ const MediaHostingSection = () => {
           <input type='radio' name='modern-media-hosting' checked={mode === 'none'} onChange={selectNone} />
           <span className={styles.optionText}>
             {t('media_hosting_none')}
-            <span className={styles.rowHint}>{t('media_hosting_none_tip')}</span>
+            <span className={settingsStyles.rowHint}>{t('media_hosting_none_tip')}</span>
           </span>
         </label>
       </div>
@@ -375,34 +375,34 @@ const AccountSection = () => {
 
   return (
     <SettingsSection id='exportAccount' title={t('account')}>
-      <div className={styles.rows}>
+      <div className={settingsStyles.rows}>
         <SettingsRow label={t('account')} htmlFor='modern-settings-account'>
-          <select id='modern-settings-account' className={styles.select} value={account?.name} onChange={(event) => void switchAccount(event.target.value)}>
+          <select id='modern-settings-account' className={settingsStyles.select} value={account?.name} onChange={(event) => void switchAccount(event.target.value)}>
             {accounts.map((option) => (
               <option key={option?.id} value={option?.name}>
                 u/{getDisplayAddress(option?.author?.shortAddress || '')}
               </option>
             ))}
           </select>
-          <Link to='/settings/account-data' className={styles.link}>
+          <Link to='/settings/account-data' className={settingsStyles.link}>
             <span className={modernStyles.sentenceCase}>{t('edit')}</span>
           </Link>
         </SettingsRow>
-        <div className={styles.row}>
-          <div className={styles.controls}>
-            <button type='button' className={`${modernStyles.secondaryButton} ${styles.button}`} disabled={!canImport} onClick={importAccountFromFile}>
+        <div className={settingsStyles.row}>
+          <div className={settingsStyles.controls}>
+            <button type='button' className={`${modernStyles.secondaryButton} ${settingsStyles.button}`} disabled={!canImport} onClick={importAccountFromFile}>
               <span className={modernStyles.sentenceCase}>
                 <TransLabel i18nKey='import_account_backup' />
               </span>
             </button>
-            <button type='button' className={`${modernStyles.secondaryButton} ${styles.button}`} onClick={() => void exportAccountToFile(exportOptions)}>
+            <button type='button' className={`${modernStyles.secondaryButton} ${settingsStyles.button}`} onClick={() => void exportAccountToFile(exportOptions)}>
               <span className={modernStyles.sentenceCase}>
                 <TransLabel i18nKey='download_account_backup' />
               </span>
             </button>
             <button
               type='button'
-              className={`${styles.textButton} ${styles.link}`}
+              className={`${settingsStyles.textButton} ${settingsStyles.link}`}
               aria-expanded={showExportOptions}
               onClick={() => setShowExportOptions(!showExportOptions)}
             >
@@ -420,10 +420,10 @@ const AccountSection = () => {
             </div>
           )}
         </div>
-        <div className={styles.row}>
+        <div className={settingsStyles.row}>
           <button
             type='button'
-            className={`${modernStyles.secondaryButton} ${styles.button} ${styles.danger}`}
+            className={`${modernStyles.secondaryButton} ${settingsStyles.button} ${settingsStyles.danger}`}
             onClick={() => deleteAccountWithConfirmation(account?.name)}
           >
             <span className={modernStyles.sentenceCase}>

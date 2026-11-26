@@ -3,8 +3,7 @@ import { useAccount } from '@bitsocial/bitsocial-react-hooks';
 import { useDefaultSubscriptions } from '../../hooks/use-default-subscriptions';
 import { handleNSFWSubscriptionPrompt } from '../../lib/utils/nsfw-subscription-utils';
 import useContentOptionsStore from '../../stores/use-content-options-store';
-import { SettingsSection, SettingsSwitch } from './settings-section';
-import styles from './modern-settings.module.css';
+import { SettingsSection, SettingsSwitch, settingsStyles } from '../../components/modern-settings-section';
 
 /** What the modern interface shows: NSFW media and NSFW default communities. */
 const ContentSettings = () => {
@@ -19,12 +18,12 @@ const ContentSettings = () => {
   return (
     <>
       <SettingsSection title={t('nsfw_content')}>
-        <div className={styles.rows}>
+        <div className={settingsStyles.rows}>
           <SettingsSwitch id='modern-settings-blur-nsfw' label={t('blur_media')} checked={blurNsfwThumbnails} onChange={setBlurNsfwThumbnails} />
         </div>
       </SettingsSection>
       <SettingsSection title={t('default_communities')}>
-        <div className={styles.rows}>
+        <div className={settingsStyles.rows}>
           <SettingsSwitch
             id='modern-settings-hide-nsfw-communities'
             label={t('hide_communities_tagged_as_nsfw')}

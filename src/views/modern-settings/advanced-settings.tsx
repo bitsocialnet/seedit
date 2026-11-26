@@ -2,8 +2,7 @@ import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import useAdvancedSettings from '../../hooks/use-advanced-settings';
 import { modernStyles } from '../../components/modern-layout';
-import { SettingsSection, SettingsSwitch } from './settings-section';
-import styles from './modern-settings.module.css';
+import { SettingsSection, SettingsSwitch, settingsStyles } from '../../components/modern-settings-section';
 
 const isElectron = window.electronApi?.isElectron === true;
 
@@ -18,11 +17,11 @@ interface TextareaSettingProps {
 }
 
 const TextareaSetting = ({ id, label, hideLabel, value, disabled, onChange }: TextareaSettingProps) => (
-  <label className={styles.field} htmlFor={id}>
+  <label className={settingsStyles.field} htmlFor={id}>
     <span className={hideLabel ? modernStyles.visuallyHidden : undefined}>{label}</span>
     <textarea
       id={id}
-      className={styles.textarea}
+      className={settingsStyles.textarea}
       value={value}
       disabled={disabled}
       autoCorrect='off'
@@ -59,10 +58,10 @@ const AdvancedSettings = () => {
   };
 
   return (
-    <form className={styles.sections} onSubmit={handleSubmit}>
+    <form className={settingsStyles.sections} onSubmit={handleSubmit}>
       {canConfigurePureP2PBrowser && (
         <SettingsSection title='pure p2p'>
-          <div className={styles.rows}>
+          <div className={settingsStyles.rows}>
             <SettingsSwitch
               id='modern-settings-pure-p2p'
               label='enable pure p2p'
@@ -82,11 +81,11 @@ const AdvancedSettings = () => {
             disabled={isConnectedToRpc}
             onChange={update('ipfsGatewayUrls')}
           />
-          <label className={styles.field} htmlFor='modern-settings-media-gateway'>
+          <label className={settingsStyles.field} htmlFor='modern-settings-media-gateway'>
             nft profile pics gateway
             <input
               id='modern-settings-media-gateway'
-              className={styles.input}
+              className={settingsStyles.input}
               value={values.mediaIpfsGatewayUrl}
               disabled={isConnectedToRpc}
               autoCapitalize='off'
@@ -123,7 +122,7 @@ const AdvancedSettings = () => {
       </SettingsSection>
       <SettingsSection id='fullNodeRpc' title='full node websocket rpc'>
         <input
-          className={styles.input}
+          className={settingsStyles.input}
           aria-label='Full node WebSocket RPC URL'
           placeholder='ws://<IP>:<port>/<secretAuthKey>'
           value={values.fullNodeRpc}
@@ -135,7 +134,7 @@ const AdvancedSettings = () => {
       {isElectron && (
         <SettingsSection title='p2p data path'>
           <input
-            className={styles.input}
+            className={settingsStyles.input}
             aria-label='P2P data path'
             value={values.dataPath}
             disabled={!isConnectedToRpc}
@@ -145,7 +144,7 @@ const AdvancedSettings = () => {
           />
         </SettingsSection>
       )}
-      <div className={styles.footer}>
+      <div className={settingsStyles.footer}>
         <button type='submit' className={modernStyles.primaryButton}>
           <span className={modernStyles.sentenceCase}>{t('save_options')}</span>
         </button>
