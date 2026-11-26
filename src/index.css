@@ -3,6 +3,8 @@
 html, body {
   max-width: 100%;
   overflow-x: hidden;
+  /* clip, where supported, keeps body from becoming a scroll container that sticky headers would stick to */
+  overflow-x: clip;
 }
 
 body {

@@ -4,8 +4,9 @@
   z-index: 1;
   min-height: 100%;
   color: var(--text-info);
-  overflow-y: hidden;
-  overflow-x: hidden;
+  /* Clip rather than hide: a hidden overflow makes this a scroll container, which stops sticky headers from sticking. */
+  overflow: hidden;
+  overflow: clip;
   min-height: 100vh;
   color-scheme: var(--color-scheme) !important;
 }
