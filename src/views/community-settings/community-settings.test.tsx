@@ -107,7 +107,7 @@ describe('CommunitySettings field rendering', () => {
       rules: ['Original rule'],
       roles: { 'owner.bso': { role: 'owner' } },
       settings: {
-        challenges: [{ name: 'captcha-canvas-v3', options: { difficulty: '3' }, exclude: [{ post: true }, { reply: true }] }],
+        challenges: [{ name: 'captcha-canvas-v3', options: { difficulty: '3' }, exclude: [{ publicationType: { post: true } }, { publicationType: { reply: true } }] }],
       },
     };
     useCommunitySettingsStore.getState().resetCommunitySettingsStore();
@@ -191,11 +191,20 @@ describe('CommunitySettings field rendering', () => {
 
     await act(async () => (container.querySelector('[title="delete group"]') as HTMLElement).click());
     expect(container.querySelectorAll('[title="delete group"]')).toHaveLength(1);
-    expect(testState.lastEditOptions?.settings.challenges[0].exclude).toEqual([{ reply: true }]);
+    expect(testState.lastEditOptions?.settings.challenges[0].exclude).toEqual([{ publicationType: { reply: true } }]);
 
     await act(async () => getButton('Add Group').click());
     expect(container.querySelectorAll('[title="delete group"]')).toHaveLength(2);
-    expect(testState.lastEditOptions?.settings.challenges[0].exclude).toHaveLength(2);
+    expect(testState.lastEditOptions?.settings.challenges[0].exclude).toEqual([{ publicationType: { reply: true } }, {}]);
+
+    // pkc-js refuses the old `role` field, so the role checkboxes write `roles`
+    const moderatorCheckbox = Array.from(container.querySelectorAll('label'))
+      .find((label) => label.textContent === 'is moderator')
+      ?.querySelector('input') as HTMLInputElement;
+    await act(async () => moderatorCheckbox.click());
+    const groups: Record<string, unknown>[] = testState.lastEditOptions?.settings.challenges[0].exclude;
+    expect(groups.flatMap((group) => (group.roles as string[] | undefined) ?? [])).toEqual(['moderator']);
+    expect(groups.some((group) => 'role' in group)).toBe(false);
   });
 
   it('initializes the create form default challenge and passes the edited draft to the create hook', async () => {

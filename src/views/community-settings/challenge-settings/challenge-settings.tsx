@@ -1,18 +1,31 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { isCreateCommunityView } from '../../../lib/utils/view-utils';
-import useCommunitySettingsStore, { CommunitySettingsState } from '../../../stores/use-community-settings-store';
-import useChallengesOptions from '../../../hooks/use-challenges-options';
+import {
+  EXCLUDE_PUBLICATION_TYPES,
+  EXCLUDE_ROLES,
+  getExcludeAddresses,
+  setExcludeAddresses,
+  setExcludeNumber,
+  setExcludeRateLimitChallengeSuccess,
+  toggleExcludePublicationType,
+  toggleExcludeRole,
+  type ChallengeExclude,
+  type ChallengeSetting,
+  type ExcludeNumberField,
+} from '../../../lib/utils/challenge-settings-utils';
+import { useCommunityChallengesDraft } from '../../../hooks/use-community-settings-draft';
 import styles from '../community-settings.module.css';
 import { getDisplayAddress } from '../../../lib/utils/address-utils';
 
+type ChallengesDraft = ReturnType<typeof useCommunityChallengesDraft>;
+
 interface ChallengeSettingsProps {
-  challenge: any;
+  challenge: ChallengeSetting;
   index: number;
   isReadOnly: boolean;
-  setCommunitySettingsStore: (data: Partial<CommunitySettingsState>) => void;
-  settings: any;
+  draft: ChallengesDraft;
   showSettings: boolean;
   challengesSettings: any;
 }
@@ -26,84 +39,36 @@ type OptionInput = {
   required?: boolean;
 };
 
-type Exclude = {
-  postScore?: number;
-  replyScore?: number;
-  firstCommentTimestamp?: number;
-  challenges?: number[];
-  post?: boolean;
-  reply?: boolean;
-  vote?: boolean;
-  role?: string[];
-  address?: string[];
-  rateLimit?: number;
-  rateLimitChallengeSuccess?: boolean;
-};
-
-const rolesToExclude = ['moderator', 'admin', 'owner'];
-const actionsToExclude: Array<'post' | 'reply' | 'vote'> = ['post', 'reply', 'vote'];
-const nonActionsToExclude: Array<'not post' | 'not reply' | 'not vote'> = ['not post', 'not reply', 'not vote'];
-
-const ExcludeAddressesFromChallengeInput = ({
-  exclude,
-  excludeIndex,
-  handleExcludeAddress,
-  isReadOnly,
-}: {
-  exclude: any;
-  excludeIndex: number;
-  handleExcludeAddress: (index: number, value: string) => void;
-  isReadOnly: boolean;
-}) => {
-  const [addressInput, setAddressInput] = useState(exclude?.address?.map((address: string) => getDisplayAddress(address)).join(', ') || '');
+const ExcludeAddressesFromChallengeInput = ({ exclude, onChange, isReadOnly }: { exclude: ChallengeExclude; onChange: (value: string) => void; isReadOnly: boolean }) => {
+  const addresses = getExcludeAddresses(exclude).map((address) => getDisplayAddress(address));
+  // the typed text is kept as typed, so commas and spaces survive until the next address
+  const [addressInput, setAddressInput] = useState(addresses.join(', '));
 
   return isReadOnly ? (
-    <span>{exclude?.address?.map((address: string) => getDisplayAddress(address)).join(', ')}</span>
+    <span>{addresses.join(', ')}</span>
   ) : (
     <input
       type='text'
       placeholder='address1.bso, address2.bso, address3.bso'
       value={addressInput}
       onChange={(e) => {
-        const newValue = e.target.value;
-        setAddressInput(newValue);
-        handleExcludeAddress(excludeIndex, newValue);
+        setAddressInput(e.target.value);
+        onChange(e.target.value);
       }}
     />
   );
 };
 
-const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, setCommunitySettingsStore, settings, showSettings }: ChallengeSettingsProps) => {
+const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, draft, showSettings }: ChallengeSettingsProps) => {
   const { name, options } = challenge || {};
-  const challengeSettings = challengesSettings[name];
-  const readOnlyFallback = isReadOnly && Object.keys(challengeSettings || {}).length === 0 && challenge;
+  const challengeSettings = name ? challengesSettings[name] : undefined;
+  const readOnlyFallback = isReadOnly && Object.keys(challengeSettings || {}).length === 0 ? challenge : undefined;
 
   const excludeArray = Array.isArray(challenge?.exclude) ? challenge.exclude : [];
 
-  const handleOptionChange = (optionName: string, newValue: string) => {
-    const updatedOptions = { ...options, [optionName]: newValue };
-    const updatedChallenges = settings.challenges?.map((ch: any, idx: number) => (idx === index ? { ...ch, options: updatedOptions } : ch));
-    setCommunitySettingsStore({ settings: { ...settings, challenges: updatedChallenges } });
-  };
-
   const addExcludeGroup = () => {
-    const newExclude = { role: [], post: false, reply: false, vote: false };
-    if (challenge?.exclude) {
-      const updatedChallenges = settings?.challenges?.map((ch: any, idx: number) => (idx === index ? { ...ch, exclude: [...ch.exclude, newExclude] } : ch));
-      setCommunitySettingsStore({ settings: { ...settings, challenges: updatedChallenges } });
-      setShowExcludeSettings((oldShowExcludeSettings) => [...oldShowExcludeSettings, true]);
-    } else {
-      const updatedChallenges = settings?.challenges?.map((ch: any, idx: number) => (idx === index ? { ...ch, exclude: [newExclude] } : ch));
-      setCommunitySettingsStore({ settings: { ...settings, challenges: updatedChallenges } });
-      setShowExcludeSettings([true]);
-    }
-  };
-
-  const deleteExcludeGroup = (excludeIndex: number) => {
-    const updatedChallenges = [...settings.challenges];
-    const currentChallenge = updatedChallenges[index];
-    currentChallenge.exclude.splice(excludeIndex, 1);
-    setCommunitySettingsStore({ settings: { ...settings, challenges: updatedChallenges } });
+    draft.addExcludeGroup(index);
+    setShowExcludeSettings((oldShowExcludeSettings) => [...oldShowExcludeSettings, true]);
   };
 
   const [showExcludeSettings, setShowExcludeSettings] = useState<boolean[]>([]);
@@ -113,58 +78,9 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
     setShowExcludeSettings(newShowExcludeSettings);
   };
 
-  const handleExcludeChange = (excludeIndex: number, type: keyof Exclude | 'not post' | 'not reply' | 'not vote', value: any) => {
-    const updatedChallenges = settings.challenges?.map((ch: any, idx: number) => {
-      if (idx === index) {
-        const updatedExclude = ch.exclude?.map((ex: any, exIdx: number) => {
-          if (exIdx === excludeIndex) {
-            let newEx = { ...ex };
-
-            switch (type) {
-              case 'not post':
-                newEx.post = value ? undefined : false;
-                break;
-              case 'not reply':
-                newEx.reply = value ? undefined : false;
-                break;
-              case 'not vote':
-                newEx.vote = value ? undefined : false;
-                break;
-              case 'role':
-                if (typeof value === 'string') {
-                  const roles = (newEx.role || []).filter((r: string) => r !== value);
-                  if (roles.length === 0 && newEx.role?.includes(value)) {
-                    delete newEx.role;
-                  } else if (!newEx.role?.includes(value)) {
-                    newEx.role = [...roles, value];
-                  } else {
-                    newEx.role = roles;
-                  }
-                }
-                break;
-              default:
-                newEx[type] = value;
-            }
-            return newEx;
-          }
-          return ex;
-        });
-        return { ...ch, exclude: updatedExclude };
-      }
-      return ch;
-    });
-
-    setCommunitySettingsStore({ settings: { ...settings, challenges: updatedChallenges } });
-  };
-
-  const handleExcludeAddress = (excludeIndex: number, value: string) => {
-    const addresses = value
-      .split(',')
-      .map((addr) => addr.trim())
-      .filter((addr) => addr !== '');
-
-    handleExcludeChange(excludeIndex, 'address', addresses.length > 0 ? addresses : undefined);
-  };
+  const updateGroup = (excludeIndex: number, update: (exclude: ChallengeExclude) => ChallengeExclude) => draft.updateExcludeGroup(index, excludeIndex, update);
+  const handleNumberChange = (excludeIndex: number, field: ExcludeNumberField, value: string) =>
+    updateGroup(excludeIndex, (exclude) => setExcludeNumber(exclude, field, value === '' ? undefined : Number(value)));
 
   return (
     <div className={showSettings || isReadOnly ? styles.visible : styles.hidden}>
@@ -189,7 +105,7 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
               type='text'
               value={options && (options[setting?.option] || '')}
               placeholder={setting?.placeholder || ''}
-              onChange={(e) => handleOptionChange(setting?.option, e.target.value)}
+              onChange={(e) => draft.setChallengeOption(index, setting?.option, e.target.value)}
             />
           )}
         </div>
@@ -201,10 +117,10 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
             Add Group
           </button>
         )}
-        {excludeArray.map((exclude: any, excludeIndex: number) => (
+        {excludeArray.map((exclude, excludeIndex) => (
           <div key={excludeIndex} className={styles.excludeGroup}>
             Exclude group #{excludeIndex + 1}
-            {!isReadOnly && <span className={styles.deleteButton} onClick={() => deleteExcludeGroup(excludeIndex)} title='delete group' />}
+            {!isReadOnly && <span className={styles.deleteButton} onClick={() => draft.removeExcludeGroup(index, excludeIndex)} title='delete group' />}
             {!isReadOnly && (
               <button className={styles.hideCombo} onClick={() => toggleExcludeSettings(excludeIndex)} disabled={isReadOnly}>
                 {(showExcludeSettings?.[excludeIndex] ?? false) ? 'Hide' : 'Show'} Group Settings
@@ -212,14 +128,13 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
             )}
             {showExcludeSettings[excludeIndex] && (
               <>
-                {isReadOnly && !exclude?.address ? null : (
+                {isReadOnly && getExcludeAddresses(exclude).length === 0 ? null : (
                   <div className={styles.challengeOption}>
                     User's address
                     <div className={styles.challengeOptionDescription}>Is one of the following:</div>
                     <ExcludeAddressesFromChallengeInput
                       exclude={exclude}
-                      excludeIndex={excludeIndex}
-                      handleExcludeAddress={handleExcludeAddress}
+                      onChange={(value) => updateGroup(excludeIndex, (current) => setExcludeAddresses(current, value))}
                       isReadOnly={isReadOnly}
                     />
                   </div>
@@ -233,15 +148,7 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
                         {isReadOnly ? (
                           <span>{exclude?.postScore}</span>
                         ) : (
-                          <input
-                            type='number'
-                            min={0}
-                            value={exclude?.postScore ?? ''}
-                            onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Number(e.target.value);
-                              handleExcludeChange(excludeIndex, 'postScore', value);
-                            }}
-                          />
+                          <input type='number' min={0} value={exclude?.postScore ?? ''} onChange={(e) => handleNumberChange(excludeIndex, 'postScore', e.target.value)} />
                         )}
                       </>
                     )}
@@ -255,10 +162,7 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
                             min={0}
                             type='number'
                             value={exclude?.replyScore ?? ''}
-                            onChange={(e) => {
-                              const value = e.target.value === '' ? undefined : Number(e.target.value);
-                              handleExcludeChange(excludeIndex, 'replyScore', value);
-                            }}
+                            onChange={(e) => handleNumberChange(excludeIndex, 'replyScore', e.target.value)}
                           />
                         )}
                       </>
@@ -276,20 +180,17 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
                         type='number'
                         min={0}
                         value={exclude?.firstCommentTimestamp ?? ''}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : Number(e.target.value);
-                          handleExcludeChange(excludeIndex, 'firstCommentTimestamp', value);
-                        }}
+                        onChange={(e) => handleNumberChange(excludeIndex, 'firstCommentTimestamp', e.target.value)}
                       />
                     )}
                   </div>
                 )}
-                {isReadOnly && !exclude?.role ? null : (
+                {isReadOnly && !exclude?.roles?.length ? null : (
                   <div className={styles.challengeOption}>
                     User's role
                     <div className={styles.challengeOptionDescription}>Is any of the following:</div>
-                    {rolesToExclude?.map((role) =>
-                      isReadOnly && !exclude?.role?.includes(role) ? null : (
+                    {EXCLUDE_ROLES.map((role) =>
+                      isReadOnly && !exclude?.roles?.includes(role) ? null : (
                         <div key={role}>
                           {isReadOnly ? (
                             <span className={styles.readOnlyRoleExclude}>{role} excluded</span>
@@ -297,9 +198,8 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
                             <label>
                               <input
                                 type='checkbox'
-                                checked={Boolean(exclude?.role?.includes(role))}
-                                onChange={() => handleExcludeChange(excludeIndex, 'role', role)}
-                                disabled={isReadOnly}
+                                checked={Boolean(exclude?.roles?.includes(role))}
+                                onChange={() => updateGroup(excludeIndex, (current) => toggleExcludeRole(current, role))}
                               />
                               is {role}
                             </label>
@@ -309,43 +209,23 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
                     )}
                   </div>
                 )}
-                {isReadOnly && !actionsToExclude.some((action) => exclude[action] === true) ? null : (
+                {isReadOnly && !EXCLUDE_PUBLICATION_TYPES.some((type) => exclude?.publicationType?.[type]) ? null : (
                   <div className={styles.challengeOption}>
                     User's action
-                    <div className={styles.challengeOptionDescription}>Is all of the following:</div>
-                    {actionsToExclude?.map((action) =>
-                      isReadOnly && !exclude?.[action] ? null : (
-                        <div key={action}>
+                    <div className={styles.challengeOptionDescription}>Is any of the following:</div>
+                    {EXCLUDE_PUBLICATION_TYPES.map((type) =>
+                      isReadOnly && !exclude?.publicationType?.[type] ? null : (
+                        <div key={type}>
                           {isReadOnly ? (
-                            <span className={styles.readOnlyActionExclude}>{action} excluded</span>
+                            <span className={styles.readOnlyActionExclude}>{type} excluded</span>
                           ) : (
                             <label>
                               <input
                                 type='checkbox'
-                                checked={exclude?.[action]}
-                                onChange={(e) => handleExcludeChange(excludeIndex, action, e.target.checked)}
-                                disabled={isReadOnly}
+                                checked={Boolean(exclude?.publicationType?.[type])}
+                                onChange={() => updateGroup(excludeIndex, (current) => toggleExcludePublicationType(current, type))}
                               />
-                              is {action}
-                            </label>
-                          )}
-                        </div>
-                      ),
-                    )}
-                    {nonActionsToExclude?.map((nonAction) =>
-                      isReadOnly && exclude?.[nonAction.replace('not ', '')] !== null ? null : (
-                        <div key={nonAction}>
-                          {isReadOnly ? (
-                            <span className={styles.readOnlyActionExclude}>{nonAction} excluded</span>
-                          ) : (
-                            <label>
-                              <input
-                                type='checkbox'
-                                checked={exclude?.[nonAction.replace('not ', '')] === undefined}
-                                onChange={(e) => handleExcludeChange(excludeIndex, nonAction, e.target.checked)}
-                                disabled={isReadOnly}
-                              />
-                              is {nonAction}
+                              is {type}
                             </label>
                           )}
                         </div>
@@ -360,15 +240,7 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
                     {isReadOnly ? (
                       <div>{exclude?.rateLimit}</div>
                     ) : (
-                      <input
-                        type='number'
-                        min={0}
-                        value={exclude?.rateLimit ?? ''}
-                        onChange={(e) => {
-                          const value = e.target.value === '' ? undefined : Number(e.target.value);
-                          handleExcludeChange(excludeIndex, 'rateLimit', value);
-                        }}
-                      />
+                      <input type='number' min={0} value={exclude?.rateLimit ?? ''} onChange={(e) => handleNumberChange(excludeIndex, 'rateLimit', e.target.value)} />
                     )}
                     {isReadOnly && !exclude?.rateLimitChallengeSuccess ? null : (
                       <div>
@@ -376,13 +248,7 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
                           <input
                             type='checkbox'
                             checked={exclude?.rateLimitChallengeSuccess === true}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                handleExcludeChange(excludeIndex, 'rateLimitChallengeSuccess', e.target.checked);
-                              } else {
-                                handleExcludeChange(excludeIndex, 'rateLimitChallengeSuccess', undefined);
-                              }
-                            }}
+                            onChange={(e) => updateGroup(excludeIndex, (current) => setExcludeRateLimitChallengeSuccess(current, e.target.checked ? true : undefined))}
                             disabled={isReadOnly}
                           />
                           apply rate limit only on challenge success
@@ -391,13 +257,7 @@ const ChallengeSettings = ({ challenge, challengesSettings, index, isReadOnly, s
                           <input
                             type='checkbox'
                             checked={exclude?.rateLimitChallengeSuccess === false}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                handleExcludeChange(excludeIndex, 'rateLimitChallengeSuccess', false);
-                              } else {
-                                handleExcludeChange(excludeIndex, 'rateLimitChallengeSuccess', undefined);
-                              }
-                            }}
+                            onChange={(e) => updateGroup(excludeIndex, (current) => setExcludeRateLimitChallengeSuccess(current, e.target.checked ? false : undefined))}
                             disabled={isReadOnly}
                           />
                           apply rate limit only on challenge fail
@@ -422,44 +282,16 @@ const Challenges = memo(function Challenges({
   challengesSettings,
 }: {
   isReadOnly: boolean;
-  readOnlyChallenges: any;
+  readOnlyChallenges: ChallengeSetting[] | undefined;
   challengeNames: string[];
   challengesSettings: any;
 }) {
   const { t } = useTranslation();
-  const settings = useCommunitySettingsStore((state) => state.settings);
-  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
   const location = useLocation();
   const isInCreateCommunityView = isCreateCommunityView(location.pathname);
-  const challenges = settings?.challenges || readOnlyChallenges || [];
+  const draft = useCommunityChallengesDraft(readOnlyChallenges);
+  const { challenges } = draft;
   const [showSettings, setShowSettings] = useState<boolean[]>(challenges?.map(() => false));
-  const challengeOptions = useChallengesOptions();
-
-  const hasSetDefaultChallenge = useRef(false);
-  const valuesRef = useRef({ settings, setCommunitySettingsStore });
-
-  useEffect(() => {
-    valuesRef.current = { settings, setCommunitySettingsStore };
-  });
-
-  useEffect(() => {
-    if (isInCreateCommunityView && !hasSetDefaultChallenge.current && challengeOptions && challengesSettings && !valuesRef.current.settings?.challenges?.length) {
-      const defaultChallengeName = challengesSettings?.['captcha-canvas-v3'] ? 'captcha-canvas-v3' : challengeNames?.[0] || Object.keys(challengeOptions)[0];
-      const defaultChallenge = {
-        name: defaultChallengeName,
-        options: challengeOptions[defaultChallengeName] || {},
-      };
-
-      valuesRef.current.setCommunitySettingsStore({
-        settings: {
-          ...valuesRef.current.settings,
-          challenges: [defaultChallenge],
-        },
-      });
-
-      hasSetDefaultChallenge.current = true;
-    }
-  }, [isInCreateCommunityView, challengeOptions, challengesSettings, challengeNames]);
 
   const toggleSettings = (index: number) => {
     const newShowSettings = [...showSettings];
@@ -468,34 +300,13 @@ const Challenges = memo(function Challenges({
   };
 
   const handleAddChallenge = () => {
-    const defaultOptions = challengeOptions['captcha-canvas-v3'] || {};
-    const newChallenge = {
-      name: 'captcha-canvas-v3',
-      options: defaultOptions,
-    };
-    const updatedChallenges = [...(settings?.challenges || []), newChallenge];
-    setCommunitySettingsStore({ settings: { ...settings, challenges: updatedChallenges } });
+    draft.addChallenge();
     setShowSettings((oldShowSettings) => [...oldShowSettings, true]);
   };
 
   const handleDeleteChallenge = (index: number) => {
-    const updatedChallenges = settings?.challenges?.filter((_: any, idx: number) => idx !== index);
-    setCommunitySettingsStore({ settings: { ...settings, challenges: updatedChallenges } });
+    draft.removeChallenge(index);
     setShowSettings((oldShowSettings) => oldShowSettings.filter((_, idx) => idx !== index));
-  };
-
-  const handleChallengeTypeChange = (index: number, newType: string) => {
-    const options = challengeOptions[newType] || {};
-    const currentChallenges = challenges || [];
-    const updatedChallenges = [...currentChallenges];
-    updatedChallenges[index] = { ...updatedChallenges[index], name: newType, options };
-
-    setCommunitySettingsStore({
-      settings: {
-        ...settings,
-        challenges: updatedChallenges,
-      },
-    });
   };
 
   return (
@@ -509,7 +320,7 @@ const Challenges = memo(function Challenges({
           </button>
         )}
         {challenges.length === 0 && !isInCreateCommunityView && <span className={styles.noChallengeWarning}>{t('warning_spam')}</span>}
-        {challenges?.map((challenge: any, index: number) => (
+        {challenges?.map((challenge, index) => (
           <div key={index} className={styles.challenge}>
             Challenge #{index + 1}
             {!isReadOnly && <span className={styles.deleteButton} title='delete challenge' onClick={() => (isReadOnly ? {} : handleDeleteChallenge(index))} />}
@@ -517,7 +328,7 @@ const Challenges = memo(function Challenges({
             {isReadOnly ? (
               <span className={styles.readOnlyChallenge}>{challenge?.name}</span>
             ) : (
-              <select value={challenge?.name} onChange={(e) => handleChallengeTypeChange(index, e.target.value)} disabled={isReadOnly}>
+              <select value={challenge?.name} onChange={(e) => draft.setChallengeName(index, e.target.value)} disabled={isReadOnly}>
                 {challengeNames?.map((challenge) => (
                   <option key={challenge} value={challenge}>
                     {challenge}
@@ -535,8 +346,7 @@ const Challenges = memo(function Challenges({
               challengesSettings={challengesSettings || {}}
               index={index}
               isReadOnly={isReadOnly}
-              setCommunitySettingsStore={setCommunitySettingsStore}
-              settings={settings}
+              draft={draft}
               showSettings={showSettings[index]}
             />
           </div>

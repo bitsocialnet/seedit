@@ -1,22 +1,9 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  deleteCommunity,
-  Role,
-  useAccount,
-  useCreateCommunity,
-  usePkcRpcSettings,
-  usePublishCommunityEdit,
-  useCommunity,
-  useSubscribe,
-} from '@bitsocial/bitsocial-react-hooks';
-import { isUserOwnerOrAdmin, Roles } from '../../lib/utils/user-utils';
-import { getCommunityPath } from '../../lib/utils/community-route-utils';
-import { isCreateCommunityView, isCommunitySettingsView } from '../../lib/utils/view-utils';
 import useCommunitySettingsStore from '../../stores/use-community-settings-store';
-import { getCommunityIdentifier } from '../../hooks/use-community-identifier';
-import useResolvedCommunityRoute from '../../hooks/use-resolved-community-route';
+import useCommunitySettings from '../../hooks/use-community-settings';
+import { useCommunityModeratorsDraft, useCommunityRulesDraft } from '../../hooks/use-community-settings-draft';
 import useIsCommunityOffline from '../../hooks/use-is-community-offline';
 import useStateString from '../../hooks/use-state-string';
 import CommunityReachabilityAlert from '../../components/community-reachability-alert';
@@ -28,6 +15,7 @@ import Challenges from './challenge-settings';
 import { FormattingHelpTable } from '../../components/reply-form';
 import styles from './community-settings.module.css';
 import startCase from 'lodash/startCase';
+import { getCommunityPath } from '../../lib/utils/community-route-utils';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 
 const Title = memo(function Title({ isReadOnly = false }: { isReadOnly?: boolean }) {
@@ -131,21 +119,17 @@ const Address = memo(function Address({ isReadOnly = false }: { isReadOnly?: boo
 
 const Rules = memo(function Rules({ isReadOnly = false }: { isReadOnly?: boolean }) {
   const { t } = useTranslation();
-  const rules = useCommunitySettingsStore((state) => state.rules);
-  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
+  const { rules, addRule: addDraftRule, setRule, removeRule } = useCommunityRulesDraft();
   const lastRuleRef = useRef(null);
 
   const handleRuleChange = (index: number, newRule: string) => {
     if (!rules) return;
-    const updatedRules = [...(rules ?? [])];
-    updatedRules[index] = newRule;
-    setCommunitySettingsStore({ rules: updatedRules });
+    setRule(index, newRule);
   };
 
   const addedRuleRef = useRef(false);
   const addRule = () => {
-    const newRules = rules ? [...rules, ''] : [''];
-    setCommunitySettingsStore({ rules: newRules });
+    addDraftRule();
     addedRuleRef.current = true;
   };
 
@@ -157,10 +141,7 @@ const Rules = memo(function Rules({ isReadOnly = false }: { isReadOnly?: boolean
   }, [rules?.length, isReadOnly, rules]);
 
   const deleteRule = (index: number) => {
-    if (rules) {
-      const filteredRules = rules.filter((_, i) => i !== index);
-      setCommunitySettingsStore({ rules: filteredRules });
-    }
+    if (rules) removeRule(index);
   };
 
   return (
@@ -192,20 +173,13 @@ const Rules = memo(function Rules({ isReadOnly = false }: { isReadOnly?: boolean
 
 const Moderators = memo(function Moderators({ isReadOnly = false }: { isReadOnly?: boolean }) {
   const { t } = useTranslation();
-  const roles = useCommunitySettingsStore((state) => state.roles);
-  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
+  const { roles, addModerator, setModeratorAddress, setModeratorRole, removeModerator } = useCommunityModeratorsDraft();
   const lastModeratorRef = useRef(null);
 
   const addedModeratorRef = useRef(false);
   const handleAddModerator = () => {
-    if (roles) {
-      const newRoles: Roles = { ...roles, '': { role: 'moderator' } };
-      setCommunitySettingsStore({ roles: newRoles });
-      addedModeratorRef.current = true;
-    } else {
-      setCommunitySettingsStore({ roles: { '': { role: 'moderator' } } });
-      addedModeratorRef.current = true;
-    }
+    addModerator();
+    addedModeratorRef.current = true;
   };
 
   useEffect(() => {
@@ -216,26 +190,14 @@ const Moderators = memo(function Moderators({ isReadOnly = false }: { isReadOnly
   }, [roles, isReadOnly]);
 
   const handleRoleChange = (address: string, newRole: 'owner' | 'admin' | 'moderator') => {
-    if (roles) {
-      const updatedRole: Role = { role: newRole };
-      const updatedRoles: Roles = { ...roles, [address]: updatedRole };
-      setCommunitySettingsStore({ roles: updatedRoles });
-    }
+    if (roles) setModeratorRole(address, newRole);
   };
 
   const handleDeleteModerator = (address: string) => {
-    if (roles) {
-      const { [address]: _, ...remainingRoles } = roles;
-      setCommunitySettingsStore({ roles: remainingRoles });
-    }
+    if (roles) removeModerator(address);
   };
 
-  const handleAddressChange = (index: number, newAddress: string) => {
-    const rolesArray = Object.entries(roles || {});
-    rolesArray[index] = [newAddress, rolesArray[index][1]];
-    const updatedRoles = Object.fromEntries(rolesArray);
-    setCommunitySettingsStore({ roles: updatedRoles });
-  };
+  const handleAddressChange = (index: number, newAddress: string) => setModeratorAddress(index, newAddress);
 
   return (
     <div className={`${styles.box} ${isReadOnly && !roles ? styles.hidden : styles.visible}`}>
@@ -291,10 +253,9 @@ const Moderators = memo(function Moderators({ isReadOnly = false }: { isReadOnly
   );
 });
 
-const JSONSettings = memo(function JSONSettings({ isReadOnly: _isReadOnly = false }: { isReadOnly?: boolean }) {
+const JSONSettings = memo(function JSONSettings({ communityAddress }: { communityAddress: string | undefined }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { communityAddress } = useResolvedCommunityRoute();
 
   return (
     <div className={`${styles.box}`}>
@@ -311,22 +272,28 @@ const JSONSettings = memo(function JSONSettings({ isReadOnly: _isReadOnly = fals
 
 const CommunitySettings = () => {
   const { t } = useTranslation();
-  const { communityAddress } = useResolvedCommunityRoute();
-  const community = useCommunity(communityAddress ? { community: getCommunityIdentifier(communityAddress) } : undefined);
-  const { address, challenges, createdAt, description, error, rules, shortAddress, settings, suggested, roles, title } = community || {};
-  const hasLoaded = !!createdAt;
-
-  const { pkcRpcSettings, state: rpcState } = usePkcRpcSettings();
-  const { challenges: rpcChallenges } = pkcRpcSettings || {};
-  const challengeNames = useMemo(() => Object.keys(rpcChallenges || {}), [rpcChallenges]);
-
-  const account = useAccount();
-  const location = useLocation();
   const navigate = useNavigate();
-  const params = useParams();
-  const isInCreateCommunityView = isCreateCommunityView(location.pathname);
-  const isInCommunitySettingsView = isCommunitySettingsView(location.pathname, params);
-  const isConnectedToRpc = rpcState === 'connected';
+  const {
+    community,
+    communityAddress,
+    hasLoaded,
+    isCreating: isInCreateCommunityView,
+    isConnectedToRpc,
+    isHostedHere,
+    isOwnerOrAdmin: userIsOwnerOrAdmin,
+    isReadOnly,
+    isChallengesReadOnly,
+    challengeNames,
+    challengesSettings: rpcChallenges,
+    isSaving: showSaving,
+    isDeleting: showDeleting,
+    error: currentError,
+    save,
+    create,
+    remove,
+  } = useCommunitySettings({ onCreated: (address) => alert(`community created, address: ${getDisplayAddress(address)}`) });
+  const { error } = community || {};
+  const isInCommunitySettingsView = !isInCreateCommunityView;
 
   useEffect(() => {
     if (isInCreateCommunityView && !isConnectedToRpc) {
@@ -334,191 +301,18 @@ const CommunitySettings = () => {
     }
   }, [isInCreateCommunityView, isConnectedToRpc, navigate]);
 
-  const userAddress = account?.author?.address;
-  const userIsOwnerOrAdmin = isUserOwnerOrAdmin(roles, userAddress);
-
   const { isOffline, offlineTitle } = useIsCommunityOffline(community || {});
 
-  // General fields can be edited by owners/admins even without RPC connection
-  const isReadOnly = (!settings && isInCommunitySettingsView && !userIsOwnerOrAdmin) || (!isConnectedToRpc && isInCreateCommunityView && !userIsOwnerOrAdmin);
-
-  // Challenges are always read-only when not connected to RPC
-  const isChallengesReadOnly = (!isConnectedToRpc || !settings) && !isInCreateCommunityView;
-
-  const publishCommunityEditOptions = useCommunitySettingsStore((state) => state.publishCommunityEditOptions);
-  const resetCommunitySettingsStore = useCommunitySettingsStore((state) => state.resetCommunitySettingsStore);
-  const setCommunitySettingsStore = useCommunitySettingsStore((state) => state.setCommunitySettingsStore);
-  const storeTitle = useCommunitySettingsStore((state) => state.title);
-  const { error: publishCommunityEditError, publishCommunityEdit } = usePublishCommunityEdit(publishCommunityEditOptions);
-  const { error: createCommunityError, createdCommunity, createCommunity } = useCreateCommunity(publishCommunityEditOptions);
-
-  const [showSaving, setShowSaving] = useState(false);
-  const [currentError, setCurrentError] = useState<Error | undefined>(publishCommunityEditError || createCommunityError);
-
-  // show each new publish/create error; the save handlers can still clear or replace it
-  const [prevHookErrors, setPrevHookErrors] = useState({ publishCommunityEditError, createCommunityError });
-  if (prevHookErrors.publishCommunityEditError !== publishCommunityEditError || prevHookErrors.createCommunityError !== createCommunityError) {
-    setPrevHookErrors({ publishCommunityEditError, createCommunityError });
-    if (publishCommunityEditError || createCommunityError) {
-      setCurrentError(publishCommunityEditError || createCommunityError);
-    }
-  }
-
   const saveCommunity = async () => {
-    try {
-      setShowSaving(true);
-      setCurrentError(undefined);
-      console.log('Saving community with options:', publishCommunityEditOptions);
-      await publishCommunityEdit();
-      setShowSaving(false);
-
-      if (publishCommunityEditError) {
-        setCurrentError(publishCommunityEditError);
-        alert(publishCommunityEditError.message || 'Error: ' + publishCommunityEditError);
-      } else {
-        alert(t('settings_saved', { communityAddress }));
-      }
-    } catch (e) {
-      setShowSaving(false);
-      if (e instanceof Error) {
-        console.warn(e);
-        setCurrentError(e);
-        alert(`failed editing community: ${e.message}`);
-      } else {
-        console.error('An unknown error occurred:', e);
-      }
-    }
+    if (await save()) alert(t('settings_saved', { communityAddress }));
   };
 
-  const [showDeleting, setShowDeleting] = useState(false);
   const _deleteCommunity = async () => {
-    if (communityAddress && window.confirm(t('delete_confirm', { value: `s/${getDisplayAddress(shortAddress || '')}`, interpolation: { escapeValue: false } }))) {
-      if (window.confirm(t('double_confirm'))) {
-        try {
-          setShowDeleting(true);
-          await deleteCommunity(communityAddress);
-          setShowDeleting(false);
-          alert(t('community_deleted'));
-          navigate('/', { replace: true });
-        } catch (e) {
-          if (e instanceof Error) {
-            console.warn(e);
-            alert(`failed deleting community: ${e.message}`);
-          } else {
-            console.error('An unknown error occurred:', e);
-          }
-        }
-      }
+    if (await remove()) {
+      alert(t('community_deleted'));
+      navigate('/', { replace: true });
     }
   };
-
-  const _createCommunity = async () => {
-    try {
-      setShowSaving(true);
-      setCurrentError(undefined);
-      console.log('Creating community with settings:', publishCommunityEditOptions);
-      await createCommunity();
-      setShowSaving(false);
-
-      if (createCommunityError) {
-        setCurrentError(createCommunityError);
-        alert(createCommunityError.message || 'Error: ' + createCommunityError);
-      }
-    } catch (e) {
-      setShowSaving(false);
-      if (e instanceof Error) {
-        console.warn(e);
-        setCurrentError(e);
-        alert(`failed creating community: ${e.message}`);
-      } else {
-        console.error('An unknown error occurred:', e);
-      }
-    }
-  };
-
-  const { subscribe } = useSubscribe({ communityAddress: createdCommunity?.address });
-
-  useEffect(() => {
-    if (createdCommunity) {
-      console.log('createdCommunity', createdCommunity);
-      alert(`community created, address: ${getDisplayAddress(createdCommunity.address || '')}`);
-
-      if (account && createdCommunity.address) {
-        subscribe();
-      }
-
-      resetCommunitySettingsStore();
-      if (createdCommunity.address) {
-        navigate(getCommunityPath(createdCommunity.address));
-      }
-    }
-  }, [createdCommunity, navigate, resetCommunitySettingsStore, account, subscribe]);
-
-  const lastViewType = useRef<'create' | 'settings' | 'other' | undefined>(undefined);
-
-  // Initialize store for create view only on first entry or when switching from settings view
-  useEffect(() => {
-    if (isInCreateCommunityView && lastViewType.current === 'settings') {
-      resetCommunitySettingsStore();
-      const initialRoles: Roles = account?.author?.address ? { [account.author.address]: { role: 'owner' as const } } : {};
-      setCommunitySettingsStore({
-        title: '',
-        description: '',
-        address: undefined,
-        suggested: {},
-        rules: [],
-        roles: initialRoles,
-        settings: {},
-        challenges: [],
-        communityAddress: undefined,
-      });
-    }
-    if (isInCreateCommunityView) {
-      lastViewType.current = 'create';
-    } else if (isInCommunitySettingsView) {
-      lastViewType.current = 'settings';
-    } else {
-      lastViewType.current = 'other';
-    }
-  }, [isInCreateCommunityView, storeTitle, resetCommunitySettingsStore, setCommunitySettingsStore, account, isInCommunitySettingsView]);
-
-  // Set store for loaded community settings when editing
-  useEffect(() => {
-    if (!isInCreateCommunityView && hasLoaded) {
-      // Only reset if we're switching to a different community or if store is uninitialized
-      const { communityAddress: storeCommunityAddress } = useCommunitySettingsStore.getState();
-      const shouldReset = !storeCommunityAddress || storeCommunityAddress !== communityAddress;
-
-      if (shouldReset) {
-        resetCommunitySettingsStore();
-        setCommunitySettingsStore({
-          title: title ?? '',
-          description: description ?? '',
-          address,
-          suggested: suggested ?? {},
-          rules: rules ?? [],
-          roles: roles ?? {},
-          settings: settings ?? {},
-          challenges: challenges ?? [],
-          communityAddress: communityAddress,
-        });
-      }
-    }
-  }, [
-    isInCreateCommunityView,
-    hasLoaded,
-    resetCommunitySettingsStore,
-    setCommunitySettingsStore,
-    title,
-    description,
-    address,
-    suggested,
-    rules,
-    roles,
-    settings,
-    challenges,
-    communityAddress,
-  ]);
 
   const documentTitle = useMemo(() => {
     let title;
@@ -564,7 +358,7 @@ const CommunitySettings = () => {
       )}
       {isReadOnly && !userIsOwnerOrAdmin && <div className={styles.infobar}>{t('owner_settings_notice')}</div>}
       {isOffline && <div className={styles.infobar}>{offlineTitle}</div>}
-      <CommunityReachabilityAlert className={`${styles.infobar} ${styles.infobarKeepCase}`} isHostedHere={Boolean(settings)} />
+      <CommunityReachabilityAlert className={`${styles.infobar} ${styles.infobarKeepCase}`} isHostedHere={isHostedHere} />
       {isChallengesReadOnly && <div className={styles.infobar}>cannot read or write challenges, community node isn't reachable.</div>}
       <Title isReadOnly={isReadOnly} />
       <Description isReadOnly={isReadOnly} />
@@ -572,7 +366,7 @@ const CommunitySettings = () => {
       <Rules isReadOnly={isReadOnly} />
       <Moderators isReadOnly={isReadOnly} />
       <Challenges isReadOnly={isChallengesReadOnly} readOnlyChallenges={community?.challenges} challengeNames={challengeNames} challengesSettings={rpcChallenges} />
-      {!isInCreateCommunityView && <JSONSettings isReadOnly={isReadOnly} />}
+      {!isInCreateCommunityView && <JSONSettings communityAddress={communityAddress} />}
       <div className={styles.saveOptions}>
         {!isInCreateCommunityView && !isReadOnly && (
           <div className={`${styles.box} ${styles.deleteCommunity}`}>
@@ -589,7 +383,7 @@ const CommunitySettings = () => {
           </div>
         )}
         {!isReadOnly && (
-          <button onClick={() => (isInCreateCommunityView ? _createCommunity() : saveCommunity())} disabled={showSaving || showDeleting}>
+          <button onClick={() => (isInCreateCommunityView ? create() : saveCommunity())} disabled={showSaving || showDeleting}>
             {isInCreateCommunityView ? t('create_community') : t('save_options')}
           </button>
         )}
