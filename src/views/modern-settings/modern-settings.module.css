@@ -391,3 +391,59 @@
     transition: none;
   }
 }
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.statValue {
+  color: var(--m-text-secondary);
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.muted {
+  color: var(--m-text-muted);
+  font-size: 12px;
+}
+
+.truncate {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.peerList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.peer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--m-border);
+  border-radius: 12px;
+}
+
+.peer .controls {
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.peerMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: var(--m-text-secondary);
+  font-size: 13px;
+}

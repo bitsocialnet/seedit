@@ -1,6 +1,5 @@
 import { type FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import useAdvancedSettings from '../../hooks/use-advanced-settings';
 import { modernStyles } from '../../components/modern-layout';
 import { SettingsSection, SettingsSwitch } from './settings-section';
@@ -146,11 +145,6 @@ const AdvancedSettings = () => {
           />
         </SettingsSection>
       )}
-      <div className={styles.controls}>
-        <Link to='/settings/p2p-stats' className={styles.link}>
-          <span className={modernStyles.sentenceCase}>{t('p2p_stats')}</span> →
-        </Link>
-      </div>
       <div className={styles.footer}>
         <button type='submit' className={modernStyles.primaryButton}>
           <span className={modernStyles.sentenceCase}>{t('save_options')}</span>

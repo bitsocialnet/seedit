@@ -196,6 +196,7 @@ const App = () => {
               <Route path='/settings' element={<ModernSettings />} />
               <Route path='/settings/content-options' element={<ModernSettings />} />
               <Route path='/settings/advanced' element={<ModernSettings />} />
+              <Route path='/settings/p2p-stats' element={<ModernSettings />} />
               <Route path='/search' element={<ModernSearch />} />
               <Route path='/inbox' element={<ModernInbox />} />
               <Route path='/inbox/unread' element={<ModernInbox />} />
@@ -265,7 +266,7 @@ const App = () => {
               }
             />
             {!isModern && <Route path='/settings/advanced' element={<Settings />} />}
-            <Route path='/settings/p2p-stats' element={<Settings />} />
+            {!isModern && <Route path='/settings/p2p-stats' element={<Settings />} />}
             {!isModern && <Route path='/settings/content-options' element={<Settings />} />}
             {import.meta.env.DEV && <Route path='/settings/debug' element={<Settings />} />}
             <Route path='/settings/account-data' element={<AccountDataEditor />} />
