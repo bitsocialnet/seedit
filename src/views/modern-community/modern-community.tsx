@@ -67,6 +67,10 @@ const ModernCommunity = () => {
         </div>
         {canLoadCommunity && (
           <div className={styles.headerActions}>
+            {/* The rail shows the same about card from 1200px. */}
+            <Link to={`${getCommunityPath(communityAddress)}/about`} className={`${modernStyles.secondaryButton} ${styles.aboutLink}`}>
+              <span className={modernStyles.sentenceCase}>{t('about')}</span>
+            </Link>
             <Link to={`${getCommunityPath(communityAddress)}/submit`} className={modernStyles.secondaryButton}>
               <PlusIcon size={18} />
               <span className={styles.createLabel}>{t('create')}</span>

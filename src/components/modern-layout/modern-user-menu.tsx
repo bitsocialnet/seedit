@@ -5,7 +5,7 @@ import { Menu, MenuCheckboxItem, MenuContent, MenuItem, MenuSeparator, MenuTrigg
 import useTheme from '../../hooks/use-theme';
 import { getDisplayAddress } from '../../lib/utils/address-utils';
 import useUiModeStore from '../../stores/use-ui-mode-store';
-import { ChevronDownIcon, ClassicIcon, MoonIcon, SettingsIcon, UserIcon } from '../modern-icons';
+import { ChevronDownIcon, ClassicIcon, InfoIcon, MoonIcon, SettingsIcon, UserIcon } from '../modern-icons';
 import styles from './modern-layout.module.css';
 
 const ModernUserMenu = () => {
@@ -47,6 +47,10 @@ const ModernUserMenu = () => {
           <span className={`${styles.switch} ${isDark ? styles.switchOn : ''}`} aria-hidden='true' />
         </MenuCheckboxItem>
         <MenuSeparator className={styles.menuDivider} />
+        <MenuItem className={styles.menuItem} render={<Link to='/about' />}>
+          <InfoIcon />
+          <span className={`${styles.menuItemText} ${styles.sentenceCase}`}>{t('about')}</span>
+        </MenuItem>
         <MenuItem className={styles.menuItem} render={<button type='button' />} onSelect={() => setUiMode('old')}>
           <ClassicIcon />
           <span className={`${styles.menuItemText} ${styles.sentenceCase}`}>{t('old_interface')}</span>

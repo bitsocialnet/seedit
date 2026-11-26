@@ -53,6 +53,12 @@
   text-transform: capitalize;
 }
 
+@media (min-width: 1200px) {
+  .aboutLink {
+    display: none;
+  }
+}
+
 .error {
   margin-bottom: 12px;
   padding: 12px 16px;
