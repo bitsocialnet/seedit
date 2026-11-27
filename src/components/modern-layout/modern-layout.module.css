@@ -167,8 +167,14 @@
 }
 
 .search:focus-within {
-  border-color: var(--m-focus);
+  border-color: var(--m-accent);
   background: var(--m-surface);
+  box-shadow: 0 0 0 1px var(--m-accent);
+}
+
+/* The pill shows the focus, so the field's own ring would draw a second one inside it. */
+.search input:focus-visible {
+  outline: none;
 }
 
 .search input {
