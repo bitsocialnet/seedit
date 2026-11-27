@@ -37,13 +37,19 @@ const StatValueCell = ({ row }: { row: TextStatRow }) => {
   return row.value;
 };
 
-const ConnectedPeersValue = ({ row }: { row: ConnectedPeersStatRow }) => (
+const ConnectedPeersValue = ({ row, connecting }: { row: ConnectedPeersStatRow; connecting: boolean }) => (
   <div>
     {/* The heading keeps the shared label/value columns, the map and peer list below sit under the value column. */}
     <div className={styles.category}>
       <span className={styles.categoryTitle}>{row.name}</span>
       <span className={styles.categorySettings}>
-        {formatCount(row.peerCount, 'peer')}, {formatCount(row.connectionCount, 'connection')}
+        {connecting ? (
+          <LoadingEllipsis string='connecting to peers' />
+        ) : (
+          <>
+            {formatCount(row.peerCount, 'peer')}, {formatCount(row.connectionCount, 'connection')}
+          </>
+        )}
       </span>
     </div>
     <div className={styles.connectedPeersPanel}>
@@ -81,7 +87,7 @@ const ConnectedPeersValue = ({ row }: { row: ConnectedPeersStatRow }) => (
               </div>
             );
           })
-        ) : (
+        ) : connecting ? null : (
           <div className={styles.connectedPeerEmpty}>No active peer addresses</div>
         )}
       </div>
@@ -93,7 +99,7 @@ const P2pStats = () => {
   const account = useAccount() as AccountShape | undefined;
   const pkcRpcSettings = usePkcRpcSettings();
   const mode = getP2PRuntimeMode(account);
-  const { error, loading, rows, updatedAt } = useP2PStats({ account, mode, rpcState: pkcRpcSettings?.state });
+  const { connecting, error, loading, rows, updatedAt } = useP2PStats({ account, mode, rpcState: pkcRpcSettings?.state });
   const updatedAtLabel = updatedAt ? new Date(updatedAt).toLocaleTimeString() : undefined;
 
   return (
@@ -109,7 +115,7 @@ const P2pStats = () => {
                     <div className={styles.categorySettings}>{updatedAtLabel}</div>
                   </div>
                 )}
-                <ConnectedPeersValue row={row} />
+                <ConnectedPeersValue row={row} connecting={connecting} />
               </Fragment>
             ) : (
               <div className={styles.category} key={row.name}>
