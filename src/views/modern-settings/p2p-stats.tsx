@@ -29,14 +29,28 @@ const StatValue = ({ row }: { row: Exclude<StatRow, ConnectedPeersStatRow> }) =>
   return <span className={styles.statValue}>{row.value}</span>;
 };
 
-const ConnectedPeers = ({ row, updatedAt }: { row: ConnectedPeersStatRow; updatedAt: string | undefined }) => (
+interface ConnectedPeersProps {
+  row: ConnectedPeersStatRow;
+  updatedAt: string | undefined;
+  /** No connection yet, while the node loads communities: a count of none would read as no peers at all. */
+  connecting: boolean;
+}
+
+const ConnectedPeers = ({ row, updatedAt, connecting }: ConnectedPeersProps) => (
   <SettingsSection
     title={row.name}
-    description={`${formatCount(row.peerCount, 'peer')}, ${formatCount(row.connectionCount, 'connection')}${updatedAt ? ` · Updated ${updatedAt}` : ''}`}
+    description={
+      connecting ? undefined : `${formatCount(row.peerCount, 'peer')}, ${formatCount(row.connectionCount, 'connection')}${updatedAt ? ` · Updated ${updatedAt}` : ''}`
+    }
   >
     <PeerWorldMap peers={row.mapEntries ?? row.entries} />
     <ul className={styles.peerList}>
-      {row.entries.length === 0 && <li className={settingsStyles.status}>No active peer addresses</li>}
+      {connecting && (
+        <li className={settingsStyles.status} role='status'>
+          Connecting to peers…
+        </li>
+      )}
+      {!connecting && row.entries.length === 0 && <li className={settingsStyles.status}>No active peer addresses</li>}
       {row.entries.map((entry) => (
         <li key={entry.id} className={styles.peer}>
           <div className={styles.peerMeta}>
@@ -72,7 +86,7 @@ const P2pStats = () => {
   const account = useAccount() as AccountShape | undefined;
   const pkcRpcSettings = usePkcRpcSettings();
   const mode = getP2PRuntimeMode(account);
-  const { error, loading, rows, updatedAt } = useP2PStats({ account, mode, rpcState: pkcRpcSettings?.state });
+  const { connecting, error, loading, rows, updatedAt } = useP2PStats({ account, mode, rpcState: pkcRpcSettings?.state });
   const updatedAtLabel = updatedAt ? new Date(updatedAt).toLocaleTimeString() : undefined;
 
   if (!mode) {
@@ -108,7 +122,7 @@ const P2pStats = () => {
         )}
       </SettingsSection>
       {peerRows.map((row) => (
-        <ConnectedPeers key={row.name} row={row} updatedAt={updatedAtLabel} />
+        <ConnectedPeers key={row.name} row={row} updatedAt={updatedAtLabel} connecting={connecting} />
       ))}
     </>
   );

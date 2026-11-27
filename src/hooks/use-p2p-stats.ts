@@ -1,6 +1,8 @@
 import { useEffect, useReducer, useRef } from 'react';
-import { getP2PStats, type AccountShape, type StatRow } from '../lib/p2p-stats';
+import { useCommunities } from '@bitsocial/bitsocial-react-hooks';
+import { getP2PStats, type AccountShape, type ConnectedPeersStatRow, type StatRow } from '../lib/p2p-stats';
 import type { P2PRuntimeMode } from '../lib/p2p-runtime';
+import { getCommunityIdentifiers } from './use-community-identifier';
 
 const STATS_REFRESH_MS = 5000;
 
@@ -38,6 +40,11 @@ const statsReducer = (state: StatsState, action: StatsAction): StatsState => {
 
 const getErrorMessage = (error: unknown, fallback = 'Error') => (error instanceof Error ? error.message : String(error || fallback));
 
+const isConnectedPeersRow = (row: StatRow): row is ConnectedPeersStatRow => 'type' in row && row.type === 'connectedPeers';
+
+const getSubscriptions = (account: AccountShape | undefined): string[] =>
+  Array.isArray(account?.subscriptions) ? account.subscriptions.filter((address: unknown): address is string => typeof address === 'string') : [];
+
 export interface UseP2PStatsOptions {
   account?: AccountShape;
   mode?: P2PRuntimeMode | null;
@@ -45,6 +52,8 @@ export interface UseP2PStatsOptions {
 }
 
 export interface P2PStatsResult {
+  /** The browser node has no connection yet while it loads the account's communities: its peers are still to come. */
+  connecting: boolean;
   error?: string;
   loading: boolean;
   rows: StatRow[];
@@ -59,6 +68,15 @@ export const useP2PStats = ({ account, mode, rpcState }: UseP2PStatsOptions): P2
   const [statsState, dispatchStats] = useReducer(statsReducer, { loading: !!mode, rows: [] });
   const accountRef = useRef(account);
   accountRef.current = account;
+
+  // pkc-js starts the browser node without peer discovery: it dials peers only to fetch content. Opened on its own,
+  // as after a refresh, the stats page fetches none, so the node would stay without peers; loading the account's
+  // communities, as the home feed does, connects it.
+  const subscriptions = mode === 'browser-libp2p' ? getSubscriptions(account) : [];
+  const { communityLoadStatuses } = useCommunities({ communities: getCommunityIdentifiers(subscriptions) });
+  // Once every community has failed to load, the node is not about to connect, and its count of none is the answer.
+  const canConnect = communityLoadStatuses.some((status) => !status.firstLoadFailed);
+  const connecting = canConnect && statsState.rows.some((row) => isConnectedPeersRow(row) && row.connectionCount === 0);
 
   useEffect(() => {
     const abortController = new AbortController();
@@ -91,7 +109,7 @@ export const useP2PStats = ({ account, mode, rpcState }: UseP2PStatsOptions): P2
     };
   }, [mode, rpcState]);
 
-  return { error: statsState.error, loading: statsState.loading, rows: statsState.rows, updatedAt: statsState.updatedAt };
+  return { connecting, error: statsState.error, loading: statsState.loading, rows: statsState.rows, updatedAt: statsState.updatedAt };
 };
 
 export default useP2PStats;
