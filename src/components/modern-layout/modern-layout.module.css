@@ -587,13 +587,15 @@
     left: 0;
     width: var(--m-nav-width);
     height: 100%;
+    transition: transform 0.2s ease;
   }
 
+  /* Centred on the navigation's right edge, and moved with the same transform as the navigation, so it stays on
+     that edge wherever the navigation is. */
   .navCollapseButton {
     position: absolute;
     top: 12px;
-    /* centred on the navigation's right edge */
-    right: -16px;
+    left: calc(var(--m-nav-width) - 16px);
     z-index: 1;
     display: inline-flex;
     align-items: center;
@@ -606,6 +608,7 @@
     background: var(--m-surface);
     color: var(--m-text);
     cursor: pointer;
+    transition: transform 0.2s ease;
   }
 
   .navCollapseButton:hover {
@@ -618,11 +621,15 @@
     box-sizing: border-box;
   }
 
-  /* Collapsed, the navigation waits off-screen, out of the tab order; it closes a moment after the pointer leaves,
-     so a pointer that overshoots its edge does not shut it. Its items start below the button, which stays put. */
+  /* Collapsed, the navigation waits behind the strip with its edge, and the button, on the strip's edge, out of the
+     tab order; it closes a moment after the pointer leaves, so a pointer that overshoots its edge does not shut it. */
+  .navRailCollapsed .nav,
+  .navRailCollapsed .navCollapseButton {
+    transform: translateX(calc(var(--m-nav-collapsed-width) - var(--m-nav-width)));
+    transition: transform 0.2s ease 0.2s;
+  }
+
   .navRailCollapsed .nav {
-    padding-top: 56px;
-    transform: translateX(-100%);
     visibility: hidden;
     transition:
       transform 0.2s ease 0.2s,
@@ -630,8 +637,13 @@
   }
 
   /* The pointer over the strip, or over the navigation it opened, keeps it open above the page. */
-  .navRailCollapsed:hover .nav {
+  .navRailCollapsed:hover .nav,
+  .navRailCollapsed:hover .navCollapseButton {
     transform: none;
+    transition: transform 0.2s ease 0.08s;
+  }
+
+  .navRailCollapsed:hover .nav {
     visibility: visible;
     box-shadow: var(--m-shadow);
     transition:
@@ -639,11 +651,15 @@
       visibility 0s linear 0.08s;
   }
 
-  /* Collapsed by a click, the navigation slides away with the strip at once, its items where they were, though the
-     pointer is still over it; the hover opens it again once the pointer has left. */
+  /* Collapsed by a click, the navigation slides back to the strip at once, though the pointer is still over it; the
+     hover opens it again once the pointer has left. */
+  .navRailCollapsed.navRailJustCollapsed .nav,
+  .navRailCollapsed.navRailJustCollapsed .navCollapseButton {
+    transform: translateX(calc(var(--m-nav-collapsed-width) - var(--m-nav-width)));
+    transition: transform 0.2s ease;
+  }
+
   .navRailCollapsed.navRailJustCollapsed .nav {
-    padding-top: 12px;
-    transform: translateX(-100%);
     visibility: hidden;
     box-shadow: none;
     transition:
@@ -722,6 +738,10 @@
   .navRailCollapsed .nav,
   .navRailCollapsed:hover .nav,
   .navRailCollapsed.navRailJustCollapsed .nav,
+  .navCollapseButton,
+  .navRailCollapsed .navCollapseButton,
+  .navRailCollapsed:hover .navCollapseButton,
+  .navRailCollapsed.navRailJustCollapsed .navCollapseButton,
   .switch,
   .switch::after {
     transition: none;
