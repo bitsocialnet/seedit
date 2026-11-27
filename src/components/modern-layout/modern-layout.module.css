@@ -98,6 +98,9 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  /* Its border inside its height: the sidebars stick at --m-header-height, so a header a pixel taller would let them
+     start a pixel lower and rise over its border as the page scrolls. */
+  box-sizing: border-box;
   height: var(--m-header-height);
   padding: 0 16px;
   background: var(--m-surface);
