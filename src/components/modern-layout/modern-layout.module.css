@@ -16,7 +16,7 @@
   --m-focus: #0b5cba;
   /* Seedit's own vote colors rather than reddit's orange and purple: the sprout green up, a red down. */
   --m-upvote: var(--m-accent);
-  --m-downvote: #cc2a1f;
+  --m-downvote: #d32020;
   --m-danger: #b42318;
   /* Text on upvote, downvote and danger fills. */
   --m-on-strong: #ffffff;
@@ -62,7 +62,7 @@
   --m-on-accent: #0e1113;
   --m-link: #79b8ff;
   --m-focus: #79b8ff;
-  --m-downvote: #ff6b61;
+  --m-downvote: #ff4040;
   --m-danger: #ff7b72;
   --m-on-strong: #0e1113;
   --m-media-bg: #181c1f;
