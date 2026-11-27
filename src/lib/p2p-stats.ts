@@ -31,6 +31,8 @@ type ConnectedPeerEntry = {
   direction?: string;
   id: string;
   location?: PeerMapLocation;
+  // Address with the peer's own public IP, used for the flag and map when `address` has none.
+  locationAddress?: string;
   peerId: string;
   role?: PeerConnectionRole;
   status?: string;
@@ -72,6 +74,9 @@ type Libp2pClientShape = {
       getConnections?: () => unknown[] | Promise<unknown[]>;
       getPeers?: () => unknown[] | Promise<unknown[]>;
       peerId?: { toString: () => string };
+      peerStore?: {
+        get?: (peerId: unknown) => unknown;
+      };
       services?: {
         pubsub?: {
           getPeers?: () => unknown[] | Promise<unknown[]>;
@@ -629,6 +634,23 @@ const getConnectionPeerId = (connection: unknown) => (isRecord(connection) ? get
 
 const getConnectionAddress = (connection: unknown) => (isRecord(connection) ? getStringValue(connection.remoteAddr, 'address unavailable') : 'address unavailable');
 
+type Libp2pShape = NonNullable<NonNullable<Libp2pClientShape['_helia']>['libp2p']>;
+
+// A peer reached through its own domain (/dns4/<domain>/tcp/443/tls/ws) has no IP in the
+// connection address, so locate it by the public IP it announced over identify instead.
+const getPeerLocationAddress = async (libp2p: Libp2pShape | undefined, connection: unknown): Promise<string | undefined> => {
+  if (!isRecord(connection) || getFirstPublicIpFromAddresses([getConnectionAddress(connection)])) return undefined;
+  try {
+    const peer = await libp2p?.peerStore?.get?.(connection.remotePeer);
+    const addresses = toArray(isRecord(peer) ? peer.addresses : undefined).map((entry) => (isRecord(entry) ? entry.multiaddr : entry));
+    // Relay addresses carry the relay's IP, not the peer's.
+    const ip = getFirstPublicIpFromAddresses(addresses.filter((address) => !getStringValue(address, '').includes('/p2p-circuit')));
+    return ip ? getEndpointAddress(ip) : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
 const getPeerIdFromAddress = (address: string) => {
   const parts = address.split('/p2p/');
   return parts.length > 1 ? parts.at(-1)?.split('/')[0] : undefined;
@@ -647,8 +669,13 @@ const getBrowserPeerTransferStats = (connection: unknown, peerId: string, addres
 
 const formatPeerTransferBytes = (value: unknown) => (getFiniteNumber(value) === undefined ? 'unknown' : formatBytes(value));
 
-const getBrowserConnectedPeersRow = (peers: unknown[], connections: unknown[], peerTransferStats: Map<string, TransferStats>): ConnectedPeersStatRow => {
-  const entries = connections.map<ConnectedPeerEntry>((connection) => {
+const getBrowserConnectedPeersRow = (
+  peers: unknown[],
+  connections: unknown[],
+  peerTransferStats: Map<string, TransferStats>,
+  locationAddresses: (string | undefined)[] = [],
+): ConnectedPeersStatRow => {
+  const entries = connections.map<ConnectedPeerEntry>((connection, index) => {
     const address = getConnectionAddress(connection);
     const peerId = getConnectionPeerId(connection);
     const fallbackId = `${peerId}-${address}`;
@@ -656,6 +683,7 @@ const getBrowserConnectedPeersRow = (peers: unknown[], connections: unknown[], p
       address,
       direction: isRecord(connection) ? getStringValue(connection.direction, '') : undefined,
       id: isRecord(connection) ? getStringValue(connection.id, fallbackId) : fallbackId,
+      locationAddress: locationAddresses[index],
       peerId,
       status: isRecord(connection) ? getStringValue(connection.status, '') : undefined,
       transferStats: getBrowserPeerTransferStats(connection, peerId, address, peerTransferStats),
@@ -763,10 +791,11 @@ const resolveConnectedPeerLocations = async (row: ConnectedPeersStatRow, signal?
   const lookups = new Map<string, Promise<PeerMapLocation | undefined>>();
   const entries = await Promise.all(
     row.entries.map(async (entry) => {
-      let lookup = lookups.get(entry.address);
+      const lookupAddress = entry.locationAddress ?? entry.address;
+      let lookup = lookups.get(lookupAddress);
       if (!lookup) {
-        lookup = fetchPeerMapLocation(entry.address, signal);
-        lookups.set(entry.address, lookup);
+        lookup = fetchPeerMapLocation(lookupAddress, signal);
+        lookups.set(lookupAddress, lookup);
       }
       const location = await lookup;
       if (!location) return entry;
@@ -840,8 +869,12 @@ const getBrowserLibp2pStats = async (account?: AccountShape, signal?: AbortSigna
   const libp2p = client?._helia?.libp2p;
   const [peers, connections] = await Promise.all([getSafeArray(() => libp2p?.getPeers?.()), getSafeArray(() => libp2p?.getConnections?.())]);
   const mode = getBrowserMode(client);
-  const [transferStats, nodeEndpoint] = await Promise.all([getBrowserTransferStats(client, connections), fetchOwnPublicEndpoint(signal)]);
-  const connectedPeersRow = getBrowserConnectedPeersRow(peers, connections, transferStats.peers);
+  const [transferStats, nodeEndpoint, locationAddresses] = await Promise.all([
+    getBrowserTransferStats(client, connections),
+    fetchOwnPublicEndpoint(signal),
+    Promise.all(connections.map((connection) => getPeerLocationAddress(libp2p, connection))),
+  ]);
+  const connectedPeersRow = getBrowserConnectedPeersRow(peers, connections, transferStats.peers, locationAddresses);
   const connectedPeers = await resolveConnectedPeerLocations(connectedPeersRow, signal);
   const connectedPeersWithMapEntries = {
     ...connectedPeers,
