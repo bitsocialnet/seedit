@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useLocation } from 'react-router-dom';
 import { useAccount, useAccountCommunities, useCommunity } from '@bitsocial/bitsocial-react-hooks';
@@ -46,19 +47,29 @@ const ModernNav = ({ isOpen, onClose }: ModernNavProps) => {
 
   const isCollapsed = useModernNavStore((state) => state.isCollapsed);
   const setCollapsed = useModernNavStore((state) => state.setCollapsed);
+  // A click on the button collapses the navigation with the pointer still over it, which would hold it open as the
+  // hover flyout: it slides away at once instead, and the hover opens it again once the pointer has left.
+  const [isJustCollapsed, setJustCollapsed] = useState(false);
+  const toggleCollapsed = () => {
+    setCollapsed(!isCollapsed);
+    setJustCollapsed(!isCollapsed);
+  };
 
   return (
     <>
       {isOpen && <button type='button' className={styles.navBackdrop} aria-label={t('close')} tabIndex={-1} onClick={onClose} />}
       {/* From 1024px the navigation can collapse to a strip; the pointer over the strip slides it out over the page. */}
-      <div className={`${styles.navRail} ${isCollapsed ? styles.navRailCollapsed : ''}`}>
+      <div
+        className={`${styles.navRail} ${isCollapsed ? styles.navRailCollapsed : ''} ${isJustCollapsed ? styles.navRailJustCollapsed : ''}`}
+        onPointerLeave={isJustCollapsed ? () => setJustCollapsed(false) : undefined}
+      >
         <button
           type='button'
           className={styles.navCollapseButton}
           aria-label={isCollapsed ? t('expand_navigation') : t('collapse_navigation')}
           aria-expanded={!isCollapsed}
           aria-controls='modern-nav'
-          onClick={() => setCollapsed(!isCollapsed)}
+          onClick={toggleCollapsed}
         >
           <MenuIcon size={18} />
         </button>

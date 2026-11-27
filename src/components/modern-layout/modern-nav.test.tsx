@@ -54,4 +54,21 @@ describe('ModernNav collapse', () => {
     expect(useModernNavStore.getState().isCollapsed).toBe(false);
     expect(localStorage.getItem('modernNavCollapsed')).toBe('false');
   });
+
+  it('keeps the navigation it just collapsed from opening under the pointer until the pointer leaves it', async () => {
+    await act(async () => root.render(createElement(ModernNav, { isOpen: false, onClose: vi.fn() })));
+    const rail = collapseButton().parentElement!;
+
+    await act(async () => collapseButton().click());
+    expect(rail.className).toMatch(/navRailJustCollapsed/);
+
+    // React derives pointerleave from the native pointerout
+    await act(async () => {
+      rail.dispatchEvent(new MouseEvent('pointerout', { bubbles: true, relatedTarget: document.body }));
+    });
+    expect(rail.className).not.toMatch(/navRailJustCollapsed/);
+
+    await act(async () => collapseButton().click());
+    expect(rail.className).not.toMatch(/navRailJustCollapsed/);
+  });
 });

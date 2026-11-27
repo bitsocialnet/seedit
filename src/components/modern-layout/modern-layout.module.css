@@ -638,6 +638,18 @@
       transform 0.2s ease 0.08s,
       visibility 0s linear 0.08s;
   }
+
+  /* Collapsed by a click, the navigation slides away with the strip at once, its items where they were, though the
+     pointer is still over it; the hover opens it again once the pointer has left. */
+  .navRailCollapsed.navRailJustCollapsed .nav {
+    padding-top: 12px;
+    transform: translateX(-100%);
+    visibility: hidden;
+    box-shadow: none;
+    transition:
+      transform 0.2s ease,
+      visibility 0s linear 0.2s;
+  }
 }
 
 @media (min-width: 1200px) {
@@ -709,6 +721,7 @@
   .navRail .nav,
   .navRailCollapsed .nav,
   .navRailCollapsed:hover .nav,
+  .navRailCollapsed.navRailJustCollapsed .nav,
   .switch,
   .switch::after {
     transition: none;
