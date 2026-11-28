@@ -1,4 +1,4 @@
-import { ComponentType, lazy, Suspense, useEffect } from 'react';
+import { ComponentType, lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { initializeNotificationSystem } from './lib/push';
@@ -28,7 +28,7 @@ import AccountBar from './components/account-bar/';
 import ChallengeModal from './components/challenge-modal';
 import Header from './components/header';
 import LoadingEllipsis from './components/loading-ellipsis';
-import ModernLayout from './components/modern-layout';
+import ModernLayout, { ModernPageSkeleton } from './components/modern-layout';
 import { preloadMarkdown } from './components/markdown';
 import NotificationHandler from './components/notification-handler';
 import Prefetcher from './components/prefetcher';
@@ -56,10 +56,10 @@ const LazyViewLoading = () => {
 
 // Each lazy view gets its own boundary. One around a layout's outlet would also catch eager views
 // that suspend (on translations, for example) and commit the layout with an empty page first.
-const lazyView = (load: () => Promise<{ default: ComponentType }>) => {
+const lazyView = (load: () => Promise<{ default: ComponentType }>, fallback: ReactNode = <LazyViewLoading />) => {
   const View = lazy(load);
   return () => (
-    <Suspense fallback={<LazyViewLoading />}>
+    <Suspense fallback={fallback}>
       <View />
     </Suspense>
   );
@@ -76,22 +76,23 @@ const Inbox = lazyView(() => import('./views/inbox'));
 const Mod = lazyView(() => import('./views/mod'));
 const Search = lazyView(() => import('./views/search'));
 const Settings = lazyView(() => import('./views/settings'));
-const ModernSettings = lazyView(() => import('./views/modern-settings'));
+// Modern pages show a skeleton of their heading and sections while their code loads.
+const ModernSettings = lazyView(() => import('./views/modern-settings'), <ModernPageSkeleton tabs={4} />);
 const AccountDataEditor = lazyView(() => import('./views/account-data-editor'));
-const ModernAccountDataEditor = lazyView(() => import('./views/modern-account-data-editor'));
+const ModernAccountDataEditor = lazyView(() => import('./views/modern-account-data-editor'), <ModernPageSkeleton />);
 const CommunityDataEditor = lazyView(() => import('./views/community-data-editor'));
 const SubmitPage = lazyView(() => import('./views/submit'));
 const CommunitySettings = lazyView(() => import('./views/community-settings'));
-const ModernCommunitySettings = lazyView(() => import('./views/modern-community-settings'));
-const ModernCommunityDataEditor = lazyView(() => import('./views/modern-community-data-editor'));
-const ModernDirectories = lazyView(() => import('./views/modern-directories'));
-const ModernStarterSubscriptions = lazyView(() => import('./views/modern-starter-subscriptions'));
-const ModernMod = lazyView(() => import('./views/modern-mod'));
-const ModernDomain = lazyView(() => import('./views/modern-domain'));
-const ModernAbout = lazyView(() => import('./views/modern-about'));
-const ModernChangelog = lazyView(() => import('./views/modern-changelog'));
-const ModernGold = lazyView(() => import('./views/modern-gold'));
-const ModernNotFound = lazyView(() => import('./views/modern-not-found'));
+const ModernCommunitySettings = lazyView(() => import('./views/modern-community-settings'), <ModernPageSkeleton />);
+const ModernCommunityDataEditor = lazyView(() => import('./views/modern-community-data-editor'), <ModernPageSkeleton />);
+const ModernDirectories = lazyView(() => import('./views/modern-directories'), <ModernPageSkeleton />);
+const ModernStarterSubscriptions = lazyView(() => import('./views/modern-starter-subscriptions'), <ModernPageSkeleton />);
+const ModernMod = lazyView(() => import('./views/modern-mod'), <ModernPageSkeleton />);
+const ModernDomain = lazyView(() => import('./views/modern-domain'), <ModernPageSkeleton />);
+const ModernAbout = lazyView(() => import('./views/modern-about'), <ModernPageSkeleton />);
+const ModernChangelog = lazyView(() => import('./views/modern-changelog'), <ModernPageSkeleton />);
+const ModernGold = lazyView(() => import('./views/modern-gold'), <ModernPageSkeleton />);
+const ModernNotFound = lazyView(() => import('./views/modern-not-found'), <ModernPageSkeleton />);
 const Communities = lazyView(() => import('./views/communities'));
 const StarterSubscriptions = lazyView(() => import('./views/starter-subscriptions'));
 
